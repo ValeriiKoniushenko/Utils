@@ -20,7 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Size.h"
+#include "Concepts.h"
+
+#include <limits>
+#include <cmath>
+
+namespace Utils
+{
+	template<IsFloating T, T Epsilon = std::numeric_limits<T>::epsilon()>
+	[[nodiscard]] inline bool IsEqual(T n1, T n2) noexcept
+	{
+		return std::fabs(n1 - n2) < Epsilon;
+	}
+}	 // namespace Utils
+
+/*#include "Size.h"
 #include "json.hpp"
 
 #include <filesystem>
@@ -41,4 +55,4 @@ void setFileContent(const std::filesystem::path& path, void* p, size_t size);
 [[nodiscard]] bool isNumber(const std::string& string);
 [[nodiscard]] std::string toString(const std::vector<std::string>& data, const std::string& delimiter = ", ");
 
-}	 // namespace Utils
+}	 // namespace Utils*/

@@ -22,45 +22,11 @@
 
 #pragma once
 
-#include <type_traits>
-
-namespace Utils
-{
-
-template <class T>
-concept Sizeable = std::is_arithmetic_v<T>;
-
-template <Sizeable T>
-struct Size2D
-{
-	T width{};
-	T height{};
-
-	[[nodiscard]] bool operator==(const Size2D<T>& other) const
-	{
-		return width == other.width && height == other.height;
-	}
-
-	[[nodiscard]] bool operator!=(const Size2D<T>& other) const
-	{
-		return width != other.width || height != other.height;
-	}
-};
-
-using DSize2D = Size2D<double>;
-using FSize2D = Size2D<float>;
-using ISize2D = Size2D<int>;
-
-template <Sizeable T>
-struct Size3D
-{
-	T width{};
-	T height{};
-	T deep{};
-};
-
-using DSize3D = Size2D<double>;
-using FSize3D = Size2D<float>;
-using ISize3D = Size2D<int>;
-
-}	 // namespace Utils
+#include "CopyableAndMoveable.h"
+#include "CopyableButNotMoveable.h"
+#include "NotCopyableAndNotMoveable.h"
+#include "NotCopyableButMoveable.h"
+#include "Rect.h"
+#include "Singleton.h"
+#include "Size.h"
+#include "Functions.h"

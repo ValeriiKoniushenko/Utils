@@ -5,15 +5,10 @@ project(Utils VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(
-	GLOB Sources
-	"sources/*.h"
-	"sources/*.cpp"
-)
+set(DEPENDENCIES_DIR dependencies)
 
-add_library(Utils STATIC Sources)
-set_target_properties(Utils PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(Utils PUBLIC sources)
-
-add_executable(Test main.cpp)
-target_link_libraries(Test PUBLIC Utils)
+add_subdirectory(${DEPENDENCIES_DIR}/glm)
+add_subdirectory(${DEPENDENCIES_DIR}/googletest)
+add_subdirectory(${DEPENDENCIES_DIR}/benchmark)
+add_subdirectory(tests)
+add_subdirectory(sources)
