@@ -22,23 +22,26 @@
 
 #pragma once
 
-#include "CopyableAndMoveable.h"
-#include "Concepts.h"
-#include "Functions.h"
+#include "Utils/CopyableAndMoveable.h"
+#include "Utils/Concepts.h"
+#include "Utils.h"
 
-namespace Utils
+#include "glm/glm.hpp"
+
+namespace Core
 {
-	template<IsArithmetic T, int Dimension> struct Size final
+	template<Utils::IsArithmetic T, int Dimension> struct Size final
 	{
 		static_assert(false, "Invalid 'Dimension' value. You can use only 2D or 3D Size type.");
 	};
 
-	template<IsArithmetic T>
+	template<Utils::IsArithmetic T>
 	struct Size<T, 2> final
 	{
 		constexpr static int DimensionValue = 2;
 		using ValueType = T;
 		using ObjectType = Size<ValueType, DimensionValue>;
+		using GlmObjectType = glm::vec<DimensionValue, T, glm::highp>;
 
 		T width{};
 		T height{};
@@ -63,13 +66,13 @@ namespace Utils
 			return area() >= other.area();
 		}
 
-		template<IsIntegral Type>
+		template<Utils::IsIntegral Type>
 		[[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return area() == other.area();
 		}
 
-		template<IsFloating Type>
+		template<Utils::IsFloating Type>
 		[[nodiscard, maybe_unused]] bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return IsEqual(area(), other.area());
@@ -156,14 +159,31 @@ namespace Utils
 				static_cast<CastType::ValueType>(height)
 			};
 		}
+
+		[[nodiscard]] constexpr GlmObjectType toGlm() const noexcept
+		{
+			return { width, height };
+		}
+
+		template<Utils::IsArithmetic Type>
+		[[nodiscard]] constexpr Size<Type, DimensionValue> asSize() const noexcept
+		{
+			return { width, height };
+		}
+
+		[[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept
+		{
+			return { vec.x, vec.y };
+		}
 	};
 
-	template<IsArithmetic T>
+	template<Utils::IsArithmetic T>
 	struct Size<T, 3> final
 	{
 		constexpr static int DimensionValue = 3;
 		using ValueType = T;
 		using ObjectType = Size<ValueType, DimensionValue>;
+		using GlmObjectType = glm::vec<DimensionValue, T, glm::highp>;
 
 		T width{};
 		T height{};
@@ -189,13 +209,13 @@ namespace Utils
 			return area() >= other.area();
 		}
 
-		template<IsIntegral Type>
+		template<Utils::IsIntegral Type>
 		[[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return area() == other.area();
 		}
 
-		template<IsFloating Type>
+		template<Utils::IsFloating Type>
 		[[nodiscard, maybe_unused]] bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return IsEqual(area(), other.area());
@@ -287,6 +307,22 @@ namespace Utils
 				static_cast<CastType::ValueType>(deep)
 			};
 		}
+
+		[[nodiscard]] constexpr GlmObjectType toGlm() const noexcept
+		{
+			return { width, height, deep };
+		}
+
+		template<Utils::IsArithmetic Type>
+		[[nodiscard]] constexpr Size<Type, DimensionValue> asSize() const noexcept
+		{
+			return { width, height, deep };
+		}
+
+		[[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept
+		{
+			return { vec.x, vec.y, vec.z };
+		}
 	};
 
 	using FSize2 = Size<float, 2>;
@@ -297,4 +333,4 @@ namespace Utils
 	using DSize3 = Size<double, 3>;
 	using ISize3 = Size<int, 3>;
 
-} // namespace Utils
+} // namespace Core
