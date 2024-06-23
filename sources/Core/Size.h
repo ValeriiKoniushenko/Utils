@@ -73,7 +73,7 @@ namespace Core
 		}
 
 		template<Utils::IsFloating Type>
-		[[nodiscard, maybe_unused]] bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+		[[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return IsEqual(area(), other.area());
 		}
@@ -152,7 +152,7 @@ namespace Core
 		}
 
 		template<class CastType>
-		[[nodiscard]] explicit operator CastType() const noexcept
+		[[nodiscard]] explicit constexpr operator CastType() const noexcept
 		{
 			return {
 				static_cast<CastType::ValueType>(width),
@@ -216,7 +216,7 @@ namespace Core
 		}
 
 		template<Utils::IsFloating Type>
-		[[nodiscard, maybe_unused]] bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+		[[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
 			return IsEqual(area(), other.area());
 		}
@@ -299,7 +299,7 @@ namespace Core
 		}
 
 		template<class CastType>
-		[[nodiscard]] explicit operator CastType() const noexcept
+		[[nodiscard]] explicit constexpr operator CastType() const noexcept
 		{
 			return {
 				static_cast<CastType::ValueType>(width),

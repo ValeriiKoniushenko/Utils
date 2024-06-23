@@ -20,30 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Utils
+#pragma once
+
+#include <memory>
+#include <mutex>
+
+namespace Core
 {
+	template <class T, class CopyBehaviour>
+	class Singleton : public CopyBehaviour
+	{
+	public:
+		static T& instance()
+		{
+			static std::unique_ptr<T> object;
+			static std::mutex mutex;
+			if (!object)
+			{
+				std::lock_guard<decltype(mutex)> lockGuard(mutex);
+				if (!object)
+				{
+					object = std::unique_ptr<T>(new T);
+				}
+			}
 
-} // namespace Utils
+			return *object.get();
+		}
 
-/*#include "Size.h"
-#include "json.hpp"
-
-#include <filesystem>
-#include <string>
-#include <vector>
-
-namespace Utils
-{
-
-[[nodiscard]] std::string getFileContent(const std::filesystem::path& path);
-void setFileContent(const std::filesystem::path& path, const std::string& data);
-void setFileContent(const std::filesystem::path& path, void* p, size_t size);
-[[nodiscard]] std::vector<ISize2D> getAllSupportedWndSizes();
-[[nodiscard]] std::vector<std::string> split(const std::string& string, char devider);
-[[nodiscard]] std::ifstream readFile(const std::filesystem::path& path);
-[[nodiscard]] bool isEqual(float n1, float n2, float E = std::numeric_limits<float>::epsilon());
-[[nodiscard]] bool isZero(float n, float E = std::numeric_limits<float>::epsilon());
-[[nodiscard]] bool isNumber(const std::string& string);
-[[nodiscard]] std::string toString(const std::vector<std::string>& data, const std::string& delimiter = ", ");
-
-}	 // namespace Utils*/
+	protected:
+		Singleton() = default;
+		virtual ~Singleton() = default;
+	};
+} // namespace Core

@@ -49,10 +49,10 @@ TEST(UtilsTests, Size2LessGreater)
 TEST(UtilsTests, Size2Equal)
 {
 	{
-		const float v1 = 5.5f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v1, v1 };
-		EXPECT_TRUE(a == b);
+		constexpr float v1 = 5.5f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v1, v1 };
+		static_assert(a == b);
 	}
 
 	{
@@ -66,10 +66,10 @@ TEST(UtilsTests, Size2Equal)
 TEST(UtilsTests, Size2NotEqual)
 {
 	{
-		const float v1 = 5.5f, v2 = 3.3f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
-		EXPECT_TRUE(a != b);
+		constexpr float v1 = 5.5f, v2 = 3.3f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
+		static_assert(a != b);
 	}
 
 	{
@@ -83,11 +83,11 @@ TEST(UtilsTests, Size2NotEqual)
 TEST(UtilsTests, Size2Sum)
 {
 	{
-		const float v1 = 5.5f, v2 = 3.3f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 + v2, v1 + v2 };
-		EXPECT_TRUE(a + b == result);
+		constexpr float v1 = 5.5f, v2 = 3.3f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 + v2, v1 + v2 };
+		static_assert(a + b == result);
 	}
 
 	{
@@ -101,11 +101,11 @@ TEST(UtilsTests, Size2Sum)
 TEST(UtilsTests, Size2Substract)
 {
 	{
-		const float v1 = 5.5f, v2 = 3.3f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 - v2, v1 - v2 };
-		EXPECT_TRUE(a - b == result);
+		constexpr float v1 = 5.5f, v2 = 3.3f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 - v2, v1 - v2 };
+		static_assert(a - b == result);
 	}
 
 	{
@@ -119,11 +119,11 @@ TEST(UtilsTests, Size2Substract)
 TEST(UtilsTests, Size2Multiplication)
 {
 	{
-		const float v1 = 5.5f, v2 = 3.3f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 * v2, v1 * v2 };
-		EXPECT_TRUE(a * b == result);
+		constexpr float v1 = 5.5f, v2 = 3.3f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 * v2, v1 * v2 };
+		static_assert(a * b == result);
 	}
 
 	{
@@ -137,11 +137,11 @@ TEST(UtilsTests, Size2Multiplication)
 TEST(UtilsTests, Size2Dividing)
 {
 	{
-		const float v1 = 5.5f, v2 = 3.3f;
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
-		const Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 / v2, v1 / v2 };
-		EXPECT_TRUE(a / b == result);
+		constexpr float v1 = 5.5f, v2 = 3.3f;
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> a = { v1, v1 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> b = { v2, v2 };
+		constexpr Core::Size<std::remove_const_t<decltype(v1)>, 2> result { v1 / v2, v1 / v2 };
+		static_assert(a / b == result);
 	}
 
 	{
@@ -183,10 +183,10 @@ TEST(UtilsTests, Size2Appending)
 TEST(UtilsTests, SizeCasting)
 {
 	{
-		Core::FSize2 fsize = { 2.5f, 5.5f };
-		Core::ISize2 isize = static_cast<Core::ISize2>(fsize);
+		constexpr Core::FSize2 fsize = { 2.5f, 5.5f };
+		constexpr Core::ISize2 isize = static_cast<Core::ISize2>(fsize);
 
-		EXPECT_EQ(2 * 5, isize.area());
+		static_assert(2.f * 5.f == isize.area());
 	}
 
 	{

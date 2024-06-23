@@ -22,11 +22,47 @@
 
 #pragma once
 
-#include "CopyableAndMoveable.h"
-#include "CopyableButNotMoveable.h"
-#include "NotCopyableAndNotMoveable.h"
-#include "NotCopyableButMoveable.h"
-#include "Rect.h"
-#include "Singleton.h"
+#include "Utils/Concepts.h"
 #include "Size.h"
-#include "Functions.h"
+
+namespace Core
+{
+	template<Utils::IsArithmetic T>
+	struct Rect final
+	{
+		using PositionT = glm::vec<2, T, glm::highp>;
+		PositionT position{};
+		Size<T, 2> size;
+
+		[[nodiscard]] PositionT getLeftTopPoint() const
+		{
+			return { position.x, position.y };
+		}
+
+		[[nodiscard]] PositionT getLeftBottomPoint() const
+		{
+			return { position.x, position.y + size.height };
+		}
+
+		[[nodiscard]] PositionT getRightBottomPoint() const
+		{
+			return { position.x + size.width, position.y + size.height };
+		}
+
+		[[nodiscard]] PositionT getRightTopPoint() const
+		{
+			return { position.x + size.width, position.y };
+		}
+
+		[[nodiscard]] bool isCollision(PositionT point) const
+		{
+			return point.x >= position.x && point.x <= position.x + size.width && point.y >= position.y && point.y <= position.y + size.height;
+		}
+
+		[[nodiscard]] bool isCollision(const Rect<T> rect) const
+		{
+			return isCollision(rect.getLeftBottomPoint()) || isCollision(rect.getLeftTopPoint()) || isCollision(rect.getRightBottomPoint()) || isCollision(rect.getRightTopPoint());
+		}
+	};
+
+} // namespace Core

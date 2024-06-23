@@ -20,30 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Utils
+#pragma once
+
+#include "Utils/Concepts.h"
+
+#include "glm/glm.hpp"
+
+namespace Core
 {
+	template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
+	struct GlobalPosition : public glm::vec<L, T, Q>
+	{
+	};
 
-} // namespace Utils
+	using GlobalPosition3F = GlobalPosition<3, float>;
+	using GlobalPosition2F = GlobalPosition<2, float>;
 
-/*#include "Size.h"
-#include "json.hpp"
+	using GlobalPosition3D = GlobalPosition<3, double>;
+	using GlobalPosition2D = GlobalPosition<2, double>;
 
-#include <filesystem>
-#include <string>
-#include <vector>
+	using GlobalPosition3I = GlobalPosition<3, int>;
+	using GlobalPosition2I = GlobalPosition<2, int>;
 
-namespace Utils
-{
-
-[[nodiscard]] std::string getFileContent(const std::filesystem::path& path);
-void setFileContent(const std::filesystem::path& path, const std::string& data);
-void setFileContent(const std::filesystem::path& path, void* p, size_t size);
-[[nodiscard]] std::vector<ISize2D> getAllSupportedWndSizes();
-[[nodiscard]] std::vector<std::string> split(const std::string& string, char devider);
-[[nodiscard]] std::ifstream readFile(const std::filesystem::path& path);
-[[nodiscard]] bool isEqual(float n1, float n2, float E = std::numeric_limits<float>::epsilon());
-[[nodiscard]] bool isZero(float n, float E = std::numeric_limits<float>::epsilon());
-[[nodiscard]] bool isNumber(const std::string& string);
-[[nodiscard]] std::string toString(const std::vector<std::string>& data, const std::string& delimiter = ", ");
-
-}	 // namespace Utils*/
+} // namespace Core
