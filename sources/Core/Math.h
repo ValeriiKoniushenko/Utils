@@ -26,7 +26,7 @@
 #include <limits>
 #include <cmath>
 
-namespace Core
+namespace Math
 {
 	template<Utils::IsArithmetic T>
 	[[nodiscard]] constexpr T Abs(T value) noexcept
@@ -39,4 +39,4 @@ namespace Core
 	{
 		return Abs(n1 - n2) < Epsilon;
 	}
-} // namespace Core
+} // namespace Math

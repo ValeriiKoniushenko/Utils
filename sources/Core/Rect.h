@@ -23,46 +23,163 @@
 #pragma once
 
 #include "Utils/Concepts.h"
+#include "Utils/CopyableAndMoveable.h"
 #include "Size.h"
+#include "Position.h"
+#include "Assert.h"
 
 namespace Core
 {
 	template<Utils::IsArithmetic T>
-	struct Rect final
+	class Rect final : public Utils::CopyableAndMoveable
 	{
-		using PositionT = glm::vec<2, T, glm::highp>;
-		PositionT position{};
-		Size<T, 2> size;
+	public:
+		using GlobalPositionT = GlobalPosition<2, T>;
 
-		[[nodiscard]] PositionT getLeftTopPoint() const
+	public:
+		constexpr Rect() = default;
+		constexpr Rect(T left, T top, T right, T bottom)
+			: _left(left),
+			_right(right),
+			_bottom(bottom),
+			_top(top)
 		{
-			return { position.x, position.y };
+#ifdef CORE_DEBUG
+			updateDebugData();
+#endif
 		}
 
-		[[nodiscard]] PositionT getLeftBottomPoint() const
+		constexpr Rect(GlobalPositionT leftTop, GlobalPositionT rightBottom)
+			: Rect(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y)
 		{
-			return { position.x, position.y + size.height };
 		}
 
-		[[nodiscard]] PositionT getRightBottomPoint() const
+		constexpr void setLeftTop(const GlobalPositionT& leftTop) noexcept
 		{
-			return { position.x + size.width, position.y + size.height };
+#ifdef CORE_DEBUG
+			updateDebugData();
+#endif
+			_left = leftTop.x;
+			_top = leftTop.y;
 		}
 
-		[[nodiscard]] PositionT getRightTopPoint() const
+		constexpr void setLeftBottom(const GlobalPositionT& leftBottom) noexcept
 		{
-			return { position.x + size.width, position.y };
+#ifdef CORE_DEBUG
+			updateDebugData();
+#endif
+			_left = leftBottom.x;
+			_bottom = leftBottom.y;
 		}
 
-		[[nodiscard]] bool isCollision(PositionT point) const
+		constexpr void setRightBottom(const GlobalPositionT& rightBottom) noexcept
 		{
-			return point.x >= position.x && point.x <= position.x + size.width && point.y >= position.y && point.y <= position.y + size.height;
+#ifdef CORE_DEBUG
+			updateDebugData();
+#endif
+			_right = rightBottom.x;
+			_bottom = rightBottom.y;
 		}
 
-		[[nodiscard]] bool isCollision(const Rect<T> rect) const
+		constexpr void setRightTop(const GlobalPositionT& rightTop) noexcept
 		{
-			return isCollision(rect.getLeftBottomPoint()) || isCollision(rect.getLeftTopPoint()) || isCollision(rect.getRightBottomPoint()) || isCollision(rect.getRightTopPoint());
+#ifdef CORE_DEBUG
+			updateDebugData();
+#endif
+			_right = rightTop.x;
+			_top = rightTop.y;
 		}
+
+		[[nodiscard]] constexpr T getWidth() const noexcept
+		{
+			return Math::Abs(_right - _left);
+		}
+
+		[[nodiscard]] constexpr T getHeight() const noexcept
+		{
+			return Math::Abs(_top - _bottom);
+		}
+
+		[[nodiscard]] constexpr GlobalPositionT getLeftTop() const noexcept
+		{
+			return GlobalPositionT{ _left, _top };
+		}
+
+		[[nodiscard]] constexpr GlobalPositionT getLeftBottom() const noexcept
+		{
+			return GlobalPositionT{ _left, _bottom };
+		}
+
+		[[nodiscard]] constexpr GlobalPositionT getRightBottom() const noexcept
+		{
+			return GlobalPositionT{ _right, _bottom };
+		}
+
+		[[nodiscard]] constexpr GlobalPositionT getRightTop() const noexcept
+		{
+			return GlobalPositionT{ _right, _top };
+		}
+
+		[[nodiscard]] constexpr GlobalPositionT getCenter() const noexcept
+		{
+			return GlobalPositionT{
+				(_left + _right) / static_cast<T>(2),
+				(_bottom + _top) / static_cast<T>(2)
+			};
+		}
+
+		[[nodiscard]] constexpr bool isValid() const noexcept
+		{
+			return _top >= _bottom && _left <= _right;
+		}
+
+		bool requireValid() const noexcept
+		{
+			if (isValid())
+			{
+				return true;
+			}
+
+			Assert(false);
+
+			return false;
+		}
+
+		[[nodiscard]] constexpr bool isContain(const GlobalPositionT& point) const noexcept
+		{
+			return point.x >= _left && point.x <= _right &&
+				point.y <= _top && point.y >= _bottom;
+		}
+
+		[[nodiscard]] constexpr bool isContain(const Rect<T>& rect) const noexcept
+		{
+			return isContain(rect.getLeftBottom()) || isContain(rect.getLeftTop()) || isContain(rect.getRightBottom()) || isContain(rect.getRightTop());
+		}
+
+	private:
+		/// @brief global position
+		T _left{};
+		/// @brief global position
+		T _right{};
+		/// @brief global position
+		T _bottom{};
+		/// @brief global position
+		T _top{};
+
+#ifdef CORE_DEBUG
+		constexpr void updateDebugData()
+		{
+			_width = getWidth();
+			_height = getHeight();
+		}
+
+		T _width{};
+		T _height{};
+#endif
 	};
+
+	using FRect = Rect<float>;
+	using DRect = Rect<double>;
+	using IRect = Rect<int>;
 
 } // namespace Core

@@ -5,6 +5,9 @@
 TEST(UtilsTests, Size2Area)
 {
 	{
+		constexpr Core::FSize2 fSize2;
+	}
+	{
 		constexpr float v = 5.5f;
 		constexpr Core::Size<decltype(v), 2> a = { v, v };
 		static_assert(a.area() == v * v);

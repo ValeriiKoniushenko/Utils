@@ -24,7 +24,7 @@
 
 #include "Utils/CopyableAndMoveable.h"
 #include "Utils/Concepts.h"
-#include "Utils.h"
+#include "Math.h"
 
 #include "glm/glm.hpp"
 
@@ -75,7 +75,7 @@ namespace Core
 		template<Utils::IsFloating Type>
 		[[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
 		{
-			return IsEqual(area(), other.area());
+			return Math::IsEqual(area(), other.area());
 		}
 
 		[[nodiscard]] constexpr T area() const noexcept
