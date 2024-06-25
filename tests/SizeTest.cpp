@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(UtilsTests, Size2Area)
+TEST(CoreTests, Size2Area)
 {
 	{
 		constexpr Core::FSize2 fSize2;
@@ -20,7 +20,7 @@ TEST(UtilsTests, Size2Area)
 	}
 }
 
-TEST(UtilsTests, Size2LessGreater)
+TEST(CoreTests, Size2LessGreater)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -49,7 +49,7 @@ TEST(UtilsTests, Size2LessGreater)
 	}
 }
 
-TEST(UtilsTests, Size2Equal)
+TEST(CoreTests, Size2Equal)
 {
 	{
 		constexpr float v1 = 5.5f;
@@ -66,7 +66,7 @@ TEST(UtilsTests, Size2Equal)
 	}
 }
 
-TEST(UtilsTests, Size2NotEqual)
+TEST(CoreTests, Size2NotEqual)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -83,7 +83,7 @@ TEST(UtilsTests, Size2NotEqual)
 	}
 }
 
-TEST(UtilsTests, Size2Sum)
+TEST(CoreTests, Size2Sum)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -101,7 +101,7 @@ TEST(UtilsTests, Size2Sum)
 	}
 }
 
-TEST(UtilsTests, Size2Substract)
+TEST(CoreTests, Size2Substract)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -119,7 +119,7 @@ TEST(UtilsTests, Size2Substract)
 	}
 }
 
-TEST(UtilsTests, Size2Multiplication)
+TEST(CoreTests, Size2Multiplication)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -137,7 +137,7 @@ TEST(UtilsTests, Size2Multiplication)
 	}
 }
 
-TEST(UtilsTests, Size2Dividing)
+TEST(CoreTests, Size2Dividing)
 {
 	{
 		constexpr float v1 = 5.5f, v2 = 3.3f;
@@ -155,7 +155,7 @@ TEST(UtilsTests, Size2Dividing)
 	}
 }
 
-TEST(UtilsTests, Size2Appending)
+TEST(CoreTests, Size2Appending)
 {
 	{
 		const float v1 = 5.5f, v2 = 3.3f;
@@ -183,7 +183,7 @@ TEST(UtilsTests, Size2Appending)
 	}
 }
 
-TEST(UtilsTests, SizeCasting)
+TEST(CoreTests, SizeCasting)
 {
 	{
 		constexpr Core::FSize2 fsize = { 2.5f, 5.5f };

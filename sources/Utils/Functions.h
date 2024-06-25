@@ -20,15 +20,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "Core/Assert.h"
+
+#include <filesystem>
+#include <fstream>
+
 namespace Utils
 {
+	template<class T>
+	[[nodiscard]] T getTextFileContentAs(const std::filesystem::path& path)
+	{
+		std::ifstream in(path);
+		if (!in.is_open())
+		{
+			in.close();
+			Assert(false, ("Impossible to open a file: " + path.string()).c_str());
+			return {};
+		}
+
+		T data((std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		in.close();
+		return data;
+	}
+
+	template<class T>
+	[[nodiscard]] T tryToGetTextFileContentAs(const std::filesystem::path& path)
+	{
+		std::ifstream in(path);
+		if (!in.is_open())
+		{
+			in.close();
+			return {};
+		}
+
+		T data((std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		in.close();
+		return data;
+	}
 
 } // namespace Utils
 
 /*#include "Size.h"
 #include "json.hpp"
 
-#include <filesystem>
 #include <string>
 #include <vector>
 

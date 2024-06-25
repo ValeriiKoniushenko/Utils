@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(UtilsTests, CreateConstexprRect)
+TEST(CoreTests, CreateConstexprRect)
 {
 	using PosT = Core::FRect::GlobalPositionT;
 	using SizeT = Core::FRect::SizeT;
@@ -24,7 +24,7 @@ TEST(UtilsTests, CreateConstexprRect)
 	static_assert(PosT(10, 0) == rect4.getLeftBottom());
 }
 
-TEST(UtilsTests, CreateConstexprRectGetters)
+TEST(CoreTests, CreateConstexprRectGetters)
 {
 	using PosT = Core::FRect::GlobalPositionT;
 
@@ -53,7 +53,7 @@ TEST(UtilsTests, CreateConstexprRectGetters)
 	}
 }
 
-TEST(UtilsTests, CreateRect)
+TEST(CoreTests, CreateRect)
 {
 	using PosT = Core::FRect::GlobalPositionT;
 
@@ -67,7 +67,7 @@ TEST(UtilsTests, CreateRect)
 	EXPECT_EQ(PosT(5, 5), rect.getCenter());
 }
 
-TEST(UtilsTests, RectPointCollision)
+TEST(CoreTests, RectPointCollision)
 {
 	using PosT = Core::FRect::GlobalPositionT;
 
@@ -80,7 +80,7 @@ TEST(UtilsTests, RectPointCollision)
 	static_assert(!rect.isContain(outerPoint));
 }
 
-TEST(UtilsTests, RectRectCollision)
+TEST(CoreTests, RectRectCollision)
 {
 	constexpr Core::FRect rect1 = { 0.f, 10.f, 10.f, 0.f };
 	constexpr Core::FRect rect2 = { 5.f, 15.f, 15.f, 5.f };
