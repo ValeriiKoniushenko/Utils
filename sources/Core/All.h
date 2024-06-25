@@ -22,22 +22,9 @@
 
 #pragma once
 
-#include <iostream>
-#include <stacktrace>
-
-inline void Assert(bool condition, const char* message = nullptr)
-{
-	using std::cerr;
-	using std::endl;
-	using std::stacktrace;
-
-	cerr << "Assert was got: " << endl
-		 << "Message: " << (message ? message : "None") << endl
-		 << "Stacktrace: " << endl << stacktrace::current() << endl;
-
-#ifdef __clang__
-	__builtin_debugtrap();
-#else
-	static_assert(false, "Not implemented behavoir for your compiler.")
-#endif
-}
+#include "Assert.h"
+#include "Math.h"
+#include "Position.h"
+#include "Rect.h"
+#include "Singleton.h"
+#include "Size.h"
