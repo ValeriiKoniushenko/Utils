@@ -34,7 +34,9 @@ namespace Core
 	class Rect final : public Utils::CopyableAndMoveable
 	{
 	public:
-		using GlobalPositionT = GlobalPosition<2, T>;
+		constexpr static int DimensionValue = 2;
+		using GlobalPositionT = GlobalPosition<DimensionValue, T>;
+		using SizeT = Size<T, DimensionValue>;
 
 	public:
 		constexpr Rect() = default;
@@ -54,10 +56,16 @@ namespace Core
 		{
 		}
 
+		constexpr Rect(GlobalPositionT leftTop, const SizeT& size)
+			: Rect(leftTop.x, leftTop.y, leftTop.x + size.width, leftTop.y - size.height)
+		{
+		}
+
 		constexpr void setLeftTop(const GlobalPositionT& leftTop) noexcept
 		{
 #ifdef CORE_DEBUG
 			updateDebugData();
+			requireValid();
 #endif
 			_left = leftTop.x;
 			_top = leftTop.y;

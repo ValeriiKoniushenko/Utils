@@ -7,18 +7,21 @@
 TEST(UtilsTests, CreateConstexprRect)
 {
 	using PosT = Core::FRect::GlobalPositionT;
+	using SizeT = Core::FRect::SizeT;
 
 	constexpr Core::FRect rect1;
 	constexpr Core::FRect rect2 = { 0.f, 10.f, 10.f, -10.f };
-	constexpr Core::FRect rect3 = { PosT{ 0.f, 10.f } , PosT{ 10.f, -10.f } };
-
-	rect1.requireValid();
-	rect2.requireValid();
-	rect3.requireValid();
+	constexpr Core::FRect rect3 = { PosT{ 0.f, 10.f }, PosT{ 10.f, -10.f } };
+	constexpr Core::FRect rect4 = { PosT{ 10.f, 10.f }, SizeT{ 10.f, 10.f } };
 
 	static_assert(rect1.isValid());
 	static_assert(rect2.isValid());
 	static_assert(rect3.isValid());
+	static_assert(rect4.isValid());
+	static_assert(PosT(10, 10) == rect4.getLeftTop());
+	static_assert(PosT(20, 10) == rect4.getRightTop());
+	static_assert(PosT(20, 0) == rect4.getRightBottom());
+	static_assert(PosT(10, 0) == rect4.getLeftBottom());
 }
 
 TEST(UtilsTests, CreateConstexprRectGetters)
