@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include "CopyableAndMoveable.h"
-#include "CopyableButNotMoveable.h"
-#include "NotCopyableAndNotMoveable.h"
-#include "NotCopyableButMoveable.h"
+#include "CopyableAndMoveableBehaviour.h"
 #include "Functions.h"
+#include "Concepts.h"

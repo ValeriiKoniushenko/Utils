@@ -22,12 +22,17 @@
 
 #pragma once
 
+#include "Utils/CopyableAndMoveableBehaviour.h"
+
 #include <memory>
 #include <mutex>
 
 namespace Core
 {
-	template <class T, class CopyBehaviour>
+	template<class T>
+	concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
+
+	template <class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
 	class Singleton : public CopyBehaviour
 	{
 	public:

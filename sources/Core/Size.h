@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "Utils/CopyableAndMoveable.h"
+#include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/Concepts.h"
 #include "Math.h"
 

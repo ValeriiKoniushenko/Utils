@@ -23,7 +23,7 @@
 #pragma once
 
 #include "Utils/Concepts.h"
-#include "Utils/CopyableAndMoveable.h"
+#include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Size.h"
 #include "Position.h"
 #include "Assert.h"
