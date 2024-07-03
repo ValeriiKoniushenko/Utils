@@ -26,12 +26,12 @@
 
 namespace Utils
 {
-	template<class T>
-	concept IsArithmetic = std::is_arithmetic_v<T>;
+    template<class T>
+    concept IsArithmetic = std::is_arithmetic_v<T>;
 
-	template<class T>
-	concept IsFloating = std::is_floating_point_v<T>;
+    template<class T>
+    concept IsFloating = std::is_floating_point_v<T>;
 
-	template<class T>
-	concept IsIntegral = std::is_integral_v<T>;
+    template<class T>
+    concept IsIntegral = std::is_integral_v<T>;
 } // namespace Utils

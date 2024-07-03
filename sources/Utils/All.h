@@ -22,6 +22,6 @@
 
 #pragma once
 
+#include "Concepts.h"
 #include "CopyableAndMoveableBehaviour.h"
 #include "Functions.h"
-#include "Concepts.h"

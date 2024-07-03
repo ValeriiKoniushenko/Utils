@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 file(
-	GLOB Sources
-	"*.cpp"
+    GLOB Sources
+    "*.cpp"
 )
 
 add_executable(UtilsTests ${Sources})

@@ -29,31 +29,31 @@
 
 namespace Core
 {
-	template<class T>
-	concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
+    template<class T>
+    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
 
-	template <class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
-	class Singleton : public CopyBehaviour
-	{
-	public:
-		static T& instance()
-		{
-			static std::unique_ptr<T> object;
-			static std::mutex mutex;
-			if (!object)
-			{
-				std::lock_guard<decltype(mutex)> lockGuard(mutex);
-				if (!object)
-				{
-					object = std::unique_ptr<T>(new T);
-				}
-			}
+    template<class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
+    class Singleton : public CopyBehaviour
+    {
+      public:
+        static T& instance()
+        {
+            static std::unique_ptr<T> object;
+            static std::mutex mutex;
+            if (!object)
+            {
+                std::lock_guard<decltype(mutex)> lockGuard(mutex);
+                if (!object)
+                {
+                    object = std::unique_ptr<T>(new T);
+                }
+            }
 
-			return *object.get();
-		}
+            return *object.get();
+        }
 
-	protected:
-		Singleton() = default;
-		virtual ~Singleton() = default;
-	};
+      protected:
+        Singleton() = default;
+        virtual ~Singleton() = default;
+    };
 } // namespace Core

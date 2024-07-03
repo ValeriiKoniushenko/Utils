@@ -24,54 +24,54 @@
 
 namespace Utils
 {
-	class CopyableAndMoveableBehaviour
-	{
-	public:
-		virtual ~CopyableAndMoveableBehaviour() = default;
-	};
+    class CopyableAndMoveableBehaviour
+    {
+      public:
+        virtual ~CopyableAndMoveableBehaviour() = default;
+    };
 
-	class CopyableAndMoveable : public CopyableAndMoveableBehaviour
-	{
-	public:
-		CopyableAndMoveable() = default;
-		~CopyableAndMoveable() override = default;
-		CopyableAndMoveable(CopyableAndMoveable&&) = default;
-		CopyableAndMoveable& operator=(CopyableAndMoveable&&) = default;
-		CopyableAndMoveable(const CopyableAndMoveable&) = default;
-		CopyableAndMoveable& operator=(const CopyableAndMoveable&) = default;
-	};
+    class CopyableAndMoveable : public CopyableAndMoveableBehaviour
+    {
+      public:
+        CopyableAndMoveable() = default;
+        ~CopyableAndMoveable() override = default;
+        CopyableAndMoveable(CopyableAndMoveable&&) = default;
+        CopyableAndMoveable& operator=(CopyableAndMoveable&&) = default;
+        CopyableAndMoveable(const CopyableAndMoveable&) = default;
+        CopyableAndMoveable& operator=(const CopyableAndMoveable&) = default;
+    };
 
-	class CopyableButNotMoveable : public CopyableAndMoveableBehaviour
-	{
-	public:
-		CopyableButNotMoveable() = default;
-		~CopyableButNotMoveable() override = default;
-		CopyableButNotMoveable(CopyableButNotMoveable&&) = delete;
-		CopyableButNotMoveable& operator=(CopyableButNotMoveable&&) = delete;
-		CopyableButNotMoveable(const CopyableButNotMoveable&) = default;
-		CopyableButNotMoveable& operator=(const CopyableButNotMoveable&) = default;
-	};
+    class CopyableButNotMoveable : public CopyableAndMoveableBehaviour
+    {
+      public:
+        CopyableButNotMoveable() = default;
+        ~CopyableButNotMoveable() override = default;
+        CopyableButNotMoveable(CopyableButNotMoveable&&) = delete;
+        CopyableButNotMoveable& operator=(CopyableButNotMoveable&&) = delete;
+        CopyableButNotMoveable(const CopyableButNotMoveable&) = default;
+        CopyableButNotMoveable& operator=(const CopyableButNotMoveable&) = default;
+    };
 
-	class NotCopyableAndNotMoveable : public CopyableAndMoveableBehaviour
-	{
-	public:
-		NotCopyableAndNotMoveable() = default;
-		~NotCopyableAndNotMoveable() override = default;
-		NotCopyableAndNotMoveable(NotCopyableAndNotMoveable&&) = delete;
-		NotCopyableAndNotMoveable& operator=(NotCopyableAndNotMoveable&&) = delete;
-		NotCopyableAndNotMoveable(const NotCopyableAndNotMoveable&) = delete;
-		NotCopyableAndNotMoveable& operator=(const NotCopyableAndNotMoveable&) = delete;
-	};
+    class NotCopyableAndNotMoveable : public CopyableAndMoveableBehaviour
+    {
+      public:
+        NotCopyableAndNotMoveable() = default;
+        ~NotCopyableAndNotMoveable() override = default;
+        NotCopyableAndNotMoveable(NotCopyableAndNotMoveable&&) = delete;
+        NotCopyableAndNotMoveable& operator=(NotCopyableAndNotMoveable&&) = delete;
+        NotCopyableAndNotMoveable(const NotCopyableAndNotMoveable&) = delete;
+        NotCopyableAndNotMoveable& operator=(const NotCopyableAndNotMoveable&) = delete;
+    };
 
-	class NotCopyableButMoveable : public CopyableAndMoveableBehaviour
-	{
-	public:
-		NotCopyableButMoveable() = default;
-		~NotCopyableButMoveable() override = default;
-		NotCopyableButMoveable(NotCopyableButMoveable&&) = default;
-		NotCopyableButMoveable& operator=(NotCopyableButMoveable&&) = default;
-		NotCopyableButMoveable(const NotCopyableButMoveable&) = delete;
-		NotCopyableButMoveable& operator=(const NotCopyableButMoveable&) = delete;
-	};
+    class NotCopyableButMoveable : public CopyableAndMoveableBehaviour
+    {
+      public:
+        NotCopyableButMoveable() = default;
+        ~NotCopyableButMoveable() override = default;
+        NotCopyableButMoveable(NotCopyableButMoveable&&) = default;
+        NotCopyableButMoveable& operator=(NotCopyableButMoveable&&) = default;
+        NotCopyableButMoveable(const NotCopyableButMoveable&) = delete;
+        NotCopyableButMoveable& operator=(const NotCopyableButMoveable&) = delete;
+    };
 
 } // namespace Utils

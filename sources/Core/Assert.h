@@ -27,17 +27,18 @@
 
 inline void Assert(bool condition, const char* message = nullptr)
 {
-	using std::cerr;
-	using std::endl;
-	using std::stacktrace;
+    using std::cerr;
+    using std::endl;
+    using std::stacktrace;
 
-	cerr << "Assert was got: " << endl
-		 << "Message: " << (message ? message : "None") << endl
-		 << "Stacktrace: " << endl << stacktrace::current() << endl;
+    cerr << "Assert was got: " << endl
+         << "Message: " << (message ? message : "None") << endl
+         << "Stacktrace: " << endl
+         << stacktrace::current() << endl;
 
 #ifdef __clang__
-	__builtin_debugtrap();
+    __builtin_debugtrap();
 #else
-	static_assert(false, "Not implemented behavoir for your compiler.")
+    static_assert(false, "Not implemented behavoir for your compiler.")
 #endif
 }

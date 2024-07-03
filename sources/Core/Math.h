@@ -23,20 +23,27 @@
 #pragma once
 
 #include "Utils/Concepts.h"
-#include <limits>
+
 #include <cmath>
+#include <limits>
 
 namespace Math
 {
-	template<Utils::IsArithmetic T>
-	[[nodiscard]] constexpr T Abs(T value) noexcept
-	{
-		return value < 0 ? -value : value;
-	}
+    template<Utils::IsArithmetic T>
+    [[nodiscard]] constexpr T Abs(T value) noexcept
+    {
+        return value < 0 ? -value : value;
+    }
 
-	template<Utils::IsFloating T, T Epsilon = std::numeric_limits<T>::epsilon()>
-	[[nodiscard]] constexpr inline bool IsEqual(T n1, T n2) noexcept
-	{
-		return Abs(n1 - n2) < Epsilon;
-	}
+    template<Utils::IsFloating T, T Epsilon = std::numeric_limits<T>::epsilon()>
+    [[nodiscard]] constexpr bool IsEqual(T n1, T n2) noexcept
+    {
+        return Abs(n1 - n2) < Epsilon;
+    }
+
+    template<Utils::IsFloating T, T Epsilon = std::numeric_limits<T>::epsilon()>
+    [[nodiscard]] constexpr bool IsZero(T n) noexcept
+    {
+        return Abs(n) < Epsilon;
+    }
 } // namespace Math

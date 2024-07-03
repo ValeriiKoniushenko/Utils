@@ -26,35 +26,31 @@
 
 namespace Core
 {
-	template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-	struct GlobalPosition : public glm::vec<L, T, Q>
-	{
-		static_assert("Incomplete type. You can use only 2(XY) or 3(XYZ).");
-	};
+    template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
+    struct GlobalPosition : public glm::vec<L, T, Q>
+    {
+        static_assert("Incomplete type. You can use only 2(XY) or 3(XYZ).");
+    };
 
-	template<typename T, glm::qualifier Q>
-	struct GlobalPosition<2, T, Q> : public glm::vec<2, T, Q>
-	{
-		explicit constexpr GlobalPosition(T x = {}, T y = {})
-			: glm::vec2 { x, y }
-		{}
-	};
+    template<typename T, glm::qualifier Q>
+    struct GlobalPosition<2, T, Q> : public glm::vec<2, T, Q>
+    {
+        explicit constexpr GlobalPosition(T x = {}, T y = {}) : glm::vec2{ x, y } {}
+    };
 
-	template<typename T, glm::qualifier Q>
-	struct GlobalPosition<3, T, Q> : public glm::vec<3, T, Q>
-	{
-		explicit constexpr GlobalPosition(T x = {}, T y = {}, T z = {})
-			: glm::vec3 { x, y, z }
-		{}
-	};
+    template<typename T, glm::qualifier Q>
+    struct GlobalPosition<3, T, Q> : public glm::vec<3, T, Q>
+    {
+        explicit constexpr GlobalPosition(T x = {}, T y = {}, T z = {}) : glm::vec3{ x, y, z } {}
+    };
 
-	using GlobalPosition3F = GlobalPosition<3, float>;
-	using GlobalPosition2F = GlobalPosition<2, float>;
+    using GlobalPosition3F = GlobalPosition<3, float>;
+    using GlobalPosition2F = GlobalPosition<2, float>;
 
-	using GlobalPosition3D = GlobalPosition<3, double>;
-	using GlobalPosition2D = GlobalPosition<2, double>;
+    using GlobalPosition3D = GlobalPosition<3, double>;
+    using GlobalPosition2D = GlobalPosition<2, double>;
 
-	using GlobalPosition3I = GlobalPosition<3, int>;
-	using GlobalPosition2I = GlobalPosition<2, int>;
+    using GlobalPosition3I = GlobalPosition<3, int>;
+    using GlobalPosition2I = GlobalPosition<2, int>;
 
 } // namespace Core

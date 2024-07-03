@@ -27,41 +27,38 @@
 
 namespace Utils
 {
-	template<class T>
-	[[nodiscard]] T getTextFileContentAs(const std::filesystem::path& path)
-	{
-		std::ifstream in(path);
-		if (!in.is_open())
-		{
-			in.close();
-			Assert(false, ("Impossible to open a file: " + path.string()).c_str());
-			return {};
-		}
+    template<class T>
+    [[nodiscard]] T getTextFileContentAs(const std::filesystem::path& path)
+    {
+        std::ifstream in(path);
+        if (!in.is_open())
+        {
+            in.close();
+            Assert(false, ("Impossible to open a file: " + path.string()).c_str());
+            return {};
+        }
 
-		T data((std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
+        T data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 
-		in.close();
-		return data;
-	}
+        in.close();
+        return data;
+    }
 
-	template<class T>
-	[[nodiscard]] T tryToGetTextFileContentAs(const std::filesystem::path& path)
-	{
-		std::ifstream in(path);
-		if (!in.is_open())
-		{
-			in.close();
-			return {};
-		}
+    template<class T>
+    [[nodiscard]] T tryToGetTextFileContentAs(const std::filesystem::path& path)
+    {
+        std::ifstream in(path);
+        if (!in.is_open())
+        {
+            in.close();
+            return {};
+        }
 
-		T data((std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
+        T data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 
-		in.close();
-		return data;
-	}
-
+        in.close();
+        return data;
+    }
 } // namespace Utils
 
 /*#include "Size.h"
@@ -73,15 +70,10 @@ namespace Utils
 namespace Utils
 {
 
-[[nodiscard]] std::string getFileContent(const std::filesystem::path& path);
-void setFileContent(const std::filesystem::path& path, const std::string& data);
-void setFileContent(const std::filesystem::path& path, void* p, size_t size);
 [[nodiscard]] std::vector<ISize2D> getAllSupportedWndSizes();
+
 [[nodiscard]] std::vector<std::string> split(const std::string& string, char devider);
-[[nodiscard]] std::ifstream readFile(const std::filesystem::path& path);
-[[nodiscard]] bool isEqual(float n1, float n2, float E = std::numeric_limits<float>::epsilon());
-[[nodiscard]] bool isZero(float n, float E = std::numeric_limits<float>::epsilon());
 [[nodiscard]] bool isNumber(const std::string& string);
 [[nodiscard]] std::string toString(const std::vector<std::string>& data, const std::string& delimiter = ", ");
 
-}	 // namespace Utils*/
+}     // namespace Utils*/
