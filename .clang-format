@@ -7,7 +7,6 @@ AlignEscapedNewlines: Right
 AlignOperands: 'true'
 AlignTrailingComments: 'true'
 AllowAllArgumentsOnNextLine: 'true'
-AllowAllConstructorInitializersOnNextLine: 'false'
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: None
@@ -21,7 +20,8 @@ BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: 'true'
 BreakInheritanceList: AfterColon
 BreakStringLiterals: 'false'
-ConstructorInitializerAllOnOneLineOrOnePerLine: 'false'
+PackConstructorInitializers: 'Never'
+ColumnLimit: 150
 Cpp11BracedListStyle: 'false'
 FixNamespaceComments: 'true'
 IncludeBlocks: Regroup
@@ -42,4 +42,5 @@ SpaceAfterTemplateKeyword: 'false'
 SpacesInSquareBrackets: 'false'
 UseTab: Never
 InsertBraces: true
+AccessModifierOffset: -4
 ...

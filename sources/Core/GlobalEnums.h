@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +22,14 @@
 
 #pragma once
 
-#include "Utils/CopyableAndMoveableBehaviour.h"
-
-#include <memory>
-#include <mutex>
-
 namespace Core
 {
-    template<class T>
-    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
 
-    template<class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
-    class Singleton : public CopyBehaviour
+    enum class Comparison
     {
-    public:
-        static T& instance()
-        {
-            static std::unique_ptr<T> object;
-            static std::mutex mutex;
-            if (!object)
-            {
-                std::lock_guard<decltype(mutex)> lockGuard(mutex);
-                if (!object)
-                {
-                    object = std::unique_ptr<T>(new T);
-                }
-            }
-
-            return *object.get();
-        }
-
-    protected:
-        Singleton() = default;
-        virtual ~Singleton() = default;
+        Greater,
+        Less,
+        Equal
     };
+
 } // namespace Core

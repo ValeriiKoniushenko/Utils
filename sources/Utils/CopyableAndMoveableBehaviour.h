@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 Valerii Koniushenko
+// Copyright (c) 2023-2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,13 @@ namespace Utils
 {
     class CopyableAndMoveableBehaviour
     {
-      public:
+    public:
         virtual ~CopyableAndMoveableBehaviour() = default;
     };
 
     class CopyableAndMoveable : public CopyableAndMoveableBehaviour
     {
-      public:
+    public:
         CopyableAndMoveable() = default;
         ~CopyableAndMoveable() override = default;
         CopyableAndMoveable(CopyableAndMoveable&&) = default;
@@ -43,7 +43,7 @@ namespace Utils
 
     class CopyableButNotMoveable : public CopyableAndMoveableBehaviour
     {
-      public:
+    public:
         CopyableButNotMoveable() = default;
         ~CopyableButNotMoveable() override = default;
         CopyableButNotMoveable(CopyableButNotMoveable&&) = delete;
@@ -54,7 +54,7 @@ namespace Utils
 
     class NotCopyableAndNotMoveable : public CopyableAndMoveableBehaviour
     {
-      public:
+    public:
         NotCopyableAndNotMoveable() = default;
         ~NotCopyableAndNotMoveable() override = default;
         NotCopyableAndNotMoveable(NotCopyableAndNotMoveable&&) = delete;
@@ -65,13 +65,24 @@ namespace Utils
 
     class NotCopyableButMoveable : public CopyableAndMoveableBehaviour
     {
-      public:
+    public:
         NotCopyableButMoveable() = default;
         ~NotCopyableButMoveable() override = default;
         NotCopyableButMoveable(NotCopyableButMoveable&&) = default;
         NotCopyableButMoveable& operator=(NotCopyableButMoveable&&) = default;
         NotCopyableButMoveable(const NotCopyableButMoveable&) = delete;
         NotCopyableButMoveable& operator=(const NotCopyableButMoveable&) = delete;
+    };
+
+    class Abstract : public CopyableAndMoveableBehaviour
+    {
+    public:
+        Abstract() = delete;
+        ~Abstract() override = default;
+        Abstract(Abstract&&) = delete;
+        Abstract& operator=(Abstract&&) = delete;
+        Abstract(const Abstract&) = delete;
+        Abstract& operator=(const Abstract&) = delete;
     };
 
 } // namespace Utils

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 Valerii Koniushenko
+// Copyright (c) 2023-2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,14 +33,18 @@ namespace Core
     template<Utils::IsArithmetic T>
     class Rect final : public Utils::CopyableAndMoveable
     {
-      public:
+    public:
         constexpr static int DimensionValue = 2;
         using GlobalPositionT = GlobalPosition<DimensionValue, T>;
         using SizeT = Size<T, DimensionValue>;
 
-      public:
+    public:
         constexpr Rect() = default;
-        constexpr Rect(T left, T top, T right, T bottom) : _left(left), _right(right), _bottom(bottom), _top(top)
+        constexpr Rect(T left, T top, T right, T bottom)
+            : _left(left),
+              _right(right),
+              _bottom(bottom),
+              _top(top)
         {
 #ifdef CORE_DEBUG
             updateDebugData();
@@ -100,15 +104,9 @@ namespace Core
 
         [[nodiscard]] constexpr GlobalPositionT getLeftTop() const noexcept { return GlobalPositionT{ _left, _top }; }
 
-        [[nodiscard]] constexpr GlobalPositionT getLeftBottom() const noexcept
-        {
-            return GlobalPositionT{ _left, _bottom };
-        }
+        [[nodiscard]] constexpr GlobalPositionT getLeftBottom() const noexcept { return GlobalPositionT{ _left, _bottom }; }
 
-        [[nodiscard]] constexpr GlobalPositionT getRightBottom() const noexcept
-        {
-            return GlobalPositionT{ _right, _bottom };
-        }
+        [[nodiscard]] constexpr GlobalPositionT getRightBottom() const noexcept { return GlobalPositionT{ _right, _bottom }; }
 
         [[nodiscard]] constexpr GlobalPositionT getRightTop() const noexcept { return GlobalPositionT{ _right, _top }; }
 
@@ -138,11 +136,11 @@ namespace Core
 
         [[nodiscard]] constexpr bool isContain(const Rect<T>& rect) const noexcept
         {
-            return isContain(rect.getLeftBottom()) || isContain(rect.getLeftTop()) ||
-                   isContain(rect.getRightBottom()) || isContain(rect.getRightTop());
+            return isContain(rect.getLeftBottom()) || isContain(rect.getLeftTop()) || isContain(rect.getRightBottom()) ||
+                   isContain(rect.getRightTop());
         }
 
-      private:
+    private:
         /// @brief global position
         T _left{};
         /// @brief global position

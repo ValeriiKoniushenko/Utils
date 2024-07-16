@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 Valerii Koniushenko
+// Copyright (c) 2023-2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,12 @@
 #pragma once
 
 #include "Assert.h"
+#include "Delegate.h"
+#include "Enum.h"
+#include "GlobalEnums.h"
 #include "Math.h"
 #include "Position.h"
 #include "Rect.h"
 #include "Singleton.h"
 #include "Size.h"
+#include "String.h"

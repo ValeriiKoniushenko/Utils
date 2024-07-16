@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "Core/Enum.h"
 
-#include "Utils/CopyableAndMoveableBehaviour.h"
+#include <gtest/gtest.h>
 
-#include <memory>
-#include <mutex>
+CreateEnum(Color, int, Red, Green, Blue);
 
-namespace Core
+TEST(EnumTest, MainTest)
 {
-    template<class T>
-    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
+    Color color = Color::Red;
+    EXPECT_EQ("Red", color.ToStr());
+    EXPECT_EQ(0, color.Cast());
 
-    template<class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
-    class Singleton : public CopyBehaviour
-    {
-    public:
-        static T& instance()
-        {
-            static std::unique_ptr<T> object;
-            static std::mutex mutex;
-            if (!object)
-            {
-                std::lock_guard<decltype(mutex)> lockGuard(mutex);
-                if (!object)
-                {
-                    object = std::unique_ptr<T>(new T);
-                }
-            }
-
-            return *object.get();
-        }
-
-    protected:
-        Singleton() = default;
-        virtual ~Singleton() = default;
-    };
-} // namespace Core
+    color = Color::Blue;
+    EXPECT_EQ("Blue", color.ToStr());
+    EXPECT_EQ(2, color.Cast());
+    EXPECT_EQ(Color::FromStr("Blue"), color);
+    EXPECT_EQ(Color::FromStr("Blue"), 2);
+}

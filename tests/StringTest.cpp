@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "Core/String.h"
 
-#include "Utils/CopyableAndMoveableBehaviour.h"
+#include <gtest/gtest.h>
 
-#include <memory>
-#include <mutex>
-
-namespace Core
+TEST(StringTest, BaseString_char_default__Creation)
 {
-    template<class T>
-    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
+    using Core::String;
+    using Core::StringAtom;
 
-    template<class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
-    class Singleton : public CopyBehaviour
     {
-    public:
-        static T& instance()
-        {
-            static std::unique_ptr<T> object;
-            static std::mutex mutex;
-            if (!object)
-            {
-                std::lock_guard<decltype(mutex)> lockGuard(mutex);
-                if (!object)
-                {
-                    object = std::unique_ptr<T>(new T);
-                }
-            }
+        StringAtom str1 = "Hello"_atom;
+        StringAtom str2 = "Hello"_atom;
+        StringAtom str3 = "World"_atom;
+        EXPECT_EQ(str1, str2);
+        EXPECT_NE(str1, str3);
+    }
 
-            return *object.get();
-        }
+    {
+        const StringAtom str1 = "Hello"_atom;
+        const StringAtom str2 = "Hello"_atom;
+        const StringAtom str3 = "World"_atom;
+        EXPECT_EQ(str1, str2);
+        EXPECT_NE(str1, str3);
+    }
 
-    protected:
-        Singleton() = default;
-        virtual ~Singleton() = default;
-    };
-} // namespace Core
+    {
+        const char* dynamicStr = new char[128]{ "World" };
+        const StringAtom str1 = "Hello"_atom;
+        const String str2 = "Hello";
+        EXPECT_NE(str1, str2);
+
+        delete[] dynamicStr;
+    }
+}

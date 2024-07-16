@@ -27,8 +27,9 @@
 
 namespace Utils
 {
+    // TODO: move in the future to the specialized class for working with FileSystem
     template<class T>
-    [[nodiscard]] T getTextFileContentAs(const std::filesystem::path& path)
+    [[nodiscard]] T GetTextFileContentAs(const std::filesystem::path& path)
     {
         std::ifstream in(path);
         if (!in.is_open())
@@ -44,8 +45,9 @@ namespace Utils
         return data;
     }
 
+    // TODO: move in the future to the specialized class for working with FileSystem
     template<class T>
-    [[nodiscard]] T tryToGetTextFileContentAs(const std::filesystem::path& path)
+    [[nodiscard]] T TryToGetTextFileContentAs(const std::filesystem::path& path)
     {
         std::ifstream in(path);
         if (!in.is_open())
@@ -60,20 +62,3 @@ namespace Utils
         return data;
     }
 } // namespace Utils
-
-/*#include "Size.h"
-#include "json.hpp"
-
-#include <string>
-#include <vector>
-
-namespace Utils
-{
-
-[[nodiscard]] std::vector<ISize2D> getAllSupportedWndSizes();
-
-[[nodiscard]] std::vector<std::string> split(const std::string& string, char devider);
-[[nodiscard]] bool isNumber(const std::string& string);
-[[nodiscard]] std::string toString(const std::vector<std::string>& data, const std::string& delimiter = ", ");
-
-}     // namespace Utils*/
