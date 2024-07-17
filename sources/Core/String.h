@@ -31,9 +31,9 @@
 #include <regex>
 #include <string_view>
 #include <type_traits>
+#include <unordered_set>
 #include <vector>
 #include <xstring>
-#include <unordered_set>
 
 namespace Core
 {
@@ -53,8 +53,8 @@ namespace Core
     struct _StringToolset<char> : public Utils::Abstract
     {
         using CharT = char;
-        using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = std::basic_string_view<CharT>;
+        using StringT = typename std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StringViewT = typename std::basic_string_view<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(strlen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
@@ -82,8 +82,8 @@ namespace Core
     struct _StringToolset<wchar_t> : public Utils::Abstract
     {
         using CharT = wchar_t;
-        using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = std::basic_string_view<CharT>;
+        using StringT = typename std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StringViewT = typename std::basic_string_view<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(wcslen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
@@ -111,11 +111,11 @@ namespace Core
     class IString : public Utils::CopyableAndMoveable
     {
     public:
-        using CharT = CharType;
-        using Toolset = _StringToolset<CharT>;
-        using SizeT = std::size_t;
-        using StringT = Toolset::StringT;
-        using StringViewT = Toolset::StringViewT;
+        using CharT = typename CharType;
+        using Toolset = typename _StringToolset<CharT>;
+        using SizeT = typename std::size_t;
+        using StringT = typename Toolset::StringT;
+        using StringViewT = typename Toolset::StringViewT;
 
     protected:
         struct Data final
@@ -305,11 +305,11 @@ namespace Core
     class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
     {
     public:
-        using CharT = CharType;
-        using SizeT = std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
-        using Toolset = _StringToolset<CharT>;
-        using WrapperT = BaseStringWrapper<CharT, StringPolicy::Static>;
-        using SmartPointer = std::unique_ptr<CharT[]>;
+        using CharT = typename CharType;
+        using SizeT = typename std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
+        using Toolset = typename _StringToolset<CharT>;
+        using WrapperT = typename BaseStringWrapper<CharT, StringPolicy::Static>;
+        using SmartPointer = typename std::unique_ptr<CharT[]>;
 
     public:
         [[nodiscard]] WrapperT Add(const CharT* string, SizeT size)
@@ -337,32 +337,29 @@ namespace Core
     {
     public:
         constexpr static StringPolicy Policy = StringPolicy::Static;
-        using Self = BaseString<CharType, Policy>;
-        using Parent = IString<CharType>;
-        using CharT = CharType;
-        using Toolset = Parent::Toolset;
-        using SizeT = Parent::SizeT;
-        using StringT = Parent::StringT;
-        using StringViewT = Parent::StringViewT;
-        using WrapperT = BaseStringWrapper<CharT, Policy>;
-        using StringPool = _StringPool<CharT>;
+        using Self = typename BaseString<CharType, Policy>;
+        using Parent = typename IString<CharType>;
+        using CharT = typename CharType;
+        using Toolset = typename Parent::Toolset;
+        using SizeT = typename Parent::SizeT;
+        using StringT = typename Parent::StringT;
+        using StringViewT = typename Parent::StringViewT;
+        using WrapperT = typename BaseStringWrapper<CharT, Policy>;
+        using StringPool = typename _StringPool<CharT>;
 
     public:
+        /**
+         * @brief Don't use this constructor manually
+         */
         constexpr BaseString(const WrapperT& wrapper)
             : _string(wrapper._string),
               _size(wrapper._size)
         {
         }
 
-        [[nodiscard]] static WrapperT Intern(const CharT* newString)
-        {
-            return StringPool::Instance().Add(newString, Toolset::Length(newString));
-        }
+        [[nodiscard]] static WrapperT Intern(const CharT* newString) { return StringPool::Instance().Add(newString, Toolset::Length(newString)); }
 
-        [[nodiscard]] static WrapperT Intern(const StringT& newString)
-        {
-            return StringPool::Instance().Add(newString.c_str(), newString.size());
-        }
+        [[nodiscard]] static WrapperT Intern(const StringT& newString) { return StringPool::Instance().Add(newString.c_str(), newString.size()); }
 
     protected:
         [[nodiscard]] constexpr Parent::Data GetData() const override { return { _string, _size, Policy }; }
