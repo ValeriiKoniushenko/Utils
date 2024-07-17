@@ -48,9 +48,24 @@ TEST(StringTest, BaseString_char_default__Creation)
     {
         const char* dynamicStr = new char[128]{ "World" };
         const StringAtom str1 = "Hello"_atom;
-        const String str2 = "Hello";
+        const StringAtom str2 = StringAtom::Intern(dynamicStr);
         EXPECT_NE(str1, str2);
 
         delete[] dynamicStr;
+    }
+
+    {
+        const char* dynamicStr = new char[128]{ "World" };
+        StringAtom str1 = "Hello"_atom;
+        StringAtom str2 = StringAtom::Intern(dynamicStr);
+        EXPECT_NE(str1, str2);
+
+        delete[] dynamicStr;
+    }
+
+    {
+        StringAtom str1 = "Hello"_atom;
+        StringAtom str2 = StringAtom::Intern(std::string("World"));
+        EXPECT_NE(str1, str2);
     }
 }

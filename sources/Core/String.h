@@ -24,6 +24,7 @@
 
 #include "Assert.h"
 #include "GlobalEnums.h"
+#include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <optional>
@@ -32,6 +33,7 @@
 #include <type_traits>
 #include <vector>
 #include <xstring>
+#include <unordered_set>
 
 namespace Core
 {
@@ -54,11 +56,13 @@ namespace Core
         using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StringViewT = std::basic_string_view<CharT>;
 
-        static int ToInt(const CharT* str) { return atoi(str); }
-        static float ToFloat(const CharT* str) { return static_cast<float>(atof(str)); }
-        static double ToDouble(const CharT* str) { return atof(str); }
-        static long long ToLongLong(const CharT* str) { return atof(str); }
-        static Comparison Cmp(const CharT* str1, const CharT* str2)
+        [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(strlen(string)); }
+        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
+        [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
+        [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
+        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return atof(str); }
+
+        [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = strcmp(str1, str2);
             if (result == 0)
@@ -80,11 +84,14 @@ namespace Core
         using CharT = wchar_t;
         using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StringViewT = std::basic_string_view<CharT>;
-        static int ToInt(const CharT* str) { return _wtoi(str); }
-        static float ToFloat(const CharT* str) { return static_cast<float>(_wtof(str)); }
-        static double ToDouble(const CharT* str) { return _wtof(str); }
-        static long long ToLongLong(const CharT* str) { return _wtoll(str); }
-        static Comparison Cmp(const CharT* str1, const CharT* str2)
+
+        [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(wcslen(string)); }
+        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
+        [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
+        [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
+        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return _wtoll(str); }
+
+        [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = wcscmp(str1, str2);
             if (result == 0)
@@ -169,7 +176,7 @@ namespace Core
             Data data = GetData();
             if (!data.string)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -181,7 +188,7 @@ namespace Core
             Data data = GetData();
             if (!data.string)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -193,7 +200,7 @@ namespace Core
             Data data = GetData();
             if (!data.string)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -205,7 +212,7 @@ namespace Core
             Data data = GetData();
             if (!data.string)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -217,7 +224,7 @@ namespace Core
             Data data = GetData();
             if (!data.string || data.size >= index)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -229,7 +236,7 @@ namespace Core
             Data data = GetData();
             if (!data.string)
             {
-                Assert("Was get null string");
+                Assert("Was get a null string");
                 return {};
             }
 
@@ -294,6 +301,31 @@ namespace Core
     template<class CharType, StringPolicy PolicyValue>
     class BaseStringWrapper;
 
+    template<class CharType>
+    class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
+    {
+    public:
+        using CharT = CharType;
+        using SizeT = std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
+        using Toolset = _StringToolset<CharT>;
+        using WrapperT = BaseStringWrapper<CharT, StringPolicy::Static>;
+        using SmartPointer = std::unique_ptr<CharT[]>;
+
+    public:
+        [[nodiscard]] WrapperT Add(const CharT* string, SizeT size)
+        {
+            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<SizeT>(1));
+            memcpy(ptr.get(), string, size);
+            const auto* addr = ptr.get();
+            _strings.emplace(std::move(ptr));
+
+            return WrapperT{ addr, size };
+        }
+
+    private:
+        std::unordered_set<SmartPointer> _strings;
+    };
+
     template<class CharType, StringPolicy PolicyValue>
     class BaseString
     {
@@ -313,12 +345,23 @@ namespace Core
         using StringT = Parent::StringT;
         using StringViewT = Parent::StringViewT;
         using WrapperT = BaseStringWrapper<CharT, Policy>;
+        using StringPool = _StringPool<CharT>;
 
     public:
         constexpr BaseString(const WrapperT& wrapper)
             : _string(wrapper._string),
               _size(wrapper._size)
         {
+        }
+
+        [[nodiscard]] static WrapperT Intern(const CharT* newString)
+        {
+            return StringPool::Instance().Add(newString, Toolset::Length(newString));
+        }
+
+        [[nodiscard]] static WrapperT Intern(const StringT& newString)
+        {
+            return StringPool::Instance().Add(newString.c_str(), newString.size());
         }
 
     protected:
@@ -333,46 +376,6 @@ namespace Core
 
         const CharT* _string = nullptr;
         const SizeT _size = 0;
-    };
-
-    template<class CharType>
-    class BaseString<CharType, StringPolicy::Dynamic> : public IString<CharType>
-    {
-    public:
-        constexpr static StringPolicy Policy = StringPolicy::Dynamic;
-        using Self = BaseString<CharType, Policy>;
-        using Parent = IString<CharType>;
-        using CharT = CharType;
-        using Toolset = Parent::Toolset;
-        using SizeT = Parent::SizeT;
-        using StringT = Parent::StringT;
-        using StringViewT = Parent::StringViewT;
-        using StaticWrapperT = BaseStringWrapper<CharT, StringPolicy::Static>;
-
-    public:
-        constexpr BaseString(const StaticWrapperT& wrapper) { static_assert(false); }
-
-        BaseString(const CharT* string)
-        {
-            Assert(string);
-            if (string)
-            {
-                static_assert(false);
-            }
-        }
-
-    protected:
-        [[nodiscard]] constexpr Parent::Data GetData() const override { return { _string, _size, Policy }; }
-
-    private:
-        explicit constexpr BaseString(const CharT* string, SizeT size)
-            : _string{ string },
-              _size{ size }
-        {
-        }
-
-        CharT* _string = nullptr;
-        SizeT _size = 0;
     };
 
     template<class CharType, StringPolicy PolicyValue>

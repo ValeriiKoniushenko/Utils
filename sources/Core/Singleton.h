@@ -36,7 +36,7 @@ namespace Core
     class Singleton : public CopyBehaviour
     {
     public:
-        static T& instance()
+        static T& Instance()
         {
             static std::unique_ptr<T> object;
             static std::mutex mutex;
