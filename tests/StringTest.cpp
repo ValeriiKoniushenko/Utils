@@ -69,3 +69,61 @@ TEST(StringTest, BaseString_char_default__Creation)
         EXPECT_NE(str1, str2);
     }
 }
+
+TEST(StringTest, BaseString_char_default__Comparision)
+{
+    using Core::StringAtom;
+
+    {
+        const StringAtom str1 = "AAA"_atom;
+        const StringAtom str2 = StringAtom::Intern(std::string("AAB"));
+        EXPECT_NE(str1, str2);
+
+        EXPECT_TRUE(str1 < str2);
+        EXPECT_TRUE(str2 > str1);
+    }
+
+    {
+        const StringAtom str1 = "AAA"_atom;
+
+        EXPECT_TRUE(str1 == "AAA");
+        EXPECT_TRUE("AAA" == str1);
+        EXPECT_TRUE(str1 != "AAB");
+        EXPECT_TRUE("AAB" != str1);
+
+        EXPECT_TRUE(str1 < "AAB");
+        EXPECT_TRUE("AAB" > str1);
+
+        EXPECT_TRUE("AAA" >= str1);
+        EXPECT_TRUE("AAA" <= str1);
+        EXPECT_TRUE(str1 <= "AAA");
+        EXPECT_TRUE(str1 >= "AAA");
+    }
+
+    {
+        const StringAtom str1 = "AAA"_atom;
+
+        EXPECT_TRUE(str1 == std::string("AAA"));
+        EXPECT_TRUE(std::string("AAA") == str1);
+        EXPECT_TRUE(str1 != std::string("AAB"));
+        EXPECT_TRUE(std::string("AAB") != str1);
+
+        EXPECT_TRUE(str1 < std::string("AAB"));
+        EXPECT_TRUE(std::string("AAB") > str1);
+
+        EXPECT_TRUE(std::string("AAA") >= str1);
+        EXPECT_TRUE(std::string("AAA") <= str1);
+        EXPECT_TRUE(str1 <= std::string("AAA"));
+        EXPECT_TRUE(str1 >= std::string("AAA"));
+    }
+
+
+    const StringAtom str2 = StringAtom::Intern(std::string("AAA"));
+    {
+        const StringAtom str1 = "AAA"_atom;
+        EXPECT_NE(str1, str2);
+
+        EXPECT_TRUE(str1 < str2);
+        EXPECT_TRUE(str2 > str1);
+    }
+}

@@ -31,7 +31,7 @@
 #include <regex>
 #include <string_view>
 #include <type_traits>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 #include <xstring>
 
@@ -53,8 +53,8 @@ namespace Core
     struct _StringToolset<char> : public Utils::Abstract
     {
         using CharT = char;
-        using StringT = typename std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = typename std::basic_string_view<CharT>;
+        using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StringViewT = std::basic_string_view<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(strlen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
@@ -111,12 +111,13 @@ namespace Core
     class IString : public Utils::CopyableAndMoveable
     {
     public:
-        using CharT = typename CharType;
-        using Toolset = typename _StringToolset<CharT>;
-        using SizeT = typename std::size_t;
+        using CharT = CharType;
+        using Self = IString<CharT>;
+        using Toolset = _StringToolset<CharT>;
+        using SizeT = std::size_t;
         using StringT = typename Toolset::StringT;
         using StringViewT = typename Toolset::StringViewT;
-
+        constexpr static SizeT invalidSize = ~(static_cast<SizeT>(0));
     protected:
         struct Data final
         {
@@ -133,34 +134,41 @@ namespace Core
         [[nodiscard]] constexpr explicit operator const CharT*() const noexcept { return GetData().string; }
         [[nodiscard]] constexpr CharT operator[](std::size_t index) const { return GetData().string[index]; }
 
-        [[nodiscard]] virtual constexpr bool operator==(const IString& other) const { return GetData().string == other.GetData().string; }
-        [[nodiscard]] virtual constexpr bool operator!=(const IString& other) const { return GetData().string != other.GetData().string; }
-        [[nodiscard]] virtual constexpr bool operator==(const CharT* other) const
+        [[nodiscard]] constexpr bool operator==(const Self& other) const { return GetData().string == other.GetData().string; }
+        [[nodiscard]] constexpr bool operator!=(const Self& other) const { return GetData().string != other.GetData().string; }
+        [[nodiscard]] bool operator>(const Self& other) const { return Toolset::Cmp(GetData().string, other.GetData().string) == Comparison::Greater; }
+        [[nodiscard]] bool operator>=(const Self& other) const
+        {
+            const auto result = Toolset::Cmp(GetData().string, other.GetData().string);
+            return result == Comparison::Greater || result == Comparison::Equal;
+        }
+        [[nodiscard]] bool operator<(const Self& other) const { return Toolset::Cmp(GetData().string, other.GetData().string) == Comparison::Less; }
+        [[nodiscard]] bool operator<=(const Self& other) const
+        {
+            const auto result = Toolset::Cmp(GetData().string, other.GetData().string);
+            return result == Comparison::Less || result == Comparison::Equal;
+        }
+
+        [[nodiscard]] bool operator==(const CharT* other) const
         {
             return Toolset::Cmp(GetData().string, other) == Comparison::Equal;
         }
-        [[nodiscard]] virtual constexpr bool operator!=(const CharT* other) const
+        [[nodiscard]] bool operator!=(const CharT* other) const
         {
             return Toolset::Cmp(GetData().string, other) != Comparison::Equal;
         }
-        [[nodiscard]] virtual bool operator>(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Greater; }
-        [[nodiscard]] virtual bool operator>=(const CharT* other) const
+        [[nodiscard]] bool operator>(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Greater; }
+        [[nodiscard]] bool operator>=(const CharT* other) const
         {
             const auto result = Toolset::Cmp(GetData().string, other);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
-        [[nodiscard]] virtual bool operator<(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Less; }
-        [[nodiscard]] virtual bool operator<=(const CharT* other) const
+        [[nodiscard]] bool operator<(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Less; }
+        [[nodiscard]] bool operator<=(const CharT* other) const
         {
             const auto result = Toolset::Cmp(GetData().string, other);
             return result == Comparison::Less || result == Comparison::Equal;
         }
-
-        [[nodiscard]] virtual constexpr bool operator==(StringViewT other) const { return *this == other.data(); }
-        [[nodiscard]] virtual bool operator>(StringViewT other) const { return *this == other.data(); }
-        [[nodiscard]] virtual bool operator>=(StringViewT other) const { return *this >= other.data(); }
-        [[nodiscard]] virtual bool operator<(StringViewT other) const { return *this < other.data(); }
-        [[nodiscard]] virtual bool operator<=(StringViewT other) const { return *this <= other.data(); }
 
         [[nodiscard]] bool operator==(const StringT& other) const { return *this == other.data(); }
         [[nodiscard]] bool operator>(const StringT& other) const { return *this > other.data(); }
@@ -171,7 +179,7 @@ namespace Core
         [[nodiscard]] constexpr bool operator!() const noexcept { return !GetData().string; }
         [[nodiscard]] constexpr operator bool() const noexcept { return GetData().string; }
 
-        [[nodiscard]] virtual constexpr CharT Front() const
+        [[nodiscard]] constexpr CharT Front() const
         {
             Data data = GetData();
             if (!data.string)
@@ -183,7 +191,7 @@ namespace Core
             return data.string[0];
         }
 
-        [[nodiscard]] virtual constexpr CharT Back() const
+        [[nodiscard]] constexpr CharT Back() const
         {
             Data data = GetData();
             if (!data.string)
@@ -305,25 +313,31 @@ namespace Core
     class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
     {
     public:
-        using CharT = typename CharType;
-        using SizeT = typename std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
-        using Toolset = typename _StringToolset<CharT>;
-        using WrapperT = typename BaseStringWrapper<CharT, StringPolicy::Static>;
-        using SmartPointer = typename std::unique_ptr<CharT[]>;
+        using CharT = CharType;
+        using SizeT = std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
+        using Toolset = _StringToolset<CharT>;
+        using WrapperT = BaseStringWrapper<CharT, StringPolicy::Static>;
+        using SmartPointer = std::unique_ptr<CharT[]>;
 
     public:
         [[nodiscard]] WrapperT Add(const CharT* string, SizeT size)
         {
+            const auto currentHash = std::hash<std::string_view>{}({string, size});
+            if (auto&& it = _strings.find(currentHash); it != _strings.end())
+            {
+                return WrapperT{ it->second.get(), size };
+            }
+
             auto&& ptr = std::make_unique<CharT[]>(size + static_cast<SizeT>(1));
             memcpy(ptr.get(), string, size);
             const auto* addr = ptr.get();
-            _strings.emplace(std::move(ptr));
+            _strings.emplace(currentHash, std::move(ptr));
 
             return WrapperT{ addr, size };
         }
 
     private:
-        std::unordered_set<SmartPointer> _strings;
+        std::unordered_map<std::size_t, SmartPointer> _strings;
     };
 
     template<class CharType, StringPolicy PolicyValue>
@@ -337,15 +351,15 @@ namespace Core
     {
     public:
         constexpr static StringPolicy Policy = StringPolicy::Static;
-        using Self = typename BaseString<CharType, Policy>;
-        using Parent = typename IString<CharType>;
-        using CharT = typename CharType;
+        using Self = BaseString<CharType, Policy>;
+        using Parent = IString<CharType>;
+        using CharT = CharType;
         using Toolset = typename Parent::Toolset;
         using SizeT = typename Parent::SizeT;
         using StringT = typename Parent::StringT;
         using StringViewT = typename Parent::StringViewT;
-        using WrapperT = typename BaseStringWrapper<CharT, Policy>;
-        using StringPool = typename _StringPool<CharT>;
+        using WrapperT = BaseStringWrapper<CharT, Policy>;
+        using StringPool = _StringPool<CharT>;
 
     public:
         /**
@@ -357,7 +371,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] static WrapperT Intern(const CharT* newString) { return StringPool::Instance().Add(newString, Toolset::Length(newString)); }
+        [[nodiscard]] static WrapperT Intern(const CharT* newString, SizeT size = IString<CharT>::invalidSize)
+        {
+            return StringPool::Instance().Add(newString, size == IString<CharT>::invalidSize ? Toolset::Length(newString) : size);
+        }
 
         [[nodiscard]] static WrapperT Intern(const StringT& newString) { return StringPool::Instance().Add(newString.c_str(), newString.size()); }
 
@@ -400,7 +417,7 @@ namespace Core
 
 constexpr Core::BaseStringWrapper<char, Core::StringPolicy::Static> operator""_atom(const char* str, std::size_t size) noexcept
 {
-    return Core::BaseStringWrapper<char, Core::StringPolicy::Static>(str, size);
+    return Core::BaseString<char, Core::StringPolicy::Static>::Intern(str, size);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
@@ -412,7 +429,7 @@ template<class CharType, Core::StringPolicy StringPolicy>
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator>=(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
 {
-    return !(str2 >= str1);
+    return !(str2 > str1) || (str1 == str2);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
@@ -424,5 +441,29 @@ template<class CharType, Core::StringPolicy StringPolicy>
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator<=(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
 {
-    return !(str2 <= str1);
+    return !(str2 < str1) || (str1 == str2);;
+}
+
+template<class CharType, Core::StringPolicy StringPolicy>
+[[nodiscard]] bool operator>(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1, const Core::BaseString<CharType, StringPolicy>& str2)
+{
+    return !(str2 > str1);
+}
+
+template<class CharType, Core::StringPolicy StringPolicy>
+[[nodiscard]] bool operator>=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1, const Core::BaseString<CharType, StringPolicy>& str2)
+{
+    return !(str2 > str1) || (str1 == str2);
+}
+
+template<class CharType, Core::StringPolicy StringPolicy>
+[[nodiscard]] bool operator<(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1, const Core::BaseString<CharType, StringPolicy>& str2)
+{
+    return !(str2 < str1);
+}
+
+template<class CharType, Core::StringPolicy StringPolicy>
+[[nodiscard]] bool operator<=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1, const Core::BaseString<CharType, StringPolicy>& str2)
+{
+    return !(str2 < str1) || (str1 == str2);;
 }
