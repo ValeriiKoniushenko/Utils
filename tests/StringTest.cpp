@@ -23,6 +23,7 @@
 #include "Core/String.h"
 
 #include <gtest/gtest.h>
+#include <unordered_set>
 
 TEST(StringTest, BaseString_char_default__Creation)
 {
@@ -117,13 +118,138 @@ TEST(StringTest, BaseString_char_default__Comparision)
         EXPECT_TRUE(str1 >= std::string("AAA"));
     }
 
-
-    const StringAtom str2 = StringAtom::Intern(std::string("AAA"));
+    const StringAtom str2 = StringAtom::Intern(std::string("AAB"));
     {
         const StringAtom str1 = "AAA"_atom;
         EXPECT_NE(str1, str2);
 
         EXPECT_TRUE(str1 < str2);
         EXPECT_TRUE(str2 > str1);
+    }
+
+    {
+        EXPECT_EQ("Hello"_atom, "Hello"_atom);
+        EXPECT_TRUE("Hello"_atom == "Hello"_atom);
+        EXPECT_TRUE("Hello"_atom == std::string("Hello"));
+        EXPECT_TRUE("Hello"_atom == std::string_view("Hello").data());
+    }
+
+    {
+        EXPECT_TRUE("Hello"_atom < "Hello1");
+        EXPECT_FALSE("Hello"_atom > "Hello1");
+        EXPECT_TRUE("Hello"_atom >= "Hello");
+        EXPECT_TRUE("Hello"_atom <= "Hello");
+        EXPECT_TRUE("Hello"_atom <= "Hello1");
+        EXPECT_TRUE("Hello1"_atom >= "Hello");
+
+        EXPECT_TRUE("Hello"_atom < "Hello1"_atom);
+        EXPECT_FALSE("Hello"_atom > "Hello1"_atom);
+        EXPECT_TRUE("Hello"_atom != "Hello1"_atom);
+        EXPECT_TRUE("Hello"_atom <= "Hello1"_atom);
+        EXPECT_TRUE("Hello1"_atom >= "Hello"_atom);
+        EXPECT_TRUE("Hello"_atom >= "Hello"_atom);
+        EXPECT_TRUE("Hello"_atom <= "Hello"_atom);
+
+        EXPECT_TRUE("Hello"_atom != std::string("Hello1"));
+        EXPECT_TRUE("Hello"_atom >= std::string("Hello"));
+        EXPECT_TRUE("Hello"_atom <= std::string("Hello"));
+        EXPECT_TRUE("Hello1"_atom >= std::string("Hello"));
+        EXPECT_TRUE("Hello"_atom <= std::string("Hello1"));
+
+        EXPECT_TRUE("Hello"_atom != std::string_view("Hello1").data());
+        EXPECT_TRUE("Hello"_atom >= std::string_view("Hello").data());
+        EXPECT_TRUE("Hello"_atom <= std::string_view("Hello").data());
+        EXPECT_TRUE("Hello1"_atom >= std::string("Hello").data());
+        EXPECT_TRUE("Hello"_atom <= std::string_view("Hello1").data());
+    }
+}
+
+TEST(StringTest, BaseString_char_default__InStdSet)
+{
+    using Core::StringAtom;
+
+    {
+        std::set<StringAtom> set;
+        set.emplace(StringAtom::Intern("Hello"));
+        set.emplace(StringAtom::Intern("World"));
+        set.emplace(StringAtom::Intern("Hello"));
+
+        EXPECT_TRUE(set.size() == 2);
+
+        auto itHello = set.find("Hello"_atom);
+        ASSERT_TRUE(itHello != set.end());
+        EXPECT_EQ(*itHello, "Hello");
+        EXPECT_EQ(*itHello, "Hello"_atom);
+
+        set.emplace("AAA"_atom);
+        EXPECT_TRUE(set.size() == 3);
+        auto itAaa = set.find("AAA"_atom);
+        ASSERT_TRUE(itAaa != set.end());
+        EXPECT_EQ(*itAaa, "AAA");
+        EXPECT_EQ(*itAaa, "AAA"_atom);
+    }
+}
+
+TEST(StringTest, BaseString_char_default__InStdUnorderedSet)
+{
+    using Core::StringAtom;
+
+    {
+        std::unordered_set<StringAtom> set;
+        set.emplace(StringAtom::Intern("Hello"));
+        set.emplace(StringAtom::Intern("World"));
+        set.emplace(StringAtom::Intern("Hello"));
+
+        EXPECT_TRUE(set.size() == 2);
+
+        auto itHello = set.find("Hello"_atom);
+        ASSERT_TRUE(itHello != set.end());
+        EXPECT_EQ(*itHello, "Hello");
+        EXPECT_EQ(*itHello, "Hello"_atom);
+
+        set.emplace("AAA"_atom);
+        EXPECT_TRUE(set.size() == 3);
+        auto itAaa = set.find("AAA"_atom);
+        ASSERT_TRUE(itAaa != set.end());
+        EXPECT_EQ(*itAaa, "AAA");
+        EXPECT_EQ(*itAaa, "AAA"_atom);
+    }
+}
+
+TEST(StringTest, BaseString_char_default__Converts)
+{
+    using Core::StringAtom;
+
+    {
+        const StringAtom str = "123"_atom;
+        auto num = str.ConvertTo<int>();
+        EXPECT_EQ(123, num);
+    }
+
+    {
+        const StringAtom str = "123.1234"_atom;
+        auto num = str.ConvertTo<float>();
+        EXPECT_EQ(123.1234f, num);
+    }
+
+    {
+        const StringAtom str = "1231234567"_atom;
+        auto num = str.ConvertTo<long long>();
+        EXPECT_EQ(1231234567, num);
+    }
+}
+
+TEST(StringTest, BaseString_char_default__UtilsFunctions)
+{
+    using Core::StringAtom;
+
+    // Split
+    {
+        const StringAtom str = "Hello fucking world!"_atom;
+        auto tokens = str.Split(" ");
+        ASSERT_EQ(3, tokens.size());
+        EXPECT_EQ(tokens[0], "Hello");
+        EXPECT_EQ(tokens[1], "fucking");
+        EXPECT_EQ(tokens[2], "world!");
     }
 }

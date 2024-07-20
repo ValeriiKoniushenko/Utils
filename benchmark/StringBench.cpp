@@ -87,10 +87,6 @@ static void BM_CStringAddr(benchmark::State& state)
     }
 }
 
-static void BM_CoreString(benchmark::State& state)
-{
-}
-
 BENCHMARK(BM_StdString);
 BENCHMARK(BM_StdStringLong);
 BENCHMARK(BM_StdStringConst);
