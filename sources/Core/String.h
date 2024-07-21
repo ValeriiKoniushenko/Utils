@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include "Assert.h"
-#include "GlobalEnums.h"
+#include "Core/AbstractIterators.h"
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
@@ -41,6 +40,39 @@ namespace Core
     {
         Static,
         Dynamic
+    };
+
+    template<class CharType>
+    struct _StringSettings : public Utils::Abstract
+    {
+        using CharT = CharType;
+        using SizeT = std::size_t;
+        constexpr static SizeT invalidSize = ~static_cast<SizeT>(0);
+    };
+
+    template<class CharType>
+    struct StringDataReadOnly
+    {
+        using Settings = _StringSettings<CharType>;
+
+        typename Settings::CharT* str;
+        typename Settings::SizeT size = Settings::invalidSize;
+    };
+
+    template<class CharType>
+    struct StringData
+    {
+        using Settings = _StringSettings<CharType>;
+        using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
+
+        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept
+        {
+            return StringDataReadOnly<CharType>{ str.get(), size };
+        }
+
+        SmartPointer str;
+        typename Settings::SizeT size = Settings::invalidSize;
+        std::size_t copyCounts = 0;
     };
 
     template<class CharType>
@@ -109,27 +141,112 @@ namespace Core
     };
 
     template<class CharType>
-    class IString : public Utils::CopyableAndMoveable
+    class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
     {
     public:
         using CharT = CharType;
-        using Self = IString<CharT>;
         using Toolset = _StringToolset<CharT>;
-        using SizeT = std::size_t;
+        using HashT = std::size_t;
+        using Settings = _StringSettings<CharT>;
+        using StringDataT = StringData<CharT>;
+        using StringDataReadOnlyT = StringDataReadOnly<CharT>;
+
+    public:
+        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size)
+        {
+            const auto currentHash = std::hash<std::string_view>{}({ string, size });
+            if (auto&& it = _strings.find(currentHash); it != _strings.end())
+            {
+                return it->second.ToReadOnly();
+            }
+
+            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<typename Settings::SizeT>(1));
+            memcpy(ptr.get(), string, size);
+            auto* addr = ptr.get();
+            _strings.emplace(currentHash, StringDataT{ std::move(ptr), size, 1 });
+
+            return StringDataReadOnlyT{ addr, size };
+        }
+
+    private:
+        std::unordered_map<HashT, StringDataT> _strings;
+    };
+
+    template<class CharType>
+    class BaseString : public Utils::CopyableAndMoveable
+    {
+    public:
+        using CharT = CharType;
+        using Self = BaseString<CharT>;
+        using Toolset = _StringToolset<CharT>;
+        using Settings = _StringSettings<CharT>;
+        using SizeT = typename Settings::SizeT;
         using StringT = typename Toolset::StringT;
         using StringViewT = typename Toolset::StringViewT;
-        constexpr static SizeT invalidSize = ~(static_cast<SizeT>(0));
+        using StringDataReadOnlyT = StringDataReadOnly<CharT>;
+        using StringPool = _StringPool<CharT>;
 
-    protected:
-        struct Data final
+    public:
+        class Iterator : public RandomAccessIterator<CharT>
         {
-            const CharT* string = nullptr;
-            SizeT size = 0;
-            StringPolicy policy = StringPolicy::Static;
+        public:
+            using Self = Iterator;
+            using Super = RandomAccessIterator<CharT>;
+
+        public:
+            Iterator() = default;
+
+        protected:
+            explicit Iterator(CharT* data)
+                : Iterator{ data }
+            {
+            }
+
+            void MakeStep(int step) noexcept override { this->_data += step; }
+
+            [[nodiscard]] Comparison operator<=>(const Super& other) const noexcept override
+            {
+                if (!this->_data || !other._data)
+                {
+                    return Comparison::None;
+                }
+
+                if (*this->_data > *other._data)
+                {
+                    return Comparison::Greater;
+                }
+
+                if (*this->_data == *other._data)
+                {
+                    return Comparison::Equal;
+                }
+
+                if (*this->_data < *other._data)
+                {
+                    return Comparison::Less;
+                }
+
+                return Comparison::None;
+            }
+
+            friend class BaseString<CharT>;
         };
 
     public:
-        [[nodiscard]] constexpr const CharT* CStr() const noexcept { return GetData().string; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size = Settings::invalidSize)
+        {
+            return Self{ StringPool::Instance().Add(newString, size == Settings::invalidSize ? Toolset::Length(newString) : size) };
+        }
+
+    private:
+        constexpr explicit BaseString(StringDataReadOnlyT data)
+            : _string{ data.str },
+              _size{ data.size }
+        {
+        }
+
+
+        /*[[nodiscard]] constexpr const CharT* CStr() const noexcept { return GetData().string; }
         [[nodiscard]] constexpr SizeT Size() const noexcept { return GetData().size; }
         [[nodiscard]] constexpr SizeT Length() const noexcept { return GetData().size == 0; }
         [[nodiscard]] constexpr bool IsEmpty() const noexcept { return GetData().size == 0; }
@@ -256,7 +373,7 @@ namespace Core
 
             if (const auto* token = Toolset::StrTok(string.data(), delimiter.c_str(), context))
             {
-                splittedStrings.emplace_back(StringT{token});
+                splittedStrings.emplace_back(StringT{ token });
             }
             else
             {
@@ -267,7 +384,7 @@ namespace Core
             {
                 if (const auto* token = Toolset::StrTok(context, delimiter.c_str(), context))
                 {
-                    splittedStrings.emplace_back(StringT{token});
+                    splittedStrings.emplace_back(StringT{ token });
                 }
                 else
                 {
@@ -311,9 +428,34 @@ namespace Core
             return std::hash<std::string_view>{}({ data.string, data.size });
         }
 
-        // [[nodiscard]] virtual std::vector<StringT> Split(StringViewT delimiter) const = 0;
+        [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ GetNonConstData().string }; }
+        [[nodiscard]] ConstIteratorT begin() const noexcept { return ConstIteratorT{ GetNonConstData().string }; }
+        [[nodiscard]] ConstIteratorT cbegin() const noexcept { return ConstIteratorT{ GetNonConstData().string }; }
 
-        // [[nodiscard]] virtual StringT TrimStart(StringViewT value) const = 0;
+        [[nodiscard]] IteratorT end() noexcept
+        {
+            auto data = GetNonConstData();
+            return IteratorT{ data.string + data.size };
+        }
+        [[nodiscard]] ConstIteratorT end() const noexcept
+        {
+            auto data = GetNonConstData();
+            return ConstIteratorT{ data.string + data.size };
+        }
+        [[nodiscard]] ConstIteratorT cend() const noexcept
+        {
+            auto data = GetNonConstData();
+            return ConstIteratorT{ data.string + data.size };
+        }
+
+        Self& TrimStart(StringViewT value) noexcept
+        {
+            if (value)
+            {
+
+                _isDirty = true;
+            }
+        }
         // [[nodiscard]] virtual StringT TrimEnd(StringViewT value) const = 0;
         // [[nodiscard]] StringT Trim(StringViewT value) const { TrimStart(value); TrimEnd(value); }
 
@@ -327,186 +469,81 @@ namespace Core
         // [[nodiscard]] virtual std::size_t RFind(StringViewT value) const = 0;
         // [[nodiscard]] virtual std::size_t Find(const std::regex& expr) const = 0;
         // [[nodiscard]] virtual std::size_t RFind(const std::regex& expr) const = 0;
-
+        */
     protected:
-        [[nodiscard]] virtual constexpr Data GetData() const = 0;
+        CharT* _string = nullptr;
+        SizeT _size = 0;
+        StringPolicy _policy = StringPolicy::Static;
     };
 
-    template<class CharType, StringPolicy PolicyValue>
-    class BaseStringWrapper;
-
-    template<class CharType>
-    class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
-    {
-    public:
-        using CharT = CharType;
-        using SizeT = std::size_t; // TODO: fix it, so BasicString has another 'using' - use it
-        using Toolset = _StringToolset<CharT>;
-        using WrapperT = BaseStringWrapper<CharT, StringPolicy::Static>;
-        using SmartPointer = std::unique_ptr<CharT[]>;
-
-    public:
-        [[nodiscard]] WrapperT Add(const CharT* string, SizeT size)
-        {
-            const auto currentHash = std::hash<std::string_view>{}({ string, size });
-            if (auto&& it = _strings.find(currentHash); it != _strings.end())
-            {
-                return WrapperT{ it->second.get(), size };
-            }
-
-            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<SizeT>(1));
-            memcpy(ptr.get(), string, size);
-            const auto* addr = ptr.get();
-            _strings.emplace(currentHash, std::move(ptr));
-
-            return WrapperT{ addr, size };
-        }
-
-    private:
-        std::unordered_map<std::size_t, SmartPointer> _strings;
-    };
-
-    template<class CharType, StringPolicy PolicyValue>
-    class BaseString
-    {
-        static_assert("Invalid string");
-    };
-
-    template<class CharType>
-    class BaseString<CharType, StringPolicy::Static> : public IString<CharType>
-    {
-    public:
-        constexpr static StringPolicy Policy = StringPolicy::Static;
-        using Self = BaseString<CharType, Policy>;
-        using Parent = IString<CharType>;
-        using CharT = CharType;
-        using Toolset = typename Parent::Toolset;
-        using SizeT = typename Parent::SizeT;
-        using StringT = typename Parent::StringT;
-        using StringViewT = typename Parent::StringViewT;
-        using WrapperT = BaseStringWrapper<CharT, Policy>;
-        using StringPool = _StringPool<CharT>;
-
-    public:
-        /**
-         * @brief Don't use this constructor manually
-         */
-        constexpr BaseString(const WrapperT& wrapper)
-            : _string(wrapper._string),
-              _size(wrapper._size)
-        {
-        }
-
-        [[nodiscard]] static WrapperT Intern(const CharT* newString, SizeT size = IString<CharT>::invalidSize)
-        {
-            return StringPool::Instance().Add(newString, size == IString<CharT>::invalidSize ? Toolset::Length(newString) : size);
-        }
-
-        [[nodiscard]] static WrapperT Intern(const StringT& newString) { return StringPool::Instance().Add(newString.c_str(), newString.size()); }
-
-    protected:
-        [[nodiscard]] constexpr Parent::Data GetData() const override { return { _string, _size, Policy }; }
-
-    private:
-        explicit constexpr BaseString(const CharT* string, SizeT size)
-            : _string{ string },
-              _size{ size }
-        {
-        }
-
-        const CharT* _string = nullptr;
-        const SizeT _size = 0;
-    };
-
-    template<class CharType, StringPolicy PolicyValue>
-    class BaseStringWrapper : Utils::NotCopyableAndNotMoveable
-    {
-    public:
-        using StringT = BaseString<CharType, PolicyValue>;
-        constexpr explicit BaseStringWrapper(const StringT::CharT* str, StringT::SizeT size)
-            : _string{ str },
-              _size{ size }
-        {
-        }
-
-    private:
-        const StringT::CharT* _string = nullptr;
-        StringT::SizeT _size = 0;
-
-        friend class BaseString<CharType, PolicyValue>;
-    };
-
-    using StringAtom = BaseString<char, StringPolicy::Static>;
-    using String = BaseString<char, StringPolicy::Dynamic>;
+    using StringAtom = BaseString<char>;
 
 } // namespace Core
 
 namespace std
 {
 
-    template<>
-    template<class CharType, Core::StringPolicy Policy>
-    struct hash<Core::BaseString<CharType, Policy>>
+    /*template<class CharType>
+    struct hash<Core::BaseString<CharType>>
     {
-        size_t operator()(const Core::BaseString<CharType, Policy>& x) const noexcept { return x.MakeHash(); }
-    };
+        size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
+    };*/
 
 } // namespace std
 
-constexpr Core::BaseString<char, Core::StringPolicy::Static> operator""_atom(const char* str, std::size_t size) noexcept
+constexpr Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
 {
-    using String = Core::BaseString<char, Core::StringPolicy::Static>;
-    return String{ String::Intern(str, size) };
+    return Core::BaseString<char>::Intern(str, size);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
-[[nodiscard]] bool operator>(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
+/*template<class CharType>
+[[nodiscard]] bool operator>(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
-[[nodiscard]] bool operator>=(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
+[[nodiscard]] bool operator>=(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
-[[nodiscard]] bool operator<(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
+[[nodiscard]] bool operator<(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
-[[nodiscard]] bool operator<=(const CharType* str1, const Core::BaseString<CharType, StringPolicy>& str2)
+[[nodiscard]] bool operator<=(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator>(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
-                             const Core::BaseString<CharType, StringPolicy>& str2)
+                             const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator>=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
-                              const Core::BaseString<CharType, StringPolicy>& str2)
+                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator<(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
-                             const Core::BaseString<CharType, StringPolicy>& str2)
+                             const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
 template<class CharType, Core::StringPolicy StringPolicy>
 [[nodiscard]] bool operator<=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
-                              const Core::BaseString<CharType, StringPolicy>& str2)
+                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
-}
+}*/

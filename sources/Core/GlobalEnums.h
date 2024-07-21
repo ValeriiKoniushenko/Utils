@@ -27,6 +27,7 @@ namespace Core
 
     enum class Comparison
     {
+        None,
         Greater,
         Less,
         Equal
