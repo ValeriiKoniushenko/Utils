@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,41 +22,17 @@
 
 #pragma once
 
-#include <iostream>
-#include <stacktrace>
-
-inline void Assert(bool condition, const char* message = nullptr)
+namespace Core
 {
-    using std::cerr;
-    using std::endl;
-    using std::stacktrace;
 
-    cerr << "Assert was got: " << endl
-         << "Message: " << (message ? message : "None") << endl
-         << "Stacktrace: " << endl
-         << stacktrace::current() << endl;
+    template<class Derived>
+    struct ISwappable
+    {
+        using DerivedT = Derived;
 
-#ifdef __clang__
-    __builtin_debugtrap();
-#else
-//    static_assert(false, "Not implemented behavoir for your compiler.")
-#endif
-}
+        virtual ~ISwappable() = default;
 
-inline void Assert(const char* message = nullptr)
-{
-    using std::cerr;
-    using std::endl;
-    using std::stacktrace;
+        virtual void Swap(DerivedT&) = 0;
+    };
 
-    cerr << "Assert was got: " << endl
-         << "Message: " << (message ? message : "None") << endl
-         << "Stacktrace: " << endl
-         << stacktrace::current() << endl;
-
-#ifdef __clang__
-    __builtin_debugtrap();
-#else
-    //static_assert(false, "Not implemented behavoir for your compiler.")
-#endif
-}
+} // namespace Core

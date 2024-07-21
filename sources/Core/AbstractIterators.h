@@ -22,208 +22,144 @@
 
 #pragma once
 
-#include "Core/Assert.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
-#include "Core/GlobalEnums.h"
+#include "Core/CommonInterfaces.h"
+
+#include <type_traits>
 
 namespace Core
 {
-    template<class DataT>
-    class Iterator : public Utils::CopyableAndMoveable
+    
+    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
+    class IInputIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
     public:
-        [[nodiscard]] virtual bool operator==(const Iterator& other) const noexcept
-        {
-            if (_data)
-            {
-                return _data == other._data;
-            }
-            return false;
-        }
+        constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
+        using CopyAndMovePolicyT = CopyAndMovePolicy;
+        using DataT = T;
+        using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
-        [[nodiscard]] virtual bool operator!=(const Iterator& other) const noexcept
-        {
-            if (_data)
-            {
-                return _data != other._data;
-            }
-            return false;
-        }
+        [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
+
+        [[nodiscard]] virtual const DataRefT operator->() const = 0;
 
     protected:
-        explicit Iterator(DataT* data)
-            : _data(data)
-        {
-        }
-
-    protected:
-        DataT* _data = nullptr;
+        IInputIterator() = default;
     };
 
-    template<class DataT>
-    class InputIterator : public Iterator<DataT>
+    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
+    class IOutputIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
     public:
-        [[nodiscard]] virtual const DataT& operator*() const noexcept
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
+        using CopyAndMovePolicyT = CopyAndMovePolicy;
+        using DataT = T;
+        using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
-        [[nodiscard]] virtual const DataT& operator->() const
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
+
+        [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
 
     protected:
-        InputIterator() = default;
+        IOutputIterator() = default;
     };
 
-    template<class DataT>
-    class OutputIterator : public Iterator<DataT>
+    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
+    class IForwardIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
     public:
-        [[nodiscard]] virtual DataT& operator*() noexcept
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
+        using CopyAndMovePolicyT = CopyAndMovePolicy;
+        using DataT = T;
+        using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
-        [[nodiscard]] virtual DataT& operator->() noexcept
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
+
+        [[nodiscard]] virtual const DataRefT operator->() const = 0;
+        
+        [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
+
+        [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
+
+        virtual DerivedIterator& operator++() noexcept = 0;
+
+        virtual DerivedIterator operator++(int) noexcept = 0;
 
     protected:
-        OutputIterator() = default;
+        IForwardIterator() = default;
     };
 
-    template<class DataT>
-    class ForwardIterator : public InputIterator<DataT>
+    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
+    class IBidirectionalIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
     public:
-        using Self = ForwardIterator<DataT>;
+        constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
+        using CopyAndMovePolicyT = CopyAndMovePolicy;
+        using DataT = T;
+        using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
+        
+        [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
-    public:
-        [[nodiscard]] virtual DataT& operator*() noexcept
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        [[nodiscard]] virtual const DataRefT operator->() const = 0;
+        
+        [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
-        [[nodiscard]] virtual DataT& operator->() noexcept
-        {
-            Assert(this->_data, "Iterator wasn't initialized");
-            return *this->_data;
-        }
+        [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
 
-        virtual Self& operator++() noexcept
-        {
-            MakeStep(1);
-            return *this;
-        }
+        virtual DerivedIterator& operator++() noexcept = 0;
 
-        virtual Self operator++(int) noexcept
-        {
-            const auto temp = *this;
-            MakeStep(1);
-            return temp;
-        }
+        virtual DerivedIterator operator++(int) noexcept = 0;
+        
+        virtual DerivedIterator& operator--() noexcept = 0;
+
+        virtual DerivedIterator operator--(int) noexcept = 0;
 
     protected:
-        ForwardIterator() = default;
-
-        virtual void MakeStep(int step) noexcept = 0;
+        IBidirectionalIterator() = default;
     };
 
-    template<class DataT>
-    class BidirectionalIterator : public ForwardIterator<DataT>
+    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
+    class IRandomAccessIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
     public:
-        using Self = BidirectionalIterator<DataT>;
+        constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
+        using CopyAndMovePolicyT = CopyAndMovePolicy;
+        using DataT = T;
+        using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
-    public:
-        virtual Self& operator--() noexcept
-        {
-            MakeStep(-1);
-            return *this;
-        }
+        [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
-        virtual Self operator--(int) noexcept
-        {
-            const auto temp = *this;
-            MakeStep(-1);
-            return temp;
-        }
+        [[nodiscard]] virtual const DataRefT operator->() const = 0;
+        
+        [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
-    protected:
-        BidirectionalIterator() = default;
-    };
+        [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
 
-    template<class DataT>
-    class RandomAccessIterator : public ForwardIterator<DataT>
-    {
-    public:
-        using Self = RandomAccessIterator<DataT>;
+        virtual DerivedIterator& operator++() noexcept = 0;
 
-    public:
-        virtual Self& operator+=(int step) noexcept
-        {
-            MakeStep(step);
-            return *this;
-        }
+        virtual DerivedIterator operator++(int) noexcept = 0;
+        
+        virtual DerivedIterator& operator--() noexcept = 0;
 
-        virtual Self& operator-=(int step) noexcept
-        {
-            MakeStep(-step);
-            return *this;
-        }
+        virtual DerivedIterator operator--(int) noexcept = 0;
+        
+        virtual DerivedIterator& operator+=(int step) noexcept = 0;
 
-        virtual Self operator+(int step) const noexcept
-        {
-            auto temp = *this;
-            temp.MakeStep(step);
-            return temp;
-        }
+        virtual DerivedIterator& operator-=(int step) noexcept = 0;
 
-        virtual Self operator-(int step) const noexcept
-        {
-            auto temp = *this;
-            temp.MakeStep(-step);
-            return temp;
-        }
+        virtual DerivedIterator operator+(int step) const noexcept = 0;
 
-        [[nodiscard]] virtual bool operator>(const Self& other) const noexcept
-        {
-            const auto result = *this <=> other;
-            return result == Comparison::Greater;
-        }
+        virtual DerivedIterator operator-(int step) const noexcept = 0;
 
-        [[nodiscard]] virtual bool operator>=(const Self& other) const noexcept
-        {
-            const auto result = *this <=> other;
-            return result == Comparison::Greater || result == Comparison::Equal;
-        }
+        [[nodiscard]] virtual bool operator>(const DerivedIterator& other) const noexcept = 0;
 
-        [[nodiscard]] virtual bool operator<(const Self& other) const noexcept
-        {
-            const auto result = *this <=> other;
-            return result == Comparison::Less;
-        }
+        [[nodiscard]] virtual bool operator>=(const DerivedIterator& other) const noexcept = 0;
 
-        [[nodiscard]] virtual bool operator<=(const Self& other) const noexcept
-        {
-            const auto result = *this <=> other;
-            return result == Comparison::Less || result == Comparison::Equal;
-        }
+        [[nodiscard]] virtual bool operator<(const DerivedIterator& other) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator<=(const DerivedIterator& other) const noexcept = 0;
 
     protected:
-        RandomAccessIterator() = default;
-
-        virtual void MakeStep(int step) noexcept = 0;
-        [[nodiscard]] virtual Comparison operator<=>(const Self& other) const noexcept = 0;
+        IRandomAccessIterator() = default;
     };
 
 } // namespace Core

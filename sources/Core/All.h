@@ -23,9 +23,9 @@
 #pragma once
 
 #include "Assert.h"
+#include "CommonEnums.h"
 #include "Delegate.h"
 #include "Enum.h"
-#include "GlobalEnums.h"
 #include "Math.h"
 #include "Position.h"
 #include "Rect.h"

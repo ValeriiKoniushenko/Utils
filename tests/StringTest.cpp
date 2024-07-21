@@ -33,10 +33,15 @@ TEST(StringTest, BaseString_char_default__Creation)
         StringAtom str1 = "Hello"_atom;
     }
 
-    /*{
+    {
+        const StringAtom str1 = "Hello"_atom;
+    }
+
+    {
         const StringAtom str1 = "Hello"_atom;
         const StringAtom str2 = "Hello"_atom;
         const StringAtom str3 = "World"_atom;
+
         EXPECT_EQ(str1, str2);
         EXPECT_NE(str1, str3);
     }
@@ -156,10 +161,9 @@ TEST(StringTest, BaseString_char_default__Comparision)
         EXPECT_TRUE("Hello"_atom <= std::string_view("Hello").data());
         EXPECT_TRUE("Hello1"_atom >= std::string("Hello").data());
         EXPECT_TRUE("Hello"_atom <= std::string_view("Hello1").data());
-    }*/
+    }
 }
 
-/*
 TEST(StringTest, BaseString_char_default__InStdSet)
 {
     using Core::StringAtom;
@@ -242,17 +246,6 @@ TEST(StringTest, BaseString_char_default__Converts)
     }
 }
 
-TEST(StringTest, BaseString_char_default__Iterator)
-{
-    using Core::StringAtom;
-
-    {
-        StringAtom str = "Hello world!"_atom;
-        auto i = str.begin();
-        EXPECT_EQ('H', *i);
-    }
-}
-
 TEST(StringTest, BaseString_char_default__UtilsFunctions)
 {
     using Core::StringAtom;
@@ -267,4 +260,14 @@ TEST(StringTest, BaseString_char_default__UtilsFunctions)
         EXPECT_EQ(tokens[2], "world!");
     }
 }
-*/
+
+TEST(StringTest, BaseString_char_default__Iterator)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto i = str.begin();
+        EXPECT_EQ('H', *i);
+    }
+}

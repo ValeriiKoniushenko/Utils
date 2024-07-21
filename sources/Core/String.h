@@ -23,6 +23,8 @@
 #pragma once
 
 #include "Core/AbstractIterators.h"
+#include "Core/Assert.h"
+#include "Core/CommonEnums.h"
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
@@ -65,10 +67,7 @@ namespace Core
         using Settings = _StringSettings<CharType>;
         using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
 
-        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept
-        {
-            return StringDataReadOnly<CharType>{ str.get(), size };
-        }
+        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
 
         SmartPointer str;
         typename Settings::SizeT size = Settings::invalidSize;
@@ -76,10 +75,7 @@ namespace Core
     };
 
     template<class CharType>
-    struct _StringToolset : public Utils::Abstract
-    {
-        static_assert(false, "Template specialization for such type wasn't implemented.");
-    };
+    struct _StringToolset;
 
     template<>
     struct _StringToolset<char> : public Utils::Abstract
@@ -172,6 +168,8 @@ namespace Core
         std::unordered_map<HashT, StringDataT> _strings;
     };
 
+    class Iterator;
+
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
     {
@@ -187,102 +185,188 @@ namespace Core
         using StringPool = _StringPool<CharT>;
 
     public:
-        class Iterator : public RandomAccessIterator<CharT>
+
+        template<bool IsReversed>
+        class Iterator : public IRandomAccessIterator<CharT, Iterator<IsReversed>, Utils::CopyableAndMoveable, true>
         {
         public:
             using Self = Iterator;
-            using Super = RandomAccessIterator<CharT>;
+            using Super = IRandomAccessIterator<CharT, Iterator, Utils::CopyableAndMoveable, true>;
 
         public:
             Iterator() = default;
 
+            [[nodiscard]] const Super::DataRefT operator*() const noexcept override { return *_data; }
+
+            [[nodiscard]] const Super::DataRefT operator->() const override { return *_data; }
+
+            [[nodiscard]] Super::DataRefT operator*() noexcept override { return *_data; }
+
+            [[nodiscard]] Super::DataRefT operator->() noexcept override { return *_data; }
+
+            Self& operator++() noexcept override
+            {
+                _data += (IsReversed ? -1 : 1);
+                return *this;
+            }
+
+            Self operator++(int) noexcept override
+            {
+                auto temp = *this;
+                _data += (IsReversed ? -1 : 1);
+                return temp;
+            }
+
+            Self& operator--() noexcept override
+            {
+                _data -= (IsReversed ? -1 : 1);
+                return *this;
+            }
+
+            Self operator--(int) noexcept override
+            {
+                auto temp = *this;
+                _data -= (IsReversed ? -1 : 1);
+                return temp;
+            }
+
+            Self& operator+=(int step) noexcept override
+            {
+                _data += (IsReversed ? -step : step);
+                return *this;
+            }
+
+            Self& operator-=(int step) noexcept override
+            {
+                _data -= step;
+                return *this;
+            }
+
+            Self operator+(int step) const noexcept override { return Self{ _data + (IsReversed ? -step : step) }; }
+
+            Self operator-(int step) const noexcept override { return Self{ _data - (IsReversed ? -step : step) }; }
+
+            [[nodiscard]] bool operator>(const Self& other) const noexcept override { return (*this <=> other) == Comparison::Greater; }
+
+            [[nodiscard]] bool operator>=(const Self& other) const noexcept override
+            {
+                const auto result = *this <=> other;
+                return result == Comparison::Equal || result == Comparison::Greater;
+            }
+
+            [[nodiscard]] bool operator<(const Self& other) const noexcept override { return (*this <=> other) == Comparison::Less; }
+
+            [[nodiscard]] bool operator<=(const Self& other) const noexcept override
+            {
+                const auto result = *this <=> other;
+                return result == Comparison::Equal || result == Comparison::Less;
+            }
+
+            void Swap(Self& other) override
+            {
+                auto temp = *this;
+                *this = other;
+                other = temp;
+            }
+
         protected:
             explicit Iterator(CharT* data)
-                : Iterator{ data }
+                : _data{ data }
             {
             }
 
-            void MakeStep(int step) noexcept override { this->_data += step; }
-
-            [[nodiscard]] Comparison operator<=>(const Super& other) const noexcept override
+            [[nodiscard]] Comparison operator<=>(const Self& other) const noexcept
             {
-                if (!this->_data || !other._data)
+                if (!_data || !other._data)
                 {
+                    Assert(false, "Impossible to compare two iterators. Some iterator is invalid");
                     return Comparison::None;
                 }
 
-                if (*this->_data > *other._data)
+                if (*_data > *other._data)
                 {
                     return Comparison::Greater;
                 }
 
-                if (*this->_data == *other._data)
+                if (*_data == *other._data)
                 {
                     return Comparison::Equal;
                 }
 
-                if (*this->_data < *other._data)
+                if (*_data < *other._data)
                 {
                     return Comparison::Less;
                 }
 
+                Assert(false, "Impossible to compare two iterators. Was get some error");
                 return Comparison::None;
             }
 
-            friend class BaseString<CharT>;
+        private:
+            CharT* _data = nullptr;
+
+            friend class BaseString<CharType>;
         };
 
+        using IteratorT = Iterator<false>;
+        using ReverseIteratorT = Iterator<true>;
+
     public:
+        [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ _string }; }
+        [[nodiscard]] const IteratorT begin() const noexcept { return IteratorT{ _string }; }
+        [[nodiscard]] const IteratorT cbegin() const noexcept { return IteratorT{ _string }; }
+        [[nodiscard]] IteratorT end() noexcept { return IteratorT{ _string + _size }; }
+        [[nodiscard]] const IteratorT end() const noexcept { return IteratorT{ _string + _size }; }
+        [[nodiscard]] const IteratorT cend() const noexcept { return IteratorT{ _string + _size }; }
+
+        [[nodiscard]] ReverseIteratorT rbegin() noexcept { return ReverseIteratorT{ _string }; }
+        [[nodiscard]] const ReverseIteratorT rbegin() const noexcept { return ReverseIteratorT{ _string }; }
+        [[nodiscard]] const ReverseIteratorT crbegin() const noexcept { return ReverseIteratorT{ _string }; }
+        [[nodiscard]] ReverseIteratorT rend() noexcept { return ReverseIteratorT{ _string + _size }; }
+        [[nodiscard]] const ReverseIteratorT rend() const noexcept { return ReverseIteratorT{ _string + _size }; }
+        [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string + _size }; }
+
+
         [[nodiscard]] static Self Intern(const CharT* newString, SizeT size = Settings::invalidSize)
         {
             return Self{ StringPool::Instance().Add(newString, size == Settings::invalidSize ? Toolset::Length(newString) : size) };
         }
+        [[nodiscard]] static Self Intern(const StringT& string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
-    private:
-        constexpr explicit BaseString(StringDataReadOnlyT data)
-            : _string{ data.str },
-              _size{ data.size }
-        {
-        }
+        [[nodiscard]] constexpr const CharT* CStr() const noexcept { return _string; }
+        [[nodiscard]] constexpr SizeT Size() const noexcept { return _size; }
+        [[nodiscard]] constexpr SizeT Length() const noexcept { return _size == 0; }
+        [[nodiscard]] constexpr bool IsEmpty() const noexcept { return _size == 0; }
+        [[nodiscard]] constexpr explicit operator const CharT*() const noexcept { return _string; }
+        [[nodiscard]] constexpr CharT operator[](std::size_t index) const { return _string[index]; }
 
-
-        /*[[nodiscard]] constexpr const CharT* CStr() const noexcept { return GetData().string; }
-        [[nodiscard]] constexpr SizeT Size() const noexcept { return GetData().size; }
-        [[nodiscard]] constexpr SizeT Length() const noexcept { return GetData().size == 0; }
-        [[nodiscard]] constexpr bool IsEmpty() const noexcept { return GetData().size == 0; }
-        [[nodiscard]] constexpr explicit operator const CharT*() const noexcept { return GetData().string; }
-        [[nodiscard]] constexpr CharT operator[](std::size_t index) const { return GetData().string[index]; }
-
-        [[nodiscard]] constexpr bool operator==(const Self& other) const { return GetData().string == other.GetData().string; }
-        [[nodiscard]] constexpr bool operator!=(const Self& other) const { return GetData().string != other.GetData().string; }
-        [[nodiscard]] bool operator>(const Self& other) const
-        {
-            return Toolset::Cmp(GetData().string, other.GetData().string) == Comparison::Greater;
-        }
+        [[nodiscard]] constexpr bool operator==(const Self& other) const { return _string == other._string; }
+        [[nodiscard]] constexpr bool operator!=(const Self& other) const { return _string != other._string; }
+        [[nodiscard]] bool operator>(const Self& other) const { return Toolset::Cmp(_string, other._string) == Comparison::Greater; }
         [[nodiscard]] bool operator>=(const Self& other) const
         {
-            const auto result = Toolset::Cmp(GetData().string, other.GetData().string);
+            const auto result = Toolset::Cmp(_string, other._string);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
-        [[nodiscard]] bool operator<(const Self& other) const { return Toolset::Cmp(GetData().string, other.GetData().string) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const Self& other) const { return Toolset::Cmp(_string, other._string) == Comparison::Less; }
         [[nodiscard]] bool operator<=(const Self& other) const
         {
-            const auto result = Toolset::Cmp(GetData().string, other.GetData().string);
+            const auto result = Toolset::Cmp(_string, other._string);
             return result == Comparison::Less || result == Comparison::Equal;
         }
 
-        [[nodiscard]] bool operator==(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Equal; }
-        [[nodiscard]] bool operator!=(const CharT* other) const { return Toolset::Cmp(GetData().string, other) != Comparison::Equal; }
-        [[nodiscard]] bool operator>(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Greater; }
+        [[nodiscard]] bool operator==(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Equal; }
+        [[nodiscard]] bool operator!=(const CharT* other) const { return Toolset::Cmp(_string, other) != Comparison::Equal; }
+        [[nodiscard]] bool operator>(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Greater; }
         [[nodiscard]] bool operator>=(const CharT* other) const
         {
-            const auto result = Toolset::Cmp(GetData().string, other);
+            const auto result = Toolset::Cmp(_string, other);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
-        [[nodiscard]] bool operator<(const CharT* other) const { return Toolset::Cmp(GetData().string, other) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Less; }
         [[nodiscard]] bool operator<=(const CharT* other) const
         {
-            const auto result = Toolset::Cmp(GetData().string, other);
+            const auto result = Toolset::Cmp(_string, other);
             return result == Comparison::Less || result == Comparison::Equal;
         }
 
@@ -292,80 +376,74 @@ namespace Core
         [[nodiscard]] bool operator<(const StringT& other) const { return *this < other.data(); }
         [[nodiscard]] bool operator<=(const StringT& other) const { return *this <= other.data(); }
 
-        [[nodiscard]] constexpr bool operator!() const noexcept { return !GetData().string; }
-        [[nodiscard]] constexpr operator bool() const noexcept { return GetData().string; }
+        [[nodiscard]] constexpr bool operator!() const noexcept { return !_string; }
+        [[nodiscard]] constexpr operator bool() const noexcept { return _string; }
 
         [[nodiscard]] constexpr CharT Front() const
         {
-            Data data = GetData();
-            if (!data.string)
+            if (!_string)
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return data.string[0];
+            return _string[0];
         }
 
         [[nodiscard]] constexpr CharT Back() const
         {
-            Data data = GetData();
-            if (!data.string)
+            if (!_string)
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return data.string[data.size - static_cast<decltype(data.size)>(1)];
+            return _string[_size - static_cast<decltype(_size)>(1)];
         }
 
         [[nodiscard]] constexpr StringViewT ToStringView() const
         {
-            Data data = GetData();
-            if (!data.string)
+            if (!_string)
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return { data.string, data.size };
+            return { _string, _size };
         }
 
         [[nodiscard]] constexpr StringT ToStdString() const
         {
-            Data data = GetData();
-            if (!data.string)
+            if (!_string)
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return { data.string };
+            return { _string };
         }
 
         [[nodiscard]] virtual CharT At(SizeT index) const noexcept
         {
-            Data data = GetData();
-            if (!data.string || data.size >= index)
+            if (!_string || _size >= index)
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return data.string[index];
+            return _string[index];
         }
 
         [[nodiscard]] std::vector<StringT> Split(const StringT& delimiter) const
         {
             StringT string;
             {
-                const Data data = GetData();
-                if (!data.string)
+                if (!_string)
                 {
                     Assert("Was get a null string");
                     return {};
                 }
-                string = data.string;
+                string = _string;
             }
 
             std::vector<StringT> splittedStrings;
@@ -405,56 +483,30 @@ namespace Core
         template<>
         [[nodiscard]] int ConvertTo() const noexcept
         {
-            return Toolset::ToInt(GetData().string);
+            return Toolset::ToInt(_string);
         }
 
         template<>
         [[nodiscard]] float ConvertTo() const noexcept
         {
-            return Toolset::ToFloat(GetData().string);
+            return Toolset::ToFloat(_string);
         }
 
         template<>
         [[nodiscard]] long long ConvertTo() const noexcept
         {
-            return Toolset::ToLongLong(GetData().string);
+            return Toolset::ToLongLong(_string);
         }
 
-        [[nodiscard]] static std::size_t operator()(const Self& string) noexcept { return string.MakeHash(); }
-
-        [[nodiscard]] std::size_t MakeHash() const noexcept
-        {
-            const auto& data = GetData();
-            return std::hash<std::string_view>{}({ data.string, data.size });
-        }
-
-        [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ GetNonConstData().string }; }
-        [[nodiscard]] ConstIteratorT begin() const noexcept { return ConstIteratorT{ GetNonConstData().string }; }
-        [[nodiscard]] ConstIteratorT cbegin() const noexcept { return ConstIteratorT{ GetNonConstData().string }; }
-
-        [[nodiscard]] IteratorT end() noexcept
-        {
-            auto data = GetNonConstData();
-            return IteratorT{ data.string + data.size };
-        }
-        [[nodiscard]] ConstIteratorT end() const noexcept
-        {
-            auto data = GetNonConstData();
-            return ConstIteratorT{ data.string + data.size };
-        }
-        [[nodiscard]] ConstIteratorT cend() const noexcept
-        {
-            auto data = GetNonConstData();
-            return ConstIteratorT{ data.string + data.size };
-        }
+        [[nodiscard]] std::size_t MakeHash() const noexcept { return std::hash<std::string_view>{}({ _string, _size }); }
 
         Self& TrimStart(StringViewT value) noexcept
         {
             if (value)
             {
-
-                _isDirty = true;
             }
+
+            return *this;
         }
         // [[nodiscard]] virtual StringT TrimEnd(StringViewT value) const = 0;
         // [[nodiscard]] StringT Trim(StringViewT value) const { TrimStart(value); TrimEnd(value); }
@@ -469,7 +521,13 @@ namespace Core
         // [[nodiscard]] virtual std::size_t RFind(StringViewT value) const = 0;
         // [[nodiscard]] virtual std::size_t Find(const std::regex& expr) const = 0;
         // [[nodiscard]] virtual std::size_t RFind(const std::regex& expr) const = 0;
-        */
+    protected:
+        constexpr explicit BaseString(StringDataReadOnlyT data)
+            : _string{ data.str },
+              _size{ data.size }
+        {
+        }
+
     protected:
         CharT* _string = nullptr;
         SizeT _size = 0;
@@ -483,67 +541,67 @@ namespace Core
 namespace std
 {
 
-    /*template<class CharType>
+    template<class CharType>
     struct hash<Core::BaseString<CharType>>
     {
         size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
-    };*/
+    };
 
 } // namespace std
 
-constexpr Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
+inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
 {
     return Core::BaseString<char>::Intern(str, size);
 }
 
-/*template<class CharType>
+template<class CharType>
 [[nodiscard]] bool operator>(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator>=(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator<(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator<=(const CharType* str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator>(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator>=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
                               const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator<(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
-template<class CharType, Core::StringPolicy StringPolicy>
+template<class CharType>
 [[nodiscard]] bool operator<=(const std::basic_string<CharType, std::char_traits<CharType>, std::allocator<CharType>>& str1,
                               const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
-}*/
+}
