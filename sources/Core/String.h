@@ -185,7 +185,6 @@ namespace Core
         using StringPool = _StringPool<CharT>;
 
     public:
-
         template<bool IsReversed>
         class Iterator : public IRandomAccessIterator<CharT, Iterator<IsReversed>, Utils::CopyableAndMoveable, true>
         {
@@ -195,6 +194,10 @@ namespace Core
 
         public:
             Iterator() = default;
+
+            [[nodiscard]] virtual bool operator==(const Self& other) const noexcept { return _data == other._data; };
+
+            [[nodiscard]] virtual bool operator!=(const Self& other) const noexcept { return _data != other._data; };
 
             [[nodiscard]] const Super::DataRefT operator*() const noexcept override { return *_data; }
 
@@ -319,13 +322,12 @@ namespace Core
         [[nodiscard]] const IteratorT end() const noexcept { return IteratorT{ _string + _size }; }
         [[nodiscard]] const IteratorT cend() const noexcept { return IteratorT{ _string + _size }; }
 
-        [[nodiscard]] ReverseIteratorT rbegin() noexcept { return ReverseIteratorT{ _string }; }
-        [[nodiscard]] const ReverseIteratorT rbegin() const noexcept { return ReverseIteratorT{ _string }; }
-        [[nodiscard]] const ReverseIteratorT crbegin() const noexcept { return ReverseIteratorT{ _string }; }
-        [[nodiscard]] ReverseIteratorT rend() noexcept { return ReverseIteratorT{ _string + _size }; }
-        [[nodiscard]] const ReverseIteratorT rend() const noexcept { return ReverseIteratorT{ _string + _size }; }
-        [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string + _size }; }
-
+        [[nodiscard]] ReverseIteratorT rbegin() noexcept { return ReverseIteratorT{ _string + _size }; }
+        [[nodiscard]] const ReverseIteratorT rbegin() const noexcept { return ReverseIteratorT{ _string + _size }; }
+        [[nodiscard]] const ReverseIteratorT crbegin() const noexcept { return ReverseIteratorT{ _string + _size }; }
+        [[nodiscard]] ReverseIteratorT rend() noexcept { return ReverseIteratorT{ _string }; }
+        [[nodiscard]] const ReverseIteratorT rend() const noexcept { return ReverseIteratorT{ _string }; }
+        [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string }; }
 
         [[nodiscard]] static Self Intern(const CharT* newString, SizeT size = Settings::invalidSize)
         {
@@ -338,7 +340,7 @@ namespace Core
         [[nodiscard]] constexpr SizeT Length() const noexcept { return _size == 0; }
         [[nodiscard]] constexpr bool IsEmpty() const noexcept { return _size == 0; }
         [[nodiscard]] constexpr explicit operator const CharT*() const noexcept { return _string; }
-        [[nodiscard]] constexpr CharT operator[](std::size_t index) const { return _string[index]; }
+        [[nodiscard]] constexpr CharT operator[](std::size_t index) const noexcept { return _string[index]; }
 
         [[nodiscard]] constexpr bool operator==(const Self& other) const { return _string == other._string; }
         [[nodiscard]] constexpr bool operator!=(const Self& other) const { return _string != other._string; }
@@ -423,11 +425,11 @@ namespace Core
             return { _string };
         }
 
-        [[nodiscard]] virtual CharT At(SizeT index) const noexcept
+        [[nodiscard]] CharT At(SizeT index) const noexcept
         {
             if (!_string || _size >= index)
             {
-                Assert("Was get a null string");
+                Assert("Was get a null string or invalid index");
                 return {};
             }
 
@@ -474,11 +476,7 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] T ConvertTo() const noexcept
-        {
-            static_assert(false, "Invalid template type was passed");
-            return {};
-        }
+        [[nodiscard]] T ConvertTo() const noexcept;
 
         template<>
         [[nodiscard]] int ConvertTo() const noexcept

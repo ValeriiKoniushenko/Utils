@@ -28,7 +28,7 @@
 
 namespace Core
 {
-    
+
     template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
     class IInputIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
     {
@@ -75,7 +75,7 @@ namespace Core
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator->() const = 0;
-        
+
         [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
         [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
@@ -96,11 +96,11 @@ namespace Core
         using CopyAndMovePolicyT = CopyAndMovePolicy;
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
-        
+
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator->() const = 0;
-        
+
         [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
         [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
@@ -108,7 +108,7 @@ namespace Core
         virtual DerivedIterator& operator++() noexcept = 0;
 
         virtual DerivedIterator operator++(int) noexcept = 0;
-        
+
         virtual DerivedIterator& operator--() noexcept = 0;
 
         virtual DerivedIterator operator--(int) noexcept = 0;
@@ -126,10 +126,14 @@ namespace Core
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
+        [[nodiscard]] virtual bool operator==(const DerivedIterator&) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator!=(const DerivedIterator&) const noexcept = 0;
+
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator->() const = 0;
-        
+
         [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
         [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
@@ -137,11 +141,11 @@ namespace Core
         virtual DerivedIterator& operator++() noexcept = 0;
 
         virtual DerivedIterator operator++(int) noexcept = 0;
-        
+
         virtual DerivedIterator& operator--() noexcept = 0;
 
         virtual DerivedIterator operator--(int) noexcept = 0;
-        
+
         virtual DerivedIterator& operator+=(int step) noexcept = 0;
 
         virtual DerivedIterator& operator-=(int step) noexcept = 0;

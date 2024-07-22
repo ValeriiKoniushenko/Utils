@@ -270,4 +270,59 @@ TEST(StringTest, BaseString_char_default__Iterator)
         auto i = str.begin();
         EXPECT_EQ('H', *i);
     }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto i = str.cbegin();
+        EXPECT_EQ('H', *i);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto ci = str.cbegin() + 1;
+        auto i = str.begin() + 1;
+        EXPECT_EQ('e', *ci);
+        EXPECT_EQ('e', *i);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto i = str.end() - 1;
+        EXPECT_EQ('!', *i);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto i = str.rbegin() + 1;
+        EXPECT_EQ('!', *i);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto front = str.Front();
+        EXPECT_EQ('H', front);
+
+        auto back = str.Back();
+        EXPECT_EQ('!', back);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        auto begin = str.begin();
+        auto end = str.end();
+
+        EXPECT_TRUE(begin != end);
+        EXPECT_FALSE(begin == end);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        std::string buff;
+
+        for (auto ch : str)
+        {
+            buff.push_back(ch);
+        }
+        EXPECT_EQ(str, buff);
+    }
 }
