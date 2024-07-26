@@ -40,6 +40,7 @@ namespace Core
 {
     enum class StringPolicy
     {
+        None,
         Static,
         Dynamic
     };
@@ -88,8 +89,9 @@ namespace Core
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
-        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return atof(str); }
+        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return atol(str); }
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
+        [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = strcmp(str1, str2);
@@ -110,8 +112,8 @@ namespace Core
     struct _StringToolset<wchar_t> : public Utils::Abstract
     {
         using CharT = wchar_t;
-        using StringT = typename std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = typename std::basic_string_view<CharT>;
+        using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StringViewT = std::basic_string_view<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(wcslen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
@@ -119,7 +121,7 @@ namespace Core
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
         [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return _wtoll(str); }
-
+        [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = wcscmp(str1, str2);
@@ -153,15 +155,34 @@ namespace Core
             const auto currentHash = std::hash<std::string_view>{}({ string, size });
             if (auto&& it = _strings.find(currentHash); it != _strings.end())
             {
+                ++it->second.copyCounts;
                 return it->second.ToReadOnly();
             }
 
             auto&& ptr = std::make_unique<CharT[]>(size + static_cast<typename Settings::SizeT>(1));
-            memcpy(ptr.get(), string, size);
+            memcpy(ptr.get(), string, size * sizeof(CharT));
             auto* addr = ptr.get();
             _strings.emplace(currentHash, StringDataT{ std::move(ptr), size, 1 });
 
             return StringDataReadOnlyT{ addr, size };
+        }
+
+        void Remove(CharT*& string, typename Settings::SizeT size)
+        {
+            const auto currentHash = std::hash<std::string_view>{}({ string, size });
+            if (auto&& it = _strings.find(currentHash); it != _strings.end())
+            {
+                --it->second.copyCounts;
+                if (it->second.copyCounts == 0)
+                {
+                    _strings.erase(it);
+                }
+                string = nullptr;
+            }
+            else
+            {
+                Assert(false, "Impossible to find such string");
+            }
         }
 
     private:
@@ -195,17 +216,17 @@ namespace Core
         public:
             Iterator() = default;
 
-            [[nodiscard]] virtual bool operator==(const Self& other) const noexcept { return _data == other._data; };
+            [[nodiscard]] bool operator==(const Self& other) const noexcept override { return _data == other._data; };
 
-            [[nodiscard]] virtual bool operator!=(const Self& other) const noexcept { return _data != other._data; };
+            [[nodiscard]] bool operator!=(const Self& other) const noexcept override { return _data != other._data; };
 
-            [[nodiscard]] const Super::DataRefT operator*() const noexcept override { return *_data; }
+            [[nodiscard]] const typename Super::DataRefT operator*() const noexcept override { return *_data; }
 
-            [[nodiscard]] const Super::DataRefT operator->() const override { return *_data; }
+            [[nodiscard]] const typename Super::DataRefT operator->() const override { return *_data; }
 
-            [[nodiscard]] Super::DataRefT operator*() noexcept override { return *_data; }
+            [[nodiscard]] typename Super::DataRefT operator*() noexcept override { return *_data; }
 
-            [[nodiscard]] Super::DataRefT operator->() noexcept override { return *_data; }
+            [[nodiscard]] typename Super::DataRefT operator->() noexcept override { return *_data; }
 
             Self& operator++() noexcept override
             {
@@ -337,53 +358,177 @@ namespace Core
 
         [[nodiscard]] constexpr const CharT* CStr() const noexcept { return _string; }
         [[nodiscard]] constexpr SizeT Size() const noexcept { return _size; }
-        [[nodiscard]] constexpr SizeT Length() const noexcept { return _size == 0; }
-        [[nodiscard]] constexpr bool IsEmpty() const noexcept { return _size == 0; }
+        [[nodiscard]] constexpr SizeT Length() const noexcept { return _size; }
+        [[nodiscard]] constexpr bool IsEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] constexpr explicit operator const CharT*() const noexcept { return _string; }
         [[nodiscard]] constexpr CharT operator[](std::size_t index) const noexcept { return _string[index]; }
 
-        [[nodiscard]] constexpr bool operator==(const Self& other) const { return _string == other._string; }
-        [[nodiscard]] constexpr bool operator!=(const Self& other) const { return _string != other._string; }
-        [[nodiscard]] bool operator>(const Self& other) const { return Toolset::Cmp(_string, other._string) == Comparison::Greater; }
+        [[nodiscard]] constexpr bool operator==(const Self& other) const
+        {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return IsStatic() && other.IsStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
+        }
+        [[nodiscard]] constexpr bool operator!=(const Self& other) const
+        {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return IsStatic() && other.IsStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
+        }
+        [[nodiscard]] bool operator>(const Self& other) const
+        {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other._string) == Comparison::Greater;
+        }
         [[nodiscard]] bool operator>=(const Self& other) const
         {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
             const auto result = Toolset::Cmp(_string, other._string);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
-        [[nodiscard]] bool operator<(const Self& other) const { return Toolset::Cmp(_string, other._string) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const Self& other) const
+        {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other._string) == Comparison::Less;
+        }
         [[nodiscard]] bool operator<=(const Self& other) const
         {
+            if (IsEmpty() || other.IsEmpty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
             const auto result = Toolset::Cmp(_string, other._string);
             return result == Comparison::Less || result == Comparison::Equal;
         }
 
-        [[nodiscard]] bool operator==(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Equal; }
-        [[nodiscard]] bool operator!=(const CharT* other) const { return Toolset::Cmp(_string, other) != Comparison::Equal; }
-        [[nodiscard]] bool operator>(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Greater; }
+        [[nodiscard]] bool operator==(const CharT* other) const
+        {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other) == Comparison::Equal;
+        }
+        [[nodiscard]] bool operator!=(const CharT* other) const
+        {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other) != Comparison::Equal;
+        }
+        [[nodiscard]] bool operator>(const CharT* other) const
+        {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other) == Comparison::Greater;
+        }
         [[nodiscard]] bool operator>=(const CharT* other) const
         {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
             const auto result = Toolset::Cmp(_string, other);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
-        [[nodiscard]] bool operator<(const CharT* other) const { return Toolset::Cmp(_string, other) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const CharT* other) const
+        {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return Toolset::Cmp(_string, other) == Comparison::Less;
+        }
         [[nodiscard]] bool operator<=(const CharT* other) const
         {
+            if (IsEmpty() || !other)
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
             const auto result = Toolset::Cmp(_string, other);
             return result == Comparison::Less || result == Comparison::Equal;
         }
 
-        [[nodiscard]] bool operator==(const StringT& other) const { return *this == other.data(); }
-        [[nodiscard]] bool operator>(const StringT& other) const { return *this > other.data(); }
-        [[nodiscard]] bool operator>=(const StringT& other) const { return *this >= other.data(); }
-        [[nodiscard]] bool operator<(const StringT& other) const { return *this < other.data(); }
-        [[nodiscard]] bool operator<=(const StringT& other) const { return *this <= other.data(); }
+        [[nodiscard]] bool operator==(const StringT& other) const
+        {
+            if (IsEmpty() || other.empty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return *this == other.data();
+        }
+        [[nodiscard]] bool operator>(const StringT& other) const
+        {
+            if (IsEmpty() || other.empty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return *this > other.data();
+        }
+        [[nodiscard]] bool operator>=(const StringT& other) const
+        {
+            if (IsEmpty() || other.empty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return *this >= other.data();
+        }
+        [[nodiscard]] bool operator<(const StringT& other) const
+        {
+            if (IsEmpty() || other.empty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return *this < other.data();
+        }
+        [[nodiscard]] bool operator<=(const StringT& other) const
+        {
+            if (IsEmpty() || other.empty())
+            {
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
+            }
+            return *this <= other.data();
+        }
 
-        [[nodiscard]] constexpr bool operator!() const noexcept { return !_string; }
-        [[nodiscard]] constexpr operator bool() const noexcept { return _string; }
+        [[nodiscard]] constexpr bool operator!() const noexcept { return !IsEmpty(); }
+        [[nodiscard]] constexpr operator bool() const noexcept { return IsEmpty(); }
 
         [[nodiscard]] constexpr CharT Front() const
         {
-            if (!_string)
+            if (IsEmpty())
             {
                 Assert("Was get a null string");
                 return {};
@@ -394,18 +539,18 @@ namespace Core
 
         [[nodiscard]] constexpr CharT Back() const
         {
-            if (!_string)
+            if (IsEmpty())
             {
                 Assert("Was get a null string");
                 return {};
             }
 
-            return _string[_size - static_cast<decltype(_size)>(1)];
+            return _string[_size - static_cast<SizeT>(1)];
         }
 
         [[nodiscard]] constexpr StringViewT ToStringView() const
         {
-            if (!_string)
+            if (IsEmpty())
             {
                 Assert("Was get a null string");
                 return {};
@@ -416,7 +561,7 @@ namespace Core
 
         [[nodiscard]] constexpr StringT ToStdString() const
         {
-            if (!_string)
+            if (IsEmpty())
             {
                 Assert("Was get a null string");
                 return {};
@@ -427,7 +572,7 @@ namespace Core
 
         [[nodiscard]] CharT At(SizeT index) const noexcept
         {
-            if (!_string || _size >= index)
+            if (IsEmpty() || _size >= index)
             {
                 Assert("Was get a null string or invalid index");
                 return {};
@@ -438,15 +583,13 @@ namespace Core
 
         [[nodiscard]] std::vector<StringT> Split(const StringT& delimiter) const
         {
-            StringT string;
+            if (IsEmpty())
             {
-                if (!_string)
-                {
-                    Assert("Was get a null string");
-                    return {};
-                }
-                string = _string;
+                Assert(false, "Impossible to work with nullptr string.");
+                return {};
             }
+
+            StringT string = _string;
 
             std::vector<StringT> splittedStrings;
             CharT* context = nullptr;
@@ -481,31 +624,79 @@ namespace Core
         template<>
         [[nodiscard]] int ConvertTo() const noexcept
         {
-            return Toolset::ToInt(_string);
+            if (!IsEmpty())
+            {
+                return Toolset::ToInt(_string);
+            }
+            Assert(false, "Impossible to work with nullptr string.");
+            return {};
         }
 
         template<>
         [[nodiscard]] float ConvertTo() const noexcept
         {
-            return Toolset::ToFloat(_string);
+            if (!IsEmpty())
+            {
+                return Toolset::ToFloat(_string);
+            }
+            Assert(false, "Impossible to work with nullptr string.");
+            return {};
+
         }
 
         template<>
         [[nodiscard]] long long ConvertTo() const noexcept
         {
-            return Toolset::ToLongLong(_string);
+            if (!IsEmpty())
+            {
+                return Toolset::ToLongLong(_string);
+            }
+            Assert(false, "Impossible to work with nullptr string.");
+            return {};
         }
 
-        [[nodiscard]] std::size_t MakeHash() const noexcept { return std::hash<std::string_view>{}({ _string, _size }); }
-
-        Self& TrimStart(StringViewT value) noexcept
+        [[nodiscard]] std::size_t MakeHash() const noexcept
         {
-            if (value)
+            if (!IsEmpty())
             {
+                return std::hash<std::string_view>{}({ _string, _size });
+            }
+            Assert(false, "Impossible to make a hash from nullptr string.");
+            return {};
+        }
+
+        Self& SubStr(std::size_t index, SizeT count = 0) noexcept
+        {
+            if (!IsEmpty())
+            {
+                const SizeT finalCount = count == 0 ? _size - index : count;
+                TryToMakeAsDynamicFrom(_string + index, _string + index + finalCount);
             }
 
             return *this;
         }
+
+        Self& TrimStart(StringViewT value) noexcept
+        {
+            if (!IsEmpty())
+            {
+                if (value)
+                {
+                    TryToMakeAsDynamic();
+                    if (const CharT* str = Toolset::StrStr(_string, value.data()))
+                    {
+
+                    }
+                }
+            }
+
+            return *this;
+        }
+
+        [[nodiscard]] constexpr bool IsStatic() const noexcept { return _policy == StringPolicy::Static; }
+        [[nodiscard]] constexpr bool IsDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
+        [[nodiscard]] constexpr bool CheckFor(StringPolicy policy) const noexcept { return _policy == policy; }
+
         // [[nodiscard]] virtual StringT TrimEnd(StringViewT value) const = 0;
         // [[nodiscard]] StringT Trim(StringViewT value) const { TrimStart(value); TrimEnd(value); }
 
@@ -519,17 +710,150 @@ namespace Core
         // [[nodiscard]] virtual std::size_t RFind(StringViewT value) const = 0;
         // [[nodiscard]] virtual std::size_t Find(const std::regex& expr) const = 0;
         // [[nodiscard]] virtual std::size_t RFind(const std::regex& expr) const = 0;
+
+        BaseString(const BaseString& other)
+        {
+            *this = other;
+        }
+
+        BaseString& operator=(const BaseString& other)
+        {
+            if (this == &this)
+            {
+                return *this;
+            }
+
+            if (other._policy == StringPolicy::Dynamic)
+            {
+                Clear();
+                TryToMakeAsDynamicFrom(other._string, other._string + other._size);
+            }
+            else if (other._policy == StringPolicy::Static)
+            {
+                Clear();
+                auto&& data = StringPool::Instance().Add(other._string, other._size);
+                _policy = StringPolicy::Static;
+                _string = data.str;
+                _size = data.size;
+            }
+            else
+            {
+                Assert(false, "Invalid StringPolicy type. Impossible to copy\\assign.");
+            }
+
+            return *this;
+        }
+
+        BaseString(BaseString&& other) noexcept
+        {
+            *this = std::move(other);
+        }
+
+        BaseString& operator=(BaseString&& other) noexcept
+        {
+            if (other._policy == StringPolicy::Dynamic)
+            {
+                Clear();
+                _string = other._string;
+                _size = other._size;
+                _policy = StringPolicy::Dynamic;
+
+                other._size = 0;
+                other._string = nullptr;
+                other._policy = StringPolicy::None;
+            }
+            else if (other._policy == StringPolicy::Static)
+            {
+                Clear();
+                _policy = StringPolicy::Static;
+                _string = other._string;
+                _size = other._size;
+
+                other._size = 0;
+                other._string = nullptr;
+                other._policy = StringPolicy::None;
+            }
+            else
+            {
+                Assert(false, "Invalid StringPolicy type. Impossible to copy\\assign.");
+            }
+
+            return *this;
+        }
+
+        void Clear()
+        {
+            if (_string)
+            {
+                if (_policy == StringPolicy::Static)
+                {
+                    StringPool::Instance().Remove(_string, _size);
+                    _size = 0;
+                    _policy = StringPolicy::None;
+                }
+                else if(_policy == StringPolicy::Dynamic)
+                {
+                    delete[] _string;
+                    _string = nullptr;
+                    _size = 0;
+                    _policy = StringPolicy::None;
+                }
+                else
+                {
+                    Assert(false, "Invalid StringPolicy type. Impossible to delete.");
+                }
+            }
+        }
+
+        ~BaseString() override
+        {
+            Clear();
+        }
+
     protected:
         constexpr explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
-              _size{ data.size }
+              _size{ data.size },
+              _policy{ StringPolicy::Static }
         {
+        }
+
+        void TryToMakeAsDynamic()
+        {
+            if (_policy == StringPolicy::Static)
+            {
+                const auto* oldString = _string;
+                if ((_string = new CharT[_size + static_cast<SizeT>(1)]))
+                {
+                    _string[_size] = 0;
+                    memcpy_s(_string, _size * sizeof(CharT), oldString, _size * sizeof(CharT));
+                    StringPool::Instance().Remove(oldString, _size);
+                    _policy = StringPolicy::Dynamic;
+                }
+            }
+        }
+
+        void TryToMakeAsDynamicFrom(const CharT* begin, const CharT* end)
+        {
+            const SizeT finalSize = end - begin;
+
+            if (auto* newString = new CharT[finalSize + static_cast<SizeT>(1)])
+            {
+                newString[finalSize] = 0;
+                memcpy_s(newString, finalSize * sizeof(CharT), begin, finalSize * sizeof(CharT));
+
+                Clear();
+
+                _policy = StringPolicy::Dynamic;
+                _string = newString;
+                _size = finalSize;
+            }
         }
 
     protected:
         CharT* _string = nullptr;
         SizeT _size = 0;
-        StringPolicy _policy = StringPolicy::Static;
+        StringPolicy _policy = StringPolicy::None;
     };
 
     using StringAtom = BaseString<char>;

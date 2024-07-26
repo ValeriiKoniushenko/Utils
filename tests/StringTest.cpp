@@ -31,6 +31,11 @@ TEST(StringTest, BaseString_char_default__Creation)
 
     {
         StringAtom str1 = "Hello"_atom;
+        StringAtom str2 = "Hello"_atom;
+    }
+
+    {
+        StringAtom str2 = "Hello"_atom;
     }
 
     {
@@ -324,5 +329,16 @@ TEST(StringTest, BaseString_char_default__Iterator)
             buff.push_back(ch);
         }
         EXPECT_EQ(str, buff);
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Modifications_SubStr)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        str.SubStr(6);
+        EXPECT_EQ("world!", str);
     }
 }

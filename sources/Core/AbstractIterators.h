@@ -38,6 +38,10 @@ namespace Core
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
+        [[nodiscard]] virtual bool operator==(const DerivedIterator&) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator!=(const DerivedIterator&) const noexcept = 0;
+
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator->() const = 0;
@@ -55,6 +59,10 @@ namespace Core
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
+        [[nodiscard]] virtual bool operator==(const DerivedIterator&) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator!=(const DerivedIterator&) const noexcept = 0;
+
         [[nodiscard]] virtual DataRefT operator*() noexcept = 0;
 
         [[nodiscard]] virtual DataRefT operator->() noexcept = 0;
@@ -71,6 +79,10 @@ namespace Core
         using CopyAndMovePolicyT = CopyAndMovePolicy;
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
+
+        [[nodiscard]] virtual bool operator==(const DerivedIterator&) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator!=(const DerivedIterator&) const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
@@ -96,6 +108,10 @@ namespace Core
         using CopyAndMovePolicyT = CopyAndMovePolicy;
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
+
+        [[nodiscard]] virtual bool operator==(const DerivedIterator&) const noexcept = 0;
+
+        [[nodiscard]] virtual bool operator!=(const DerivedIterator&) const noexcept = 0;
 
         [[nodiscard]] virtual const DataRefT operator*() const noexcept = 0;
 
