@@ -35,10 +35,6 @@ TEST(StringTest, BaseString_char_default__Creation)
     }
 
     {
-        StringAtom str2 = "Hello"_atom;
-    }
-
-    {
         const StringAtom str1 = "Hello"_atom;
     }
 
@@ -340,5 +336,298 @@ TEST(StringTest, BaseString_char_default_Modifications_SubStr)
         StringAtom str = "Hello world!"_atom;
         str.SubStr(6);
         EXPECT_EQ("world!", str);
+        EXPECT_EQ(6, str.Size());
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        str.SubStr(0, 5);
+        EXPECT_EQ("Hello", str);
+        EXPECT_EQ(5, str.Size());
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        str.SubStr(2, 5);
+        EXPECT_EQ("llo", str);
+        EXPECT_EQ(3, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Find)
+{
+    using Core::StringAtom;
+
+    {
+        const auto str = "Hello world!"_atom;
+        const auto* found = str.Find(" ");
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = "Hello world!"_atom;
+        const auto* found = str.Find(std::string(" "));
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = "Hello world!"_atom;
+        const auto* found = str.Find(" "_atom);
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = "Hello world! How are you, world?"_atom;
+        const auto strings = str.FindAll("world");
+        ASSERT_FALSE(strings.empty());
+        for (const auto& string : strings)
+        {
+            EXPECT_EQ("world", std::string_view(string, 5));
+        }
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Cmp)
+{
+    using Core::StringAtom;
+
+    {
+        const auto str = "Hello world!"_atom;
+        EXPECT_TRUE(str.Compare("hello world!", true) == Core::Comparison::Equal);
+        EXPECT_TRUE(str.Compare("hello world", true) == Core::Comparison::Less);
+    }
+
+    {
+        const auto str = "AAA"_atom;
+        EXPECT_TRUE(str.Compare("bbb", true) == Core::Comparison::Less);
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Trim)
+{
+    using Core::StringAtom;
+
+    {
+        auto str = "  MyLogin"_atom;
+        str.TrimStart(' ');
+        EXPECT_EQ("MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = "__MyLogin"_atom;
+        str.TrimStart(' ');
+        EXPECT_EQ("__MyLogin", str);
+        EXPECT_EQ(9, str.Size());
+    }
+
+    {
+        auto str = "MyLogin  "_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ("MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = "MyLogin__"_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ("MyLogin__", str);
+        EXPECT_EQ(9, str.Size());
+    }
+
+    {
+        auto str = "MyLogin  "_atom;
+        str.Trim(' ');
+        EXPECT_EQ("MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = "MyLogin__"_atom;
+        str.Trim(' ');
+        EXPECT_EQ("MyLogin__", str);
+        EXPECT_EQ(9, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_ToLower)
+{
+    {
+        auto str = "Hello World!"_atom;
+        str.ToLowerCase();
+        EXPECT_EQ("hello world!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_ToUpper)
+{
+    {
+        auto str = "Hello World!"_atom;
+        str.ToUpperCase();
+        EXPECT_EQ("HELLO WORLD!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_PushBack)
+{
+    {
+        auto str = "Hello World"_atom;
+        str.push_back('!');
+        EXPECT_EQ("Hello World!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        const auto* text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        str.push_back(text);
+        EXPECT_EQ("Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum", str);
+        EXPECT_EQ(11 + strlen(text), str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.push_back(std::string("!!!"));
+        EXPECT_EQ("Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_PushFront)
+{
+    {
+        auto str = "Hello World"_atom;
+        str.push_front('!');
+        EXPECT_EQ("!Hello World", str);
+        EXPECT_EQ(12, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        const auto* text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        str.push_front(text);
+        EXPECT_EQ("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World", str);
+        EXPECT_EQ(11 + strlen(text), str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.push_front(std::string("!!!"));
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Insert)
+{
+    {
+        auto str = "Hello World"_atom;
+        str.insert(0, "!!!");
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.insert(str.Size(), "!!!");
+        EXPECT_EQ("Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.insert(5, "!!!");
+        EXPECT_EQ("Hello!!! World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.insert(str.begin(), "!!!");
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_PopBack)
+{
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+
+        str.pop_back();
+
+        EXPECT_EQ("Hello World", str);
+        EXPECT_EQ(11, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_PopFront)
+{
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        std::string s;
+        str.shrink_to_fit();
+        str.pop_front();
+
+        EXPECT_EQ("ello World!", str);
+        EXPECT_EQ(11, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_ShrinkToFit)
+{
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+
+        str.Reserve(100);
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(201, str.Capacity());
+
+        str.shrink_to_fit();
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Replace)
+{
+    {
+        auto str = "Hello World! Hello World!"_atom;
+        str.ReplaceFirst("llo", "LLO___LLO");
+        EXPECT_EQ("HeLLO___LLO World! Hello World!", str);
+    }
+
+    {
+        auto str = "Hello World! Hello World!"_atom;
+        str.ReplaceAll("o", "!o!");
+        EXPECT_EQ("Hell!o! W!o!rld! Hell!o! W!o!rld!", str);
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Regex)
+{
+    {
+        // check for pascal case
+        auto str = "RegEx"_atom;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
+    }
+}
+
+TEST(StringTest, BaseString_char_default_Copy)
+{
+    {
+        const auto str = "Hello world!"_atom;
+        char arr[128]{};
+        str.Copy(arr, str.Size());
+        EXPECT_EQ(str, arr);
     }
 }

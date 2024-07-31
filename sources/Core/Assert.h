@@ -27,6 +27,11 @@
 
 inline void Assert(bool condition, const char* message = nullptr)
 {
+    if (condition)
+    {
+        return;
+    }
+
     using std::cerr;
     using std::endl;
     using std::stacktrace;

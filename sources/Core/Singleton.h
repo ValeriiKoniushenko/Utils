@@ -52,8 +52,9 @@ namespace Core
             return *object.get();
         }
 
+        virtual ~Singleton() = default;
+
     protected:
         Singleton() = default;
-        virtual ~Singleton() = default;
     };
 } // namespace Core
