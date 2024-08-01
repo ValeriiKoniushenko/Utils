@@ -32,10 +32,10 @@
 #include <optional>
 #include <regex>
 #include <type_traits>
+#include <set>
 #include <unordered_map>
 #include <vector>
 #include <xstring>
-#include <regex>
 
 namespace Core
 {
@@ -52,27 +52,6 @@ namespace Core
         using CharT = CharType;
         using SizeT = std::size_t;
         constexpr static SizeT invalidSize = ~static_cast<SizeT>(0);
-    };
-
-    template<class CharType>
-    struct StringDataReadOnly
-    {
-        using Settings = _StringSettings<CharType>;
-
-        typename Settings::CharT* str;
-        typename Settings::SizeT size = Settings::invalidSize;
-    };
-
-    template<class CharType>
-    struct StringData
-    {
-        using Settings = _StringSettings<CharType>;
-        using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
-
-        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
-
-        SmartPointer str;
-        typename Settings::SizeT size = Settings::invalidSize;
     };
 
     template<class CharType>
@@ -143,6 +122,57 @@ namespace Core
     };
 
     template<class CharType>
+    struct StringDataReadOnly
+    {
+        using Settings = _StringSettings<CharType>;
+
+        typename Settings::CharT* str;
+        typename Settings::SizeT size = Settings::invalidSize;
+    };
+
+    template<class CharType>
+    struct StringData
+    {
+        using Toolset = _StringToolset<CharType>;
+        using Settings = _StringSettings<CharType>;
+        using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
+
+        StringData(SmartPointer&& ptr, typename Settings::SizeT newSize)
+            : str{ std::move(ptr) },
+              size{ newSize }
+        {
+        }
+
+        StringData(const CharType* newString, typename Settings::SizeT newSize)
+        {
+            str = SmartPointer(new CharType[newSize + static_cast<decltype(newSize)>(1)]);
+            memcpy_s(str.get(), size * sizeof(CharType), newString, newSize * sizeof(CharType));
+        }
+
+        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
+        [[nodiscard]] bool operator<(const StringData& other) const
+        {
+            if (str)
+            {
+                return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less;
+            }
+            return false;
+        }
+
+        [[nodiscard]] bool operator==(const StringData& other) const
+        {
+            if (str)
+            {
+                return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal;
+            }
+            return false;
+        }
+
+        SmartPointer str;
+        typename Settings::SizeT size = Settings::invalidSize;
+    };
+
+    template<class CharType>
     class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
     {
     public:
@@ -150,11 +180,12 @@ namespace Core
         using Toolset = _StringToolset<CharT>;
         using HashT = std::size_t;
         using Settings = _StringSettings<CharT>;
+        using SizeT = typename Settings::SizeT;
         using StringDataT = StringData<CharT>;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size, bool isCompileTime = false)
         {
             const auto currentHash = std::hash<std::string_view>{}({ string, size });
             if (auto&& it = _strings.find(currentHash); it != _strings.end())
@@ -339,7 +370,7 @@ namespace Core
         [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string, this }; }
 
         [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::Instance().Add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size, bool isCompileTime = false) { return Self{ StringPool::Instance().Add(newString, size, isCompileTime) }; }
         [[nodiscard]] static Self Intern(const StdStringT& string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
         [[nodiscard]] const CharT* CStr() const noexcept { return _string; }
@@ -510,7 +541,7 @@ namespace Core
         }
 
         [[nodiscard]] bool operator!() const noexcept { return !IsEmpty(); }
-        [[nodiscard]] operator bool() const noexcept { return IsEmpty(); }
+        [[nodiscard]] explicit operator bool() const noexcept { return IsEmpty(); }
 
         [[nodiscard]] CharT Front() const
         {
@@ -567,15 +598,9 @@ namespace Core
             return _string[index];
         }
 
-        [[nodiscard]] const CharT* c_str() const noexcept
-        {
-            return _string;
-        }
+        [[nodiscard]] const CharT* c_str() const noexcept { return _string; }
 
-        [[nodiscard]] const CharT* data() const noexcept
-        {
-            return _string;
-        }
+        [[nodiscard]] const CharT* data() const noexcept { return _string; }
 
         [[nodiscard]] CharT* data() noexcept
         {
@@ -671,7 +696,7 @@ namespace Core
             if (!IsEmpty())
             {
                 const SizeT finalCount = count == 0 ? _size - index : count - index;
-                TryToMakeAsDynamicFrom(_string + index, _string + index + finalCount);
+                *this = std::move(Self(_string + index, finalCount));
             }
 
             return *this;
@@ -688,7 +713,7 @@ namespace Core
                 }
                 if (offset != 0)
                 {
-                    TryToMakeAsDynamicFrom(_string + offset, _string + _size);
+                    *this = std::move(Self(_string + offset, _size - offset));
                 }
             }
 
@@ -707,7 +732,7 @@ namespace Core
                 ++offset;
                 if (offset != static_cast<long long>(_size) - 1ll)
                 {
-                    TryToMakeAsDynamicFrom(_string, _string + offset);
+                    Resize(offset);
                 }
             }
 
@@ -845,15 +870,9 @@ namespace Core
             return *this;
         }
 
-        Self& push_front(CharT ch) noexcept
-        {
-            return push_front(&ch, 1);
-        }
+        Self& push_front(CharT ch) noexcept { return push_front(&ch, 1); }
 
-        Self& push_front(const typename Toolset::StdStringT& str) noexcept
-        {
-            return push_front(str.data(), str.size());
-        }
+        Self& push_front(const typename Toolset::StdStringT& str) noexcept { return push_front(str.data(), str.size()); }
 
         Self& push_front(const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -942,10 +961,7 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] SizeT Capacity() const noexcept
-        {
-            return _capacity;
-        }
+        [[nodiscard]] SizeT Capacity() const noexcept { return _capacity; }
 
         Self& insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -1232,7 +1248,7 @@ namespace Core
                 {
                     _string = nullptr;
                 }
-                else
+                else if (_policy == StringPolicy::Dynamic)
                 {
                     delete[] _string;
                 }
@@ -1241,7 +1257,7 @@ namespace Core
                 _policy = StringPolicy::Dynamic;
                 if (newSize < oldCapacity)
                 {
-                    _size = newSize - static_cast<SizeT>(1);
+                    _size = newSize;
                     _string[_size] = 0;
                 }
             }
@@ -1251,16 +1267,15 @@ namespace Core
 
         Self& Resize(const SizeT newSize)
         {
-            if (newSize < _size)
+            if (newSize < _size && _policy != StringPolicy::Static)
             {
-                _size = newSize;
-                _string[_size] = 0;
+                _string[newSize] = 0;
             }
-            else if (newSize > _size)
+            else if (newSize > _size || _policy == StringPolicy::Static)
             {
                 Reserve(newSize);
-                _size = newSize;
             }
+            _size = newSize;
 
             return *this;
         }
@@ -1278,20 +1293,9 @@ namespace Core
 
         void TryToMakeAsDynamic()
         {
-            if (_policy == StringPolicy::Static && !IsEmpty())
+            if (_policy != StringPolicy::Dynamic && !IsEmpty())
             {
-                Reserve(_size + static_cast<SizeT>(1));
-            }
-        }
-
-        void TryToMakeAsDynamicFrom(const CharT* begin, const CharT* end)
-        {
-            if (_policy == StringPolicy::Static && !IsEmpty())
-            {
-                const SizeT finalSize = end - begin;
-                Reserve(finalSize + static_cast<SizeT>(1));
-                memcpy_s(_string, _capacity * sizeof(CharT), begin, finalSize * sizeof(CharT));
-                _string[finalSize] = 0;
+                Reserve(_size);
             }
         }
 
@@ -1320,7 +1324,7 @@ namespace std
 
 inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
 {
-    return Core::BaseString<char>::Intern(str, size);
+    return Core::BaseString<char>::Intern(str, size, true);
 }
 
 template<class CharType>

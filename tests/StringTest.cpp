@@ -30,15 +30,6 @@ TEST(StringTest, BaseString_char_default__Creation)
     using Core::StringAtom;
 
     {
-        StringAtom str1 = "Hello"_atom;
-        StringAtom str2 = "Hello"_atom;
-    }
-
-    {
-        const StringAtom str1 = "Hello"_atom;
-    }
-
-    {
         const StringAtom str1 = "Hello"_atom;
         const StringAtom str2 = "Hello"_atom;
         const StringAtom str3 = "World"_atom;
@@ -446,6 +437,13 @@ TEST(StringTest, BaseString_char_default_Trim)
     }
 
     {
+        auto str = "  MyLogin  "_atom;
+        str.Trim(' ');
+        EXPECT_EQ("MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
         auto str = "MyLogin__"_atom;
         str.Trim(' ');
         EXPECT_EQ("MyLogin__", str);
@@ -484,9 +482,12 @@ TEST(StringTest, BaseString_char_default_PushBack)
 
     {
         auto str = "Hello World"_atom;
-        const auto* text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        const auto* text =
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_back(text);
-        EXPECT_EQ("Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum", str);
+        EXPECT_EQ(
+            "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
+            str);
         EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
@@ -509,9 +510,12 @@ TEST(StringTest, BaseString_char_default_PushFront)
 
     {
         auto str = "Hello World"_atom;
-        const auto* text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        const auto* text =
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_front(text);
-        EXPECT_EQ("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World", str);
+        EXPECT_EQ(
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World",
+            str);
         EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
@@ -630,4 +634,42 @@ TEST(StringTest, BaseString_char_default_Copy)
         str.Copy(arr, str.Size());
         EXPECT_EQ(str, arr);
     }
+}
+
+TEST(StringTest, BaseString_char_AdvanceWorkFlow)
+{
+    auto str = "Hello World!"_atom;
+
+    {
+        auto tokens = str.Split(" ");
+        ASSERT_EQ(2, tokens.size());
+        EXPECT_EQ("Hello", tokens[0]);
+        EXPECT_EQ("World!", tokens[1]);
+    }
+
+    str.ToLowerCase();
+    ASSERT_EQ("hello world!", str);
+    ASSERT_EQ(str, "hello world!");
+    ASSERT_EQ(std::string("hello world!"), str);
+    ASSERT_EQ(str, std::string("hello world!"));
+
+    str.ToUpperCase();
+    ASSERT_EQ("HELLO WORLD!", str);
+    ASSERT_EQ(str, "HELLO WORLD!");
+    ASSERT_EQ(std::string("HELLO WORLD!"), str);
+    ASSERT_EQ(str, std::string("HELLO WORLD!"));
+
+    str.ReplaceAll("!", "???");
+    ASSERT_EQ("HELLO WORLD???", str);
+    ASSERT_EQ(str, "HELLO WORLD???");
+    ASSERT_EQ(std::string("HELLO WORLD???"), str);
+    ASSERT_EQ(str, std::string("HELLO WORLD???"));
+    ASSERT_TRUE(strcmp(str.c_str(), "HELLO WORLD???") == 0);
+
+    ASSERT_TRUE(str.Compare("AAA", true) == Core::Comparison::Greater);
+    ASSERT_TRUE(str.Compare("AAA") == Core::Comparison::Greater);
+    ASSERT_TRUE(str.Compare("aaa") == Core::Comparison::Less);
+
+    str.Trim('?');
+    ASSERT_EQ(str, "HELLO WORLD");
 }
