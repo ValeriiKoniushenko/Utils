@@ -319,6 +319,22 @@ TEST(StringTest, BaseString_char_default__Iterator)
     }
 }
 
+TEST(StringTest, BaseString_char_default_Modifications_RangeBasedFor)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        std::string tempStdStr;
+        for (auto ch : str)
+        {
+            tempStdStr.push_back(ch);
+        }
+
+        EXPECT_EQ(tempStdStr, str);
+    }
+}
+
 TEST(StringTest, BaseString_char_default_Modifications_SubStr)
 {
     using Core::StringAtom;
@@ -497,6 +513,13 @@ TEST(StringTest, BaseString_char_default_PushBack)
         EXPECT_EQ("Hello World!!!", str);
         EXPECT_EQ(14, str.Size());
     }
+
+    {
+        auto str = "Hello World"_atom;
+        str.PushBack(std::string("!!!"));
+        EXPECT_EQ("Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
 }
 
 TEST(StringTest, BaseString_char_default_PushFront)
@@ -525,6 +548,13 @@ TEST(StringTest, BaseString_char_default_PushFront)
         EXPECT_EQ("!!!Hello World", str);
         EXPECT_EQ(14, str.Size());
     }
+
+    {
+        auto str = "Hello World"_atom;
+        str.PushFront(std::string("!!!"));
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
 }
 
 TEST(StringTest, BaseString_char_default_Insert)
@@ -538,7 +568,21 @@ TEST(StringTest, BaseString_char_default_Insert)
 
     {
         auto str = "Hello World"_atom;
+        str.Insert(0, "!!!");
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
         str.insert(str.Size(), "!!!");
+        EXPECT_EQ("Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.Insert(str.Size(), "!!!");
         EXPECT_EQ("Hello World!!!", str);
         EXPECT_EQ(14, str.Size());
     }
@@ -552,7 +596,21 @@ TEST(StringTest, BaseString_char_default_Insert)
 
     {
         auto str = "Hello World"_atom;
+        str.Insert(5, "!!!");
+        EXPECT_EQ("Hello!!! World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
         str.insert(str.begin(), "!!!");
+        EXPECT_EQ("!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = "Hello World"_atom;
+        str.Insert(str.begin(), "!!!");
         EXPECT_EQ("!!!Hello World", str);
         EXPECT_EQ(14, str.Size());
     }
@@ -569,6 +627,16 @@ TEST(StringTest, BaseString_char_default_PopBack)
         EXPECT_EQ("Hello World", str);
         EXPECT_EQ(11, str.Size());
     }
+
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+
+        str.PopBack();
+
+        EXPECT_EQ("Hello World", str);
+        EXPECT_EQ(11, str.Size());
+    }
 }
 
 TEST(StringTest, BaseString_char_default_PopFront)
@@ -577,8 +645,17 @@ TEST(StringTest, BaseString_char_default_PopFront)
         auto str = "Hello World!"_atom;
         EXPECT_EQ(12, str.Size());
         std::string s;
-        str.shrink_to_fit();
         str.pop_front();
+
+        EXPECT_EQ("ello World!", str);
+        EXPECT_EQ(11, str.Size());
+    }
+
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        std::string s;
+        str.PopFront();
 
         EXPECT_EQ("ello World!", str);
         EXPECT_EQ(11, str.Size());
@@ -597,6 +674,20 @@ TEST(StringTest, BaseString_char_default_ShrinkToFit)
         EXPECT_EQ(201, str.Capacity());
 
         str.shrink_to_fit();
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+    }
+
+    {
+        auto str = "Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+
+        str.Reserve(100);
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(201, str.Capacity());
+
+        str.ShrinkToFit();
         EXPECT_EQ(12, str.Size());
         EXPECT_EQ(12 + 1, str.Capacity());
     }
@@ -672,4 +763,33 @@ TEST(StringTest, BaseString_char_AdvanceWorkFlow)
 
     str.Trim('?');
     ASSERT_EQ(str, "HELLO WORLD");
+}
+
+TEST(StringTest, BaseString_char_AdvanceWorkFlow2)
+{
+    Core::StringAtom str(128);
+    ASSERT_TRUE(str.IsEmpty());
+    ASSERT_TRUE(!str);
+    if (!str)
+    {
+        str.push_back("Hello");
+        ASSERT_FALSE(str.IsEmpty());
+        str.push_back("World");
+        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_EQ("HelloWorld", str);
+    }
+}
+
+TEST(StringTest, BaseString_char_AdvanceWorkFlow3)
+{
+    Core::StringAtom str;
+    str.Resize(5);
+    if (!str)
+    {
+        str.push_back("Hello");
+        ASSERT_FALSE(str.IsEmpty());
+        str.push_back("World");
+        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_EQ("     HelloWorld", str);
+    }
 }

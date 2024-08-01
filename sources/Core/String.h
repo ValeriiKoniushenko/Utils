@@ -31,8 +31,8 @@
 #include <cstring>
 #include <optional>
 #include <regex>
-#include <type_traits>
 #include <set>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 #include <xstring>
@@ -370,10 +370,12 @@ namespace Core
         [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string, this }; }
 
         [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size, bool isCompileTime = false) { return Self{ StringPool::Instance().Add(newString, size, isCompileTime) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size, bool isCompileTime = false)
+        {
+            return Self{ StringPool::Instance().Add(newString, size, isCompileTime) };
+        }
         [[nodiscard]] static Self Intern(const StdStringT& string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
-        [[nodiscard]] const CharT* CStr() const noexcept { return _string; }
         [[nodiscard]] SizeT Size() const noexcept { return _size; }
         [[nodiscard]] SizeT Length() const noexcept { return _size; }
         [[nodiscard]] bool IsEmpty() const noexcept { return _string == nullptr || _size == 0; }
@@ -540,14 +542,14 @@ namespace Core
             return *this <= other.data();
         }
 
-        [[nodiscard]] bool operator!() const noexcept { return !IsEmpty(); }
+        [[nodiscard]] bool operator!() const noexcept { return IsEmpty(); }
         [[nodiscard]] explicit operator bool() const noexcept { return IsEmpty(); }
 
         [[nodiscard]] CharT Front() const
         {
             if (IsEmpty())
             {
-                Assert("Was get a null string");
+                Assert("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -558,7 +560,7 @@ namespace Core
         {
             if (IsEmpty())
             {
-                Assert("Was get a null string");
+                Assert("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -569,7 +571,7 @@ namespace Core
         {
             if (IsEmpty())
             {
-                Assert("Was get a null string");
+                Assert("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -580,7 +582,7 @@ namespace Core
         {
             if (IsEmpty())
             {
-                Assert("Was get a null string");
+                Assert("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -591,7 +593,7 @@ namespace Core
         {
             if (IsEmpty() || _size >= index)
             {
-                Assert("Was get a null string or invalid index");
+                Assert("Impossible to work with nullptr string. or invalid index");
                 return {};
             }
 
@@ -599,8 +601,10 @@ namespace Core
         }
 
         [[nodiscard]] const CharT* c_str() const noexcept { return _string; }
+        [[nodiscard]] const CharT* CStr() const noexcept { return _string; }
 
         [[nodiscard]] const CharT* data() const noexcept { return _string; }
+        [[nodiscard]] const CharT* Data() const noexcept { return _string; }
 
         [[nodiscard]] CharT* data() noexcept
         {
@@ -841,10 +845,13 @@ namespace Core
         Self& operator+=(const CharT* str) noexcept { return push_back(str); }
 
         Self& push_back(CharT ch) noexcept { return push_back(&ch, 1); }
+        Self& PushBack(CharT ch) noexcept { return push_back(&ch, 1); }
 
         Self& push_back(const typename Toolset::StdStringT& str) noexcept { return push_back(str.data(), str.size()); }
+        Self& PushBack(const typename Toolset::StdStringT& str) noexcept { return push_back(str.data(), str.size()); }
 
         Self& push_back(typename Toolset::StringViewT str) noexcept { return push_back(str.data(), str.size()); }
+        Self& PushBack(typename Toolset::StringViewT str) noexcept { return push_back(str.data(), str.size()); }
 
         Self& push_back(const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -869,10 +876,16 @@ namespace Core
 
             return *this;
         }
+        Self& PushBack(const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        {
+            return push_back(str, size);
+        }
 
         Self& push_front(CharT ch) noexcept { return push_front(&ch, 1); }
+        Self& PushFront(CharT ch) noexcept { return push_front(&ch, 1); }
 
         Self& push_front(const typename Toolset::StdStringT& str) noexcept { return push_front(str.data(), str.size()); }
+        Self& PushFront(const typename Toolset::StdStringT& str) noexcept { return push_front(str.data(), str.size()); }
 
         Self& push_front(const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -901,7 +914,12 @@ namespace Core
 
             return *this;
         }
+        Self& PushFront(const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        {
+            return push_front(str, size);
+        }
 
+        Self& PopBack() noexcept { return pop_back(); }
         Self& pop_back() noexcept
         {
             Assert(_size > 0, "Impossible to pop_back a value from the empty string");
@@ -913,6 +931,7 @@ namespace Core
             return *this;
         }
 
+        Self& PopFront() noexcept { return pop_front(); }
         Self& pop_front() noexcept
         {
             Assert(_size > 0, "Impossible to pop_back a value from the empty string");
@@ -938,6 +957,7 @@ namespace Core
             return *this;
         }
 
+        Self& ShrinkToFit() noexcept { return shrink_to_fit(); }
         Self& shrink_to_fit() noexcept
         {
             const auto* oldString = _string;
@@ -963,6 +983,7 @@ namespace Core
 
         [[nodiscard]] SizeT Capacity() const noexcept { return _capacity; }
 
+        Self& Insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(std::move(iterator), str, size); }
         Self& insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             Assert(iterator._owner == this);
@@ -974,6 +995,7 @@ namespace Core
             return *this;
         }
 
+        Self& Insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
         Self& insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             if (size == Settings::invalidSize)
@@ -1133,6 +1155,11 @@ namespace Core
         }
 
         BaseString(const BaseString& other) { *this = other; }
+
+        BaseString(SizeT reserveCount)
+        {
+            Reserve(reserveCount);
+        }
 
         BaseString& operator=(const BaseString& other)
         {
