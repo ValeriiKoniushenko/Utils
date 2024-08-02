@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "Core/String.h"
+
 #include <benchmark/benchmark.h>
 
 static void BM_StdString(benchmark::State& state)
@@ -87,10 +89,30 @@ static void BM_CStringAddr(benchmark::State& state)
     }
 }
 
+static void BM_StdStringPushBack(benchmark::State& state)
+{
+    std::string str;
+    for (auto _ : state)
+    {
+        str.push_back('1');
+    }
+}
+
+static void BM_PushBack(benchmark::State& state)
+{
+    Core::StringAtom str;
+    for (auto _ : state)
+    {
+        str.push_back('1');
+    }
+}
+
 BENCHMARK(BM_StdString);
 BENCHMARK(BM_StdStringLong);
 BENCHMARK(BM_StdStringConst);
 BENCHMARK(BM_CString);
 BENCHMARK(BM_CStringAddr);
+BENCHMARK(BM_StdStringPushBack);
+BENCHMARK(BM_PushBack);
 
 BENCHMARK_MAIN();

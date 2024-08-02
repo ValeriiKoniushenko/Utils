@@ -876,10 +876,7 @@ namespace Core
 
             return *this;
         }
-        Self& PushBack(const CharT* str, SizeT size = Settings::invalidSize) noexcept
-        {
-            return push_back(str, size);
-        }
+        Self& PushBack(const CharT* str, SizeT size = Settings::invalidSize) noexcept { return push_back(str, size); }
 
         Self& push_front(CharT ch) noexcept { return push_front(&ch, 1); }
         Self& PushFront(CharT ch) noexcept { return push_front(&ch, 1); }
@@ -914,10 +911,7 @@ namespace Core
 
             return *this;
         }
-        Self& PushFront(const CharT* str, SizeT size = Settings::invalidSize) noexcept
-        {
-            return push_front(str, size);
-        }
+        Self& PushFront(const CharT* str, SizeT size = Settings::invalidSize) noexcept { return push_front(str, size); }
 
         Self& PopBack() noexcept { return pop_back(); }
         Self& pop_back() noexcept
@@ -983,7 +977,10 @@ namespace Core
 
         [[nodiscard]] SizeT Capacity() const noexcept { return _capacity; }
 
-        Self& Insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(std::move(iterator), str, size); }
+        Self& Insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        {
+            return insert(std::move(iterator), str, size);
+        }
         Self& insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             Assert(iterator._owner == this);
@@ -1156,10 +1153,7 @@ namespace Core
 
         BaseString(const BaseString& other) { *this = other; }
 
-        BaseString(SizeT reserveCount)
-        {
-            Reserve(reserveCount);
-        }
+        BaseString(SizeT reserveCount) { Reserve(reserveCount); }
 
         BaseString& operator=(const BaseString& other)
         {
