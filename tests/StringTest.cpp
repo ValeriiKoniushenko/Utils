@@ -63,6 +63,70 @@ TEST(StringTest, BaseString_char_default__Creation)
     }
 }
 
+TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str1 = "Hello"_atom;
+        StringAtom str2(str1);
+
+        ASSERT_FALSE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_EQ(str1.Data(), str2.Data());
+        EXPECT_TRUE(str1.IsStatic());
+        EXPECT_TRUE(str2.IsStatic());
+        EXPECT_EQ(5, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ("Hello", str1);
+        EXPECT_EQ("Hello", str2);
+    }
+
+    {
+        StringAtom str1 = "Hello"_atom;
+        StringAtom str2(std::move(str1));
+
+        ASSERT_TRUE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.Data(), str2.Data());
+        EXPECT_FALSE(str1.IsStatic());
+        EXPECT_TRUE(str2.IsStatic());
+        EXPECT_EQ(0, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ("Hello", str2);
+    }
+
+    {
+        StringAtom str1 = "Hello";
+        StringAtom str2(str1);
+
+        ASSERT_FALSE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.Data(), str2.Data());
+        EXPECT_TRUE(str1.IsDynamic());
+        EXPECT_TRUE(str2.IsDynamic());
+        EXPECT_EQ(5, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ("Hello", str1);
+        EXPECT_EQ("Hello", str2);
+    }
+
+    {
+        StringAtom str1 = "Hello";
+        StringAtom str2(std::move(str1));
+
+        ASSERT_TRUE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.Data(), str2.Data());
+        EXPECT_EQ(nullptr, str1.Data());
+        EXPECT_FALSE(str1.IsDynamic());
+        EXPECT_TRUE(str2.IsDynamic());
+        EXPECT_EQ(0, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ("Hello", str2);
+    }
+}
+
 TEST(StringTest, BaseString_char_default__Comparision)
 {
     using Core::StringAtom;

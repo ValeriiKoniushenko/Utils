@@ -1135,7 +1135,7 @@ namespace Core
 
         BaseString() = default;
 
-        explicit BaseString(const CharT* str, SizeT size = Settings::invalidSize)
+        BaseString(const CharT* str, SizeT size = Settings::invalidSize)
         {
             Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
             memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
@@ -1153,7 +1153,7 @@ namespace Core
 
         BaseString(const BaseString& other) { *this = other; }
 
-        BaseString(SizeT reserveCount) { Reserve(reserveCount); }
+        explicit BaseString(SizeT reserveCount) { Reserve(reserveCount); }
 
         BaseString& operator=(const BaseString& other)
         {
@@ -1165,7 +1165,8 @@ namespace Core
             if (other._policy == StringPolicy::Dynamic)
             {
                 Clear();
-                TryToMakeAsDynamicFrom(other._string, other._string + other._size);
+                Resize(other._size);
+                memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
             }
             else if (other._policy == StringPolicy::Static)
             {

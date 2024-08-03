@@ -48,6 +48,12 @@ inline void Assert(bool condition, const char* message = nullptr)
 #endif
 }
 
+inline bool Verify(bool condition, const char* message = nullptr)
+{
+    Assert(condition, message);
+    return condition;
+}
+
 inline void Assert(const char* message = nullptr)
 {
     using std::cerr;
