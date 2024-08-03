@@ -543,7 +543,7 @@ namespace Core
         }
 
         [[nodiscard]] bool operator!() const noexcept { return IsEmpty(); }
-        [[nodiscard]] explicit operator bool() const noexcept { return IsEmpty(); }
+        [[nodiscard]] explicit operator bool() const noexcept { return !IsEmpty(); }
 
         [[nodiscard]] CharT Front() const
         {

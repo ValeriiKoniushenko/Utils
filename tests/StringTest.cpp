@@ -22,10 +22,10 @@
 
 #include "Core/String.h"
 
+#include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <unordered_set>
-#include <filesystem>
 
 TEST(StringTest, BaseString_char_default__Creation)
 {
