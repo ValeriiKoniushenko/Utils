@@ -1062,6 +1062,25 @@ namespace Core
             return Toolset::Cmp(_string, other);
         }
 
+        [[nodiscard]] const CharT* Find(const std::basic_regex<CharT>& expr, int baseOffset = 0) const noexcept
+        {
+            if (IsEmpty())
+            {
+                Assert("Impossible to work with nullptr string.");
+                return nullptr;
+            }
+
+            std::match_results<const CharT*> match;
+            std::regex_search(_string + baseOffset, match, expr);
+
+            if (!match.empty())
+            {
+                return _string + baseOffset + match.position();
+            }
+
+            return nullptr;
+        }
+
         [[nodiscard]] const CharT* Find(const Self& other, int baseOffset = 0) const noexcept
         {
             if (IsEmpty() || other.IsEmpty())

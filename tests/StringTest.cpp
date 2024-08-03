@@ -877,3 +877,32 @@ TEST(StringTest, BaseString_char_AdvanceWorkFlow3)
         ASSERT_EQ("     HelloWorld", str);
     }
 }
+
+TEST(StringTest, BaseString_char_RegexFind)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto* found = str.Find(std::regex(" \\w+"));
+        EXPECT_STREQ(" world!", found);
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto* found = str.Find(std::regex(" \\w+"), 3);
+        EXPECT_STREQ(" world!", found);
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto* found = str.Find(std::regex(" \\w+"));
+        EXPECT_STREQ(" world!", found);
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto* found = str.Find(std::regex(" \\w+"), 3);
+        EXPECT_STREQ(" world!", found);
+    }
+}
