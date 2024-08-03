@@ -612,7 +612,7 @@ namespace Core
             return _string;
         }
 
-        [[nodiscard]] std::vector<StdStringT> Split(const StdStringT& delimiter) const
+        [[nodiscard]] std::vector<Self> Split(const Self& delimiter) const
         {
             if (IsEmpty())
             {
@@ -620,9 +620,9 @@ namespace Core
                 return {};
             }
 
-            StdStringT string = _string;
+            Self string = _string;
 
-            std::vector<StdStringT> splittedStrings;
+            std::vector<Self> splittedStrings;
             CharT* context = nullptr;
 
             if (const auto* token = Toolset::StrTok(string.data(), delimiter.c_str(), context))
@@ -638,7 +638,7 @@ namespace Core
             {
                 if (const auto* token = Toolset::StrTok(context, delimiter.c_str(), context))
                 {
-                    splittedStrings.emplace_back(StdStringT{ token });
+                    splittedStrings.emplace_back(Self{ token });
                 }
                 else
                 {
