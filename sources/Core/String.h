@@ -1135,6 +1135,21 @@ namespace Core
 
         BaseString() = default;
 
+        template<class IterT>
+        BaseString(IterT first, IterT last)
+        {
+            if (first != last)
+            {
+                constexpr const SizeT defaultCapacity = 16;
+                Reserve(defaultCapacity);
+                for (; first != last; ++first)
+                {
+                    PushBack(static_cast<CharT>(0));
+                    std::char_traits<CharT>::assign(_string[_size - static_cast<SizeT>(1)], *first);
+                }
+            }
+        }
+
         BaseString(const CharT* str, SizeT size = Settings::invalidSize)
         {
             Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);

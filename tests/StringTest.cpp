@@ -22,8 +22,10 @@
 
 #include "Core/String.h"
 
+#include <fstream>
 #include <gtest/gtest.h>
 #include <unordered_set>
+#include <filesystem>
 
 TEST(StringTest, BaseString_char_default__Creation)
 {
@@ -380,6 +382,24 @@ TEST(StringTest, BaseString_char_default__Iterator)
             buff.push_back(ch);
         }
         EXPECT_EQ(str, buff);
+    }
+
+    {
+        std::ofstream out("temp.txt");
+        ASSERT_TRUE(out.is_open());
+        out << "Hello world!";
+        out.close();
+
+        std::ifstream in("temp.txt");
+        ASSERT_TRUE(in.is_open());
+
+        StringAtom str((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        ASSERT_FALSE(str.IsEmpty());
+        EXPECT_TRUE(str.IsDynamic());
+        EXPECT_EQ("Hello world!", str);
+        EXPECT_EQ(12, str.Size());
+        in.close();
+        std::filesystem::remove("temp.txt");
     }
 }
 
