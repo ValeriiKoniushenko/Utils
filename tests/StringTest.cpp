@@ -799,6 +799,13 @@ TEST(StringTest, BaseString_char_default_Regex)
         auto str = "RegEx"_atom;
         EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
     }
+
+    {
+        auto str = "RegEx"_atom;
+        Core::StringAtom::StdRegexMatchResults match;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
+        EXPECT_FALSE(match.empty());
+    }
 }
 
 TEST(StringTest, BaseString_char_default_Copy)
@@ -884,25 +891,37 @@ TEST(StringTest, BaseString_char_RegexFind)
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto* found = str.Find(std::regex(" \\w+"));
-        EXPECT_STREQ(" world!", found);
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto* found = str.Find(std::regex(" \\w+"), 3);
-        EXPECT_STREQ(" world!", found);
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto* found = str.Find(std::regex(" \\w+"));
-        EXPECT_STREQ(" world!", found);
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto* found = str.Find(std::regex(" \\w+"), 3);
-        EXPECT_STREQ(" world!", found);
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
     }
 }

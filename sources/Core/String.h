@@ -62,7 +62,8 @@ namespace Core
     {
         using CharT = char;
         using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = std::basic_string_view<CharT>;
+        using StdStringViewT = std::basic_string_view<CharT>;
+        using StdRegex = std::basic_regex<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(strlen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
@@ -94,7 +95,7 @@ namespace Core
     {
         using CharT = wchar_t;
         using StringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StringViewT = std::basic_string_view<CharT>;
+        using StdStringViewT = std::basic_string_view<CharT>;
 
         [[nodiscard]] static std::size_t Length(const CharT* string) noexcept { return static_cast<std::size_t>(wcslen(string)); }
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
@@ -212,15 +213,19 @@ namespace Core
     {
     public:
         using CharT = CharType;
-        using value_type = CharT;
         using Self = BaseString<CharT>;
         using Toolset = _StringToolset<CharT>;
         using Settings = _StringSettings<CharT>;
         using SizeT = typename Settings::SizeT;
         using StdStringT = typename Toolset::StdStringT;
-        using StringViewT = typename Toolset::StringViewT;
+        using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
         using StringPool = _StringPool<CharT>;
+        using StdRegex = typename Toolset::StdRegex;
+
+        using value_type = CharT;
+        using pointer = value_type*;
+        using difference_type = long long;
 
     public:
         template<bool IsReversed>
@@ -229,6 +234,11 @@ namespace Core
         public:
             using Self = Iterator;
             using Super = IRandomAccessIterator<CharT, Iterator, Utils::CopyableAndMoveable, true>;
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type        = typename BaseString<CharT>::value_type;
+            using difference_type   = typename BaseString<CharT>::difference_type;
+            using pointer           = typename BaseString<CharT>::pointer;
+            using reference         = value_type&;
 
         public:
             Iterator() = default;
@@ -286,6 +296,16 @@ namespace Core
             Self operator+(int step) const noexcept override { return Self{ _data + (IsReversed ? -step : step), _owner }; }
 
             Self operator-(int step) const noexcept override { return Self{ _data - (IsReversed ? -step : step), _owner }; }
+
+            difference_type operator-(const Self& other) const noexcept
+            {
+                if (Verify(_owner == other._owner))
+                {
+                    return _data - other._data;
+                }
+
+                return {};
+            }
 
             [[nodiscard]] bool operator>(const Self& other) const noexcept override { return (*this <=> other) == Comparison::Greater; }
 
@@ -353,6 +373,7 @@ namespace Core
 
         using IteratorT = Iterator<false>;
         using ReverseIteratorT = Iterator<true>;
+        using StdRegexMatchResults = std::match_results<Core::BaseString<CharT>::IteratorT>;
 
     public:
         [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ _string, this }; }
@@ -567,7 +588,7 @@ namespace Core
             return _string[_size - static_cast<SizeT>(1)];
         }
 
-        [[nodiscard]] StringViewT ToStringView() const
+        [[nodiscard]] StdStringViewT ToStringView() const
         {
             if (IsEmpty())
             {
@@ -773,7 +794,7 @@ namespace Core
             return *this;
         }
 
-        Self& ReplaceFirst(StringViewT mainValue, StringViewT newValue) noexcept
+        Self& ReplaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
             if (!IsEmpty())
             {
@@ -789,7 +810,7 @@ namespace Core
             return *this;
         }
 
-        Self& ReplaceAll(StringViewT mainValue, StringViewT newValue) noexcept
+        Self& ReplaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
             if (!IsEmpty())
             {
@@ -810,7 +831,7 @@ namespace Core
 
         [[nodiscard]] bool RegexMatch(const StdStringT& expr) { return RegexMatch(expr.data()); }
 
-        [[nodiscard]] bool RegexMatch(const StringViewT& expr) { return RegexMatch(expr.data()); }
+        [[nodiscard]] bool RegexMatch(const StdStringViewT& expr) { return RegexMatch(expr.data()); }
 
         [[nodiscard]] bool RegexMatch(const CharT* expr)
         {
@@ -822,15 +843,18 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(const StdStringT& expr, std::smatch& smatch) const { return RegexMatch(expr.data(), smatch); }
+        [[nodiscard]] bool RegexMatch(const StdStringT& expr, StdRegexMatchResults& match, std::regex_constants::match_flag_type flags =
+                      std::regex_constants::match_default) const { return RegexMatch(expr.data(), match, flags); }
 
-        [[nodiscard]] bool RegexMatch(const StringViewT& expr, std::smatch& smatch) const { return RegexMatch(expr.data(), smatch); }
+        [[nodiscard]] bool RegexMatch(const StdStringViewT& expr, StdRegexMatchResults& match, std::regex_constants::match_flag_type flags =
+                      std::regex_constants::match_default) const { return RegexMatch(expr.data(), match, flags); }
 
-        [[nodiscard]] bool RegexMatch(const CharT* expr, std::smatch& smatch) const
+        [[nodiscard]] bool RegexMatch(const CharT* expr, std::match_results<Core::BaseString<CharT>::Iterator<false>>& match, std::regex_constants::match_flag_type flags =
+                      std::regex_constants::match_default) const
         {
             if (!IsEmpty())
             {
-                return std::regex_match(_string, smatch, std::regex(expr));
+               return std::regex_match(begin(), end(), match, StdRegex(expr), flags);
             }
 
             return false;
@@ -840,7 +864,7 @@ namespace Core
 
         Self& operator+=(const typename Toolset::StdStringT& str) noexcept { return push_back(str); }
 
-        Self& operator+=(typename Toolset::StringViewT str) noexcept { return push_back(str); }
+        Self& operator+=(typename Toolset::StdStringViewT str) noexcept { return push_back(str); }
 
         Self& operator+=(const CharT* str) noexcept { return push_back(str); }
 
@@ -850,8 +874,8 @@ namespace Core
         Self& push_back(const typename Toolset::StdStringT& str) noexcept { return push_back(str.data(), str.size()); }
         Self& PushBack(const typename Toolset::StdStringT& str) noexcept { return push_back(str.data(), str.size()); }
 
-        Self& push_back(typename Toolset::StringViewT str) noexcept { return push_back(str.data(), str.size()); }
-        Self& PushBack(typename Toolset::StringViewT str) noexcept { return push_back(str.data(), str.size()); }
+        Self& push_back(typename Toolset::StdStringViewT str) noexcept { return push_back(str.data(), str.size()); }
+        Self& PushBack(typename Toolset::StdStringViewT str) noexcept { return push_back(str.data(), str.size()); }
 
         Self& push_back(const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -1026,9 +1050,6 @@ namespace Core
         [[nodiscard]] bool IsDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
         [[nodiscard]] bool CheckForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
 
-        // [[nodiscard]] virtual StringT Replace(StringViewT oldValue, StringViewT newValue) const = 0;
-        // [[nodiscard]] virtual StringT ReplaceAll(StringViewT oldValue, StringViewT newValue) const = 0;
-
         [[nodiscard]] Comparison Compare(const CharT* other, const bool isIgnoreCase = false) const noexcept
         {
             if (IsEmpty() || other == nullptr)
@@ -1062,23 +1083,18 @@ namespace Core
             return Toolset::Cmp(_string, other);
         }
 
-        [[nodiscard]] const CharT* Find(const std::basic_regex<CharT>& expr, int baseOffset = 0) const noexcept
+        [[nodiscard]] StdRegexMatchResults FindRegex(const CharT* expr, int baseOffset = 0) const noexcept
         {
-            if (IsEmpty())
+            if (IsEmpty() || !expr)
             {
                 Assert("Impossible to work with nullptr string.");
-                return nullptr;
+                return {};
             }
 
-            std::match_results<const CharT*> match;
-            std::regex_search(_string + baseOffset, match, expr);
+            StdRegexMatchResults match;
+            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr));
 
-            if (!match.empty())
-            {
-                return _string + baseOffset + match.position();
-            }
-
-            return nullptr;
+            return match;
         }
 
         [[nodiscard]] const CharT* Find(const Self& other, int baseOffset = 0) const noexcept
@@ -1103,7 +1119,7 @@ namespace Core
             return Find(other.data(), baseOffset);
         }
 
-        [[nodiscard]] const CharT* Find(StringViewT other, int baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* Find(StdStringViewT other, int baseOffset = 0) const noexcept
         {
             if (IsEmpty() || other.empty())
             {
@@ -1180,7 +1196,7 @@ namespace Core
         {
         }
 
-        explicit BaseString(typename Toolset::StringViewT str)
+        explicit BaseString(typename Toolset::StdStringViewT str)
             : BaseString(str.data(), str.size())
         {
         }
