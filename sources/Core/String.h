@@ -74,6 +74,7 @@ namespace Core
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
         [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
         [[nodiscard]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
+
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = strcmp(str1, str2);
@@ -106,6 +107,7 @@ namespace Core
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
         [[nodiscard]] static std::wint_t ToUpper(const CharT ch) noexcept { return towupper(ch); };
         [[nodiscard]] static std::wint_t ToLower(const CharT ch) noexcept { return towlower(ch); };
+
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
             const int result = wcscmp(str1, str2);
@@ -151,6 +153,7 @@ namespace Core
         }
 
         [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
+
         [[nodiscard]] bool operator<(const StringData& other) const
         {
             if (str)
@@ -235,10 +238,10 @@ namespace Core
             using Self = Iterator;
             using Super = IRandomAccessIterator<CharT, Iterator, Utils::CopyableAndMoveable, true>;
             using iterator_category = std::random_access_iterator_tag;
-            using value_type        = typename BaseString<CharT>::value_type;
-            using difference_type   = typename BaseString<CharT>::difference_type;
-            using pointer           = typename BaseString<CharT>::pointer;
-            using reference         = value_type&;
+            using value_type = typename BaseString<CharT>::value_type;
+            using difference_type = typename BaseString<CharT>::difference_type;
+            using pointer = typename BaseString<CharT>::pointer;
+            using reference = value_type&;
 
         public:
             Iterator() = default;
@@ -391,10 +394,12 @@ namespace Core
         [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string, this }; }
 
         [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
+
         [[nodiscard]] static Self Intern(const CharT* newString, SizeT size, bool isCompileTime = false)
         {
             return Self{ StringPool::Instance().Add(newString, size, isCompileTime) };
         }
+
         [[nodiscard]] static Self Intern(const StdStringT& string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT Size() const noexcept { return _size; }
@@ -412,6 +417,7 @@ namespace Core
             }
             return IsStatic() && other.IsStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
+
         [[nodiscard]] bool operator!=(const Self& other) const
         {
             if (IsEmpty() || other.IsEmpty())
@@ -421,6 +427,7 @@ namespace Core
             }
             return IsStatic() && other.IsStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
         }
+
         [[nodiscard]] bool operator>(const Self& other) const
         {
             if (IsEmpty() || other.IsEmpty())
@@ -430,6 +437,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Greater;
         }
+
         [[nodiscard]] bool operator>=(const Self& other) const
         {
             if (IsEmpty() || other.IsEmpty())
@@ -440,6 +448,7 @@ namespace Core
             const auto result = Toolset::Cmp(_string, other._string);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
+
         [[nodiscard]] bool operator<(const Self& other) const
         {
             if (IsEmpty() || other.IsEmpty())
@@ -449,6 +458,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Less;
         }
+
         [[nodiscard]] bool operator<=(const Self& other) const
         {
             if (IsEmpty() || other.IsEmpty())
@@ -469,6 +479,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other) == Comparison::Equal;
         }
+
         [[nodiscard]] bool operator!=(const CharT* other) const
         {
             if (IsEmpty() || !other)
@@ -478,6 +489,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other) != Comparison::Equal;
         }
+
         [[nodiscard]] bool operator>(const CharT* other) const
         {
             if (IsEmpty() || !other)
@@ -487,6 +499,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other) == Comparison::Greater;
         }
+
         [[nodiscard]] bool operator>=(const CharT* other) const
         {
             if (IsEmpty() || !other)
@@ -497,6 +510,7 @@ namespace Core
             const auto result = Toolset::Cmp(_string, other);
             return result == Comparison::Greater || result == Comparison::Equal;
         }
+
         [[nodiscard]] bool operator<(const CharT* other) const
         {
             if (IsEmpty() || !other)
@@ -506,6 +520,7 @@ namespace Core
             }
             return Toolset::Cmp(_string, other) == Comparison::Less;
         }
+
         [[nodiscard]] bool operator<=(const CharT* other) const
         {
             if (IsEmpty() || !other)
@@ -526,6 +541,7 @@ namespace Core
             }
             return *this == other.data();
         }
+
         [[nodiscard]] bool operator>(const StdStringT& other) const
         {
             if (IsEmpty() || other.empty())
@@ -535,6 +551,7 @@ namespace Core
             }
             return *this > other.data();
         }
+
         [[nodiscard]] bool operator>=(const StdStringT& other) const
         {
             if (IsEmpty() || other.empty())
@@ -544,6 +561,7 @@ namespace Core
             }
             return *this >= other.data();
         }
+
         [[nodiscard]] bool operator<(const StdStringT& other) const
         {
             if (IsEmpty() || other.empty())
@@ -553,6 +571,7 @@ namespace Core
             }
             return *this < other.data();
         }
+
         [[nodiscard]] bool operator<=(const StdStringT& other) const
         {
             if (IsEmpty() || other.empty())
@@ -843,18 +862,24 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(const StdStringT& expr, StdRegexMatchResults& match, std::regex_constants::match_flag_type flags =
-                      std::regex_constants::match_default) const { return RegexMatch(expr.data(), match, flags); }
+        [[nodiscard]] bool RegexMatch(const StdStringT& expr, StdRegexMatchResults& match,
+                                      std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const
+        {
+            return RegexMatch(expr.data(), match, flags);
+        }
 
-        [[nodiscard]] bool RegexMatch(const StdStringViewT& expr, StdRegexMatchResults& match, std::regex_constants::match_flag_type flags =
-                      std::regex_constants::match_default) const { return RegexMatch(expr.data(), match, flags); }
+        [[nodiscard]] bool RegexMatch(const StdStringViewT& expr, StdRegexMatchResults& match,
+                                      std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const
+        {
+            return RegexMatch(expr.data(), match, flags);
+        }
 
-        [[nodiscard]] bool RegexMatch(const CharT* expr, std::match_results<Core::BaseString<CharT>::Iterator<false>>& match, std::regex_constants::match_flag_type flags =
-                      std::regex_constants::match_default) const
+        [[nodiscard]] bool RegexMatch(const CharT* expr, std::match_results<Core::BaseString<CharT>::Iterator<false>>& match,
+                                      std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const
         {
             if (!IsEmpty())
             {
-               return std::regex_match(begin(), end(), match, StdRegex(expr), flags);
+                return std::regex_match(begin(), end(), match, StdRegex(expr), flags);
             }
 
             return false;
@@ -900,6 +925,7 @@ namespace Core
 
             return *this;
         }
+
         Self& PushBack(const CharT* str, SizeT size = Settings::invalidSize) noexcept { return push_back(str, size); }
 
         Self& push_front(CharT ch) noexcept { return push_front(&ch, 1); }
@@ -935,9 +961,11 @@ namespace Core
 
             return *this;
         }
+
         Self& PushFront(const CharT* str, SizeT size = Settings::invalidSize) noexcept { return push_front(str, size); }
 
         Self& PopBack() noexcept { return pop_back(); }
+
         Self& pop_back() noexcept
         {
             Assert(_size > 0, "Impossible to pop_back a value from the empty string");
@@ -950,6 +978,7 @@ namespace Core
         }
 
         Self& PopFront() noexcept { return pop_front(); }
+
         Self& pop_front() noexcept
         {
             Assert(_size > 0, "Impossible to pop_back a value from the empty string");
@@ -976,6 +1005,7 @@ namespace Core
         }
 
         Self& ShrinkToFit() noexcept { return shrink_to_fit(); }
+
         Self& shrink_to_fit() noexcept
         {
             const auto* oldString = _string;
@@ -1005,6 +1035,7 @@ namespace Core
         {
             return insert(std::move(iterator), str, size);
         }
+
         Self& insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             Assert(iterator._owner == this);
@@ -1017,6 +1048,7 @@ namespace Core
         }
 
         Self& Insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
+
         Self& insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             if (size == Settings::invalidSize)
@@ -1083,7 +1115,8 @@ namespace Core
             return Toolset::Cmp(_string, other);
         }
 
-        [[nodiscard]] StdRegexMatchResults FindRegex(const CharT* expr, int baseOffset = 0) const noexcept
+        [[nodiscard]] StdRegexMatchResults FindRegex(const CharT* expr, int baseOffset = 0,
+                                                     std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const noexcept
         {
             if (IsEmpty() || !expr)
             {
@@ -1092,7 +1125,7 @@ namespace Core
             }
 
             StdRegexMatchResults match;
-            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr));
+            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr), flags);
 
             return match;
         }
@@ -1380,18 +1413,15 @@ namespace Core
     };
 
     using StringAtom = BaseString<char>;
-
 } // namespace Core
 
 namespace std
 {
-
     template<class CharType>
     struct hash<Core::BaseString<CharType>>
     {
         size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
     };
-
 } // namespace std
 
 inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
