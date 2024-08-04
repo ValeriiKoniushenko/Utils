@@ -36,6 +36,7 @@
 #include <unordered_map>
 #include <vector>
 #include <xstring>
+#include <functional>
 
 namespace Core
 {
@@ -1116,7 +1117,7 @@ namespace Core
         }
 
         [[nodiscard]] StdRegexMatchResults FindRegex(const CharT* expr, int baseOffset = 0,
-                                                     std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const noexcept
+                                                     std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const
         {
             if (IsEmpty() || !expr)
             {
@@ -1128,6 +1129,33 @@ namespace Core
             std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr), flags);
 
             return match;
+        }
+
+        void IterateRegex(const CharT* expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+        {
+            IterateRegex(expr, 0, std::forward<std::function<bool(const StdRegexMatchResults&)>>(lambda), flag);
+        }
+
+        void IterateRegex(const CharT* expr, int baseOffset, std::function<bool(const StdRegexMatchResults&)>&& lambda, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+        {
+            if (IsEmpty() || !expr)
+            {
+                Assert("Impossible to work with nullptr string.");
+                return;
+            }
+            StdRegex regexExpr(expr);
+            auto first = std::regex_iterator<IteratorT>(begin(), end(), regexExpr, flag);
+            auto last = std::regex_iterator<IteratorT>();
+            for (; first != last; ++first)
+            {
+                if (lambda)
+                {
+                    if (!std::invoke(lambda, *first))
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         [[nodiscard]] const CharT* Find(const Self& other, int baseOffset = 0) const noexcept

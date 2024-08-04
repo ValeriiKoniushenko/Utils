@@ -925,3 +925,19 @@ TEST(StringTest, BaseString_char_RegexFind)
         EXPECT_EQ(" world", match.str());
     }
 }
+
+TEST(StringTest, BaseString_char_IterateRegex)
+{
+    using Core::StringAtom;
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex("\\w+", [&buffer](const StringAtom::StdRegexMatchResults& match)
+        {
+            buffer.PushBack(match.str());
+            return true;
+        });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+}
