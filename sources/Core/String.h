@@ -29,6 +29,7 @@
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <cstring>
+#include <functional>
 #include <optional>
 #include <regex>
 #include <set>
@@ -36,7 +37,6 @@
 #include <unordered_map>
 #include <vector>
 #include <xstring>
-#include <functional>
 
 namespace Core
 {
@@ -1131,12 +1131,14 @@ namespace Core
             return match;
         }
 
-        void IterateRegex(const CharT* expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+        void IterateRegex(const CharT* expr, std::function<bool(const StdRegexMatchResults&)>&& lambda,
+                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
             IterateRegex(expr, 0, std::forward<std::function<bool(const StdRegexMatchResults&)>>(lambda), flag);
         }
 
-        void IterateRegex(const CharT* expr, int baseOffset, std::function<bool(const StdRegexMatchResults&)>&& lambda, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+        void IterateRegex(const CharT* expr, int baseOffset, std::function<bool(const StdRegexMatchResults&)>&& lambda,
+                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
             if (IsEmpty() || !expr)
             {
@@ -1144,7 +1146,7 @@ namespace Core
                 return;
             }
             StdRegex regexExpr(expr);
-            auto first = std::regex_iterator<IteratorT>(begin(), end(), regexExpr, flag);
+            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, flag);
             auto last = std::regex_iterator<IteratorT>();
             for (; first != last; ++first)
             {
