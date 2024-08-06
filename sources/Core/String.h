@@ -1284,11 +1284,10 @@ namespace Core
             else if (other._policy == StringPolicy::Static)
             {
                 Clear();
-                auto&& data = StringPool::Instance().Add(other._string, other._size);
-                _policy = StringPolicy::Static;
-                _string = data.str;
-                _size = data.size;
-                _capacity = 0;
+                _policy = other._policy;
+                _string = other._string;
+                _size = other._size;
+                _capacity = other._capacity;
             }
             else
             {
