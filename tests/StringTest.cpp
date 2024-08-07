@@ -75,7 +75,7 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
 
         ASSERT_FALSE(str1.IsEmpty());
         ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_EQ(str1.Data(), str2.Data());
+        EXPECT_EQ(str1.CStr(), str2.CStr());
         EXPECT_TRUE(str1.IsStatic());
         EXPECT_TRUE(str2.IsStatic());
         EXPECT_EQ(5, str1.Size());
@@ -90,7 +90,7 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
 
         ASSERT_TRUE(str1.IsEmpty());
         ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.Data(), str2.Data());
+        EXPECT_NE(str1.CStr(), str2.CStr());
         EXPECT_FALSE(str1.IsStatic());
         EXPECT_TRUE(str2.IsStatic());
         EXPECT_EQ(0, str1.Size());
@@ -104,7 +104,7 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
 
         ASSERT_FALSE(str1.IsEmpty());
         ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.Data(), str2.Data());
+        EXPECT_NE(str1.CStr(), str2.CStr());
         EXPECT_TRUE(str1.IsDynamic());
         EXPECT_TRUE(str2.IsDynamic());
         EXPECT_EQ(5, str1.Size());
@@ -119,8 +119,8 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
 
         ASSERT_TRUE(str1.IsEmpty());
         ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.Data(), str2.Data());
-        EXPECT_EQ(nullptr, str1.Data());
+        EXPECT_NE(str1.CStr(), str2.CStr());
+        EXPECT_EQ(nullptr, str1.CStr());
         EXPECT_FALSE(str1.IsDynamic());
         EXPECT_TRUE(str2.IsDynamic());
         EXPECT_EQ(0, str1.Size());
@@ -806,6 +806,12 @@ TEST(StringTest, BaseString_char_default_Regex)
         EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
         EXPECT_FALSE(match.empty());
     }
+
+    {
+        auto str = "Hello this fucking world!"_atom;
+        str.RegexReplace(" ", "_=_");
+        EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
+    }
 }
 
 TEST(StringTest, BaseString_char_default_Copy)
@@ -934,6 +940,81 @@ TEST(StringTest, BaseString_char_IterateRegex)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         str.IterateRegex("\\w+",
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex(std::string("\\w+"),
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string expr("\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string_view expr("\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        const auto expr = "\\w+"_atom;
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex("\\w+"_atom,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex(std::string_view("\\w+"),
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
