@@ -27,89 +27,100 @@
 #include <functional>
 #include <unordered_map>
 
-template<class F>
-class Delegate : public Utils::CopyableAndMoveable
+namespace Core
 {
-public:
-    class ID : public Utils::CopyableAndMoveable
+
+    template<class F>
+    class Delegate : public Utils::CopyableAndMoveable
     {
     public:
-        using IdT = unsigned int;
-        static constexpr IdT invalidID = ~(static_cast<IdT>(0));
-
-        struct Hasher final
+        class ID final : public Utils::CopyableAndMoveable
         {
-            std::size_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
-        };
+        public:
+            using IdT = unsigned int;
+            static constexpr IdT invalidID = ~(static_cast<IdT>(0));
 
-    public:
-        ID(Delegate<F>* owner, IdT newId)
-            : _owner{ owner },
-              _id{ newId }
-        {
-        }
-
-        ~ID() override
-        {
-            if (_owner)
+            struct Hasher final
             {
-                _owner->Unsubscribe(*this);
+                std::size_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
+            };
+
+        public:
+            ID(Delegate<F>* owner, IdT newId)
+                : _owner{ owner },
+                  _id{ newId }
+            {
             }
-        }
 
-        [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
-
-        [[nodiscard]] constexpr bool IsValid() const noexcept
-        {
-            if (*this == ID())
+            ~ID() override
             {
-                return false;
+                if (_owner)
+                {
+                    _owner->Unsubscribe(*this);
+                }
             }
-            if (_owner)
+
+            [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
+
+            [[nodiscard]] constexpr bool IsValid() const noexcept
             {
-                if (_owner->_callbacks[*this] == _owner->_callbacks.end())
+                if (*this == ID())
                 {
                     return false;
                 }
+                if (_owner)
+                {
+                    if (_owner->_callbacks[*this] == _owner->_callbacks.end())
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
-            return true;
+
+        private:
+            IdT _id = invalidID;
+            Delegate<F>* _owner = nullptr;
+        };
+
+        using CallbackT = std::function<F>;
+        using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
+
+    public:
+        template<class... TArgs>
+        void Trigger(TArgs&&... args)
+        {
+            for (auto&& [id, callback] : _callbacks)
+            {
+                std::invoke(callback, std::forward<TArgs>(args)...);
+            }
         }
+
+        [[nodiscard]] ID SubscribeAndGetID(CallbackT&& callback)
+        {
+            ID id(this, ++_generatedID);
+            _callbacks.emplace(id, std::forward<CallbackT>(callback));
+            return id;
+        }
+
+        void Subscribe(CallbackT&& callback)
+        {
+            ID id(this, ++_generatedID);
+            _callbacks.emplace(id, std::forward<CallbackT>(callback));
+        }
+
+        void Unsubscribe(const ID& id) { _callbacks.erase(id); }
+
+        [[nodiscard]] CallbackContainerT::size_type GetSubscriptionsCount() const noexcept { return _callbacks.size(); }
+        [[nodiscard]] bool IsEmpty() const noexcept { return _callbacks.empty(); }
+
+        void Reset() { _callbacks.clear(); }
+
+        [[nodiscard]] typename ID::IdT GetLastGeneratedID() const noexcept { return _generatedID; }
 
     private:
-        IdT _id = invalidID;
-        Delegate<F>* _owner = nullptr;
+        CallbackContainerT _callbacks{};
+        typename ID::IdT _generatedID = ID::invalidID;
     };
 
-    using CallbackT = std::function<F>;
-    using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
-
-public:
-    template<class... TArgs>
-    void Trigger(TArgs&&... args)
-    {
-        for (auto&& [id, callback] : _callbacks)
-        {
-            std::invoke(callback, std::forward<TArgs>(args)...);
-        }
-    }
-
-    [[nodiscard]] ID Subscribe(CallbackT&& callback)
-    {
-        ID id(this, ++_generatedID);
-        _callbacks.emplace(id, std::forward<CallbackT>(callback));
-        return id;
-    }
-
-    void Unsubscribe(const ID& id) { _callbacks.erase(id); }
-
-    [[nodiscard]] CallbackContainerT::size_type GetSubscriptionsCount() const noexcept { return _callbacks.size(); }
-    [[nodiscard]] bool IsEmpty() const noexcept { return _callbacks.empty(); }
-
-    void Reset() { _callbacks.clear(); }
-
-    [[nodiscard]] ID::IdT GetLastGeneratedID() const noexcept { return _generatedID; }
-
-private:
-    CallbackContainerT _callbacks{};
-    ID::IdT _generatedID = ID::invalidID;
-};
+} // namespace Core

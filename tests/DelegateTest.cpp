@@ -26,11 +26,11 @@
 
 TEST(DelegateTest, SimpleTest1)
 {
-    Delegate<void()> delegate;
+    Core::Delegate<void()> delegate;
 
     bool wasInvoked = false;
 
-    auto id = delegate.Subscribe(
+    auto id = delegate.SubscribeAndGetID(
         [&]()
         {
             wasInvoked = true;
@@ -42,11 +42,11 @@ TEST(DelegateTest, SimpleTest1)
 
 TEST(DelegateTest, SimpleTest2)
 {
-    Delegate<void()> delegate;
+    Core::Delegate<void()> delegate;
 
     bool wasInvoked = false;
 
-    auto id = delegate.Subscribe(
+    auto id = delegate.SubscribeAndGetID(
         [&]()
         {
             wasInvoked = true;
@@ -65,11 +65,11 @@ TEST(DelegateTest, SimpleTest2)
 
 TEST(DelegateTest, SimpleTest3)
 {
-    Delegate<void()> delegate;
+    Core::Delegate<void()> delegate;
     {
         bool wasInvoked = false;
 
-        auto id = delegate.Subscribe(
+        auto id = delegate.SubscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
@@ -83,18 +83,18 @@ TEST(DelegateTest, SimpleTest3)
 
 TEST(DelegateTest, SimpleTest4)
 {
-    Delegate<void()> delegate;
+    Core::Delegate<void()> delegate;
     {
         bool wasInvoked1 = false;
         bool wasInvoked2 = false;
 
-        auto id1 = delegate.Subscribe(
+        auto id1 = delegate.SubscribeAndGetID(
             [&]()
             {
                 wasInvoked1 = true;
             });
 
-        auto id2 = delegate.Subscribe(
+        auto id2 = delegate.SubscribeAndGetID(
             [&]()
             {
                 wasInvoked2 = true;
@@ -110,11 +110,11 @@ TEST(DelegateTest, SimpleTest4)
 
 TEST(DelegateTest, SimpleTest5)
 {
-    Delegate<void()> delegate;
+    Core::Delegate<void()> delegate;
     {
         bool wasInvoked = false;
 
-        auto id = delegate.Subscribe(
+        auto id = delegate.SubscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
@@ -129,7 +129,7 @@ TEST(DelegateTest, SimpleTest5)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.Subscribe(
+        auto id = delegate.SubscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
