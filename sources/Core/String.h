@@ -1346,6 +1346,16 @@ namespace Core
             return *this;
         }
 
+        [[nodiscard]] BaseString<char> ToASCII() const
+        {
+            BaseString<char> temp;
+            for (auto ch : *this)
+            {
+                temp += static_cast<char>(ch);
+            }
+            return temp;
+        }
+
         ~BaseString() override { Clear(); }
 
     protected:

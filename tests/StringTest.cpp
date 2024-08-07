@@ -1221,8 +1221,6 @@ TEST(StringTest, BaseString_wchar_t_default__Comparision)
     }
 }
 
-
-
 TEST(StringTest, BaseString_wchar_t_default__InStdSet)
 {
     using Core::WStringAtom;
@@ -2005,4 +2003,12 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
                          });
         EXPECT_EQ(L"HelloworldHowareyou", buffer);
     }
+}
+
+TEST(StringTest, BaseString_wchar_t_to_char)
+{
+    const auto wstr = L"Hello world!"_atom;
+    const auto str = wstr.ToASCII();
+    EXPECT_EQ("Hello world!", str);
+    EXPECT_EQ(12, str.Size());
 }
