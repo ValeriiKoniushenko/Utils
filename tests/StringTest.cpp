@@ -1024,9 +1024,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
     }
 }
 
-
 // ========================== WCHAR_T ==============================
-
 
 TEST(StringTest, BaseString_wchar_t_default__Creation)
 {
@@ -1220,5 +1218,791 @@ TEST(StringTest, BaseString_wchar_t_default__Comparision)
         EXPECT_TRUE(L"Hello"_atom <= std::wstring_view(L"Hello").data());
         EXPECT_TRUE(L"Hello1"_atom >= std::wstring(L"Hello").data());
         EXPECT_TRUE(L"Hello"_atom <= std::wstring_view(L"Hello1").data());
+    }
+}
+
+
+
+TEST(StringTest, BaseString_wchar_t_default__InStdSet)
+{
+    using Core::WStringAtom;
+
+    {
+        std::set<WStringAtom> set;
+        set.emplace(WStringAtom::Intern(L"Hello"));
+        set.emplace(WStringAtom::Intern(L"World"));
+        set.emplace(WStringAtom::Intern(L"Hello"));
+
+        EXPECT_TRUE(set.size() == 2);
+
+        auto itHello = set.find(L"Hello"_atom);
+        ASSERT_TRUE(itHello != set.end());
+        EXPECT_EQ(*itHello, L"Hello");
+        EXPECT_EQ(*itHello, L"Hello"_atom);
+
+        set.emplace(L"AAA"_atom);
+        EXPECT_TRUE(set.size() == 3);
+        auto itAaa = set.find(L"AAA"_atom);
+        ASSERT_TRUE(itAaa != set.end());
+        EXPECT_EQ(*itAaa, L"AAA");
+        EXPECT_EQ(*itAaa, L"AAA"_atom);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__InStdUnorderedSet)
+{
+    using Core::WStringAtom;
+
+    {
+        std::unordered_set<WStringAtom> set;
+        set.emplace(WStringAtom::Intern(L"Hello"));
+        set.emplace(WStringAtom::Intern(L"World"));
+        set.emplace(WStringAtom::Intern(L"Hello"));
+
+        EXPECT_TRUE(set.size() == 2);
+
+        auto itHello = set.find(L"Hello"_atom);
+        ASSERT_TRUE(itHello != set.end());
+        EXPECT_EQ(*itHello, L"Hello");
+        EXPECT_EQ(*itHello, L"Hello"_atom);
+
+        set.emplace(L"AAA"_atom);
+        EXPECT_TRUE(set.size() == 3);
+        auto itAaa = set.find(L"AAA"_atom);
+        ASSERT_TRUE(itAaa != set.end());
+        EXPECT_EQ(*itAaa, L"AAA");
+        EXPECT_EQ(*itAaa, L"AAA"_atom);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__Converts)
+{
+    using Core::WStringAtom;
+
+    {
+        const WStringAtom str = L"123"_atom;
+        EXPECT_EQ(123, str.ConvertTo<int>());
+    }
+
+    {
+        const WStringAtom str = L"123.1234"_atom;
+        EXPECT_EQ(123.1234f, str.ConvertTo<float>());
+    }
+
+    {
+        const WStringAtom str = L"1231234567"_atom;
+        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+    }
+
+    {
+        const WStringAtom str = L"f1231234567"_atom;
+        EXPECT_EQ(0, str.ConvertTo<long long>());
+    }
+
+    {
+        const WStringAtom str = L"1231234567f"_atom;
+        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__UtilsFunctions)
+{
+    using Core::WStringAtom;
+
+    // Split
+    {
+        const WStringAtom str = L"Hello fucking world!"_atom;
+        auto tokens = str.Split(L" L");
+        ASSERT_EQ(3, tokens.size());
+        EXPECT_EQ(tokens[0], L"Hello");
+        EXPECT_EQ(tokens[1], L"fucking");
+        EXPECT_EQ(tokens[2], L"world!");
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__Iterator)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto i = str.begin();
+        EXPECT_EQ('H', *i);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto i = str.cbegin();
+        EXPECT_EQ('H', *i);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto ci = str.cbegin() + 1;
+        auto i = str.begin() + 1;
+        EXPECT_EQ('e', *ci);
+        EXPECT_EQ('e', *i);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto i = str.end() - 1;
+        EXPECT_EQ('!', *i);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto i = str.rbegin() + 1;
+        EXPECT_EQ('!', *i);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto front = str.Front();
+        EXPECT_EQ('H', front);
+
+        auto back = str.Back();
+        EXPECT_EQ('!', back);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        auto begin = str.begin();
+        auto end = str.end();
+
+        EXPECT_TRUE(begin != end);
+        EXPECT_FALSE(begin == end);
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        std::wstring buff;
+
+        for (auto ch : str)
+        {
+            buff.push_back(ch);
+        }
+        EXPECT_EQ(str, buff);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Modifications_RangeBasedFor)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        std::wstring tempStdStr;
+        for (auto ch : str)
+        {
+            tempStdStr.push_back(ch);
+        }
+
+        EXPECT_EQ(tempStdStr, str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Modifications_SubStr)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        str.SubStr(6);
+        EXPECT_EQ(L"world!", str);
+        EXPECT_EQ(6, str.Size());
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        str.SubStr(0, 5);
+        EXPECT_EQ(L"Hello", str);
+        EXPECT_EQ(5, str.Size());
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        str.SubStr(2, 5);
+        EXPECT_EQ(L"llo", str);
+        EXPECT_EQ(3, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Find)
+{
+    using Core::WStringAtom;
+
+    {
+        const auto str = L"Hello world!"_atom;
+        const auto* found = str.Find(L" ");
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = L"Hello world!"_atom;
+        const auto* found = str.Find(std::wstring(L" "));
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = L"Hello world!"_atom;
+        const auto* found = str.Find(L" "_atom);
+        ASSERT_TRUE(found);
+        EXPECT_EQ(' ', *found);
+    }
+
+    {
+        const auto str = L"Hello world! How are you, world?"_atom;
+        const auto strings = str.FindAll(L"world");
+        ASSERT_FALSE(strings.empty());
+        for (const auto& string : strings)
+        {
+            EXPECT_EQ(L"world", std::wstring_view(string, 5));
+        }
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Cmp)
+{
+    using Core::WStringAtom;
+
+    {
+        const auto str = L"Hello world!"_atom;
+        EXPECT_TRUE(str.Compare(L"hello world!", true) == Core::Comparison::Equal);
+        EXPECT_TRUE(str.Compare(L"hello world", true) == Core::Comparison::Less);
+    }
+
+    {
+        const auto str = L"AAA"_atom;
+        EXPECT_TRUE(str.Compare(L"bbb", true) == Core::Comparison::Less);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Trim)
+{
+    using Core::WStringAtom;
+
+    {
+        auto str = L"  MyLogin"_atom;
+        str.TrimStart(' ');
+        EXPECT_EQ(L"MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = L"__MyLogin"_atom;
+        str.TrimStart(' ');
+        EXPECT_EQ(L"__MyLogin", str);
+        EXPECT_EQ(9, str.Size());
+    }
+
+    {
+        auto str = L"MyLogin  "_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ(L"MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = L"MyLogin__"_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ(L"MyLogin__", str);
+        EXPECT_EQ(9, str.Size());
+    }
+
+    {
+        auto str = L"MyLogin  "_atom;
+        str.Trim(' ');
+        EXPECT_EQ(L"MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = L"  MyLogin  "_atom;
+        str.Trim(' ');
+        EXPECT_EQ(L"MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = L"MyLogin__"_atom;
+        str.Trim(' ');
+        EXPECT_EQ(L"MyLogin__", str);
+        EXPECT_EQ(9, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_ToLower)
+{
+    {
+        auto str = L"Hello World!"_atom;
+        str.ToLowerCase();
+        EXPECT_EQ(L"hello world!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_ToUpper)
+{
+    {
+        auto str = L"Hello World!"_atom;
+        str.ToUpperCase();
+        EXPECT_EQ(L"HELLO WORLD!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_PushBack)
+{
+    {
+        auto str = L"Hello World"_atom;
+        str.push_back('!');
+        EXPECT_EQ(L"Hello World!", str);
+        EXPECT_EQ(12, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        const auto* text =
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        str.push_back(text);
+        EXPECT_EQ(
+            L"Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
+            str);
+        EXPECT_EQ(11 + wcslen(text), str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.push_back(std::wstring(L"!!!"));
+        EXPECT_EQ(L"Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.PushBack(std::wstring(L"!!!"));
+        EXPECT_EQ(L"Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_PushFront)
+{
+    {
+        auto str = L"Hello World"_atom;
+        str.push_front('!');
+        EXPECT_EQ(L"!Hello World", str);
+        EXPECT_EQ(12, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        const auto* text =
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+        str.push_front(text);
+        EXPECT_EQ(
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World",
+            str);
+        EXPECT_EQ(11 + wcslen(text), str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.push_front(std::wstring(L"!!!"));
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.PushFront(std::wstring(L"!!!"));
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Insert)
+{
+    {
+        auto str = L"Hello World"_atom;
+        str.insert(0, L"!!!");
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.Insert(0, L"!!!");
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.insert(str.Size(), L"!!!");
+        EXPECT_EQ(L"Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.Insert(str.Size(), L"!!!");
+        EXPECT_EQ(L"Hello World!!!", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.insert(5, L"!!!");
+        EXPECT_EQ(L"Hello!!! World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.Insert(5, L"!!!");
+        EXPECT_EQ(L"Hello!!! World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.insert(str.begin(), L"!!!");
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+
+    {
+        auto str = L"Hello World"_atom;
+        str.Insert(str.begin(), L"!!!");
+        EXPECT_EQ(L"!!!Hello World", str);
+        EXPECT_EQ(14, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_PopBack)
+{
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+
+        str.pop_back();
+
+        EXPECT_EQ(L"Hello World", str);
+        EXPECT_EQ(11, str.Size());
+    }
+
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+
+        str.PopBack();
+
+        EXPECT_EQ(L"Hello World", str);
+        EXPECT_EQ(11, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_PopFront)
+{
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        std::wstring s;
+        str.pop_front();
+
+        EXPECT_EQ(L"ello World!", str);
+        EXPECT_EQ(11, str.Size());
+    }
+
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        std::wstring s;
+        str.PopFront();
+
+        EXPECT_EQ(L"ello World!", str);
+        EXPECT_EQ(11, str.Size());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_ShrinkToFit)
+{
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+
+        str.Reserve(100);
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(201, str.Capacity());
+
+        str.shrink_to_fit();
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+    }
+
+    {
+        auto str = L"Hello World!"_atom;
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+
+        str.Reserve(100);
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(201, str.Capacity());
+
+        str.ShrinkToFit();
+        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12 + 1, str.Capacity());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Replace)
+{
+    {
+        auto str = L"Hello World! Hello World!"_atom;
+        str.ReplaceFirst(L"llo", L"LLO___LLO");
+        EXPECT_EQ(L"HeLLO___LLO World! Hello World!", str);
+    }
+
+    {
+        auto str = L"Hello World! Hello World!"_atom;
+        str.ReplaceAll(L"o", L"!o!");
+        EXPECT_EQ(L"Hell!o! W!o!rld! Hell!o! W!o!rld!", str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Regex)
+{
+    {
+        // check for pascal case
+        auto str = L"RegEx"_atom;
+        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$"));
+    }
+
+    {
+        auto str = L"RegEx"_atom;
+        Core::WStringAtom::StdRegexMatchResults match;
+        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$", match));
+        EXPECT_FALSE(match.empty());
+    }
+
+    {
+        auto str = L"Hello this fucking world!"_atom;
+        str.RegexReplace(L" ", L"_=_");
+        EXPECT_EQ(L"Hello_=_this_=_fucking_=_world!", str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default_Copy)
+{
+    {
+        const auto str = L"Hello world!"_atom;
+        wchar_t arr[128]{};
+        str.Copy(arr, str.Size());
+        EXPECT_EQ(str, arr);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow)
+{
+    auto str = L"Hello World!"_atom;
+
+    {
+        auto tokens = str.Split(L" L");
+        ASSERT_EQ(2, tokens.size());
+        EXPECT_EQ(L"Hello", tokens[0]);
+        EXPECT_EQ(L"World!", tokens[1]);
+    }
+
+    str.ToLowerCase();
+    ASSERT_EQ(L"hello world!", str);
+    ASSERT_EQ(str, L"hello world!");
+    ASSERT_EQ(std::wstring(L"hello world!"), str);
+    ASSERT_EQ(str, std::wstring(L"hello world!"));
+
+    str.ToUpperCase();
+    ASSERT_EQ(L"HELLO WORLD!", str);
+    ASSERT_EQ(str, L"HELLO WORLD!");
+    ASSERT_EQ(std::wstring(L"HELLO WORLD!"), str);
+    ASSERT_EQ(str, std::wstring(L"HELLO WORLD!"));
+
+    str.ReplaceAll(L"!", L"???");
+    ASSERT_EQ(L"HELLO WORLD???", str);
+    ASSERT_EQ(str, L"HELLO WORLD???");
+    ASSERT_EQ(std::wstring(L"HELLO WORLD???"), str);
+    ASSERT_EQ(str, std::wstring(L"HELLO WORLD???"));
+    ASSERT_TRUE(wcscmp(str.c_str(), L"HELLO WORLD???") == 0);
+
+    ASSERT_TRUE(str.Compare(L"AAA", true) == Core::Comparison::Greater);
+    ASSERT_TRUE(str.Compare(L"AAA") == Core::Comparison::Greater);
+    ASSERT_TRUE(str.Compare(L"aaa") == Core::Comparison::Less);
+
+    str.Trim('?');
+    ASSERT_EQ(str, L"HELLO WORLD");
+}
+
+TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow2)
+{
+    Core::WStringAtom str(128);
+    ASSERT_TRUE(str.IsEmpty());
+    ASSERT_TRUE(!str);
+    if (!str)
+    {
+        str.push_back(L"Hello");
+        ASSERT_FALSE(str.IsEmpty());
+        str.push_back(L"World");
+        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_EQ(L"HelloWorld", str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow3)
+{
+    Core::WStringAtom str;
+    str.Resize(5);
+    if (!str)
+    {
+        str.push_back(L"Hello");
+        ASSERT_FALSE(str.IsEmpty());
+        str.push_back(L"World");
+        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_EQ(L"     HelloWorld", str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_RegexFind)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_IterateRegex)
+{
+    using Core::WStringAtom;
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(L"\\w+",
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(std::wstring(L"\\w+"),
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        std::wstring expr(L"\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        std::wstring_view expr(L"\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        const auto expr = L"\\w+"_atom;
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(L"\\w+"_atom,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(std::wstring_view(L"\\w+"),
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
     }
 }

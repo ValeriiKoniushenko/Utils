@@ -862,7 +862,7 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                return std::regex_match(_string, std::regex(expr.data()), flag);
+                return std::regex_match(_string, StdRegex(expr.data()), flag);
             }
 
             return false;
@@ -975,7 +975,7 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                memcpy_s(dest, count * sizeof(CharT), _string + offset, std::min(_size - offset, count));
+                memcpy_s(dest, count * sizeof(CharT), _string + offset, std::min(_size - offset, count) * sizeof(CharT));
                 dest[count] = 0;
             }
             return *this;
