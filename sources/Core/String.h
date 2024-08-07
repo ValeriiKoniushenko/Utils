@@ -645,7 +645,7 @@ namespace Core
             {
                 return {};
             }
-            
+
             return _string[index];
         }
 
@@ -661,10 +661,7 @@ namespace Core
             return _string;
         }
 
-        [[nodiscard]] CharT* Data() noexcept
-        {
-            return data();
-        }
+        [[nodiscard]] CharT* Data() noexcept { return data(); }
 
         [[nodiscard]] std::vector<Self> Split(const Self& delimiter) const
         {
@@ -861,8 +858,7 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr,
-                                      std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
         {
             if (!IsEmpty())
             {
@@ -883,7 +879,8 @@ namespace Core
             return false;
         }
 
-        void RegexReplace(StdStringViewT expr, StdStringViewT newValue, std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
+        void RegexReplace(StdStringViewT expr, StdStringViewT newValue,
+                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
         {
             const StdRegex regex(expr.data());
             BaseString temp;
@@ -891,10 +888,7 @@ namespace Core
             *this = std::move(temp);
         }
 
-        [[nodiscard]] Self GetCopyAsDynamic() const
-        {
-            return BaseString(_string, _size);
-        }
+        [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
 
         Self& operator+=(CharT ch) noexcept { return push_back(ch); }
         Self& operator+=(StdStringViewT str) noexcept { return push_back(str); }
@@ -1188,7 +1182,7 @@ namespace Core
             Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
             memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
         }
-        
+
         explicit BaseString(StdStringViewT str)
             : BaseString(str.data(), str.size())
         {
@@ -1383,7 +1377,6 @@ namespace Core
     using WStringAtom = BaseString<wchar_t>;
 } // namespace Core
 
-
 template<class CharType>
 struct std::hash<Core::BaseString<CharType>>
 {
@@ -1419,7 +1412,7 @@ template<class CharType>
 }
 
 template<class CharType>
-[[nodiscard]] bool operator<=(typename Core::_StringToolset<CharType>::StdStringViewT str1,const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator<=(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
 }

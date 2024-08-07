@@ -1023,3 +1023,202 @@ TEST(StringTest, BaseString_char_IterateRegex)
         EXPECT_EQ("HelloworldHowareyou", buffer);
     }
 }
+
+
+// ========================== WCHAR_T ==============================
+
+
+TEST(StringTest, BaseString_wchar_t_default__Creation)
+{
+    using Core::WStringAtom;
+
+    {
+        const WStringAtom str1 = L"Hello"_atom;
+        const WStringAtom str2 = L"Hello"_atom;
+        const WStringAtom str3 = L"World"_atom;
+
+        EXPECT_EQ(str1, str2);
+        EXPECT_NE(str1, str3);
+    }
+
+    {
+        const wchar_t* dynamicStr = new wchar_t[128]{ L"World" };
+        const WStringAtom str1 = L"Hello"_atom;
+        const WStringAtom str2 = WStringAtom::Intern(dynamicStr);
+        EXPECT_NE(str1, str2);
+
+        delete[] dynamicStr;
+    }
+
+    {
+        const wchar_t* dynamicStr = new wchar_t[128]{ L"World" };
+        WStringAtom str1 = L"Hello"_atom;
+        WStringAtom str2 = WStringAtom::Intern(dynamicStr);
+        EXPECT_NE(str1, str2);
+
+        delete[] dynamicStr;
+    }
+
+    {
+        WStringAtom str1 = L"Hello"_atom;
+        WStringAtom str2 = WStringAtom::Intern(std::wstring(L"World"));
+        EXPECT_NE(str1, str2);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__DefaultCopyAndMove)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str1 = L"Hello"_atom;
+        WStringAtom str2(str1);
+
+        ASSERT_FALSE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_EQ(str1.CStr(), str2.CStr());
+        EXPECT_TRUE(str1.IsStatic());
+        EXPECT_TRUE(str2.IsStatic());
+        EXPECT_EQ(5, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ(L"Hello", str1);
+        EXPECT_EQ(L"Hello", str2);
+    }
+
+    {
+        WStringAtom str1 = L"Hello"_atom;
+        WStringAtom str2(std::move(str1));
+
+        ASSERT_TRUE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.CStr(), str2.CStr());
+        EXPECT_FALSE(str1.IsStatic());
+        EXPECT_TRUE(str2.IsStatic());
+        EXPECT_EQ(0, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ(L"Hello", str2);
+    }
+
+    {
+        WStringAtom str1 = L"Hello";
+        WStringAtom str2(str1);
+
+        ASSERT_FALSE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.CStr(), str2.CStr());
+        EXPECT_TRUE(str1.IsDynamic());
+        EXPECT_TRUE(str2.IsDynamic());
+        EXPECT_EQ(5, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ(L"Hello", str1);
+        EXPECT_EQ(L"Hello", str2);
+    }
+
+    {
+        WStringAtom str1 = L"Hello";
+        WStringAtom str2(std::move(str1));
+
+        ASSERT_TRUE(str1.IsEmpty());
+        ASSERT_FALSE(str2.IsEmpty());
+        EXPECT_NE(str1.CStr(), str2.CStr());
+        EXPECT_EQ(nullptr, str1.CStr());
+        EXPECT_FALSE(str1.IsDynamic());
+        EXPECT_TRUE(str2.IsDynamic());
+        EXPECT_EQ(0, str1.Size());
+        EXPECT_EQ(5, str2.Size());
+        EXPECT_EQ(L"Hello", str2);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_default__Comparision)
+{
+    using Core::WStringAtom;
+
+    {
+        const WStringAtom str1 = L"AAA"_atom;
+        const WStringAtom str2 = WStringAtom::Intern(std::wstring(L"AAB"));
+        EXPECT_NE(str1, str2);
+
+        EXPECT_TRUE(str1 < str2);
+        EXPECT_TRUE(str2 > str1);
+    }
+
+    {
+        const WStringAtom str1 = L"AAA"_atom;
+
+        EXPECT_TRUE(str1 == L"AAA");
+        EXPECT_TRUE(L"AAA" == str1);
+        EXPECT_TRUE(str1 != L"AAB");
+        EXPECT_TRUE(L"AAB" != str1);
+
+        EXPECT_TRUE(str1 < L"AAB");
+        EXPECT_TRUE(L"AAB" > str1);
+
+        EXPECT_TRUE(L"AAA" >= str1);
+        EXPECT_TRUE(L"AAA" <= str1);
+        EXPECT_TRUE(str1 <= L"AAA");
+        EXPECT_TRUE(str1 >= L"AAA");
+    }
+
+    {
+        const WStringAtom str1 = L"AAA"_atom;
+
+        EXPECT_TRUE(str1 == std::wstring(L"AAA"));
+        EXPECT_TRUE(std::wstring(L"AAA") == str1);
+        EXPECT_TRUE(str1 != std::wstring(L"AAB"));
+        EXPECT_TRUE(std::wstring(L"AAB") != str1);
+
+        EXPECT_TRUE(str1 < std::wstring(L"AAB"));
+        EXPECT_TRUE(std::wstring(L"AAB") > str1);
+
+        EXPECT_TRUE(std::wstring(L"AAA") >= str1);
+        EXPECT_TRUE(std::wstring(L"AAA") <= str1);
+        EXPECT_TRUE(str1 <= std::wstring(L"AAA"));
+        EXPECT_TRUE(str1 >= std::wstring(L"AAA"));
+    }
+
+    const WStringAtom str2 = WStringAtom::Intern(std::wstring(L"AAB"));
+    {
+        const WStringAtom str1 = L"AAA"_atom;
+        EXPECT_NE(str1, str2);
+
+        EXPECT_TRUE(str1 < str2);
+        EXPECT_TRUE(str2 > str1);
+    }
+
+    {
+        EXPECT_EQ(L"Hello"_atom, L"Hello"_atom);
+        EXPECT_TRUE(L"Hello"_atom == L"Hello"_atom);
+        EXPECT_TRUE(L"Hello"_atom == std::wstring(L"Hello"));
+        EXPECT_TRUE(L"Hello"_atom == std::wstring_view(L"Hello").data());
+    }
+
+    {
+        EXPECT_TRUE(L"Hello"_atom < L"Hello1");
+        EXPECT_FALSE(L"Hello"_atom > L"Hello1");
+        EXPECT_TRUE(L"Hello"_atom >= L"Hello");
+        EXPECT_TRUE(L"Hello"_atom <= L"Hello");
+        EXPECT_TRUE(L"Hello"_atom <= L"Hello1");
+        EXPECT_TRUE(L"Hello1"_atom >= L"Hello");
+
+        EXPECT_TRUE(L"Hello"_atom < L"Hello1"_atom);
+        EXPECT_FALSE(L"Hello"_atom > L"Hello1"_atom);
+        EXPECT_TRUE(L"Hello"_atom != L"Hello1"_atom);
+        EXPECT_TRUE(L"Hello"_atom <= L"Hello1"_atom);
+        EXPECT_TRUE(L"Hello1"_atom >= L"Hello"_atom);
+        EXPECT_TRUE(L"Hello"_atom >= L"Hello"_atom);
+        EXPECT_TRUE(L"Hello"_atom <= L"Hello"_atom);
+
+        EXPECT_TRUE(L"Hello"_atom != std::wstring(L"Hello1"));
+        EXPECT_TRUE(L"Hello"_atom >= std::wstring(L"Hello"));
+        EXPECT_TRUE(L"Hello"_atom <= std::wstring(L"Hello"));
+        EXPECT_TRUE(L"Hello1"_atom >= std::wstring(L"Hello"));
+        EXPECT_TRUE(L"Hello"_atom <= std::wstring(L"Hello1"));
+
+        EXPECT_TRUE(L"Hello"_atom != std::wstring_view(L"Hello1").data());
+        EXPECT_TRUE(L"Hello"_atom >= std::wstring_view(L"Hello").data());
+        EXPECT_TRUE(L"Hello"_atom <= std::wstring_view(L"Hello").data());
+        EXPECT_TRUE(L"Hello1"_atom >= std::wstring(L"Hello").data());
+        EXPECT_TRUE(L"Hello"_atom <= std::wstring_view(L"Hello1").data());
+    }
+}
