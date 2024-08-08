@@ -1149,6 +1149,7 @@ namespace Core
             {
                 _capacity = capacity;
                 memcpy_s(_string, _size * sizeof(CharT), oldString, _size);
+                _string[_size] = 0;
 
                 if (_policy == StringPolicy::Static)
                 {
