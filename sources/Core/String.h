@@ -78,7 +78,7 @@ namespace Core
 
         static void FromInt(int value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%d", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'int' value to string.");
             }
@@ -86,7 +86,7 @@ namespace Core
 
         static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%f", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%f", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'float' value to string.");
             }
@@ -94,7 +94,7 @@ namespace Core
 
         static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%lf", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%lf", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'double' value to string.");
             }
@@ -102,7 +102,7 @@ namespace Core
 
         static void FromUnsignedLongLong(unsigned long long value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%llu", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%llu", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'long long' value to string.");
             }
@@ -148,7 +148,7 @@ namespace Core
 
         static void FromInt(int value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%d", value); errorCode != 0)
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'int' value to string.");
             }
@@ -156,7 +156,7 @@ namespace Core
 
         static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%f", value); errorCode != 0)
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%f", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'float' value to string.");
             }
@@ -164,15 +164,15 @@ namespace Core
 
         static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%lf", value); errorCode != 0)
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lf", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'double' value to string.");
             }
         }
 
-        static void FromLongLong(long long value, CharT* buffer, SizeT bufferSize)
+        static void FromUnsignedLongLong(unsigned long long value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%ll", value); errorCode != 0)
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'long long' value to string.");
             }
@@ -287,6 +287,17 @@ namespace Core
     };
 
     class Iterator;
+
+    template<class T>
+    concept IsFormattableType =
+        std::is_same_v<std::decay_t<T>, int>
+        || std::is_same_v<std::decay_t<T>, double>
+        || std::is_same_v<std::decay_t<T>, float>
+        || std::is_same_v<std::decay_t<T>, unsigned long long>
+        || std::is_same_v<std::decay_t<T>, const char*>
+        || std::is_same_v<std::decay_t<T>, char*>
+        || std::is_same_v<std::decay_t<T>, const wchar_t*>
+        || std::is_same_v<std::decay_t<T>, wchar_t*>;
 
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
@@ -782,6 +793,12 @@ namespace Core
         }
 
         template<>
+        static Self MakeFrom(const CharT* value)
+        {
+            return Self(value);
+        }
+
+        template<>
         static Self MakeFrom(float value)
         {
             Self temp;
@@ -856,6 +873,24 @@ namespace Core
             }
             Assert("Impossible to work with nullptr string.");
             return {};
+        }
+
+        template<IsFormattableType... T>
+        [[nodiscard]] static Self Format(StdStringViewT str, const T... args)
+        {
+            Self temp(str);
+            const void* expr = nullptr;
+            if constexpr (sizeof(CharT) == 1)
+            {
+                expr = "\\{\\}";
+            }
+            else
+            {
+                expr = L"\\{\\}";
+            }
+
+            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::match_flag_type::format_first_only), ...);
+            return temp;
         }
 
         [[nodiscard]] HashT MakeHash() const noexcept

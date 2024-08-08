@@ -1036,10 +1036,17 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
 TEST(StringTest, BaseString_char_default__From)
 {
     using Core::StringAtom;
-    EXPECT_EQ("123", StringAtom::MakeFrom(123));;
-    EXPECT_EQ("123.0", StringAtom::MakeFrom(123.f));;
-    EXPECT_EQ("123.0", StringAtom::MakeFrom(123.));;
-    EXPECT_EQ("412312334234ll", StringAtom::MakeFrom(412312334234ull));;
+    EXPECT_EQ("123", StringAtom::MakeFrom(123));
+    EXPECT_EQ("123.000000", StringAtom::MakeFrom(123.f));
+    EXPECT_EQ("123.000000", StringAtom::MakeFrom(123.));
+    EXPECT_EQ("412312334234", StringAtom::MakeFrom(412312334234ull));
+}
+
+TEST(StringTest, BaseString_char_default__Format)
+{
+    using Core::StringAtom;
+    const auto str = StringAtom::Format("Hello {}! I have {}$. If u want we can go to {}.", "Jenny", 300, "caffee");
+    EXPECT_EQ("Hello Jenny! I have 300$. If u want we can go to caffee.", str);
 }
 
 // =================================================================
@@ -2031,4 +2038,20 @@ TEST(StringTest, BaseString_wchar_t_to_char)
     const auto str = wstr.ToASCII();
     EXPECT_EQ("Hello world!", str);
     EXPECT_EQ(12, str.Size());
+}
+
+TEST(StringTest, BaseString_wchar_t_default__From)
+{
+    using Core::WStringAtom;
+    EXPECT_EQ(L"123", WStringAtom::MakeFrom(123));
+    EXPECT_EQ(L"123.000000", WStringAtom::MakeFrom(123.f));
+    EXPECT_EQ(L"123.000000", WStringAtom::MakeFrom(123.));
+    EXPECT_EQ(L"412312334234", WStringAtom::MakeFrom(412312334234ull));
+}
+
+TEST(StringTest, BaseString_wchar_t_default__Format)
+{
+    using Core::WStringAtom;
+    const auto str = WStringAtom::Format(L"Hello {}! I have {}$. If u want we can go to {}.", L"Jenny", 300, L"caffee");
+    EXPECT_EQ(L"Hello Jenny! I have 300$. If u want we can go to caffee.", str);
 }
