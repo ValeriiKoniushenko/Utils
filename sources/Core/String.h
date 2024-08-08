@@ -37,6 +37,7 @@
 #include <unordered_map>
 #include <vector>
 #include <xstring>
+#include <cwctype>
 
 namespace Core
 {
@@ -69,6 +70,7 @@ namespace Core
         using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
+        [[nodiscard]] static bool IsSpace(int ch) { return static_cast<bool>(isspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(strlen(string)); }
 
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
@@ -139,6 +141,7 @@ namespace Core
         using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
+        [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
 
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
