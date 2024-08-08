@@ -290,14 +290,9 @@ namespace Core
 
     template<class T>
     concept IsFormattableType =
-        std::is_same_v<std::decay_t<T>, int>
-        || std::is_same_v<std::decay_t<T>, double>
-        || std::is_same_v<std::decay_t<T>, float>
-        || std::is_same_v<std::decay_t<T>, unsigned long long>
-        || std::is_same_v<std::decay_t<T>, const char*>
-        || std::is_same_v<std::decay_t<T>, char*>
-        || std::is_same_v<std::decay_t<T>, const wchar_t*>
-        || std::is_same_v<std::decay_t<T>, wchar_t*>;
+        std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
+        std::is_same_v<std::decay_t<T>, unsigned long long> || std::is_same_v<std::decay_t<T>, const char*> ||
+        std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*>;
 
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
@@ -1357,8 +1352,8 @@ namespace Core
         Self& operator=(StdStringViewT other)
         {
             Clear();
-            Resize(other._size);
-            memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
+            Resize(other.Size());
+            memcpy_s(_string, _size * sizeof(CharT), other.data(), other.Size() * sizeof(CharT));
             return *this;
         }
 
