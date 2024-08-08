@@ -40,7 +40,6 @@
 
 namespace Core
 {
-
     enum class StringPolicy
     {
         None,
@@ -66,17 +65,52 @@ namespace Core
     {
         using CharT = char;
         using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StdStringViewT = std::basic_string_view<CharT>;
-        using StdRegex = std::basic_regex<CharT>;
+        using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
+        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(strlen(string)); }
+
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
         [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return atoll(str); }
+
+        static void FromInt(int value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%d", value); errorCode < 0)
+            {
+                Assert("Impossible to convert 'int' value to string.");
+            }
+        }
+
+        static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%f", value); errorCode < 0)
+            {
+                Assert("Impossible to convert 'float' value to string.");
+            }
+        }
+
+        static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%lf", value); errorCode < 0)
+            {
+                Assert("Impossible to convert 'double' value to string.");
+            }
+        }
+
+        static void FromUnsignedLongLong(unsigned long long value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize * sizeof(CharT), "%llu", value); errorCode < 0)
+            {
+                Assert("Impossible to convert 'long long' value to string.");
+            }
+        }
+
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
+
         [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
         [[nodiscard]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
 
@@ -101,17 +135,52 @@ namespace Core
     {
         using CharT = wchar_t;
         using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StdStringViewT = std::basic_string_view<CharT>;
-        using StdRegex = std::basic_regex<CharT>;
+        using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
+        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
+
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
         [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return _wtoll(str); }
+
+        static void FromInt(int value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%d", value); errorCode != 0)
+            {
+                Assert("Impossible to convert 'int' value to string.");
+            }
+        }
+
+        static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%f", value); errorCode != 0)
+            {
+                Assert("Impossible to convert 'float' value to string.");
+            }
+        }
+
+        static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%lf", value); errorCode != 0)
+            {
+                Assert("Impossible to convert 'double' value to string.");
+            }
+        }
+
+        static void FromLongLong(long long value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize * sizeof(CharT), bufferSize * sizeof(CharT), L"%ll", value); errorCode != 0)
+            {
+                Assert("Impossible to convert 'long long' value to string.");
+            }
+        }
+
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
+
         [[nodiscard]] static std::wint_t ToUpper(const CharT ch) noexcept { return towupper(ch); };
         [[nodiscard]] static std::wint_t ToLower(const CharT ch) noexcept { return towlower(ch); };
 
@@ -700,6 +769,49 @@ namespace Core
         }
 
         template<class T>
+        static Self MakeFrom(T);
+
+        template<>
+        static Self MakeFrom(int value)
+        {
+            Self temp;
+            temp.Reserve(16);
+            Toolset::FromInt(value, temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
+        template<>
+        static Self MakeFrom(float value)
+        {
+            Self temp;
+            temp.Reserve(16);
+            Toolset::FromFloat(value, temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
+        template<>
+        static Self MakeFrom(double value)
+        {
+            Self temp;
+            temp.Reserve(16);
+            Toolset::FromDouble(value, temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
+        template<>
+        static Self MakeFrom(unsigned long long value)
+        {
+            Self temp;
+            temp.Reserve(32);
+            Toolset::FromUnsignedLongLong(value, temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
+        template<class T>
         [[nodiscard]] T ConvertTo() const noexcept;
 
         template<>
@@ -719,6 +831,17 @@ namespace Core
             if (!IsEmpty())
             {
                 return Toolset::ToFloat(_string);
+            }
+            Assert("Impossible to work with nullptr string.");
+            return {};
+        }
+
+        template<>
+        [[nodiscard]] double ConvertTo() const noexcept
+        {
+            if (!IsEmpty())
+            {
+                return Toolset::ToDouble(_string);
             }
             Assert("Impossible to work with nullptr string.");
             return {};
@@ -879,13 +1002,15 @@ namespace Core
             return false;
         }
 
-        void RegexReplace(StdStringViewT expr, StdStringViewT newValue,
+        bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
                           std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
         {
             const StdRegex regex(expr.data());
             BaseString temp;
             std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), flag);
+            const auto wasReplaced = *this != temp;
             *this = std::move(temp);
+            return wasReplaced;
         }
 
         [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
@@ -897,6 +1022,7 @@ namespace Core
         Self& PushBack(CharT ch) noexcept { return push_back(StdStringViewT(&ch, 1)); }
 
         Self& push_back(StdStringViewT str) noexcept { return PushBack(str); }
+
         Self& PushBack(StdStringViewT str) noexcept
         {
             const auto oldSize = _size;
@@ -920,6 +1046,7 @@ namespace Core
         Self& PushFront(CharT ch) noexcept { return PushFront(StdStringViewT(&ch, 1)); }
 
         Self& push_front(StdStringViewT str) noexcept { return PushFront(str); }
+
         Self& PushFront(StdStringViewT str) noexcept
         {
             const auto oldSize = _size;

@@ -1024,7 +1024,27 @@ TEST(StringTest, BaseString_char_IterateRegex)
     }
 }
 
+TEST(StringTest, BaseString_char_default__RegexReplace)
+{
+    auto str = "Hello world!"_atom;
+    EXPECT_FALSE(str.RegexReplace("\\?", ""));
+    EXPECT_EQ("Hello world!", str);
+    EXPECT_TRUE(str.RegexReplace(" ", "_"));
+    EXPECT_EQ("Hello_world!", str);
+}
+
+TEST(StringTest, BaseString_char_default__From)
+{
+    using Core::StringAtom;
+    EXPECT_EQ("123", StringAtom::MakeFrom(123));;
+    EXPECT_EQ("123.0", StringAtom::MakeFrom(123.f));;
+    EXPECT_EQ("123.0", StringAtom::MakeFrom(123.));;
+    EXPECT_EQ("412312334234ll", StringAtom::MakeFrom(412312334234ull));;
+}
+
+// =================================================================
 // ========================== WCHAR_T ==============================
+// =================================================================
 
 TEST(StringTest, BaseString_wchar_t_default__Creation)
 {
