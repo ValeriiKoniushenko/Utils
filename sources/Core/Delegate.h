@@ -105,7 +105,7 @@ namespace Core
 
         void Subscribe(CallbackT&& callback)
         {
-            ID id(this, ++_generatedID);
+            ID id(nullptr, ++_generatedID);
             _callbacks.emplace(id, std::forward<CallbackT>(callback));
         }
 

@@ -141,3 +141,22 @@ TEST(DelegateTest, SimpleTest5)
     EXPECT_EQ(0, delegate.GetSubscriptionsCount());
     EXPECT_TRUE(delegate.IsEmpty());
 }
+
+TEST(DelegateTest, SubscribeWithoutIDGetting)
+{
+    Core::Delegate<void()> delegate;
+    {
+        bool wasInvoked = false;
+
+        delegate.Subscribe(
+            [&]()
+            {
+                wasInvoked = true;
+            });
+
+        delegate.Trigger();
+        EXPECT_TRUE(wasInvoked);
+    }
+    EXPECT_EQ(1, delegate.GetSubscriptionsCount());
+    EXPECT_FALSE(delegate.IsEmpty());
+}
