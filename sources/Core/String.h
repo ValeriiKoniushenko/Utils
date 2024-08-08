@@ -1352,8 +1352,8 @@ namespace Core
         Self& operator=(StdStringViewT other)
         {
             Clear();
-            Resize(other.Size());
-            memcpy_s(_string, _size * sizeof(CharT), other.data(), other.Size() * sizeof(CharT));
+            Resize(other.size());
+            memcpy_s(_string, _size * sizeof(CharT), other.data(), other.size() * sizeof(CharT));
             return *this;
         }
 
