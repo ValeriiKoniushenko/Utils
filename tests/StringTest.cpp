@@ -32,6 +32,14 @@ TEST(StringTest, BaseString_char_default__Creation)
     using Core::StringAtom;
 
     {
+        const StringAtom str1 = "";
+
+        EXPECT_EQ("", str1);
+        EXPECT_EQ(0, str1.Size());
+        EXPECT_NE(0, str1.Capacity());
+    }
+
+    {
         const StringAtom str1 = "Hello"_atom;
         const StringAtom str2 = "Hello"_atom;
         const StringAtom str3 = "World"_atom;

@@ -29,6 +29,7 @@
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <cstring>
+#include <cwctype>
 #include <functional>
 #include <optional>
 #include <regex>
@@ -37,7 +38,6 @@
 #include <unordered_map>
 #include <vector>
 #include <xstring>
-#include <cwctype>
 
 namespace Core
 {
@@ -563,6 +563,11 @@ namespace Core
         {
             if (IsEmpty() || !other)
             {
+                if (_string && _string[0] == 0 && other && other[0] == 0)
+                {
+                    return true;
+                }
+
                 Assert("Impossible to work with nullptr string.");
                 return {};
             }
@@ -625,6 +630,10 @@ namespace Core
         {
             if (IsEmpty() || other.empty())
             {
+                if (_string && _string[0] == 0 && other.empty())
+                {
+                    return true;
+                }
                 Assert("Impossible to work with nullptr string.");
                 return {};
             }
@@ -1501,6 +1510,11 @@ namespace Core
             else if (newSize > _size || _policy == StringPolicy::Static)
             {
                 Reserve(newSize);
+            }
+            // for empty init
+            else if (newSize == 0 && _policy == StringPolicy::None)
+            {
+                Reserve(1);
             }
             _size = newSize;
 
