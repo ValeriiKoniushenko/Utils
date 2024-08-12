@@ -709,7 +709,10 @@ namespace Core
         {
             if (IsEmpty())
             {
-                return {};
+                if constexpr (sizeof(CharT) == 1)
+                    return { "" };
+                else
+                    return { L"" };
             }
 
             return { _string, _size };
