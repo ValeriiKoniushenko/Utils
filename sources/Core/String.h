@@ -709,7 +709,6 @@ namespace Core
         {
             if (IsEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -718,7 +717,7 @@ namespace Core
 
         [[nodiscard]] StdStringT ToStdString() const
         {
-            if (!Verify(!IsEmpty(), "Impossible to work with nullptr string."))
+            if (IsEmpty())
             {
                 return {};
             }
