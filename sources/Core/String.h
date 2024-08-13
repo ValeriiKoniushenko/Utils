@@ -994,6 +994,65 @@ namespace Core
             return *this;
         }
 
+        Self& Erase(IndexT index)
+        {
+            if (!IsEmpty())
+            {
+                if (!Verify(index < _size, "Invalid index"))
+                {
+                    return *this;
+                }
+
+                Self temp(_string, index);
+                temp += _string + index + 1;
+                *this = std::move(temp);
+            }
+
+            return *this;
+        }
+
+        Self& Erase(IndexT from, IndexT to)
+        {
+            if (!IsEmpty())
+            {
+                if (!Verify(from < _size && to < _size, "Invalid index"))
+                {
+                    return *this;
+                }
+
+                Self temp(_string, from);
+                temp += _string + to + 1;
+                *this = std::move(temp);
+            }
+
+            return *this;
+        }
+
+        Self& Erase(IteratorT iterator)
+        {
+            if (!IsEmpty())
+            {
+                if (Verify(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
+                {
+                    return Erase(iterator._data - _string);
+                }
+            }
+            return *this;
+        }
+
+        Self& Erase(IteratorT from, IteratorT to)
+        {
+            if (!IsEmpty())
+            {
+                if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'")
+                    && Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
+                {
+                    return Erase(from._data - _string, to._data - _string);
+                }
+            }
+            return *this;
+        }
+
         Self& ReplaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
             if (!IsEmpty())

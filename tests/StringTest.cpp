@@ -1066,6 +1066,34 @@ How are you?)"_atom;
     EXPECT_EQ(3, StringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
 }
 
+TEST(StringTest, BaseString_char_default__Erase)
+{
+    using Core::StringAtom;
+    {
+        auto str = "Hello world!"_atom;
+        str.Erase(5);
+        EXPECT_EQ("Helloworld!", str);
+    }
+
+    {
+        auto str = "Hello world!"_atom;
+        str.Erase(5, 7);
+        EXPECT_EQ("Hellorld!", str);
+    }
+
+    {
+        auto str = "Hello world!"_atom;
+        str.Erase(str.begin() + 5);
+        EXPECT_EQ("Helloworld!", str);
+    }
+
+    {
+        auto str = "Hello world!"_atom;
+        str.Erase(str.begin() + 5, str.begin() + 7);
+        EXPECT_EQ("Hellorld!", str);
+    }
+}
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================
@@ -2076,7 +2104,8 @@ TEST(StringTest, BaseString_wchar_t_default__Format)
 TEST(StringTest, BaseString_wchar_t_default__LinesCount)
 {
     using Core::WStringAtom;
-    const auto str = LR"(Hello
+    const auto str =
+        LR"(Hello
 World!
 How are you?)"_atom;
     EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
