@@ -1057,6 +1057,15 @@ TEST(StringTest, BaseString_char_default__Format)
     EXPECT_EQ("Hello Jenny! I have 300$. If u want we can go to caffee.", str);
 }
 
+TEST(StringTest, BaseString_char_default__LinesCount)
+{
+    using Core::StringAtom;
+    const auto str = R"(Hello
+World!
+How are you?)"_atom;
+    EXPECT_EQ(3, StringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
+}
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================
@@ -2062,4 +2071,13 @@ TEST(StringTest, BaseString_wchar_t_default__Format)
     using Core::WStringAtom;
     const auto str = WStringAtom::Format(L"Hello {}! I have {}$. If u want we can go to {}.", L"Jenny", 300, L"caffee");
     EXPECT_EQ(L"Hello Jenny! I have 300$. If u want we can go to caffee.", str);
+}
+
+TEST(StringTest, BaseString_wchar_t_default__LinesCount)
+{
+    using Core::WStringAtom;
+    const auto str = LR"(Hello
+World!
+How are you?)"_atom;
+    EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
 }

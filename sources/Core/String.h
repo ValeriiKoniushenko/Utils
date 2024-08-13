@@ -710,9 +710,13 @@ namespace Core
             if (IsEmpty())
             {
                 if constexpr (sizeof(CharT) == 1)
+                {
                     return { "" };
+                }
                 else
+                {
                     return { L"" };
+                }
             }
 
             return { _string, _size };
@@ -1534,6 +1538,32 @@ namespace Core
         }
 
         ~BaseString() override { Clear(); }
+
+        // ============= Utils ===============
+        static std::size_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
+        {
+            if (!Verify(!end || !source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
+            {
+                return 0;
+            }
+            constexpr const int endLineCode = 10; // 10 == '\n'
+
+            while (end[0] == endLineCode)
+            {
+                ++end;
+            }
+
+            std::size_t count = 0;
+            for (std::size_t i = 0; i < end - source.c_str(); ++i)
+            {
+                if (source[i] == endLineCode)
+                {
+                    ++count;
+                }
+            }
+
+            return ++count;
+        }
 
     protected:
         explicit BaseString(StringDataReadOnlyT data)
