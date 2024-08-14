@@ -1468,7 +1468,7 @@ namespace Core
             }
             else
             {
-                Assert("Invalid StringPolicy type. Impossible to copy\\assign.");
+                Clear();
             }
 
             return *this;
@@ -1506,7 +1506,7 @@ namespace Core
             }
             else
             {
-                Assert("Invalid StringPolicy type. Impossible to copy\\assign.");
+                Clear();
             }
 
             return *this;
