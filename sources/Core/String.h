@@ -949,15 +949,16 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                long long offset = static_cast<long long>(_size) - 1ll;
-                while (_string[offset] == ch && offset >= 0)
+                SizeT count = 0;
+                const CharT* end = _string + _size;
+                while (*--end == ch && count < _size)
                 {
-                    --offset;
+                    ++count;
                 }
-                ++offset;
-                if (offset != static_cast<long long>(_size) - 1ll)
+
+                if (count != 0)
                 {
-                    Resize(offset);
+                    Resize(_size - count);
                 }
             }
 
@@ -1044,8 +1045,8 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'")
-                    && Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
+                if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
+                    Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
                     return Erase(from._data - _string, to._data - _string);
                 }

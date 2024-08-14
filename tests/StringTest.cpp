@@ -557,6 +557,29 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ("MyLogin__", str);
         EXPECT_EQ(9, str.Size());
     }
+
+    {
+        auto str = "MyLogin;"_atom;
+        str.Trim(';');
+        EXPECT_EQ("MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = "   "_atom;
+        str.Trim(' ');
+        EXPECT_EQ("", str);
+        EXPECT_EQ(0, str.Size());
+        EXPECT_NE(0, str.Capacity());
+    }
+
+    {
+        auto str = "   "_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ("", str);
+        EXPECT_EQ(0, str.Size());
+        EXPECT_NE(0, str.Capacity());
+    }
 }
 
 TEST(StringTest, BaseString_char_default_ToLower)
@@ -1602,6 +1625,29 @@ TEST(StringTest, BaseString_wchar_t_default_Trim)
         EXPECT_EQ(L"MyLogin__", str);
         EXPECT_EQ(9, str.Size());
     }
+
+    {
+        auto str = L"MyLogin;"_atom;
+        str.Trim(';');
+        EXPECT_EQ(L"MyLogin", str);
+        EXPECT_EQ(7, str.Size());
+    }
+
+    {
+        auto str = L"   "_atom;
+        str.Trim(' ');
+        EXPECT_EQ(L"", str);
+        EXPECT_EQ(0, str.Size());
+        EXPECT_NE(0, str.Capacity());
+    }
+
+    {
+        auto str = L"   "_atom;
+        str.TrimEnd(' ');
+        EXPECT_EQ(L"", str);
+        EXPECT_EQ(0, str.Size());
+        EXPECT_NE(0, str.Capacity());
+    }
 }
 
 TEST(StringTest, BaseString_wchar_t_default_ToLower)
@@ -2109,4 +2155,32 @@ TEST(StringTest, BaseString_wchar_t_default__LinesCount)
 World!
 How are you?)"_atom;
     EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
+}
+
+TEST(StringTest, BaseString_wchar_t_default__Erase)
+{
+    using Core::WStringAtom;
+    {
+        auto str = L"Hello world!"_atom;
+        str.Erase(5);
+        EXPECT_EQ(L"Helloworld!", str);
+    }
+
+    {
+        auto str = L"Hello world!"_atom;
+        str.Erase(5, 7);
+        EXPECT_EQ(L"Hellorld!", str);
+    }
+
+    {
+        auto str = L"Hello world!"_atom;
+        str.Erase(str.begin() + 5);
+        EXPECT_EQ(L"Helloworld!", str);
+    }
+
+    {
+        auto str = L"Hello world!"_atom;
+        str.Erase(str.begin() + 5, str.begin() + 7);
+        EXPECT_EQ(L"Hellorld!", str);
+    }
 }
