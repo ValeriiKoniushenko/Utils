@@ -501,6 +501,10 @@ namespace Core
         {
             if (IsEmpty() || other.IsEmpty())
             {
+                if (IsEmpty() && other.IsEmpty())
+                {
+                    return true;
+                }
                 Assert("Impossible to work with nullptr string.");
                 return {};
             }
@@ -511,6 +515,11 @@ namespace Core
         {
             if (IsEmpty() || other.IsEmpty())
             {
+                if ((IsEmpty() && !other.IsEmpty()) || (!IsEmpty() && other.IsEmpty()))
+                {
+                    return true;
+                }
+
                 Assert("Impossible to work with nullptr string.");
                 return {};
             }
