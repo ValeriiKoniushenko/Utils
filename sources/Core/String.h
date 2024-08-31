@@ -1098,7 +1098,7 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
             if (!IsEmpty())
             {
