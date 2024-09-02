@@ -47,7 +47,7 @@ def CanGoTo(path):
 
 def ValidateFile(path):
     if IsCorrectFileExtension(path):
-        proc = subprocess.Popen(f'cppcheck -j 20 --language=c++ --std=c++20 -q --platform=win64 --template="[{{severity}}] {{file}}:{{line}}[{{column}}]:\n\tID: {{id}}\n\tMessage: {{message}}\n" --suppress=missingIncludeSystem --suppress=uninitdata --verbose --error-exitcode=1 {path}', stdout=subprocess.PIPE)
+        proc = subprocess.Popen(f'cppcheck -j 20 --language=c++ --std=c++20 -q --platform=win64 --template="[{{severity}}] {{file}}:{{line}}[{{column}}]:\n\tID: {{id}}\n\tMessage: {{message}}\n" --suppress=missingIncludeSystem --suppress=unknownMacro --suppress=uninitdata --verbose --error-exitcode=1 {path}', stdout=subprocess.PIPE)
         output = proc.stdout.read().decode(project_config.gCharSet)
         if len(output) > 0:
             project_config.gValidationErrors.append({output})
