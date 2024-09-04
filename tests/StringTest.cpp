@@ -1117,6 +1117,21 @@ TEST(StringTest, BaseString_char_default__Erase)
     }
 }
 
+TEST(StringTest, BaseString_char_default__Misc)
+{
+    EXPECT_TRUE(Core::StringAtom::IsSpace(' '));
+    EXPECT_TRUE(Core::StringAtom::IsSpace('\n'));
+    EXPECT_TRUE(Core::StringAtom::IsSpace('\t'));
+    EXPECT_TRUE(Core::StringAtom::IsSpace('\r'));
+    EXPECT_FALSE(Core::StringAtom::IsSpace('a'));
+
+    EXPECT_TRUE(Core::StringAtom::IsContainChar('a', "abcdef"));
+    EXPECT_TRUE(Core::StringAtom::IsContainChar('c', "abcdef"));
+    EXPECT_TRUE(Core::StringAtom::IsContainChar('f', "abcdef"));
+    EXPECT_FALSE(Core::StringAtom::IsContainChar('z', "abcdef"));
+}
+
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================

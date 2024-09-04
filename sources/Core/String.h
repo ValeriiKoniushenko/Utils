@@ -1098,6 +1098,20 @@ namespace Core
             return *this;
         }
 
+        [[nodiscard]] static bool IsSpace(CharT ch) noexcept { return Toolset::IsSpace(ch); }
+        [[nodiscard]] static bool IsContainChar(CharT ch, StdStringViewT set) noexcept
+        {
+            for (const auto value : set)
+            {
+                if (value == ch)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
             if (!IsEmpty())
