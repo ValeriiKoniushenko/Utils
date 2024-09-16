@@ -464,7 +464,7 @@ namespace Core
 
         using IteratorT = Iterator<false>;
         using ReverseIteratorT = Iterator<true>;
-        using StdRegexMatchResults = std::match_results<Core::BaseString<CharT>::IteratorT>;
+        using StdRegexMatchResults = std::match_results<IteratorT>;
 
     public:
         [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ _string, this }; }
@@ -1122,7 +1122,7 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::match_results<Core::BaseString<CharT>::Iterator<false>>& match,
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
                                       std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
             if (!IsEmpty())

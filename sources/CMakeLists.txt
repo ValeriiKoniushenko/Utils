@@ -1,12 +1,7 @@
-file(
-    GLOB Sources
-    "Utils/*.h"
-    "Utils/*.cpp"
-    "Core/*.h"
-    "Core/*.cpp"
-)
+add_subdirectory(Core)
+add_subdirectory(Utils)
 
-add_library(Utils INTERFACE ${Sources})
+add_library(Utils INTERFACE)
 set_target_properties(Utils PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(Utils INTERFACE ./)
-target_link_libraries(Utils INTERFACE glm)
+target_link_libraries(Utils INTERFACE Utils::Core Utils::Utils)
