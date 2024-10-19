@@ -815,6 +815,12 @@ namespace Core
         }
 
         template<>
+        static Self MakeFrom(const Self& value)
+        {
+            return value;
+        }
+
+        template<>
         static Self MakeFrom(const CharT* value)
         {
             return Self(value);
