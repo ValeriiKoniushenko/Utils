@@ -290,12 +290,15 @@ namespace Core
     };
 
     class Iterator;
+    template<class CharType>
+    class BaseString;
 
     template<class T>
     concept IsFormattableType =
         std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
         std::is_same_v<std::decay_t<T>, unsigned long long> || std::is_same_v<std::decay_t<T>, const char*> ||
-        std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*>;
+        std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
+        std::is_same_v<T, BaseString<T>>;
 
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
