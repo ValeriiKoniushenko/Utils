@@ -11,7 +11,8 @@ if(MSVC)
 else()
     # do nothing
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        add_compile_options("-stdlib=libc++")
+        message(STATUS "Clang: added flag[s]")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     else()
         # do nothing
     endif()

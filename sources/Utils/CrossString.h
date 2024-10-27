@@ -24,6 +24,7 @@
 
 #ifndef _MSC_VER
 
+    // TODO: maybe remove
     #include <stdarg.h>
     #include <string.h>
 

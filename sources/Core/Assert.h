@@ -23,7 +23,10 @@
 #pragma once
 
 #include <iostream>
-#include <stacktrace>
+
+#ifdef __cpp_lib_stacktrace
+    #include <stacktrace>
+#endif
 
 inline void Assert(bool condition, const char* message = nullptr)
 {
@@ -34,17 +37,19 @@ inline void Assert(bool condition, const char* message = nullptr)
 
     using std::cerr;
     using std::endl;
-    using std::stacktrace;
 
     cerr << "Assert was got: " << endl
          << "Message: " << (message ? message : "None") << endl
+    #ifdef __cpp_lib_stacktrace
          << "Stacktrace: " << endl
-         << stacktrace::current() << endl;
+         << std::stacktrace::current() << endl
+    #endif
+    ;
 
 #ifdef __clang__
     __builtin_debugtrap();
 #else
-//    static_assert(false, "Not implemented behavoir for your compiler.")
+    static_assert(false, "Not implemented behaviour for your compiler.")
 #endif
 }
 
@@ -56,18 +61,5 @@ inline bool Verify(bool condition, const char* message = nullptr)
 
 inline void Assert(const char* message = nullptr)
 {
-    using std::cerr;
-    using std::endl;
-    using std::stacktrace;
-
-    cerr << "Assert was got: " << endl
-         << "Message: " << (message ? message : "None") << endl
-         << "Stacktrace: " << endl
-         << stacktrace::current() << endl;
-
-#ifdef __clang__
-    __builtin_debugtrap();
-#else
-    // static_assert(false, "Not implemented behavoir for your compiler.")
-#endif
+    Assert(false, message);
 }
