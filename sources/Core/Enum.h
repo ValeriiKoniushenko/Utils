@@ -25,14 +25,14 @@
 #include <iostream>
 #include <optional>
 #include <regex>
-#include <string>
+#include "Utils/CrossString.h"
 #include <unordered_map>
 
 #define CreateEnum(Name, Type, ...)                                                                                                                  \
     struct Name                                                                                                                                      \
     {                                                                                                                                                \
     private:                                                                                                                                         \
-        using SizeT = __int32;                                                                                                                       \
+        using SizeT = __int32_t;                                                                                                                       \
         using KeyT = std::optional<Type>;                                                                                                            \
         using ValueT = std::string;                                                                                                                  \
                                                                                                                                                      \

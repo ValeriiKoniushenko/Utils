@@ -20,21 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Core/Enum.h"
+#pragma once
 
-#include <gtest/gtest.h>
+#ifndef _MSC_VER
 
-CreateEnum(Color, int, Red, Green, Blue);
+    #include <stdarg.h>
+    #include <string.h>
 
-TEST(EnumTest, MainTest)
+inline char* strtok_s(char* s, const char* delim, char** context)
 {
-    Color color = Color::Red;
-    EXPECT_EQ("Red", color.ToStr());
-    EXPECT_EQ(0, color.Cast());
-
-    color = Color::Blue;
-    EXPECT_EQ("Blue", color.ToStr());
-    EXPECT_EQ(2, color.Cast());
-    EXPECT_EQ(Color::FromStr("Blue").value_or(999), color.Cast());
-    EXPECT_EQ(Color::FromStr("Blue").value_or(999), 2);
+    return strtok_r(s, delim, context);
 }
+
+inline int _wtoi(const wchar_t* str)
+{
+    return static_cast<int>(wcstol(str, 0, 10));
+}
+
+inline float _wtof(const wchar_t* str)
+{
+    wchar_t* endptr = nullptr;
+    return static_cast<int>(wcstof(str, &endptr));
+}
+
+inline long long _wtoll(const wchar_t* str)
+{
+    wchar_t* endptr = nullptr;
+    return static_cast<int>(wcstoll(str, &endptr, 10));
+}
+
+inline int _snwprintf_s(wchar_t* s, std::size_t n, std::size_t, const wchar_t* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    auto result = vswprintf(s, n, format, args);
+    va_end(args);
+    return result;
+}
+
+inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** ptr)
+{
+    return wcstok(str, delim, ptr);
+}
+
+inline void* memcpy_s(void* dest, std::size_t destsz, const void* src, std::size_t count)
+{
+    return memcpy(dest, src, count);
+}
+
+#endif

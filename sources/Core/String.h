@@ -27,17 +27,15 @@
 #include "Core/CommonEnums.h"
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
+#include "Utils/CrossString.h"
 
-#include <cstring>
 #include <cwctype>
 #include <functional>
 #include <optional>
 #include <regex>
-#include <set>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-#include <xstring>
 
 namespace Core
 {
@@ -298,7 +296,7 @@ namespace Core
         std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
         std::is_same_v<std::decay_t<T>, unsigned long long> || std::is_same_v<std::decay_t<T>, const char*> ||
         std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
-        std::is_same_v<BaseString<T::CharT>, T>;
+        std::is_same_v<BaseString<typename T::CharT>, T>;
 
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
@@ -804,10 +802,10 @@ namespace Core
             return splittedStrings;
         }
 
-        template<class T>
+        template<class T, int DUMMY = 0>
         static Self MakeFrom(T);
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(int value)
         {
             Self temp;
@@ -817,19 +815,19 @@ namespace Core
             return temp;
         }
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(const Self& value)
         {
             return value;
         }
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(const CharT* value)
         {
             return Self(value);
         }
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(float value)
         {
             Self temp;
@@ -839,7 +837,7 @@ namespace Core
             return temp;
         }
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(double value)
         {
             Self temp;
@@ -849,7 +847,7 @@ namespace Core
             return temp;
         }
 
-        template<>
+        template<int DUMMY = 0>
         static Self MakeFrom(unsigned long long value)
         {
             Self temp;
@@ -859,10 +857,14 @@ namespace Core
             return temp;
         }
 
-        template<class T>
-        [[nodiscard]] T ConvertTo() const noexcept;
+        template<class T, int DUMMY = 0>
+        [[nodiscard]] T ConvertTo() const noexcept
+        {
+            static_assert("Invalid type");
+            return {};
+        }
 
-        template<>
+        template<int DUMMY = 0>
         [[nodiscard]] int ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -873,7 +875,7 @@ namespace Core
             return {};
         }
 
-        template<>
+        template<int DUMMY = 0>
         [[nodiscard]] float ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -884,7 +886,7 @@ namespace Core
             return {};
         }
 
-        template<>
+        template<int DUMMY = 0>
         [[nodiscard]] double ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -895,7 +897,7 @@ namespace Core
             return {};
         }
 
-        template<>
+        template<int DUMMY = 0>
         [[nodiscard]] long long ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -920,7 +922,7 @@ namespace Core
                 expr = L"\\{\\}";
             }
 
-            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::match_flag_type::format_first_only), ...);
+            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
             return temp;
         }
 
