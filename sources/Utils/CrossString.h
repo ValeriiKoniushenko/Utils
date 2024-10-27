@@ -41,7 +41,7 @@ inline int _wtoi(const wchar_t* str)
 inline float _wtof(const wchar_t* str)
 {
     wchar_t* endptr = nullptr;
-    return static_cast<int>(wcstof(str, &endptr));
+    return static_cast<float>(wcstof(str, &endptr));
 }
 
 inline long long _wtoll(const wchar_t* str)

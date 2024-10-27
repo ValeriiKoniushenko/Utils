@@ -182,8 +182,8 @@ namespace Core
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
 
-        [[nodiscard]] static std::wint_t ToUpper(const CharT ch) noexcept { return towupper(ch); };
-        [[nodiscard]] static std::wint_t ToLower(const CharT ch) noexcept { return towlower(ch); };
+        [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
+        [[nodiscard]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
 
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
@@ -802,10 +802,10 @@ namespace Core
             return splittedStrings;
         }
 
-        template<class T, int DUMMY = 0>
+        template<class T>
         static Self MakeFrom(T);
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(int value)
         {
             Self temp;
@@ -815,19 +815,19 @@ namespace Core
             return temp;
         }
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(const Self& value)
         {
             return value;
         }
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(const CharT* value)
         {
             return Self(value);
         }
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(float value)
         {
             Self temp;
@@ -837,7 +837,7 @@ namespace Core
             return temp;
         }
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(double value)
         {
             Self temp;
@@ -847,7 +847,7 @@ namespace Core
             return temp;
         }
 
-        template<int DUMMY = 0>
+        template<>
         static Self MakeFrom(unsigned long long value)
         {
             Self temp;
@@ -857,14 +857,14 @@ namespace Core
             return temp;
         }
 
-        template<class T, int DUMMY = 0>
+        template<class T>
         [[nodiscard]] T ConvertTo() const noexcept
         {
             static_assert("Invalid type");
             return {};
         }
 
-        template<int DUMMY = 0>
+        template<>
         [[nodiscard]] int ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -875,7 +875,7 @@ namespace Core
             return {};
         }
 
-        template<int DUMMY = 0>
+        template<>
         [[nodiscard]] float ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -886,7 +886,7 @@ namespace Core
             return {};
         }
 
-        template<int DUMMY = 0>
+        template<>
         [[nodiscard]] double ConvertTo() const noexcept
         {
             if (!IsEmpty())
@@ -897,7 +897,7 @@ namespace Core
             return {};
         }
 
-        template<int DUMMY = 0>
+        template<>
         [[nodiscard]] long long ConvertTo() const noexcept
         {
             if (!IsEmpty())

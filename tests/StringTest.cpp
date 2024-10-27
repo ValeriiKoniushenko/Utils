@@ -1393,8 +1393,8 @@ TEST(StringTest, BaseString_wchar_t_default__Converts)
     }
 
     {
-        const WStringAtom str = L"123.1234"_atom;
-        EXPECT_EQ(123.1234f, str.ConvertTo<float>());
+        const WStringAtom str = L"123.123"_atom;
+        EXPECT_FLOAT_EQ(123.123f, str.ConvertTo<float>());
     }
 
     {
