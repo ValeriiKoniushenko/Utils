@@ -6,6 +6,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(MSVC)
+    # do nothing
+else()
+    # do nothing
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        add_compile_options("-stdlib=libc++")
+    else()
+        # do nothing
+    endif()
+endif()
+
 set(DEPENDENCIES_DIR dependencies)
 
 add_subdirectory(${DEPENDENCIES_DIR}/glm)
