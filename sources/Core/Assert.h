@@ -49,7 +49,7 @@ inline void Assert(bool condition, const char* message = nullptr)
 #ifdef __clang__
     __builtin_debugtrap();
 #else
-    static_assert(false, "Not implemented behaviour for your compiler.")
+    static_assert(false, "Not implemented behaviour for your compiler.");
 #endif
 }
 

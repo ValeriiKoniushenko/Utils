@@ -13,11 +13,30 @@ The utilitary library for my own common projects. It has some count of already i
 
 # Getting started
 
+## Requirements
+Needed settings\programs on your system are:
+- cmake 3.30 >=
+- clang 18.1.8 >=
+
+For better experience:
+- setup ```core.autocrlf=true``` for git environment
+
+## Installation
+1. Clone this repository
+2. Install\update all dependencies. In terminal: ```git submodule update --recursive --remote```
+3. Install ```python3```
+4. Install ```pip```
+5. Run ```/scripts/check.py``` and following instructions(if it will be needed)
+6. Open the terminal and make sure that your current path inside project root folder
+7. Create build dir & go into: ```mkdir build; cd build```
+8. Run cmake: ```cmake ../```
+9. Build project using cmake: ```cmake --build .```
+
 ## Project validator
 This tools was created for using with CI\CD or using with git-hooks.
 To run this tool you need to:
-1. Run python script by the next path: ```/scripts/setup_env.py```
-2. After this your env will be checked and the next step you can:
+1. Run python script by the next path: ```/scripts/check.py``` - it will check all needed dependencies on your system.
+2. After this your env will be checked and the next step you can do:
    1. You can run file\[s\]-checking. Just run python script: ```/scripts/file_validator.py``` and pass as argument\[s\] the path to your file\[s\]
    2. You can run project-checking. Just run python script without arguments: ```/scripts/project_validator.py```. It'll find your project by the root ```.git``` folder
 
