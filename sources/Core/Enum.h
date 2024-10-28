@@ -25,8 +25,10 @@
 #include <iostream>
 #include <optional>
 #include <regex>
-#include "Utils/CrossString.h"
 #include <unordered_map>
+
+#include "Utils/CrossString.h"
+#include "Utils/CrossTypes.h"
 
 #define CreateEnum(Name, Type, ...)                                                                                                                  \
     struct Name                                                                                                                                      \

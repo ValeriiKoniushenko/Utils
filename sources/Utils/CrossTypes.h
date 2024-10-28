@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,51 +22,13 @@
 
 #pragma once
 
-#include <iostream>
-
 #ifdef _MSC_VER
-    #include <windows.h>
-    #include <debugapi.h>
+    typedef __int8              __int8_t;
+    typedef __int16             __int16_t;
+    typedef __int32             __int32_t;
+    typedef __int64             __int64_t;
+    typedef unsigned __int8     __uint8_t;
+    typedef unsigned __int16    __uint16_t;
+    typedef unsigned __int32    __uint32_t;
+    typedef unsigned __int64    __uint64_t;
 #endif
-
-#ifdef __cpp_lib_stacktrace
-    #include <stacktrace>
-#endif
-
-inline void Assert(bool condition, const char* message = nullptr)
-{
-    if (condition)
-    {
-        return;
-    }
-
-    using std::cerr;
-    using std::endl;
-
-    cerr << "Assert was got: " << endl
-         << "Message: " << (message ? message : "None") << endl
-    #ifdef __cpp_lib_stacktrace
-         << "Stacktrace: " << endl
-         << std::stacktrace::current() << endl
-    #endif
-    ;
-
-#ifdef __clang__
-    __builtin_debugtrap();
-#elif defined(_MSC_VER)
-    DebugBreak();
-#else
-    static_assert(false, "Not implemented behaviour for your compiler.");
-#endif
-}
-
-inline bool Verify(bool condition, const char* message = nullptr)
-{
-    Assert(condition, message);
-    return condition;
-}
-
-inline void Assert(const char* message = nullptr)
-{
-    Assert(false, message);
-}

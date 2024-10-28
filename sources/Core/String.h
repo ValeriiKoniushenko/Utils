@@ -1244,7 +1244,7 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                memcpy_s(dest, count * sizeof(CharT), _string + offset, std::min(_size - offset, count) * sizeof(CharT));
+                memcpy_s(dest, count * sizeof(CharT), _string + offset, (std::min)(_size - offset, count) * sizeof(CharT));
                 dest[count] = 0;
             }
             return *this;
@@ -1573,7 +1573,7 @@ namespace Core
             {
                 if (_string)
                 {
-                    const auto limit = std::min(finalCapacity, oldCapacity);
+                    const auto limit = (std::min)(finalCapacity, oldCapacity);
                     for (IndexT i = 0; i < limit; ++i)
                     {
                         newString[i] = _string[i];
