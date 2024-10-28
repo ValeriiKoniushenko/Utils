@@ -9,7 +9,7 @@
 
 for FILE in $(git diff --cached --name-only --diff-filter=ACMRTUXB -- '*.cpp' '*.c' '*.h' '*.hpp')
 do    
-    RESULT="$(python scripts/file_validator.py $FILE)"
+    RESULT="$(python3 scripts/file_validator.py $FILE)"
     BAD_RESULT=""
 
     if [ "$RESULT" != "$BAD_RESULT" ]

@@ -5,7 +5,7 @@ import subprocess
 import project_config
 from pathlib import Path, PurePath    
 import os
-import distutils
+import shutil
 
 def GetFileExtensions():
     return [ 'cpp', 'c', 'cxx', 'h', 'hpp' ]
@@ -80,7 +80,7 @@ def ValidateFolder(path):
     return originalErrorsCount == errorsCount
 
 def CheckForCppcheck():
-    return distutils.spawn.find_executable("cppcheck.exe") != None
+    return shutil.which("cppcheck") != None
 
 def ValidateSubfolders(path):
     originalErrorsCount = len(project_config.gValidationErrors)
