@@ -12,7 +12,7 @@ def ValidateWholeProject(rootPath):
     os.chdir(directory)
 
     for item in os.listdir(directory):
-        path = os.path.normpath(f'{rootPath}/{item.decode(project_config.gCharSet)}')
+        path = os.path.normpath(f'{rootPath}{os.path.sep}{item.decode(project_config.gCharSet)}')
         if os.path.isdir(path):
             project_utils.ValidateFolder(path)
             ValidateWholeProject(path)

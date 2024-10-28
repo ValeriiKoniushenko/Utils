@@ -1,8 +1,8 @@
 from pathlib import Path
 import glob
 import pathlib
-import subprocess
 import project_config
+from subprocess import Popen, PIPE
 from pathlib import Path, PurePath    
 import os
 import shutil
@@ -47,10 +47,30 @@ def CanGoTo(path):
 
 def ValidateFile(path):
     if IsCorrectFileExtension(path):
-        proc = subprocess.Popen(f'cppcheck -j 10 --language=c++ --std=c++20 -q --platform=win64 --template="[{{severity}}] {{file}}:{{line}}[{{column}}]:\n\tID: {{id}}\n\tMessage: {{message}}\n" --suppress=missingIncludeSystem --suppress=unknownMacro --suppress=uninitdata --verbose --error-exitcode=1 {path}', stdout=subprocess.PIPE, shell=True)
-        output = proc.stdout.read().decode(project_config.gCharSet)
-        if len(output) > 0:
-            project_config.gValidationErrors.append({output})
+        platform = 'unix64' if os.name == 'posix' else 'win64'
+
+        #'cppcheck -j 10 --language=c++ --std=c++20 -q --platform={platform}' + ' --template="[{severity}] {file}:{line}[{column}]:\n\tID: {id}\n\tMessage: {message}\n" 
+        # --suppress=missingIncludeSystem --suppress=unknownMacro --suppress=uninitdata --verbose --error-exitcode=1' + f' {path}'
+
+        proc = Popen([
+            'cppcheck',
+            '-j',
+            '10',
+            '--language=c++',
+            '--std=c++20',
+            '-q',
+            '--template="[{severity}] {file}:{line}[{column}]:\n\tID: {id}\n\tMessage: {message}\n"',
+            '--suppress=missingIncludeSystem',
+            '--suppress=unknownMacro',
+            '--suppress=uninitdata',
+            '--verbose',
+            '--error-exitcode=1',
+            path,
+            ], stdout=PIPE, stderr=PIPE)
+        
+        outs = proc.communicate()[0]
+        if len(outs) > 0:
+            project_config.gValidationErrors.append({outs})
             return False
     return True
     
