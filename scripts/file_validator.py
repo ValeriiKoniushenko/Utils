@@ -14,7 +14,8 @@ if __name__ == "__main__":
     for i in range(1, len(argv)):
         path = argv[i]
         if not os.path.isabs(argv[i]):
-            path = project_utils.GetRoot() + '\\' + argv[i]
+            path = project_utils.GetRoot() + os.path.sep + argv[i]
+            path = os.path.normpath(path)
             
         isCorrectFile = project_utils.ValidateFile(path)
         isCorrectFolder = project_utils.ValidateSubfolders(path)
