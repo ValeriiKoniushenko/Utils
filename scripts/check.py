@@ -90,7 +90,7 @@ def CheckForSubmodules():
     anySubModuleName = "glm"
     dependenciesDirName = "dependencies"
     path = str(rootPath) + os.path.sep + dependenciesDirName + os.path.sep + anySubModuleName
-    if not Path(path).exists():
+    if not Path(path).exists() or len(os.listdir(path)) == 0:
         eprint('[error]\t\t Install all needed submodule using i.g. next command: git submodule update --recursive --remote')
     else:
         print(f"[successful]\t Dependencies was found")
