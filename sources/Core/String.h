@@ -971,7 +971,7 @@ namespace Core
             {
                 SizeT count = 0;
                 const CharT* end = _string + _size;
-                while (*--end == ch && count < _size)
+                while (count < _size && *--end == ch)
                 {
                     ++count;
                 }

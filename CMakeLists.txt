@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Fixing unix clang lib dependencies
 if(MSVC)
     # do nothing
 else()
@@ -15,6 +16,16 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     else()
         # do nothing
+    endif()
+endif()
+
+# Little crutch for GTests: if we use XSan -> settings 0 to HAVE_POSIX_REGEX
+string(FIND ${CMAKE_CXX_FLAGS} "-fsanitize=" HAS_XSAN)
+if(NOT ${HAS_XSAN} STREQUAL "")
+    if(WIN32)
+        set(HAVE_STD_REGEX 0)
+    else()
+        set(HAVE_POSIX_REGEX 0)
     endif()
 endif()
 
