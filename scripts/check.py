@@ -32,12 +32,11 @@ def CheckForCppCheck():
 
 
 def CheckEnvVar(name, messege=None):
-    result = str(os.environ[name])
-    if result == '':
+    if os.environ.get(name) is None:
         if (messege != None):
             eprint(messege)
         else:
-            eprint(f"[error]\t\t Wasn't found environment varialbe: {name} - set it and try again")
+            eprint(f"[warning]\t Wasn't found environment varialbe: {name} - set it and try again")
     else:
         print(f'[successful]\t Environment variable "{name}" was found!')
 
