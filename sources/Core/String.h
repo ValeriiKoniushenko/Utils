@@ -857,6 +857,16 @@ namespace Core
             return temp;
         }
 
+        template<>
+        static Self MakeFrom(unsigned int value)
+        {
+            Self temp;
+            temp.Reserve(32);
+            Toolset::FromUnsignedLongLong(static_cast<unsigned long long>(value), temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
         template<class T>
         [[nodiscard]] T ConvertTo() const noexcept
         {

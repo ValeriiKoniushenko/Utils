@@ -23,7 +23,7 @@
 #include "Utils/Functions.h"
 
 #include <gtest/gtest.h>
-#include <string>
+#include <string>e
 
 TEST(UtilsTests, ReadFileContentToStdString)
 {
