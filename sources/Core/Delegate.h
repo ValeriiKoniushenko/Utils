@@ -37,12 +37,12 @@ namespace Core
         class ID final : public Utils::CopyableAndMoveable
         {
         public:
-            using IdT = unsigned int;
+            using IdT = __uint32_t;
             static constexpr IdT invalidID = ~(static_cast<IdT>(0));
 
             struct Hasher final
             {
-                std::size_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
+                __uint64_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
             };
 
         public:

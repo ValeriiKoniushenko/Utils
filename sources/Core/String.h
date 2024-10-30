@@ -28,6 +28,8 @@
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
+#include "Utils/CrossTypes.h"
+#include "Utils/TypeTraits.h"
 
 #include <cwctype>
 #include <functional>
@@ -50,9 +52,9 @@ namespace Core
     struct _StringSettings : public Utils::Abstract
     {
         using CharT = CharType;
-        using SizeT = std::size_t;
-        using HashT = std::size_t;
-        using IndexT = std::size_t;
+        using SizeT = __uint64_t;
+        using HashT = __uint64_t;
+        using IndexT = __uint64_t;
         constexpr static SizeT invalidSize = ~static_cast<SizeT>(0);
     };
 
@@ -74,13 +76,13 @@ namespace Core
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
-        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return atoll(str); }
+        [[nodiscard]] static __int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
 
-        static void FromInt(int value, CharT* buffer, SizeT bufferSize)
+        static void FromInt32(__int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
             {
-                Assert("Impossible to convert 'int' value to string.");
+                Assert("Impossible to convert '__int32_t' value to string.");
             }
         }
 
@@ -100,11 +102,19 @@ namespace Core
             }
         }
 
-        static void FromUnsignedLongLong(unsigned long long value, CharT* buffer, SizeT bufferSize)
+        static void FromUInt64(__uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%llu", value); errorCode < 0)
             {
-                Assert("Impossible to convert 'long long' value to string.");
+                Assert("Impossible to convert '__uint64_t' value to string.");
+            }
+        }
+
+        static void FromInt64(__int64_t value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%lld", value); errorCode < 0)
+            {
+                Assert("Impossible to convert '__int64_t' value to string.");
             }
         }
 
@@ -142,16 +152,16 @@ namespace Core
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
 
-        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
+        [[nodiscard]] static __int32_t ToInt(const CharT* str) noexcept { return _wtoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
-        [[nodiscard]] static long long ToLongLong(const CharT* str) noexcept { return _wtoll(str); }
+        [[nodiscard]] static __int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
 
-        static void FromInt(int value, CharT* buffer, SizeT bufferSize)
+        static void FromInt32(__int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
             {
-                Assert("Impossible to convert 'int' value to string.");
+                Assert("Impossible to convert '__int32_t' value to string.");
             }
         }
 
@@ -171,11 +181,19 @@ namespace Core
             }
         }
 
-        static void FromUnsignedLongLong(unsigned long long value, CharT* buffer, SizeT bufferSize)
+        static void FromUInt64(__uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
             {
-                Assert("Impossible to convert 'long long' value to string.");
+                Assert("Impossible to convert '__uint64_t' value to string.");
+            }
+        }
+
+        static void FromInt64(__int64_t value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lld", value); errorCode < 0)
+            {
+                Assert("Impossible to convert '__int64_t' value to string.");
             }
         }
 
@@ -187,7 +205,7 @@ namespace Core
 
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
-            const int result = wcscmp(str1, str2);
+            const auto result = wcscmp(str1, str2);
             if (result == 0)
             {
                 return Comparison::Equal;
@@ -294,8 +312,8 @@ namespace Core
     template<class T>
     concept IsFormattableType =
         std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
-        std::is_same_v<std::decay_t<T>, unsigned long long> || std::is_same_v<std::decay_t<T>, const char*> ||
-        std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
+        std::is_same_v<std::decay_t<T>, __uint64_t> || std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*> ||
+        std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
         std::is_same_v<BaseString<typename T::CharT>, T>;
 
     template<class CharType>
@@ -317,7 +335,7 @@ namespace Core
 
         using value_type = CharT;
         using pointer = value_type*;
-        using difference_type = long long;
+        using difference_type = __int64_t;
 
     public:
         template<bool IsReversed>
@@ -802,32 +820,32 @@ namespace Core
             return splittedStrings;
         }
 
-        template<class T>
-        static Self MakeFrom(T);
-
-        template<>
-        static Self MakeFrom(int value)
+        template<class T, class = typename std::enable_if_t<std::is_integral_v<T>>>
+        static Self MakeFrom(T value)
         {
+            // TODO: optimize it using static array
             Self temp;
-            temp.Reserve(16);
-            Toolset::FromInt(value, temp.Data(), temp.Capacity());
+            temp.Reserve(32);
+
+            if constexpr (std::is_unsigned_v<T>)
+            {
+                Toolset::FromUInt64(value, temp.Data(), temp.Capacity());
+            }
+            else
+            {
+                Toolset::FromInt64(value, temp.Data(), temp.Capacity());
+            }
+
             temp._size = Toolset::Length(temp.Data());
+            temp.ShrinkToFit();
+
             return temp;
         }
 
-        template<>
-        static Self MakeFrom(const Self& value)
-        {
-            return value;
-        }
+        static Self MakeFrom(const Self& value) { return value; }
 
-        template<>
-        static Self MakeFrom(const CharT* value)
-        {
-            return Self(value);
-        }
+        static Self MakeFrom(const CharT* value) { return Self(value); }
 
-        template<>
         static Self MakeFrom(float value)
         {
             Self temp;
@@ -837,82 +855,43 @@ namespace Core
             return temp;
         }
 
-        template<>
         static Self MakeFrom(double value)
         {
             Self temp;
-            temp.Reserve(16);
+            temp.Reserve(32);
             Toolset::FromDouble(value, temp.Data(), temp.Capacity());
             temp._size = Toolset::Length(temp.Data());
             return temp;
         }
 
-        template<>
-        static Self MakeFrom(unsigned long long value)
+        template<class T>
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, __uint64_t> && std::is_unsigned_v<T>, T> ConvertTo() const noexcept
         {
-            Self temp;
-            temp.Reserve(32);
-            Toolset::FromUnsignedLongLong(value, temp.Data(), temp.Capacity());
-            temp._size = Toolset::Length(temp.Data());
-            return temp;
-        }
-
-        template<>
-        static Self MakeFrom(unsigned int value)
-        {
-            Self temp;
-            temp.Reserve(32);
-            Toolset::FromUnsignedLongLong(static_cast<unsigned long long>(value), temp.Data(), temp.Capacity());
-            temp._size = Toolset::Length(temp.Data());
-            return temp;
+            if (!IsEmpty())
+            {
+                return static_cast<T>(Toolset::ToUInt64(_string));
+            }
+            Assert("Impossible to work with nullptr string.");
+            return {};
         }
 
         template<class T>
-        [[nodiscard]] T ConvertTo() const noexcept
-        {
-            static_assert("Invalid type");
-            return {};
-        }
-
-        template<>
-        [[nodiscard]] int ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, __int64_t> && std::is_signed_v<T>, T> ConvertTo() const noexcept
         {
             if (!IsEmpty())
             {
-                return Toolset::ToInt(_string);
+                return static_cast<T>(Toolset::ToInt64(_string));
             }
             Assert("Impossible to work with nullptr string.");
             return {};
         }
 
-        template<>
-        [[nodiscard]] float ConvertTo() const noexcept
+        template<class T>
+        [[nodiscard]] std::enable_if_t<std::is_floating_point_v<T>, T> ConvertTo() const noexcept
         {
             if (!IsEmpty())
             {
-                return Toolset::ToFloat(_string);
-            }
-            Assert("Impossible to work with nullptr string.");
-            return {};
-        }
-
-        template<>
-        [[nodiscard]] double ConvertTo() const noexcept
-        {
-            if (!IsEmpty())
-            {
-                return Toolset::ToDouble(_string);
-            }
-            Assert("Impossible to work with nullptr string.");
-            return {};
-        }
-
-        template<>
-        [[nodiscard]] long long ConvertTo() const noexcept
-        {
-            if (!IsEmpty())
-            {
-                return Toolset::ToLongLong(_string);
+                return static_cast<T>(Toolset::ToDouble(_string));
             }
             Assert("Impossible to work with nullptr string.");
             return {};
@@ -1208,7 +1187,7 @@ namespace Core
                 Reserve(finalSize);
             }
 
-            for (long long i = oldSize; i >= 0; --i)
+            for (__int64_t i = oldSize; i >= 0; --i)
             {
                 _string[i + str.size()] = _string[i];
             }
@@ -1241,7 +1220,7 @@ namespace Core
             if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
             {
                 TryToMakeAsDynamic();
-                for (long long i = 1ll; i < _size; ++i)
+                for (__int64_t i = 1ll; i < _size; ++i)
                 {
                     _string[i - 1ll] = _string[i];
                 }
@@ -1270,7 +1249,7 @@ namespace Core
             if ((_string = new CharT[capacity]))
             {
                 _capacity = capacity;
-                memcpy_s(_string, _size * sizeof(CharT), oldString, _size);
+                memcpy_s(_string, _size * sizeof(CharT), oldString, _size * sizeof(CharT));
                 _string[_size] = 0;
 
                 if (_policy == StringPolicy::Static)
@@ -1304,9 +1283,9 @@ namespace Core
             return *this;
         }
 
-        Self& Insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
+        Self& Insert(__int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
 
-        Self& insert(long long pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& insert(__int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             if (size == Settings::invalidSize)
             {
@@ -1320,7 +1299,7 @@ namespace Core
                 Reserve(finalSize);
             }
 
-            for (long long i = oldSize; i >= pos; --i)
+            for (__int64_t i = oldSize; i >= pos; --i)
             {
                 _string[i + size] = _string[i];
             }
@@ -1644,21 +1623,21 @@ namespace Core
         ~BaseString() override { Clear(); }
 
         // ============= Utils ===============
-        static std::size_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
+        static __uint64_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
         {
             if (!Verify(!end || !source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
             {
                 return 0;
             }
-            constexpr const int endLineCode = 10; // 10 == '\n'
+            constexpr const __int32_t endLineCode = 10; // 10 == '\n'
 
             while (end[0] == endLineCode)
             {
                 ++end;
             }
 
-            std::size_t count = 0;
-            for (std::size_t i = 0; i < end - source.c_str(); ++i)
+            __uint64_t count = 0;
+            for (__uint64_t i = 0; i < end - source.c_str(); ++i)
             {
                 if (source[i] == endLineCode)
                 {
@@ -1704,12 +1683,12 @@ struct std::hash<Core::BaseString<CharType>>
     size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
 };
 
-inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size) noexcept
+inline Core::BaseString<char> operator""_atom(const char* str, __uint64_t size) noexcept
 {
     return Core::BaseString<char>::Intern(str, size, true);
 }
 
-inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, std::size_t size) noexcept
+inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, __uint64_t size) noexcept
 {
     return Core::BaseString<wchar_t>::Intern(str, size, true);
 }

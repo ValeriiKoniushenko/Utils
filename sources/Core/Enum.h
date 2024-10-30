@@ -22,19 +22,19 @@
 
 #pragma once
 
+#include "Utils/CrossString.h"
+#include "Utils/CrossTypes.h"
+
 #include <iostream>
 #include <optional>
 #include <regex>
 #include <unordered_map>
 
-#include "Utils/CrossString.h"
-#include "Utils/CrossTypes.h"
-
 #define CreateEnum(Name, Type, ...)                                                                                                                  \
     struct Name                                                                                                                                      \
     {                                                                                                                                                \
     private:                                                                                                                                         \
-        using SizeT = __int32_t;                                                                                                                       \
+        using SizeT = __int32_t;                                                                                                                     \
         using KeyT = std::optional<Type>;                                                                                                            \
         using ValueT = std::string;                                                                                                                  \
                                                                                                                                                      \

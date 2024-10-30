@@ -35,13 +35,19 @@ namespace Core
     template<typename T, glm::qualifier Q>
     struct GlobalPosition<2, T, Q> : public glm::vec<2, T, Q>
     {
-        explicit constexpr GlobalPosition(T x = {}, T y = {}) : glm::vec2{ x, y } {}
+        explicit constexpr GlobalPosition(T x = {}, T y = {})
+            : glm::vec2{ x, y }
+        {
+        }
     };
 
     template<typename T, glm::qualifier Q>
     struct GlobalPosition<3, T, Q> : public glm::vec<3, T, Q>
     {
-        explicit constexpr GlobalPosition(T x = {}, T y = {}, T z = {}) : glm::vec3{ x, y, z } {}
+        explicit constexpr GlobalPosition(T x = {}, T y = {}, T z = {})
+            : glm::vec3{ x, y, z }
+        {
+        }
     };
 
     using GlobalPosition3F = GlobalPosition<3, float>;

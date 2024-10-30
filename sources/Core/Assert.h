@@ -25,8 +25,8 @@
 #include <iostream>
 
 #ifdef _MSC_VER
-    #include <windows.h>
     #include <debugapi.h>
+    #include <windows.h>
 #endif
 
 #ifdef __cpp_lib_stacktrace
@@ -45,11 +45,11 @@ inline void Assert(bool condition, const char* message = nullptr)
 
     cerr << "Assert was got: " << endl
          << "Message: " << (message ? message : "None") << endl
-    #ifdef __cpp_lib_stacktrace
+#ifdef __cpp_lib_stacktrace
          << "Stacktrace: " << endl
          << std::stacktrace::current() << endl
-    #endif
-    ;
+#endif
+        ;
 
 #ifdef __clang__
     __builtin_debugtrap();
