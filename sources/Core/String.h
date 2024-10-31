@@ -1367,7 +1367,7 @@ namespace Core
         void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
                           std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
         {
-            if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string."))
+            if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string.") || !lambda)
             {
                 return;
             }
@@ -1377,12 +1377,9 @@ namespace Core
             auto last = std::regex_iterator<IteratorT>();
             for (; first != last; ++first)
             {
-                if (lambda)
+                if (!std::invoke(lambda, *first))
                 {
-                    if (!std::invoke(lambda, *first))
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
         }

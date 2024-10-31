@@ -21,11 +21,12 @@
 // SOFTWARE.
 
 #pragma once
+#include <cwchar>
 
-#ifndef _MSC_VER
-
+#ifdef __unix__
     #include "CrossTypes.h"
-    // TODO: maybe remove
+
+    #include <bits/types.h>
     #include <stdarg.h>
     #include <string.h>
 
