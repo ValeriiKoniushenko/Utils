@@ -23,7 +23,7 @@ For better experience:
 
 ## Installation
 1. Clone this repository
-2. Install\update all dependencies. In terminal: ```git submodule update --recursive --remote```
+2. Install\update all dependencies. In terminal: ```git submodule update --recursive --remote --init```
 3. Install ```python3```
 4. Install ```pip```
 5. Run ```/scripts/check.py``` and following instructions(if it will be needed)
