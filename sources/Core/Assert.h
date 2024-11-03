@@ -50,7 +50,7 @@ inline void Assert(bool condition, const char* message = nullptr)
          << std::stacktrace::current() << endl
 #endif
         ;
-#if defined(DEBUG) && DEBUG==1
+#if defined(UTILS_DEBUG) && UTILS_DEBUG==1
     #if defined(__clang__)
         #if __has_builtin(__builtin_debugtrap)
             __builtin_debugtrap();

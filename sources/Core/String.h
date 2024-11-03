@@ -52,9 +52,9 @@ namespace Core
     struct _StringSettings : public Utils::Abstract
     {
         using CharT = CharType;
-        using SizeT = __uint64_t;
-        using HashT = __uint64_t;
-        using IndexT = __uint64_t;
+        using SizeT = uint64_t;
+        using HashT = uint64_t;
+        using IndexT = uint64_t;
         constexpr static SizeT invalidSize = ~static_cast<SizeT>(0);
     };
 
@@ -102,11 +102,11 @@ namespace Core
             }
         }
 
-        static void FromUInt64(__uint64_t value, CharT* buffer, SizeT bufferSize)
+        static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
             {
-                Assert("Impossible to convert '__uint64_t' value to string.");
+                Assert("Impossible to convert 'uint64_t' value to string.");
             }
         }
 
@@ -181,11 +181,11 @@ namespace Core
             }
         }
 
-        static void FromUInt64(__uint64_t value, CharT* buffer, SizeT bufferSize)
+        static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
             {
-                Assert("Impossible to convert '__uint64_t' value to string.");
+                Assert("Impossible to convert 'uint64_t' value to string.");
             }
         }
 
@@ -312,7 +312,7 @@ namespace Core
     template<class T>
     concept IsFormattableType =
         std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
-        std::is_same_v<std::decay_t<T>, __uint64_t> || std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*> ||
+        std::is_same_v<std::decay_t<T>, uint64_t> || std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*> ||
         std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
         std::is_same_v<BaseString<typename T::CharT>, T>;
 
@@ -865,7 +865,7 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, __uint64_t> && std::is_unsigned_v<T>, T> ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, uint64_t> && std::is_unsigned_v<T>, T> ConvertTo() const noexcept
         {
             if (!IsEmpty())
             {
@@ -1625,7 +1625,7 @@ namespace Core
         ~BaseString() override { Clear(); }
 
         // ============= Utils ===============
-        static __uint64_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
+        static uint64_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
         {
             if (!Verify(!end || !source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
             {
@@ -1638,8 +1638,8 @@ namespace Core
                 ++end;
             }
 
-            __uint64_t count = 0;
-            for (__uint64_t i = 0; i < end - source.c_str(); ++i)
+            uint64_t count = 0;
+            for (uint64_t i = 0; i < end - source.c_str(); ++i)
             {
                 if (source[i] == endLineCode)
                 {
@@ -1685,12 +1685,12 @@ struct std::hash<Core::BaseString<CharType>>
     size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
 };
 
-inline Core::BaseString<char> operator""_atom(const char* str, __uint64_t size) noexcept
+inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size) noexcept
 {
     return Core::BaseString<char>::Intern(str, size, true);
 }
 
-inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, __uint64_t size) noexcept
+inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t size) noexcept
 {
     return Core::BaseString<wchar_t>::Intern(str, size, true);
 }

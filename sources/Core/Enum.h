@@ -23,8 +23,8 @@
 #pragma once
 
 #include "Utils/CrossString.h"
-#include "Utils/CrossTypes.h"
 
+#include <inttypes.h>
 #include <iostream>
 #include <optional>
 #include <regex>
