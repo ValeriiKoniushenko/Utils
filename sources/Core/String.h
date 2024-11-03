@@ -28,9 +28,9 @@
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
-#include "Utils/CrossTypes.h"
 #include "Utils/TypeTraits.h"
 
+#include <inttypes.h>
 #include <cwctype>
 #include <functional>
 #include <optional>
@@ -76,13 +76,13 @@ namespace Core
         [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
-        [[nodiscard]] static __int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
+        [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
 
-        static void FromInt32(__int32_t value, CharT* buffer, SizeT bufferSize)
+        static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
             {
-                Assert("Impossible to convert '__int32_t' value to string.");
+                Assert("Impossible to convert 'int32_t' value to string.");
             }
         }
 
@@ -104,17 +104,17 @@ namespace Core
 
         static void FromUInt64(__uint64_t value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%llu", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
             {
                 Assert("Impossible to convert '__uint64_t' value to string.");
             }
         }
 
-        static void FromInt64(__int64_t value, CharT* buffer, SizeT bufferSize)
+        static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%lld", value); errorCode < 0)
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRId64, value); errorCode < 0)
             {
-                Assert("Impossible to convert '__int64_t' value to string.");
+                Assert("Impossible to convert 'int64_t' value to string.");
             }
         }
 
@@ -152,16 +152,16 @@ namespace Core
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
 
-        [[nodiscard]] static __int32_t ToInt(const CharT* str) noexcept { return _wtoi(str); }
+        [[nodiscard]] static int32_t ToInt(const CharT* str) noexcept { return _wtoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
-        [[nodiscard]] static __int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
+        [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
 
-        static void FromInt32(__int32_t value, CharT* buffer, SizeT bufferSize)
+        static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
             {
-                Assert("Impossible to convert '__int32_t' value to string.");
+                Assert("Impossible to convert 'int32_t' value to string.");
             }
         }
 
@@ -189,11 +189,11 @@ namespace Core
             }
         }
 
-        static void FromInt64(__int64_t value, CharT* buffer, SizeT bufferSize)
+        static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lld", value); errorCode < 0)
             {
-                Assert("Impossible to convert '__int64_t' value to string.");
+                Assert("Impossible to convert 'int64_t' value to string.");
             }
         }
 
@@ -335,7 +335,7 @@ namespace Core
 
         using value_type = CharT;
         using pointer = value_type*;
-        using difference_type = __int64_t;
+        using difference_type = int64_t;
 
     public:
         template<bool IsReversed>
@@ -876,7 +876,7 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, __int64_t> && std::is_signed_v<T>, T> ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, int64_t> && std::is_signed_v<T>, T> ConvertTo() const noexcept
         {
             if (!IsEmpty())
             {
@@ -1190,7 +1190,7 @@ namespace Core
                 Reserve(finalSize);
             }
 
-            for (__int64_t i = oldSize; i >= 0; --i)
+            for (int64_t i = oldSize; i >= 0; --i)
             {
                 _string[i + str.size()] = _string[i];
             }
@@ -1223,7 +1223,7 @@ namespace Core
             if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
             {
                 TryToMakeAsDynamic();
-                for (__int64_t i = 1ll; i < _size; ++i)
+                for (int64_t i = 1ll; i < _size; ++i)
                 {
                     _string[i - 1ll] = _string[i];
                 }
@@ -1286,9 +1286,9 @@ namespace Core
             return *this;
         }
 
-        Self& Insert(__int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
+        Self& Insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
 
-        Self& insert(__int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             if (size == Settings::invalidSize)
             {
@@ -1302,7 +1302,7 @@ namespace Core
                 Reserve(finalSize);
             }
 
-            for (__int64_t i = oldSize; i >= pos; --i)
+            for (int64_t i = oldSize; i >= pos; --i)
             {
                 _string[i + size] = _string[i];
             }
@@ -1631,7 +1631,7 @@ namespace Core
             {
                 return 0;
             }
-            constexpr const __int32_t endLineCode = 10; // 10 == '\n'
+            constexpr const int32_t endLineCode = 10; // 10 == '\n'
 
             while (end[0] == endLineCode)
             {
