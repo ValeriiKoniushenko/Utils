@@ -50,13 +50,20 @@ inline void Assert(bool condition, const char* message = nullptr)
          << std::stacktrace::current() << endl
 #endif
         ;
-
-#ifdef __clang__
-    __builtin_debugtrap();
-#elif defined(_MSC_VER)
-    DebugBreak();
-#else
-    static_assert(false, "Not implemented behaviour for your compiler.");
+#if defined(DEBUG) && DEBUG==1
+    #if defined(__clang__)
+        #if __has_builtin(__builtin_debugtrap)
+            __builtin_debugtrap();
+        #else
+            #warning Not implemented for this compiler
+        #endif
+    #elif defined(_MSC_VER)
+        DebugBreak();
+    #elif defined(__GNUC__) || defined(__GNUG__)
+        __builtin_trap();
+    #else
+        static_assert(false, "Not implemented behaviour for your compiler.");
+    #endif
 #endif
 }
 
