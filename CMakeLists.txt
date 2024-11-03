@@ -9,11 +9,10 @@ include(Features)
 
 
 # ========= Base setup & Predefinitions =========
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(REQUIRED_CXX_STANDARD cxx_std_23) # read-only
 set(CXX_STANDARD)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(DEPENDENCIES_DIR dependencies)
 set(BENCHMARK_ENABLE_TESTING)
