@@ -1112,36 +1112,36 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                           std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
-                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), flag);
+                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), matchFlag);
             }
 
             return false;
         }
 
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
-                                      std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+                                      std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                       std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
-                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), flag);
+                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
             }
 
             return false;
         }
 
         bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
-                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                           std::regex::flag_type regexFlag = std::regex::ECMAScript)
         {
             const StdRegex regex(expr.data(), regexFlag);
             BaseString temp;
-            std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), flag);
+            std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), matchFlag);
             const auto wasReplaced = *this != temp;
             *this = std::move(temp);
             return wasReplaced;
@@ -1354,7 +1354,8 @@ namespace Core
         }
 
         [[nodiscard]] StdRegexMatchResults FindRegex(StdStringViewT expr, int baseOffset = 0,
-                                                     std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+                                                     std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                     std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string."))
             {
@@ -1362,7 +1363,7 @@ namespace Core
             }
 
             StdRegexMatchResults match;
-            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr.data()), flag);
+            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
 
             return match;
         }
