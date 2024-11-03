@@ -1365,15 +1365,16 @@ namespace Core
         }
 
         void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
-                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string.") || !lambda)
             {
                 return;
             }
 
-            StdRegex regexExpr(expr.data());
-            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, flag);
+            StdRegex regexExpr(expr.data(), regexFlag);
+            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
             auto last = std::regex_iterator<IteratorT>();
             for (; first != last; ++first)
             {
