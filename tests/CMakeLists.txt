@@ -10,3 +10,4 @@ file(
 
 add_executable(UtilsTests ${Sources})
 target_link_libraries(UtilsTests PUBLIC gtest Utils)
+target_compile_features(UtilsTests PUBLIC ${CXX_STANDARD})

@@ -2,20 +2,23 @@ cmake_minimum_required(VERSION 3.30.0..)
 
 project(Utils VERSION 1.0 LANGUAGES CXX)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
-# ========= Base setup =========
-set(CMAKE_CXX_STANDARD 23)
+include(Predefinitions)
+include(Features)
+
+
+# ========= Base setup & Predefinitions =========
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(REQUIRED_CXX_STANDARD cxx_std_23) # read-only
+set(CXX_STANDARD)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(DEPENDENCIES_DIR dependencies)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-
-
-# ========= Predefinitions =========
-include(Predefinitions)
-
 set(BENCHMARK_ENABLE_TESTING)
 
+InstallCXXStandardVersion()
 InstallDebugLevel()
 InstallBenchmarkDependenciesTesting()
 
@@ -25,7 +28,6 @@ InstallBenchmarkDependenciesTesting()
 add_subdirectory(${DEPENDENCIES_DIR}/glm)
 add_subdirectory(${DEPENDENCIES_DIR}/googletest)
 add_subdirectory(${DEPENDENCIES_DIR}/benchmark)
-
 # Adding core
 add_subdirectory(benchmark)
 add_subdirectory(tests)
