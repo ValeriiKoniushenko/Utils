@@ -1112,31 +1112,34 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
-                return std::regex_match(_string, StdRegex(expr.data()), flag);
+                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), flag);
             }
 
             return false;
         }
 
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
-                                      std::regex_constants::match_flag_type flag = std::regex_constants::match_default) const
+                                      std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+                                      std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
-                return std::regex_match(begin(), end(), match, StdRegex(expr.data()), flag);
+                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), flag);
             }
 
             return false;
         }
 
         bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
-                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default)
+                          std::regex_constants::match_flag_type flag = std::regex_constants::match_default,
+                          std::regex::flag_type regexFlag = std::regex::ECMAScript)
         {
-            const StdRegex regex(expr.data());
+            const StdRegex regex(expr.data(), regexFlag);
             BaseString temp;
             std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), flag);
             const auto wasReplaced = *this != temp;
