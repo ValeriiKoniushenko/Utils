@@ -27,10 +27,15 @@ For better experience:
 3. Install ```python3```
 4. Install ```pip```
 5. Run ```/scripts/check.py``` and following instructions(if it will be needed)
-6. Open the terminal and make sure that your current path inside project root folder
-7. Create build dir & go into: ```mkdir build; cd build```
-8. Run cmake: ```cmake ../```
-9. Build project using cmake: ```cmake --build .```
+
+## Building
+1. Open the terminal and make sure that your current path inside project root folder 
+2. Create build dir & go into: ```mkdir build; cd build```
+3. Run cmake: ```cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_BUILD_TYPE="Debug" ../```
+4. Build project using cmake: ```cmake --build .```
+
+PS: to build Debug or Release version of the project set ```Debug``` or ```Release``` to ```-DCMAKE_BUILD_TYPE```.
+E.g: ```-DCMAKE_BUILD_TYPE="Release"```
 
 ## Project validator
 This tools was created for using with CI\CD or using with git-hooks.
