@@ -24,6 +24,7 @@
 
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
+#include <cstdint>
 #include <functional>
 #include <unordered_map>
 
@@ -37,12 +38,12 @@ namespace Core
         class ID final : public Utils::CopyableAndMoveable
         {
         public:
-            using IdT = __uint32_t;
+            using IdT = uint32_t;
             static constexpr IdT invalidID = ~(static_cast<IdT>(0));
 
             struct Hasher final
             {
-                __uint64_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
+                uint64_t operator()(const ID& value) const { return std::hash<IdT>()(value._id); }
             };
 
         public:
