@@ -1149,15 +1149,29 @@ namespace Core
 
         [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
 
-        Self& operator+=(CharT ch) noexcept { return push_back(ch); }
-        Self& operator+=(StdStringViewT str) noexcept { return push_back(str); }
 
-        Self& push_back(CharT ch) noexcept { return push_back(StdStringViewT(&ch, 1)); }
-        Self& PushBack(CharT ch) noexcept { return push_back(StdStringViewT(&ch, 1)); }
+        Self operator+(CharT ch)
+        {
+            auto tmp = *this;
+            tmp += ch;
+            return tmp;
+        }
+        Self operator+(StdStringViewT str)
+        {
+            auto tmp = *this;
+            tmp += str;
+            return tmp;
+        }
 
-        Self& push_back(StdStringViewT str) noexcept { return PushBack(str); }
+        Self& operator+=(CharT ch) { return push_back(ch); }
+        Self& operator+=(StdStringViewT str) { return push_back(str); }
 
-        Self& PushBack(StdStringViewT str) noexcept
+        Self& push_back(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
+        Self& PushBack(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
+
+        Self& push_back(StdStringViewT str) { return PushBack(str); }
+
+        Self& PushBack(StdStringViewT str)
         {
             const auto oldSize = _size;
             const auto finalSize = _size + str.size();
@@ -1176,12 +1190,12 @@ namespace Core
             return *this;
         }
 
-        Self& push_front(CharT ch) noexcept { return PushFront(StdStringViewT(&ch, 1)); }
-        Self& PushFront(CharT ch) noexcept { return PushFront(StdStringViewT(&ch, 1)); }
+        Self& push_front(CharT ch) { return PushFront(StdStringViewT(&ch, 1)); }
+        Self& PushFront(CharT ch) { return PushFront(StdStringViewT(&ch, 1)); }
 
-        Self& push_front(StdStringViewT str) noexcept { return PushFront(str); }
+        Self& push_front(StdStringViewT str) { return PushFront(str); }
 
-        Self& PushFront(StdStringViewT str) noexcept
+        Self& PushFront(StdStringViewT str)
         {
             const auto oldSize = _size;
             const auto finalSize = _size + str.size();
@@ -1204,9 +1218,9 @@ namespace Core
             return *this;
         }
 
-        Self& PopBack() noexcept { return pop_back(); }
+        Self& PopBack() { return pop_back(); }
 
-        Self& pop_back() noexcept
+        Self& pop_back()
         {
             if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
             {
@@ -1216,9 +1230,9 @@ namespace Core
             return *this;
         }
 
-        Self& PopFront() noexcept { return pop_front(); }
+        Self& PopFront() { return pop_front(); }
 
-        Self& pop_front() noexcept
+        Self& pop_front()
         {
             if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
             {
@@ -1717,4 +1731,20 @@ template<class CharType>
 [[nodiscard]] bool operator<=(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
+}
+
+template<class CharType>
+[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+{
+    auto temp = Core::BaseString<CharType>(str1);
+    temp += str2;
+    return temp;
+}
+
+template<class CharType>
+[[nodiscard]] Core::BaseString<CharType> operator+(CharType str1, const Core::BaseString<CharType>& str2)
+{
+    auto temp = Core::BaseString<CharType>(str1);
+    temp += str2;
+    return temp;
 }

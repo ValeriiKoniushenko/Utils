@@ -1131,6 +1131,13 @@ TEST(StringTest, BaseString_char_default__Misc)
     EXPECT_FALSE(Core::StringAtom::IsContainChar('z', "abcdef"));
 }
 
+TEST(StringTest, BaseString_char_addition)
+{
+    EXPECT_EQ("Hello world!", "Hello " + Core::StringAtom("world!"));
+    EXPECT_EQ("Hello world!", "Hello " + "world!"_atom);
+    EXPECT_EQ("Hello world!", Core::StringAtom("Hello ") + "world!");
+}
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================
