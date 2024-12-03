@@ -30,9 +30,9 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
-#include <inttypes.h>
 #include <cwctype>
 #include <functional>
+#include <inttypes.h>
 #include <optional>
 #include <regex>
 #include <type_traits>
@@ -1113,7 +1113,7 @@ namespace Core
         }
 
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+                                      std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
@@ -1149,14 +1149,13 @@ namespace Core
 
         [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
 
-
         Self operator+(CharT ch)
         {
             auto tmp = *this;
             tmp += ch;
             return tmp;
         }
-        Self operator+(StdStringViewT str)
+        Self operator+(const Self& str)
         {
             auto tmp = *this;
             tmp += str;
@@ -1734,7 +1733,8 @@ template<class CharType>
 }
 
 template<class CharType>
-[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::_StringToolset<CharType>::StdStringViewT str1,
+                                                   const Core::BaseString<CharType>& str2)
 {
     auto temp = Core::BaseString<CharType>(str1);
     temp += str2;

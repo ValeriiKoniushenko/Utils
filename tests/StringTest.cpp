@@ -1135,6 +1135,8 @@ TEST(StringTest, BaseString_char_addition)
 {
     EXPECT_EQ("Hello world!", "Hello " + Core::StringAtom("world!"));
     EXPECT_EQ("Hello world!", "Hello " + "world!"_atom);
+    EXPECT_EQ("Hello world!", "Hello " + "world"_atom + "!");
+    EXPECT_EQ("Hello world!", "Hello " + "world"_atom + "!"_atom);
     EXPECT_EQ("Hello world!", Core::StringAtom("Hello ") + "world!");
 }
 
@@ -2204,4 +2206,13 @@ TEST(StringTest, BaseString_wchar_t_default__Erase)
         str.Erase(str.begin() + 5, str.begin() + 7);
         EXPECT_EQ(L"Hellorld!", str);
     }
+}
+
+TEST(StringTest, BaseString_wchar_t_addition)
+{
+    EXPECT_EQ(L"Hello world!", L"Hello " + Core::WStringAtom(L"world!"));
+    EXPECT_EQ(L"Hello world!", L"Hello " + L"world!"_atom);
+    EXPECT_EQ(L"Hello world!", L"Hello " + L"world"_atom + L"!");
+    EXPECT_EQ(L"Hello world!", L"Hello " + L"world"_atom + L"!"_atom);
+    EXPECT_EQ(L"Hello world!", Core::WStringAtom(L"Hello ") + L"world!");
 }
