@@ -1,6 +1,0 @@
-[submodule "dependencies/glm"]
-	path = dependencies/glm
-	url = https://github.com/g-truc/glm.git
-[submodule "dependencies/benchmark"]
-	path = dependencies/benchmark
-	url = https://github.com/google/benchmark.git
