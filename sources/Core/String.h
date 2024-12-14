@@ -30,11 +30,13 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
+#include <cstring>
 #include <cwctype>
 #include <functional>
 #include <inttypes.h>
 #include <optional>
 #include <regex>
+#include <stdlib.h>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>

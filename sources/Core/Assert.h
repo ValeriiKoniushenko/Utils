@@ -25,8 +25,8 @@
 #include <iostream>
 
 #ifdef _MSC_VER
-    #include <debugapi.h>
     #include <windows.h>
+    #include <debugapi.h>
 #endif
 
 #ifdef __cpp_lib_stacktrace

@@ -34,7 +34,7 @@
     struct Name                                                                                                                                      \
     {                                                                                                                                                \
     private:                                                                                                                                         \
-        using SizeT = __int32_t;                                                                                                                     \
+        using SizeT = int32_t;                                                                                                                     \
         using KeyT = std::optional<Type>;                                                                                                            \
         using ValueT = std::string;                                                                                                                  \
                                                                                                                                                      \
