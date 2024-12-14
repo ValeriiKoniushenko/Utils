@@ -1,5 +1,15 @@
 @echo off
 
+rem Check and update git submodules
+set count=0
+for %%x in (dependencies/*) do set /a count+=1
+if %ERRORLEVEL% NEQ 0 echo "[31mError:[0m Was met some error while trying to calculate dependecies" && exit 1
+
+if %count%==0 (
+    git submodule update --init --force --remote
+    if %ERRORLEVEL% NEQ 0 echo "[31mError:[0m Was met some error while trying to updating git submodules\" && exit 1
+)
+
 where python
 if %ERRORLEVEL% NEQ 0 echo "[31mError:[0m python wasn't found. Install it(https://www.python.org/downloads/) and try again." && exit 1
 
