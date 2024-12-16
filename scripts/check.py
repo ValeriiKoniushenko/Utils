@@ -148,7 +148,7 @@ def ValidateArgs():
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         if ValidateArgs():
-            exit(0)
+            exit(1)
 
     СheckForSetuptools()
     CheckForCppCheck()
