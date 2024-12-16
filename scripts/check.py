@@ -2,15 +2,21 @@ import subprocess
 import shutil
 import sys
 import os
+import glob
 from packaging import version
 from pathlib import Path
 
 errors = 0
+pathToRepo = None
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 def GetRoot():
+    global pathToRepo
+    if pathToRepo != None:
+        return os.path.normpath(pathToRepo)
+    
     for path in Path(__file__).parents:
         git_dir = path / ".git"
         if git_dir.is_dir():
@@ -96,20 +102,54 @@ def CheckForSubmodules():
         eprint(f"[info]\t\t git root directory wasn't found")
         return
 
-    anySubModuleName = "glm"
     dependenciesDirName = "dependencies"
-    path = str(rootPath) + os.path.sep + dependenciesDirName + os.path.sep + anySubModuleName
-    if not Path(path).exists() or len(os.listdir(path)) == 0:
+    path = str(rootPath) + os.path.sep + dependenciesDirName + os.path.sep
+
+    hasError = True
+    if Path(path).exists() and len(os.listdir(path)) != 0:
+        for topPath in glob.iglob(path + '*', recursive=False):
+            if len(os.listdir(topPath)) == 0:
+                break
+
+        hasError = False
+        print(f"\x1b[6;30;32m[successful]\x1b[0m\t Dependencies was found")
+    
+    if hasError:
         errors += 1
         eprint('\x1b[6;30;31m[error]\x1b[0m\t\t Install all needed submodule using i.g. next command: git submodule update --init --recursive --remote')
-    else:
-        print(f"\x1b[6;30;32m[successful]\x1b[0m\t Dependencies was found")
-
+    
 def PrintAdditionalInfo(string):
     print(f"[info]\t\t {string}")
 
+def ValidateArgs():
+    global pathToRepo
+
+    mainArg = sys.argv[1]
+
+    if str(mainArg).strip() == '--help':
+        print(f"Run {sys.argv[0]} with next params:")
+        print(f"--root \t checking a project by the given path. But be attentive, this path must contains .git folder")
+        print(f"--help \t to get help message")
+        return True
+    elif str(mainArg).strip() == '--root':
+        if len(sys.argv) < 3:
+            print(f"Incorrect count of arguments. Run with the next template: {sys.argv[0]} --root \"path/to/your/repo\"")
+            return True
+        
+        pathToRepo = os.path.normpath(sys.argv[2])
+        if not Path(pathToRepo).is_absolute():
+            pathToRepo = Path(pathToRepo).resolve()
+    else:
+        print("Incorrect argument[s]")
+        return True
+
+    return False
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        if ValidateArgs():
+            exit(0)
+
     СheckForSetuptools()
     CheckForCppCheck()
     CheckCmakeVersion("3.30")
