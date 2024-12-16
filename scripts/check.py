@@ -29,18 +29,18 @@ def СheckForSetuptools():
 
     if not 'setuptools' in result:
         errors += 1
-        eprint('\x1b[6;30;31m[error]\x1b[0m\t\t "setuptools" (python\'s pip module) wasn\'t found. Install it: https://pypi.org/project/setuptools/')
+        eprint('[error]\t\t "setuptools" (python\'s pip module) wasn\'t found. Install it: https://pypi.org/project/setuptools/')
     else:
-        print('\x1b[6;30;32m[successful]\x1b[0m\t "setuptools" was found!')
+        print('[successful]\t "setuptools" was found!')
 
 
 def CheckForCppCheck():
     global errors
     if shutil.which('cppcheck') == None:
         errors += 1
-        eprint('\x1b[6;30;31m[error]\x1b[0m\t\t "cppcheck" wasn\'t found. Try to install it corresponding to your OS')
+        eprint('[error]\t\t "cppcheck" wasn\'t found. Try to install it corresponding to your OS')
     else:
-        print('\x1b[6;30;32m[successful]\x1b[0m\t "cppcheck" was found!')
+        print('[successful]\t "cppcheck" was found!')
 
 
 def CheckEnvVar(name, messege=None):
@@ -52,7 +52,7 @@ def CheckEnvVar(name, messege=None):
         else:
             eprint(f"[info]\t\t Wasn't found environment varialbe: {name} - set it and try again")
     else:
-        print(f'\x1b[6;30;32m[successful]\x1b[0m\t Environment variable "{name}" was found!')
+        print(f'[successful]\t Environment variable "{name}" was found!')
 
 
 def CheckCmakeVersion(reqVersion):
@@ -61,9 +61,9 @@ def CheckCmakeVersion(reqVersion):
     versionStr = line.split()[2]
     
     if version.parse(versionStr) < version.parse(reqVersion):
-        eprint(f"\x1b[6;30;33m[warning]\x1b[0m\t Required cmake version is {reqVersion} but your cmake is: {versionStr}")
+        eprint(f"[warning]\t Required cmake version is {reqVersion} but your cmake is: {versionStr}")
     else:
-        print(f'\x1b[6;30;32m[successful]\x1b[0m\t Your cmake version({versionStr}) corresponding to the project\'s requirements')
+        print(f'[successful]\t Your cmake version({versionStr}) corresponding to the project\'s requirements')
 
 def CheckForClang(reqVersion):
     if shutil.which('clang') == None:
@@ -76,24 +76,24 @@ def CheckForClang(reqVersion):
     versionStr = line.split()[2]
     
     if version.parse(versionStr) < version.parse(reqVersion):
-        eprint(f"\x1b[6;30;33m[warning]\x1b[0m\t If you will use clang to compile a project, so: required clang version is {reqVersion} but your clang is: {versionStr}")
+        eprint(f"[warning]\t If you will use clang to compile a project, so: required clang version is {reqVersion} but your clang is: {versionStr}")
     else:
-        print(f'\x1b[6;30;32m[successful]\x1b[0m\t Your clang version({versionStr}) corresponding to the project\'s requirements')
+        print(f'[successful]\t Your clang version({versionStr}) corresponding to the project\'s requirements')
 
 
 def CheckForGitCRLF():
     localSettings = subprocess.check_output(['git', 'config', '--list', '--local']).decode('utf-8')
     if 'core.autocrlf' in localSettings:
         if 'core.autocrlf=false' in localSettings:
-            eprint(f"\x1b[6;30;33m[warning]\x1b[0m\t git core.autocrlf locally set to 'false'. Better to change it to 'true'")
+            eprint(f"[warning]\t git core.autocrlf locally set to 'false'. Better to change it to 'true'")
         else:
-            print(f"\x1b[6;30;32m[successful]\x1b[0m\t git core.autocrlf set to 'true'")
+            print(f"[successful]\t git core.autocrlf set to 'true'")
     else:
         settings = subprocess.check_output(['git', 'config', '--list', '--local']).decode('utf-8')
         if 'core.autocrlf=false' in settings:
-            eprint(f"\x1b[6;30;33m[warning]\x1b[0m\t git core.autocrlf globally set to 'false'. Better to change it to 'true' globally or locally")
+            eprint(f"[warning]\t git core.autocrlf globally set to 'false'. Better to change it to 'true' globally or locally")
         else:
-            print(f"\x1b[6;30;32m[successful]\x1b[0m\t git core.autocrlf set to 'true'")
+            print(f"[successful]\t git core.autocrlf set to 'true'")
 
 def CheckForSubmodules():
     global errors
@@ -112,11 +112,11 @@ def CheckForSubmodules():
                 break
 
         hasError = False
-        print(f"\x1b[6;30;32m[successful]\x1b[0m\t Dependencies was found")
+        print(f"[successful]\t Dependencies was found")
     
     if hasError:
         errors += 1
-        eprint('\x1b[6;30;31m[error]\x1b[0m\t\t Install all needed submodule using i.g. next command: git submodule update --init --recursive --remote')
+        eprint('[error]\t\t Install all needed submodule using i.g. next command: git submodule update --init --recursive --remote')
     
 def PrintAdditionalInfo(string):
     print(f"[info]\t\t {string}")
