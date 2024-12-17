@@ -34,7 +34,7 @@
     struct Name                                                                                                                                      \
     {                                                                                                                                                \
     private:                                                                                                                                         \
-        using SizeT = int32_t;                                                                                                                     \
+        using SizeT = int32_t;                                                                                                                       \
         using KeyT = std::optional<Type>;                                                                                                            \
         using ValueT = std::string;                                                                                                                  \
                                                                                                                                                      \
@@ -48,25 +48,29 @@
         Name(Name&&) = default;                                                                                                                      \
         Name& operator=(Name&&) = default;                                                                                                           \
                                                                                                                                                      \
-        bool operator==(Name other) const                                                                                                            \
+        bool operator==(Name other) const noexcept                                                                                                   \
         {                                                                                                                                            \
             return mValue == other.mValue;                                                                                                           \
         }                                                                                                                                            \
-        Name& operator=(Name other)                                                                                                                  \
+        Name& operator=(Name other) noexcept                                                                                                         \
         {                                                                                                                                            \
             mValue = other.mValue;                                                                                                                   \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
-        Name& operator=(Type value)                                                                                                                  \
+        Name& operator=(Type value) noexcept                                                                                                         \
         {                                                                                                                                            \
             mValue = value;                                                                                                                          \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
-        bool operator!=(Name other) const                                                                                                            \
+        bool operator!=(Name other) const noexcept                                                                                                   \
         {                                                                                                                                            \
             return mValue != other.mValue;                                                                                                           \
         }                                                                                                                                            \
-        Type Cast() const                                                                                                                            \
+        Type Cast() const noexcept                                                                                                                   \
+        {                                                                                                                                            \
+            return mValue;                                                                                                                           \
+        }                                                                                                                                            \
+        operator Type() const noexcept                                                                                                               \
         {                                                                                                                                            \
             return mValue;                                                                                                                           \
         }                                                                                                                                            \
