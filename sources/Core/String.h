@@ -526,8 +526,7 @@ namespace Core
                 {
                     return true;
                 }
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return false;
             }
             return IsStatic() && other.IsStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
@@ -541,8 +540,7 @@ namespace Core
                     return true;
                 }
 
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return false;
             }
             return IsStatic() && other.IsStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
         }
