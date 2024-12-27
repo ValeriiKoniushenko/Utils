@@ -27,6 +27,9 @@
 
 namespace Utils
 {
+
+    [[nodiscard]] bool IsReadable(const std::filesystem::path& p) noexcept;
+
     template<typename T, typename = void>
     struct __has_value_type : std::false_type
     {
@@ -47,6 +50,15 @@ namespace Utils
     // clang-format on
     [[nodiscard]] T GetTextFileContentAs(const std::filesystem::path& path)
     {
+        if (!IsReadable(path))
+        {
+            if constexpr (!ignoreAssert)
+            {
+                Assert(false, ("Impossible to read a file(permission error): " + path.string()).c_str());
+            }
+            return {};
+        }
+
         std::ifstream in(path);
         if (!in.is_open())
         {
@@ -72,7 +84,5 @@ namespace Utils
     {
         return GetTextFileContentAs<T, true, CharTypeT>(path);
     }
-
-    [[nodiscard]] bool IsReadable(const std::filesystem::path& p) noexcept;
 
 } // namespace Utils
