@@ -27,38 +27,52 @@
 
 namespace Utils
 {
+    template<typename T, typename = void>
+    struct __has_value_type : std::false_type
+    {
+    };
+
+    template<typename T>
+    struct __has_value_type<T, decltype(T::value_type, void())> : std::true_type
+    {
+    };
+
     // TODO: move in the future to the specialized class for working with FileSystem
-    template<class T>
+    // clang-format off
+    template<
+        class T,
+        bool ignoreAssert = false,
+        class CharTypeT = std::conditional_t<__has_value_type<T>::value, typename T::value_type, char>
+    >
+    // clang-format on
     [[nodiscard]] T GetTextFileContentAs(const std::filesystem::path& path)
     {
         std::ifstream in(path);
         if (!in.is_open())
         {
             in.close();
-            Assert(false, ("Impossible to open a file: " + path.string()).c_str());
+            if constexpr (!ignoreAssert)
+            {
+                Assert(false, ("Impossible to open a file: " + path.string()).c_str());
+            }
             return {};
         }
 
-        T data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-
-        in.close();
-        return data;
+        return T{ std::istreambuf_iterator<CharTypeT>(in), std::istreambuf_iterator<CharTypeT>() };
     }
 
     // TODO: move in the future to the specialized class for working with FileSystem
-    template<class T>
+    // clang-format off
+    template<
+        class T,
+        class CharTypeT = std::conditional_t<__has_value_type<T>::value, typename T::value_type, char>
+    >
+    // clang-format on
     [[nodiscard]] T TryToGetTextFileContentAs(const std::filesystem::path& path)
     {
-        std::ifstream in(path);
-        if (!in.is_open())
-        {
-            in.close();
-            return {};
-        }
-
-        T data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-
-        in.close();
-        return data;
+        return GetTextFileContentAs<T, true, CharTypeT>(path);
     }
+
+    [[nodiscard]] bool IsReadable(const std::filesystem::path& p) noexcept;
+
 } // namespace Utils
