@@ -1140,6 +1140,19 @@ TEST(StringTest, BaseString_char_addition)
     EXPECT_EQ("Hello world!", Core::StringAtom("Hello ") + "world!");
 }
 
+TEST(StringTest, BaseString_char_simple_copy)
+{
+    Core::StringAtom str = "Hello world!";
+    const auto baseCapacity = str.Capacity();
+    str.ShrinkToFit();
+    const auto shrinkedCapacity = str.Capacity();
+    EXPECT_LE(shrinkedCapacity, baseCapacity);
+
+    Core::StringAtom copyStr = "Smth";
+    copyStr = str;
+    EXPECT_EQ(shrinkedCapacity, str.Capacity());
+}
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================

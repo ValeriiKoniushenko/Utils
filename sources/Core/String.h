@@ -1484,7 +1484,7 @@ namespace Core
             if (other._policy == StringPolicy::Dynamic)
             {
                 Clear();
-                Resize(other._size);
+                Resize(other._size, true);
                 memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
             }
             else if (other._policy == StringPolicy::Static)
@@ -1567,12 +1567,12 @@ namespace Core
             }
         }
 
-        Self& Reserve(const SizeT newSize)
+        Self& Reserve(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
             const auto* oldString = _string;
             const auto oldCapacity = _capacity;
 
-            const SizeT finalCapacity = newSize * _capacityMultiplier + static_cast<SizeT>(1);
+            const SizeT finalCapacity = newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + static_cast<SizeT>(1);
             if (auto* newString = new CharT[finalCapacity]{})
             {
                 if (_string)
@@ -1605,7 +1605,7 @@ namespace Core
             return *this;
         }
 
-        Self& Resize(const SizeT newSize)
+        Self& Resize(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
             if (newSize < _size && _policy != StringPolicy::Static)
             {
@@ -1613,12 +1613,12 @@ namespace Core
             }
             else if (newSize > _size || _policy == StringPolicy::Static)
             {
-                Reserve(newSize);
+                Reserve(newSize, isIgnoreMultiplier);
             }
             // for empty init
             else if (newSize == 0 && _policy == StringPolicy::None)
             {
-                Reserve(1);
+                Reserve(1, isIgnoreMultiplier);
             }
             _size = newSize;
 
