@@ -1708,6 +1708,16 @@ inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t si
     return Core::BaseString<wchar_t>::Intern(str, size, true);
 }
 
+inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size) noexcept
+{
+    return Core::BaseString<char>(str, size);
+}
+
+inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size) noexcept
+{
+    return Core::BaseString<wchar_t>(str, size);
+}
+
 template<class CharType>
 [[nodiscard]] bool operator>(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {

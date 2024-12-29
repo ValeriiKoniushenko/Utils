@@ -1153,6 +1153,12 @@ TEST(StringTest, BaseString_char_simple_copy)
     EXPECT_EQ(shrinkedCapacity, str.Capacity());
 }
 
+TEST(StringTest, BaseString_char_operator_dyn)
+{
+    auto str = "Hello world!"_dyn;
+    EXPECT_EQ("Hello world!", str);
+}
+
 // =================================================================
 // ========================== WCHAR_T ==============================
 // =================================================================
