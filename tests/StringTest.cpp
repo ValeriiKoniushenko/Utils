@@ -1153,10 +1153,20 @@ TEST(StringTest, BaseString_char_simple_copy)
     EXPECT_EQ(shrinkedCapacity, str.Capacity());
 }
 
-TEST(StringTest, BaseString_char_operator_dyn)
+TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
 {
-    auto str = "Hello world!"_dyn;
-    EXPECT_EQ("Hello world!", str);
+    {
+        auto str = "Path: "_dyn;
+        str += std::filesystem::current_path();
+    }
+
+    {
+        auto str = "Path: "_dyn + std::filesystem::current_path();
+    }
+
+    {
+        Core::StringAtom str(std::filesystem::current_path());
+    }
 }
 
 // =================================================================

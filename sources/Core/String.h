@@ -30,8 +30,10 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
+#include <codecvt>
 #include <cstring>
 #include <cwctype>
+#include <filesystem>
 #include <functional>
 #include <inttypes.h>
 #include <optional>
@@ -515,7 +517,7 @@ namespace Core
         [[nodiscard]] SizeT Length() const noexcept { return _size; }
         [[nodiscard]] bool IsEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
-        [[nodiscard]] operator StdStringViewT() const noexcept { return ToStringView(); }
+        [[nodiscard]] operator StdStringViewT() const noexcept { return ToStdStringView(); }
         [[nodiscard]] CharT operator[](IndexT index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
@@ -733,7 +735,7 @@ namespace Core
             return _string[_size - static_cast<SizeT>(1)];
         }
 
-        [[nodiscard]] StdStringViewT ToStringView() const
+        [[nodiscard]] StdStringViewT ToStdStringView() const
         {
             if (IsEmpty())
             {
@@ -1161,9 +1163,29 @@ namespace Core
             tmp += str;
             return tmp;
         }
+        template<class T>
+            requires std::is_same_v<T, std::filesystem::path>
+        Self& operator+(T&& path)
+        {
+            auto tmp = *this;
+            tmp += std::forward<T>(path);
+            return tmp;
+        }
 
         Self& operator+=(CharT ch) { return push_back(ch); }
         Self& operator+=(StdStringViewT str) { return push_back(str); }
+
+        template<class T>
+            requires std::is_same_v<T, std::filesystem::path>
+        Self& operator+=(T&& path)
+        {
+            if constexpr (std::is_same_v<std::filesystem::path::value_type, CharT>)
+            {
+                return push_back(std::forward<T>(path.string()));
+            }
+
+            return push_back(path.generic_string());
+        }
 
         Self& push_back(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
         Self& PushBack(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
@@ -1460,6 +1482,13 @@ namespace Core
         explicit BaseString(StdStringViewT str)
             : BaseString(str.data(), str.size())
         {
+        }
+
+        template<class T>
+            requires std::is_same_v<T, std::filesystem::path>
+        explicit BaseString(T&& path)
+        {
+            *this += std::forward<T>(path);
         }
 
         BaseString(const Self& other) { *this = other; }
