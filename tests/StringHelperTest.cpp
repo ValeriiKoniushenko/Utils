@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "Core/StringHelper.h"
 
-#include "String.h"
+#include <gtest/gtest.h>
+#include <sstream>
 
-#include <iostream>
+TEST(StringHelperTest, read_to_stream)
+{
+    {
+        auto string = "Hello World"_atom;
+        std::cout << string << std::endl;
+    }
 
-std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
-std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
+    {
+        const auto string = "Hello World"_atom;
+        std::cout << string << std::endl;
+    }
 
-void Assert(const Core::StringAtom& s);
-void Assert(bool value, const Core::StringAtom& s);
-[[nodiscard]] bool Verify(bool value, const Core::StringAtom& s);
+    {
+        const auto string = "Hello World"_atom;
+        std::stringstream ss;
+        ss << string;
+        EXPECT_EQ(ss.str(), "Hello World"_atom);
+    }
+
+    // Assert("Hello world"_atom);
+    // Assert("Hello world"_dyn);
+}

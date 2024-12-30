@@ -22,13 +22,34 @@
 
 #pragma once
 
-#include "String.h"
+#include "StringHelper.h"
 
-#include <iostream>
+#include "Assert.h"
 
-std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
-std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
+std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s)
+{
+    return stream << s.c_str();
+}
 
-void Assert(const Core::StringAtom& s);
-void Assert(bool value, const Core::StringAtom& s);
-[[nodiscard]] bool Verify(bool value, const Core::StringAtom& s);
+std::istream& operator>>(std::istream& stream, Core::StringAtom& s)
+{
+    std::string temp;
+    std::cin >> temp;
+    s += temp;
+    return stream;
+}
+
+void Assert(const Core::StringAtom& s)
+{
+    Assert(s.c_str());
+}
+
+void Assert(bool value, const Core::StringAtom& s)
+{
+    Assert(value, s.c_str());
+}
+
+bool Verify(bool value, const Core::StringAtom& s)
+{
+    return Verify(value, s.c_str());
+}

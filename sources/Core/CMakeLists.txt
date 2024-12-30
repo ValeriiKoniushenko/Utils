@@ -4,9 +4,9 @@ file(
     "*.cpp"
 )
 
-add_library(UtilsCore INTERFACE ${Sources})
+add_library(UtilsCore STATIC ${Sources})
 add_library(Utils::Core ALIAS UtilsCore)
-target_compile_features(UtilsCore INTERFACE ${CXX_STANDARD})
+target_compile_features(UtilsCore PUBLIC ${CXX_STANDARD})
 set_target_properties(UtilsCore PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(UtilsCore INTERFACE ../)
-target_link_libraries(UtilsCore INTERFACE glm UtilsUtils)
+target_include_directories(UtilsCore PUBLIC ../)
+target_link_libraries(UtilsCore PUBLIC glm UtilsUtils)
