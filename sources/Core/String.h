@@ -900,7 +900,7 @@ namespace Core
         }
 
         template<IsFormattableType... T>
-        [[nodiscard]] static Self Format(StdStringViewT str, const T... args)
+        [[nodiscard]] static Self Format(StdStringViewT str, const T&... args)
         {
             Self temp(str);
             const void* expr = nullptr;
@@ -914,6 +914,7 @@ namespace Core
             }
 
             (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
+
             return temp;
         }
 
@@ -1717,6 +1718,40 @@ namespace Core
         static constexpr SizeT _capacityMultiplier = 2ull;
     };
 
+    template<class CharType>
+    class StringFormatter : public BaseString<CharType>
+    {
+    public:
+        using CharT = CharType;
+        using Self = StringFormatter<CharT>;
+        using String = BaseString<CharT>;
+        using BaseString<char>::BaseString;
+
+        template<IsFormattableType T>
+        Self& operator<<(const T& value)
+        {
+            FormatFirst(value);
+            return *this;
+        }
+
+    protected:
+        template<IsFormattableType T>
+        void FormatFirst(const T& arg)
+        {
+            const void* expr = nullptr;
+            if constexpr (sizeof(CharT) == 1)
+            {
+                expr = "\\{\\}";
+            }
+            else
+            {
+                expr = L"\\{\\}";
+            }
+
+            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
+        }
+    };
+
     using StringAtom = BaseString<char>;
     using WStringAtom = BaseString<wchar_t>;
 } // namespace Core
@@ -1786,4 +1821,9 @@ template<class CharType>
     auto temp = Core::BaseString<CharType>(str1);
     temp += str2;
     return temp;
+}
+
+inline Core::StringFormatter<char> operator""_f(const char* str, uint64_t size)
+{
+    return Core::StringFormatter<char>(str, size);
 }

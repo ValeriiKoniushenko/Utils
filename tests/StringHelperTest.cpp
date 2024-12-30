@@ -25,7 +25,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 
-TEST(StringHelperTest, read_to_stream)
+TEST(StringHelperTest, write_to_stream)
 {
     {
         auto string = "Hello World"_atom;
@@ -46,4 +46,16 @@ TEST(StringHelperTest, read_to_stream)
 
     // Assert("Hello world"_atom);
     // Assert("Hello world"_dyn);
+}
+
+TEST(StringHelperTest, quick_format)
+{
+    {
+        Core::StringFormatter<char> formatter("Hello {}");
+        formatter << "World";
+        EXPECT_EQ("Hello World", formatter);
+    }
+
+    EXPECT_EQ("Hello World", "Hello {}"_f << "World");
+    EXPECT_EQ("Hello 555", "Hello {}"_f << 555);
 }
