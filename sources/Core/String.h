@@ -1165,7 +1165,7 @@ namespace Core
             return tmp;
         }
         template<class T>
-            requires std::is_same_v<T, std::filesystem::path>
+            requires std::is_same_v<std::remove_reference_t<T>, std::filesystem::path>
         Self& operator+(T&& path)
         {
             auto tmp = *this;
@@ -1177,7 +1177,7 @@ namespace Core
         Self& operator+=(StdStringViewT str) { return push_back(str); }
 
         template<class T>
-            requires std::is_same_v<T, std::filesystem::path>
+            requires std::is_same_v<std::remove_reference_t<T>, std::filesystem::path>
         Self& operator+=(T&& path)
         {
             if constexpr (std::is_same_v<std::filesystem::path::value_type, CharT>)
@@ -1486,7 +1486,7 @@ namespace Core
         }
 
         template<class T>
-            requires std::is_same_v<T, std::filesystem::path>
+            requires std::is_same_v<std::remove_reference_t<T>, std::filesystem::path>
         explicit BaseString(T&& path)
         {
             *this += std::forward<T>(path);

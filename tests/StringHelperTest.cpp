@@ -28,20 +28,20 @@
 TEST(StringHelperTest, write_to_stream)
 {
     {
-        auto string = "Hello World"_atom;
+        auto string = "Test string, ignore it"_atom;
         std::cout << string << std::endl;
     }
 
     {
-        const auto string = "Hello World"_atom;
+        const auto string = "Test string, ignore it"_atom;
         std::cout << string << std::endl;
     }
 
     {
-        const auto string = "Hello World"_atom;
+        const auto string = "Test string, ignore it"_atom;
         std::stringstream ss;
         ss << string;
-        EXPECT_EQ(ss.str(), "Hello World"_atom);
+        EXPECT_EQ(ss.str(), "Test string, ignore it"_atom);
     }
 
     // Assert("Hello world"_atom);
