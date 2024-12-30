@@ -1490,8 +1490,6 @@ namespace Core
         {
         }
 
-        explicit BaseString(const std::filesystem::path& path) { *this = MakeFrom(path); }
-
         BaseString(const Self& other) { *this = other; }
 
         explicit BaseString(SizeT reserveCount) { Reserve(reserveCount); }

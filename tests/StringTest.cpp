@@ -1180,10 +1180,6 @@ TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
     {
         auto str = "Path: "_dyn + Core::StringAtom::MakeFrom(std::filesystem::current_path());
     }
-
-    {
-        Core::StringAtom str(std::filesystem::current_path());
-    }
 }
 
 // =================================================================
