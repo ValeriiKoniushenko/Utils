@@ -106,6 +106,14 @@ namespace Core
             }
         }
 
+        static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = snprintf(buffer, bufferSize, "%s", value.generic_string().c_str()); errorCode < 0)
+            {
+                Assert("Impossible to convert 'std::filesystem::path' value to string.");
+            }
+        }
+
         static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
@@ -182,6 +190,14 @@ namespace Core
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lf", value); errorCode < 0)
             {
                 Assert("Impossible to convert 'double' value to string.");
+            }
+        }
+
+        static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        {
+            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%s", value.wstring().c_str()); errorCode < 0)
+            {
+                Assert("Impossible to convert 'std::filesystem::path' value to string.");
             }
         }
 
@@ -866,6 +882,15 @@ namespace Core
             return temp;
         }
 
+        static Self MakeFrom(const std::filesystem::path& value)
+        {
+            Self temp;
+            temp.Reserve(1024);
+            Toolset::FromStdFilesystemPath(value, temp.Data(), temp.Capacity());
+            temp._size = Toolset::Length(temp.Data());
+            return temp;
+        }
+
         template<class T>
         [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, uint64_t> && std::is_unsigned_v<T>, T> ConvertTo() const noexcept
         {
@@ -1166,7 +1191,7 @@ namespace Core
         }
         template<class T>
             requires std::is_same_v<std::remove_reference_t<T>, std::filesystem::path>
-        Self& operator+(T&& path)
+        Self operator+(T&& path)
         {
             auto tmp = *this;
             tmp += std::forward<T>(path);

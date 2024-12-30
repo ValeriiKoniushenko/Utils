@@ -1171,6 +1171,11 @@ TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
     }
 
     {
+        auto path = std::filesystem::current_path();
+        auto str = "Path: "_dyn + path;
+    }
+
+    {
         auto str = "Path: "_dyn + std::filesystem::current_path();
     }
 

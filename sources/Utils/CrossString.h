@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 #pragma once
-#include <cwchar>
 
 #ifdef __unix__
 
