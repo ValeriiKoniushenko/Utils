@@ -1157,26 +1157,28 @@ TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
 {
     {
         auto str = "Path: "_dyn;
-        str += std::filesystem::current_path();
+        str += Core::StringAtom::MakeFrom(std::filesystem::current_path());
     }
 
     {
         auto str = "Path: "_dyn;
         auto path = std::filesystem::current_path();
-        str += path;
+        str += Core::StringAtom::MakeFrom(path);
     }
 
     {
-        auto str = "Path: "_dyn + std::filesystem::current_path();
+        auto str = "Path: "_dyn;
+        const auto path = std::filesystem::current_path();
+        str += Core::StringAtom::MakeFrom(path);
     }
 
     {
         auto path = std::filesystem::current_path();
-        auto str = "Path: "_dyn + path;
+        auto str = "Path: "_dyn + Core::StringAtom::MakeFrom(path);
     }
 
     {
-        auto str = "Path: "_dyn + std::filesystem::current_path();
+        auto str = "Path: "_dyn + Core::StringAtom::MakeFrom(std::filesystem::current_path());
     }
 
     {
