@@ -1171,6 +1171,10 @@ TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
     }
 
     {
+        auto str = "Path: "_dyn + std::filesystem::current_path();
+    }
+
+    {
         Core::StringAtom str(std::filesystem::current_path());
     }
 }
