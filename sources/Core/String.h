@@ -334,7 +334,8 @@ namespace Core
         std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
         std::is_same_v<std::decay_t<T>, uint64_t> || std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*> ||
         std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
-        std::is_same_v<BaseString<typename T::CharT>, T> || std::is_same_v<typename T::StdStringViewT, T>;
+        std::is_same_v<BaseString<typename T::CharT>, T> || std::is_same_v<typename T::StdStringViewT, T> ||
+        std::is_same_v<typename T::StdStringT, T>;
 
     template<class CharType>
     class BaseString : public Utils::CopyableAndMoveable
