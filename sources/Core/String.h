@@ -862,6 +862,8 @@ namespace Core
 
         static Self MakeFrom(const Self& value) { return value; }
 
+        static Self MakeFrom(StdStringViewT value) { return { value }; }
+
         static Self MakeFrom(const CharT* value) { return Self(value); }
 
         static Self MakeFrom(float value)
