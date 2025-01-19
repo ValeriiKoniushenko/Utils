@@ -132,6 +132,7 @@ namespace Core
 
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
+        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
 
         [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
         [[nodiscard]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
@@ -219,6 +220,7 @@ namespace Core
 
         [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
         [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
+        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
 
         [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
         [[nodiscard]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
@@ -356,6 +358,17 @@ namespace Core
         using value_type = CharT;
         using pointer = value_type*;
         using difference_type = int64_t;
+
+        template<bool IsConst>
+        using AdaptiveRawPtr = std::conditional_t<IsConst, const Self, Self>*;
+
+        enum LineSeparator : uint8_t
+        {
+            CR,
+            LF,
+            CRLF,
+            LFCR
+        };
 
     public:
         template<bool IsReversed>
@@ -1668,29 +1681,131 @@ namespace Core
         ~BaseString() override { Clear(); }
 
         // ============= Utils ===============
-        static uint64_t GetLinesCountInText(const Self& source, const CharT* end) noexcept
+        template<class T>
+        static constexpr const T* GetLineSeparatorString(LineSeparator separator)
         {
-            if (!Verify(!end || !source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
-            {
-                return 0;
-            }
-            constexpr const int32_t endLineCode = 10; // 10 == '\n'
+            const T* sep = nullptr;
 
-            while (end[0] == endLineCode)
+            if constexpr (std::is_same_v<T, char>)
             {
-                ++end;
-            }
-
-            uint64_t count = 0;
-            for (uint64_t i = 0; i < end - source.c_str(); ++i)
-            {
-                if (source[i] == endLineCode)
+                if (separator == LineSeparator::LF)
                 {
-                    ++count;
+                    sep = "\n";
+                }
+                else if (separator == LineSeparator::CR)
+                {
+                    sep = "\r";
+                }
+                else if (separator == LineSeparator::LFCR)
+                {
+                    sep = "\n\r";
+                }
+                else if (separator == LineSeparator::CRLF)
+                {
+                    sep = "\r\n";
+                }
+                else
+                {
+                    Assert(false);
+                    sep = "\n";
+                }
+            }
+            else
+            {
+                if (separator == LineSeparator::LF)
+                {
+                    sep = L"\n";
+                }
+                else if (separator == LineSeparator::CR)
+                {
+                    sep = L"\r";
+                }
+                else if (separator == LineSeparator::LFCR)
+                {
+                    sep = L"\n\r";
+                }
+                else if (separator == LineSeparator::CRLF)
+                {
+                    sep = L"\r\n";
+                }
+                else
+                {
+                    Assert(false);
+                    sep = L"\n";
                 }
             }
 
+            return sep;
+        }
+
+        static constexpr int32_t GetLineSeparatorStringSize(LineSeparator separator)
+        {
+            if (separator == LineSeparator::LF || separator == LineSeparator::CR)
+            {
+                return 1;
+            }
+
+            return 2;
+        }
+
+        static uint64_t GetLinesCountInText(const Self& source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
+        {
+            if (!Verify(!source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
+            {
+                return 0;
+            }
+
+            if (end == nullptr)
+            {
+                end = source._string + source._size;
+            }
+
+            uint64_t count = 0;
+            const auto* string = source.c_str();
+            while ((string = FindNextLine(string, end, separator)))
+            {
+                ++count;
+            }
+
             return ++count;
+        }
+
+        template<class T>
+        static const T* FindNextLine(const T* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        {
+            const auto* result = _StringToolset<T>::StrStr(string, GetLineSeparatorString<T>(separator));
+            if (result != nullptr)
+            {
+                if (end != nullptr && result >= end)
+                {
+                    return nullptr;
+                }
+
+                result += GetLineSeparatorStringSize(separator);
+            }
+            return result;
+        }
+
+        /**
+         * @brief Can take a functions of next types:
+         * bool(String) - this function will work until it gets 'false' in return
+         * void(String) - will iterate without stopping through all main string
+         */
+        template<class FuncT>
+        void ForEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF)
+        {
+            ForEachByLineImpl<false, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
+        }
+
+        /**
+         * @brief Can take a functions of next types:
+         * bool(String) - this function will work until it gets 'false' in return
+         * void(String) - will iterate without stopping through all main string
+         */
+        template<class FuncT>
+        void ForEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF) const
+        {
+            ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
         }
 
     protected:
@@ -1716,6 +1831,50 @@ namespace Core
         SizeT _capacity = 0;
         StringPolicy _policy = StringPolicy::None;
         static constexpr SizeT _capacityMultiplier = 2ull;
+
+    private:
+        // ================== PIPMPLs =======================
+        template<bool IsConst, class FuncT>
+        static void ForEachByLineImpl(AdaptiveRawPtr<IsConst> base, FuncT&& callback, LineSeparator separator)
+        {
+            if (!base)
+            {
+                return;
+            }
+
+            auto* oldString = base->c_str();
+            decltype(oldString) nextLine = nullptr;
+
+            do
+            {
+                nextLine = FindNextLine(oldString, nullptr, separator);
+                SizeT size = Settings::invalidSize;
+                if (nextLine != nullptr)
+                {
+                    size = nextLine - oldString - GetLineSeparatorStringSize(separator);
+                }
+
+                Self temp(oldString, size);
+                temp.Trim(static_cast<CharT>('\n'));
+                temp.Trim(static_cast<CharT>('\r'));
+                temp.Trim(static_cast<CharT>('\n'));
+                temp.Trim(static_cast<CharT>('\r'));
+
+                if constexpr (std::is_void_v<decltype(callback(temp))>)
+                {
+                    std::invoke(std::forward<decltype(callback)>(callback), std::move(temp));
+                }
+                else
+                {
+                    if (!std::invoke(std::forward<decltype(callback)>(callback), std::move(temp)))
+                    {
+                        return;
+                    }
+                }
+
+                oldString = nextLine;
+            } while (nextLine);
+        }
     };
 
     template<class CharType>

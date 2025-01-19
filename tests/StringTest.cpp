@@ -1089,6 +1089,31 @@ How are you?)"_atom;
     EXPECT_EQ(3, StringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
 }
 
+TEST(StringTest, BaseString_char_default__iterate_over_lines)
+{
+    using Core::StringAtom;
+    const auto str = "Hello\nWorld!\nHow are you?"_atom;
+
+    std::vector<StringAtom> lines = { "Hello", "World!", "How are you?" };
+
+    std::vector<bool> linesValidator;
+    int i = 0;
+    str.ForEachByLine(
+        [&](auto str)
+        {
+            linesValidator.push_back(str == lines[i++]);
+            return true;
+        },
+        StringAtom::LineSeparator::LF);
+
+    ASSERT_EQ(lines.size(), linesValidator.size());
+
+    for (auto isValid : linesValidator)
+    {
+        EXPECT_TRUE(isValid);
+    }
+}
+
 TEST(StringTest, BaseString_char_default__Erase)
 {
     using Core::StringAtom;
@@ -1180,6 +1205,17 @@ TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
     {
         auto str = "Path: "_dyn + Core::StringAtom::MakeFrom(std::filesystem::current_path());
     }
+}
+
+TEST(StringTest, BaseString_char_foreachbyline)
+{
+    using namespace Core;
+
+    StringAtom str = "Hello\nWorld\n!";
+    /*str.ForEachByLine(
+        [](auto)
+        {
+        });*/
 }
 
 // =================================================================
@@ -2220,6 +2256,30 @@ TEST(StringTest, BaseString_wchar_t_default__LinesCount)
 World!
 How are you?)"_atom;
     EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
+}
+
+TEST(StringTest, BaseString_wchar_t_default__iterate_over_lines)
+{
+    using Core::WStringAtom;
+    const auto str = L"Hello\nWorld!\nHow are you?"_atom;
+
+    std::vector<WStringAtom> lines = { L"Hello", L"World!", L"How are you?" };
+
+    std::vector<bool> linesValidator;
+    int i = 0;
+    str.ForEachByLine(
+        [&](auto str)
+        {
+            linesValidator.push_back(str == lines[i++]);
+        },
+        WStringAtom::LineSeparator::LF);
+
+    ASSERT_EQ(lines.size(), linesValidator.size());
+
+    for (auto isValid : linesValidator)
+    {
+        EXPECT_TRUE(isValid);
+    }
 }
 
 TEST(StringTest, BaseString_wchar_t_default__Erase)
