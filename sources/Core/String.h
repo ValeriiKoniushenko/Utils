@@ -170,6 +170,7 @@ namespace Core
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
         [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
+        [[nodiscard]] static uint64_t ToUInt64(const CharT* str) noexcept { return _wtoll(str); }
 
         static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
         {
