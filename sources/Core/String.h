@@ -819,7 +819,7 @@ namespace Core
 
         [[nodiscard]] std::vector<Self> Split(const Self& delimiter) const
         {
-            if (!Verify(!IsEmpty(), "Impossible to work with nullptr string."))
+            u if (IsEmpty())
             {
                 return {};
             }
@@ -1992,4 +1992,3 @@ inline Core::StringFormatter<char> operator""_f(const char* str, uint64_t size)
 inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, uint64_t size)
 {
     return Core::StringFormatter<wchar_t>(str, size);
-}
