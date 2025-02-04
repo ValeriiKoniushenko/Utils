@@ -1979,7 +1979,7 @@ template<class CharType>
 template<class CharType>
 [[nodiscard]] Core::BaseString<CharType> operator+(CharType str1, const Core::BaseString<CharType>& str2)
 {
-    auto temp = Core::BaseString<CharType>(str1);
+    auto temp = Core::BaseString<CharType>(&str1, 1);
     temp += str2;
     return temp;
 }
