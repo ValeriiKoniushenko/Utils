@@ -280,6 +280,45 @@ namespace Core
 
             return Comparison::Less;
         }
+
+        static const CharT* ReverseStrStr(const CharT* string, const CharT* substr, const CharT* end = nullptr)
+        {
+            if (!string)
+            {
+                return nullptr;
+            }
+
+            if (!substr)
+            {
+                return string;
+            }
+
+            if (*substr == 0) // 0 is '\0'
+            {
+                return string;
+            }
+            const auto lenStr = Length(string);
+            const auto limitOffset = end ? (string + lenStr) - end : 0;
+            const auto lenSubstr = Length(substr);
+            if (lenSubstr > lenStr)
+            {
+                return nullptr;
+            }
+
+            for (const CharT* p = string + lenStr - lenSubstr - limitOffset; p >= string; --p)
+            {
+                if (memcmp(p, substr, lenSubstr * sizeof(CharT)) == 0 || p == string)
+                {
+                    return p;
+                }
+            }
+
+            return nullptr;
+        }
+        static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
+        {
+            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
+        }
     };
 
     template<class CharType>

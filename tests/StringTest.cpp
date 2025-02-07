@@ -2400,3 +2400,96 @@ TEST(StringTest, BaseString_wchar_t_addition)
     EXPECT_EQ(L"Hello world!", L"Hello " + L"world"_atom + L"!"_atom);
     EXPECT_EQ(L"Hello world!", Core::WStringAtom(L"Hello ") + L"world!");
 }
+
+TEST(StringTest, BaseString_wchar_t_foreachbyline)
+{
+    using namespace Core;
+
+    WStringAtom str = L"Hello\nWorld\n!";
+    std::vector<WStringAtom> tokens;
+    str.ForEachByLine(
+        [&tokens](auto str)
+        {
+            tokens.emplace_back(std::move(str));
+        });
+
+    ASSERT_EQ(3, tokens.size());
+    EXPECT_EQ(L"Hello", tokens[0]);
+    EXPECT_EQ(L"World", tokens[1]);
+    EXPECT_EQ(L"!", tokens[2]);
+}
+
+TEST(StringTest, BaseString_wchar_t_FindNextLine)
+{
+    using namespace Core;
+
+    WStringAtom str = L"Hello\nWorld\n!";
+    std::vector<WStringAtom> tokens = { L"Hello", L"World", L"!" };
+
+    const auto* ptr = str.c_str();
+
+    const auto firstLineStr = WStringAtom(ptr, tokens[0].Size());
+    ASSERT_TRUE(firstLineStr);
+    ASSERT_EQ(L"Hello", firstLineStr);
+
+    const auto secondLine = WStringAtom::FindNextLine(ptr);
+    ASSERT_TRUE(secondLine);
+    const auto secondLineStr = WStringAtom(secondLine, tokens[1].Size());
+    ASSERT_EQ(L"World", secondLineStr);
+    ptr = secondLine;
+
+    const auto thirdLine = WStringAtom::FindNextLine(ptr);
+    ASSERT_TRUE(thirdLine);
+    const auto thirdLineStr = WStringAtom(thirdLine, tokens[2].Size());
+    ASSERT_EQ(L"!", thirdLineStr);
+    ptr = thirdLine;
+
+    EXPECT_EQ(nullptr, WStringAtom::FindNextLine(ptr));
+}
+
+TEST(StringTest, BaseString_wchar_t_ReverseStrStr)
+{
+    using namespace Core;
+
+    const auto lenHello = WStringAtom(L"Hello").Length();
+
+    {
+        WStringAtom str = L"HelloHello";
+        EXPECT_EQ(str.c_str() + lenHello, str.ReverseFind(L"Hello"));
+    }
+
+    {
+        WStringAtom str = L"HelloHello";
+        EXPECT_EQ(str.c_str(), str.ReverseFind(L"Hello", 0, 1));
+    }
+
+    {
+        WStringAtom str = L"";
+        EXPECT_EQ(nullptr, str.ReverseFind(L"Hello", 0, 1));
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_FindPrevLine)
+{
+    using namespace Core;
+
+    WStringAtom str = L"Hello\nWorld\n!";
+    std::vector<WStringAtom> tokens = { L"Hello", L"World", L"!" };
+
+    const auto* end = str.c_str() + str.Size();
+
+    const auto* ptr = WStringAtom::FindPrevLine(str.c_str());
+    ASSERT_TRUE(ptr);
+    const auto thirdLine = WStringAtom(ptr, tokens[2].Size());
+    EXPECT_EQ(L"!", thirdLine);
+
+    ptr = WStringAtom::FindPrevLine(str.c_str(), ptr - 1);
+    ASSERT_TRUE(ptr);
+    const auto secondLine = WStringAtom(ptr, tokens[1].Size());
+    EXPECT_EQ(L"World", secondLine);
+
+    ptr = WStringAtom::FindPrevLine(str.c_str(), ptr - 1);
+    ASSERT_TRUE(ptr);
+    const auto firstLine = WStringAtom(ptr, tokens[0].Size());
+    EXPECT_EQ(L"Hello", firstLine);
+}
