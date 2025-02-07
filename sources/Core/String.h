@@ -152,6 +152,45 @@ namespace Core
 
             return Comparison::Less;
         }
+
+        static const CharT* ReverseStrStr(const CharT* string, const CharT* substr, const CharT* end = nullptr)
+        {
+            if (!string)
+            {
+                return nullptr;
+            }
+
+            if (!substr)
+            {
+                return string;
+            }
+
+            if (*substr == 0) // 0 is '\0'
+            {
+                return string;
+            }
+            const auto lenStr = Length(string);
+            const auto limitOffset = end ? (string + lenStr) - end : 0;
+            const auto lenSubstr = Length(substr);
+            if (lenSubstr > lenStr)
+            {
+                return nullptr;
+            }
+
+            for (const CharT* p = string + lenStr - lenSubstr - limitOffset; p >= string; --p)
+            {
+                if (memcmp(p, substr, lenSubstr * sizeof(CharT)) == 0 || p == string)
+                {
+                    return p;
+                }
+            }
+
+            return nullptr;
+        }
+        static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
+        {
+            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
+        }
     };
 
     template<>
@@ -444,7 +483,7 @@ namespace Core
 
             difference_type operator-(const Self& other) const noexcept
             {
-                if (Verify(_owner == other._owner))
+                if (_owner == other._owner)
                 {
                     return _data - other._data;
                 }
@@ -1144,6 +1183,7 @@ namespace Core
         }
 
         [[nodiscard]] static bool IsSpace(CharT ch) noexcept { return Toolset::IsSpace(ch); }
+
         [[nodiscard]] static bool IsContainChar(CharT ch, StdStringViewT set) noexcept
         {
             for (const auto value : set)
@@ -1217,6 +1257,11 @@ namespace Core
 
         Self& PushBack(StdStringViewT str)
         {
+            if (str.empty())
+            {
+                return *this;
+            }
+
             const auto oldSize = _size;
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
@@ -1241,6 +1286,11 @@ namespace Core
 
         Self& PushFront(StdStringViewT str)
         {
+            if (str.empty())
+            {
+                return *this;
+            }
+
             const auto oldSize = _size;
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
@@ -1266,7 +1316,7 @@ namespace Core
 
         Self& pop_back()
         {
-            if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
+            if (_size > 0)
             {
                 TryToMakeAsDynamic();
                 _string[--_size] = 0;
@@ -1278,7 +1328,7 @@ namespace Core
 
         Self& pop_front()
         {
-            if (Verify(_size > 0, "Impossible to pop_back a value from the empty string"))
+            if (_size > 0)
             {
                 TryToMakeAsDynamic();
                 for (int64_t i = 1ll; i < _size; ++i)
@@ -1381,7 +1431,7 @@ namespace Core
 
         [[nodiscard]] Comparison Compare(StdStringViewT other, const bool isIgnoreCase = false) const noexcept
         {
-            if (!Verify(!IsEmpty() && !other.empty(), "Impossible to work with nullptr string."))
+            if (IsEmpty() || other.empty())
             {
                 return Comparison::None;
             }
@@ -1415,7 +1465,12 @@ namespace Core
                                                      std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                                      std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
-            if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string."))
+            if (IsEmpty())
+            {
+                return {};
+            }
+
+            if (!Verify(!expr.empty(), "RegEx expr is empty"))
             {
                 return {};
             }
@@ -1430,7 +1485,12 @@ namespace Core
                           std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                           std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
-            if (!Verify(!IsEmpty() && !expr.empty(), "Impossible to work with nullptr string.") || !lambda)
+            if (IsEmpty())
+            {
+                return;
+            }
+
+            if (!Verify(!expr.empty(), "RegEx expr is empty"))
             {
                 return;
             }
@@ -1447,19 +1507,38 @@ namespace Core
             }
         }
 
-        [[nodiscard]] const CharT* Find(StdStringViewT other, int baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* Find(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
         {
-            if (!Verify(!IsEmpty() && !other.empty(), "Impossible to work with nullptr string."))
+            if (IsEmpty())
             {
                 return nullptr;
             }
 
+            if (other.empty())
+            {
+                return _string;
+            }
             return Toolset::StrStr(_string + baseOffset, other.data());
+        }
+
+        [[nodiscard]] const CharT* ReverseFind(StdStringViewT other, uint64_t baseOffset = 0, uint64_t limitOffset = 0) const noexcept
+        {
+            if (IsEmpty())
+            {
+                return nullptr;
+            }
+
+            if (other.empty())
+            {
+                return _string;
+            }
+
+            return Toolset::ReverseStrStr(_string + baseOffset, other.data(), _string + Size() - limitOffset);
         }
 
         [[nodiscard]] std::vector<const CharT*> FindAll(StdStringViewT other) const noexcept
         {
-            if (!Verify(!IsEmpty() && !other.empty(), "Impossible to work with nullptr string."))
+            if (IsEmpty() || other.empty())
             {
                 return {};
             }
@@ -1683,12 +1762,11 @@ namespace Core
         ~BaseString() override { Clear(); }
 
         // ============= Utils ===============
-        template<class T>
-        static constexpr const T* GetLineSeparatorString(LineSeparator separator)
+        static constexpr const CharT* GetLineSeparatorString(LineSeparator separator)
         {
-            const T* sep = nullptr;
+            const CharT* sep = nullptr;
 
-            if constexpr (std::is_same_v<T, char>)
+            if constexpr (std::is_same_v<CharT, char>)
             {
                 if (separator == LineSeparator::LF)
                 {
@@ -1772,10 +1850,9 @@ namespace Core
             return ++count;
         }
 
-        template<class T>
-        static const T* FindNextLine(const T* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        static const CharT* FindNextLine(const CharT* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
         {
-            const auto* result = _StringToolset<T>::StrStr(string, GetLineSeparatorString<T>(separator));
+            const auto* result = _StringToolset<CharT>::StrStr(string, GetLineSeparatorString(separator));
             if (result != nullptr)
             {
                 if (end != nullptr && result >= end)
@@ -1785,6 +1862,27 @@ namespace Core
 
                 result += GetLineSeparatorStringSize(separator);
             }
+            return result;
+        }
+
+        static CharT* FindNextLine(CharT* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        {
+            return const_cast<const CharT*>(FindNextLine(static_cast<const CharT*>(string), end, separator));
+        }
+
+        static const CharT* FindPrevLine(const CharT* begin, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        {
+            if (begin == nullptr)
+            {
+                return nullptr;
+            }
+
+            const auto* result = _StringToolset<CharT>::ReverseStrStr(begin, GetLineSeparatorString(separator), end);
+            if (result != nullptr && result != begin)
+            {
+                result += GetLineSeparatorStringSize(separator);
+            }
+
             return result;
         }
 

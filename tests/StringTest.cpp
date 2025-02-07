@@ -1212,10 +1212,92 @@ TEST(StringTest, BaseString_char_foreachbyline)
     using namespace Core;
 
     StringAtom str = "Hello\nWorld\n!";
-    /*str.ForEachByLine(
-        [](auto)
+    std::vector<StringAtom> tokens;
+    str.ForEachByLine(
+        [&tokens](auto str)
         {
-        });*/
+            tokens.emplace_back(std::move(str));
+        });
+
+    ASSERT_EQ(3, tokens.size());
+    EXPECT_EQ("Hello", tokens[0]);
+    EXPECT_EQ("World", tokens[1]);
+    EXPECT_EQ("!", tokens[2]);
+}
+
+TEST(StringTest, BaseString_char_FindNextLine)
+{
+    using namespace Core;
+
+    StringAtom str = "Hello\nWorld\n!";
+    std::vector<StringAtom> tokens = { "Hello", "World", "!" };
+
+    const auto* ptr = str.c_str();
+
+    const auto firstLineStr = StringAtom(ptr, tokens[0].Size());
+    ASSERT_TRUE(firstLineStr);
+    ASSERT_EQ("Hello", firstLineStr);
+
+    const auto secondLine = StringAtom::FindNextLine(ptr);
+    ASSERT_TRUE(secondLine);
+    const auto secondLineStr = StringAtom(secondLine, tokens[1].Size());
+    ASSERT_EQ("World", secondLineStr);
+    ptr = secondLine;
+
+    const auto thirdLine = StringAtom::FindNextLine(ptr);
+    ASSERT_TRUE(thirdLine);
+    const auto thirdLineStr = StringAtom(thirdLine, tokens[2].Size());
+    ASSERT_EQ("!", thirdLineStr);
+    ptr = thirdLine;
+
+    EXPECT_EQ(nullptr, StringAtom::FindNextLine(ptr));
+}
+
+TEST(StringTest, BaseString_char_ReverseStrStr)
+{
+    using namespace Core;
+
+    const auto lenHello = StringAtom("Hello").Length();
+
+    {
+        StringAtom str = "HelloHello";
+        EXPECT_EQ(str.c_str() + lenHello, str.ReverseFind("Hello"));
+    }
+
+    {
+        StringAtom str = "HelloHello";
+        EXPECT_EQ(str.c_str(), str.ReverseFind("Hello", 0, 1));
+    }
+
+    {
+        StringAtom str = "";
+        EXPECT_EQ(nullptr, str.ReverseFind("Hello", 0, 1));
+    }
+}
+
+TEST(StringTest, BaseString_char_FindPrevLine)
+{
+    using namespace Core;
+
+    StringAtom str = "Hello\nWorld\n!";
+    std::vector<StringAtom> tokens = { "Hello", "World", "!" };
+
+    const auto* end = str.c_str() + str.Size();
+
+    const auto* ptr = StringAtom::FindPrevLine(str.c_str());
+    ASSERT_TRUE(ptr);
+    const auto thirdLine = StringAtom(ptr, tokens[2].Size());
+    EXPECT_EQ("!", thirdLine);
+
+    ptr = StringAtom::FindPrevLine(str.c_str(), ptr - 1);
+    ASSERT_TRUE(ptr);
+    const auto secondLine = StringAtom(ptr, tokens[1].Size());
+    EXPECT_EQ("World", secondLine);
+
+    ptr = StringAtom::FindPrevLine(str.c_str(), ptr - 1);
+    ASSERT_TRUE(ptr);
+    const auto firstLine = StringAtom(ptr, tokens[0].Size());
+    EXPECT_EQ("Hello", firstLine);
 }
 
 // =================================================================
