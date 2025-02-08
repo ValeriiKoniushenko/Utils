@@ -1867,20 +1867,20 @@ namespace Core
             return 2;
         }
 
-        static uint64_t GetLinesCountInText(const Self& source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
+        static uint64_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
         {
-            if (!Verify(!source.IsEmpty(), "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
+            if (!Verify(source, "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
             {
                 return 0;
             }
 
             if (end == nullptr)
             {
-                end = source._string + source._size;
+                end = source + Toolset::Length(source);
             }
 
             uint64_t count = 0;
-            const auto* string = source.c_str();
+            const auto* string = source;
             while ((string = FindNextLine(string, end, separator)))
             {
                 ++count;

@@ -1086,7 +1086,7 @@ TEST(StringTest, BaseString_char_default__LinesCount)
     const auto str = R"(Hello
 World!
 How are you?)"_atom;
-    EXPECT_EQ(3, StringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
+    EXPECT_EQ(3, StringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.Size()));
 }
 
 TEST(StringTest, BaseString_char_default__iterate_over_lines)
@@ -2337,7 +2337,7 @@ TEST(StringTest, BaseString_wchar_t_default__LinesCount)
         LR"(Hello
 World!
 How are you?)"_atom;
-    EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str, str.c_str() + str.Size()));
+    EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.Size()));
 }
 
 TEST(StringTest, BaseString_wchar_t_default__iterate_over_lines)
