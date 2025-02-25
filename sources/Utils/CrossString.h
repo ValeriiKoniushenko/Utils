@@ -25,9 +25,10 @@
 #ifdef __unix__
 
     #include <bits/types.h>
-    #include <inttypes.h>
-    #include <stdarg.h>
-    #include <string.h>
+    #include <cinttypes>
+    #include <cstdarg>
+    #include <cstring>
+    #include <cwchar>
 
 inline char* strtok_s(char* s, const char* delim, char** context)
 {
