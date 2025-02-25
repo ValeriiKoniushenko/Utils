@@ -24,7 +24,6 @@
 
 #include "Math.h"
 #include "Utils/Concepts.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
 #include "glm/glm.hpp"
 
 namespace Core
@@ -121,7 +120,7 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return { static_cast<CastType::ValueType>(width), static_cast<CastType::ValueType>(height) };
+            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height) };
         }
 
         [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height }; }
@@ -232,7 +231,7 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return { static_cast<CastType::ValueType>(width), static_cast<CastType::ValueType>(height), static_cast<CastType::ValueType>(deep) };
+            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height), static_cast<CastType::ValueType>(deep) };
         }
 
         [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height, deep }; }

@@ -1,7 +1,7 @@
 file(
-    GLOB Sources
-    "*.h"
-    "*.cpp"
+        GLOB Sources
+        "*.h"
+        "*.cpp"
 )
 
 add_library(UtilsUtils STATIC ${Sources})

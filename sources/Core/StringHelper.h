@@ -24,8 +24,6 @@
 
 #include "String.h"
 
-#include <iostream>
-
 std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
 std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
 

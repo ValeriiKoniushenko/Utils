@@ -38,7 +38,6 @@
 #include <inttypes.h>
 #include <optional>
 #include <regex>
-#include <stdlib.h>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -387,7 +386,7 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size, bool isCompileTime = false)
+        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size)
         {
             const auto currentHash = std::hash<StdStringViewT>{}({ string, size });
             if (auto&& it = _strings.find(currentHash); it != _strings.end())
@@ -615,9 +614,9 @@ namespace Core
 
         [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size, bool isCompileTime = false)
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size)
         {
-            return Self{ StringPool::Instance().Add(newString, size, isCompileTime) };
+            return Self{ StringPool::Instance().Add(newString, size) };
         }
 
         [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
@@ -2062,12 +2061,12 @@ struct std::hash<Core::BaseString<CharType>>
 
 inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size) noexcept
 {
-    return Core::BaseString<char>::Intern(str, size, true);
+    return Core::BaseString<char>::Intern(str, size);
 }
 
 inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t size) noexcept
 {
-    return Core::BaseString<wchar_t>::Intern(str, size, true);
+    return Core::BaseString<wchar_t>::Intern(str, size);
 }
 
 inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size) noexcept

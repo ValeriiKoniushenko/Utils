@@ -112,7 +112,7 @@ namespace Core
 
         void Unsubscribe(const ID& id) { _callbacks.erase(id); }
 
-        [[nodiscard]] CallbackContainerT::size_type GetSubscriptionsCount() const noexcept { return _callbacks.size(); }
+        [[nodiscard]] typename CallbackContainerT::size_type GetSubscriptionsCount() const noexcept { return _callbacks.size(); }
         [[nodiscard]] bool IsEmpty() const noexcept { return _callbacks.empty(); }
 
         void Reset() { _callbacks.clear(); }
