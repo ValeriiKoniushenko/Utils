@@ -2031,8 +2031,6 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] operator const typename String::StdStringViewT() const { return this->ToStdStringView(); }
-
     protected:
         template<IsFormattableType T>
         void FormatFirst(const T& arg)
