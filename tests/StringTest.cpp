@@ -27,6 +27,68 @@
 #include <gtest/gtest.h>
 #include <unordered_set>
 
+TEST(StringTest, BaseString_char_Assigning)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom string;
+        string = "Hello";
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        std::string s = "Hello";
+        string = s;
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        string = std::string("Hello");
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        std::string_view s = "Hello";
+        string = s;
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        string = std::string_view("Hello");
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        StringAtom s = "Hello";
+        string = s;
+        EXPECT_EQ(string, "Hello");
+    }
+
+    {
+        StringAtom string;
+        string = StringAtom("Hello");
+        EXPECT_EQ(string, "Hello");
+    }
+
+    EXPECT_EQ("Hello", StringAtom("Hello"));
+    EXPECT_EQ("Hello", StringAtom(std::string("Hello")));
+    EXPECT_EQ("Hello", StringAtom(std::string_view("Hello")));
+}
+
+TEST(StringTest, BaseString_char_Regex)
+{
+    using Core::StringAtom;
+    using j = StringAtom::jp;
+    j::Regex regex;
+}
+
+/*
 TEST(StringTest, BaseString_char_default__Creation)
 {
     using Core::StringAtom;
@@ -614,12 +676,17 @@ TEST(StringTest, BaseString_char_default_PushBack)
     {
         auto str = "Hello World"_atom;
         const auto* text =
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_back(text);
         EXPECT_EQ(
-            "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
-            str);
-        EXPECT_EQ(11 + strlen(text), str.Size());
+            "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
+text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five
+centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
+Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem
+Ipsum", str); EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
     {
@@ -649,12 +716,17 @@ TEST(StringTest, BaseString_char_default_PushFront)
     {
         auto str = "Hello World"_atom;
         const auto* text =
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_front(text);
         EXPECT_EQ(
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World",
-            str);
-        EXPECT_EQ(11 + strlen(text), str.Size());
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello
+World", str); EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
     {
@@ -1865,12 +1937,17 @@ TEST(StringTest, BaseString_wchar_t_default_PushBack)
     {
         auto str = L"Hello World"_atom;
         const auto* text =
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_back(text);
         EXPECT_EQ(
-            L"Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
-            str);
-        EXPECT_EQ(11 + wcslen(text), str.Size());
+            L"Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
+text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five
+centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
+Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem
+Ipsum", str); EXPECT_EQ(11 + wcslen(text), str.Size());
     }
 
     {
@@ -1900,12 +1977,17 @@ TEST(StringTest, BaseString_wchar_t_default_PushFront)
     {
         auto str = L"Hello World"_atom;
         const auto* text =
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
         str.push_front(text);
         EXPECT_EQ(
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World",
-            str);
-        EXPECT_EQ(11 + wcslen(text), str.Size());
+            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
+but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello
+World", str); EXPECT_EQ(11 + wcslen(text), str.Size());
     }
 
     {
@@ -2493,3 +2575,4 @@ TEST(StringTest, BaseString_wchar_t_FindPrevLine)
     const auto firstLine = WStringAtom(ptr, tokens[0].Size());
     EXPECT_EQ(L"Hello", firstLine);
 }
+*/

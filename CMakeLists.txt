@@ -26,6 +26,9 @@ InstallBenchmarkDependenciesTesting()
 add_subdirectory(${DEPENDENCIES_DIR}/glm)
 add_subdirectory(${DEPENDENCIES_DIR}/googletest)
 add_subdirectory(${DEPENDENCIES_DIR}/benchmark)
+add_subdirectory(${DEPENDENCIES_DIR}/pcre2)
+add_subdirectory(${DEPENDENCIES_DIR}/jpcre2)
+
 # Adding core
 add_subdirectory(benchmark)
 add_subdirectory(tests)

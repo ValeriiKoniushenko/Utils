@@ -7,3 +7,6 @@
 [submodule "dependencies/benchmark"]
 	path = dependencies/benchmark
 	url = git@github.com:google/benchmark.git
+[submodule "dependencies/pcre2"]
+	path = dependencies/pcre2
+	url = git@github.com:PCRE2Project/pcre2.git

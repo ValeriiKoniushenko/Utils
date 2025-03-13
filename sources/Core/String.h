@@ -30,6 +30,12 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
+#ifdef UTILS__USE_STD_REGEX
+    #include <regex>mo
+#else
+    #include "jpcre2.hpp"
+#endif
+
 #include <codecvt>
 #include <cstring>
 #include <cwctype>
@@ -37,7 +43,6 @@
 #include <functional>
 #include <inttypes.h>
 #include <optional>
-#include <regex>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -70,7 +75,6 @@ namespace Core
         using CharT = char;
         using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(int ch) { return static_cast<bool>(isspace(ch)); }
@@ -198,7 +202,6 @@ namespace Core
         using CharT = wchar_t;
         using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
@@ -432,7 +435,12 @@ namespace Core
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
         using StringPool = _StringPool<CharT>;
-        using StdRegex = typename Toolset::StdRegex;
+#ifdef UTILS__USE_STD_REGEX
+        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
+        using StdRegexMatchResults = std::match_results<IteratorT>;
+#else
+        using jp = jpcre2::select<CharT>;
+#endif
 
         using value_type = CharT;
         using pointer = value_type*;
@@ -451,11 +459,11 @@ namespace Core
 
     public:
         template<bool IsReversed>
-        class Iterator : public IRandomAccessIterator<CharT, Iterator<IsReversed>, Utils::CopyableAndMoveable, true>
+        class BaseIterator : public IRandomAccessIterator<CharT, BaseIterator<IsReversed>, Utils::CopyableAndMoveable, true>
         {
         public:
-            using Self = Iterator;
-            using Super = IRandomAccessIterator<CharT, Iterator, Utils::CopyableAndMoveable, true>;
+            using Self = BaseIterator;
+            using Super = IRandomAccessIterator<CharT, BaseIterator, Utils::CopyableAndMoveable, true>;
             using iterator_category = std::random_access_iterator_tag;
             using value_type = typename BaseString<CharT>::value_type;
             using difference_type = typename BaseString<CharT>::difference_type;
@@ -463,7 +471,7 @@ namespace Core
             using reference = value_type&;
 
         public:
-            Iterator() = default;
+            BaseIterator() = default;
 
             [[nodiscard]] bool operator==(const Self& other) const noexcept override { return _data == other._data; };
 
@@ -553,7 +561,7 @@ namespace Core
             }
 
         protected:
-            explicit Iterator(CharT* data, const BaseString<CharType>* owner)
+            explicit BaseIterator(CharT* data, const BaseString<CharType>* owner)
                 : _data{ data },
                   _owner{ owner }
             {
@@ -593,31 +601,27 @@ namespace Core
             friend class BaseString<CharType>;
         };
 
-        using IteratorT = Iterator<false>;
-        using ReverseIteratorT = Iterator<true>;
-        using StdRegexMatchResults = std::match_results<IteratorT>;
+        using Iterator = BaseIterator<false>;
+        using ReverseIterator = BaseIterator<true>;
 
     public:
-        [[nodiscard]] IteratorT begin() noexcept { return IteratorT{ _string, this }; }
-        [[nodiscard]] const IteratorT begin() const noexcept { return IteratorT{ _string, this }; }
-        [[nodiscard]] const IteratorT cbegin() const noexcept { return IteratorT{ _string, this }; }
-        [[nodiscard]] IteratorT end() noexcept { return IteratorT{ _string + _size, this }; }
-        [[nodiscard]] const IteratorT end() const noexcept { return IteratorT{ _string + _size, this }; }
-        [[nodiscard]] const IteratorT cend() const noexcept { return IteratorT{ _string + _size, this }; }
+        [[nodiscard]] Iterator begin() noexcept { return Iterator{ _string, this }; }
+        [[nodiscard]] const Iterator begin() const noexcept { return Iterator{ _string, this }; }
+        [[nodiscard]] const Iterator cbegin() const noexcept { return Iterator{ _string, this }; }
+        [[nodiscard]] Iterator end() noexcept { return Iterator{ _string + _size, this }; }
+        [[nodiscard]] const Iterator end() const noexcept { return Iterator{ _string + _size, this }; }
+        [[nodiscard]] const Iterator cend() const noexcept { return Iterator{ _string + _size, this }; }
 
-        [[nodiscard]] ReverseIteratorT rbegin() noexcept { return ReverseIteratorT{ _string + _size, this }; }
-        [[nodiscard]] const ReverseIteratorT rbegin() const noexcept { return ReverseIteratorT{ _string + _size, this }; }
-        [[nodiscard]] const ReverseIteratorT crbegin() const noexcept { return ReverseIteratorT{ _string + _size, this }; }
-        [[nodiscard]] ReverseIteratorT rend() noexcept { return ReverseIteratorT{ _string, this }; }
-        [[nodiscard]] const ReverseIteratorT rend() const noexcept { return ReverseIteratorT{ _string, this }; }
-        [[nodiscard]] const ReverseIteratorT crend() const noexcept { return ReverseIteratorT{ _string, this }; }
+        [[nodiscard]] ReverseIterator rbegin() noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] const ReverseIterator rbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] const ReverseIterator crbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] ReverseIterator rend() noexcept { return ReverseIterator{ _string, this }; }
+        [[nodiscard]] const ReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
+        [[nodiscard]] const ReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
 
         [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size)
-        {
-            return Self{ StringPool::Instance().Add(newString, size) };
-        }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::Instance().Add(newString, size) }; }
 
         [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
@@ -1031,9 +1035,9 @@ namespace Core
             {
                 expr = L"\\{\\}";
             }
-
+#ifdef UTILS__USE_STD_REGEX
             (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
-
+#endif
             return temp;
         }
 
@@ -1160,7 +1164,7 @@ namespace Core
             return *this;
         }
 
-        Self& Erase(IteratorT iterator)
+        Self& Erase(Iterator iterator)
         {
             if (!IsEmpty())
             {
@@ -1172,7 +1176,7 @@ namespace Core
             return *this;
         }
 
-        Self& Erase(IteratorT from, IteratorT to)
+        Self& Erase(Iterator from, Iterator to)
         {
             if (!IsEmpty())
             {
@@ -1235,6 +1239,53 @@ namespace Core
             return false;
         }
 
+#ifdef UTILS__USE_STD_REGEX
+        [[nodiscard]] StdRegexMatchResults FindRegex(StdStringViewT expr, int baseOffset = 0,
+                                                     std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                     std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        {
+            if (IsEmpty())
+            {
+                return {};
+            }
+
+            if (!Verify(!expr.empty(), "RegEx expr is empty"))
+            {
+                return {};
+            }
+
+            StdRegexMatchResults match;
+            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
+
+            return match;
+        }
+
+        void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
+                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        {
+            if (IsEmpty())
+            {
+                return;
+            }
+
+            if (!Verify(!expr.empty(), "RegEx expr is empty"))
+            {
+                return;
+            }
+
+            StdRegex regexExpr(expr.data(), regexFlag);
+            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
+            auto last = std::regex_iterator<IteratorT>();
+            for (; first != last; ++first)
+            {
+                if (!std::invoke(lambda, *first))
+                {
+                    break;
+                }
+            }
+        }
+
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                       std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
@@ -1263,12 +1314,14 @@ namespace Core
                           std::regex::flag_type regexFlag = std::regex::ECMAScript)
         {
             const StdRegex regex(expr.data(), regexFlag);
+
             BaseString temp;
             std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), matchFlag);
             const auto wasReplaced = *this != temp;
             *this = std::move(temp);
             return wasReplaced;
         }
+#endif
 
         [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
 
@@ -1416,12 +1469,12 @@ namespace Core
 
         [[nodiscard]] SizeT Capacity() const noexcept { return _capacity; }
 
-        Self& Insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& Insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             return insert(std::move(iterator), str, size);
         }
 
-        Self& insert(IteratorT iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             Assert(iterator._owner == this);
             if (iterator._owner == this)
@@ -1497,52 +1550,6 @@ namespace Core
             }
 
             return Toolset::Cmp(_string, other.data());
-        }
-
-        [[nodiscard]] StdRegexMatchResults FindRegex(StdStringViewT expr, int baseOffset = 0,
-                                                     std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                     std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (IsEmpty())
-            {
-                return {};
-            }
-
-            if (!Verify(!expr.empty(), "RegEx expr is empty"))
-            {
-                return {};
-            }
-
-            StdRegexMatchResults match;
-            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
-
-            return match;
-        }
-
-        void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
-                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (IsEmpty())
-            {
-                return;
-            }
-
-            if (!Verify(!expr.empty(), "RegEx expr is empty"))
-            {
-                return;
-            }
-
-            StdRegex regexExpr(expr.data(), regexFlag);
-            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
-            auto last = std::regex_iterator<IteratorT>();
-            for (; first != last; ++first)
-            {
-                if (!std::invoke(lambda, *first))
-                {
-                    break;
-                }
-            }
         }
 
         [[nodiscard]] const CharT* Find(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
@@ -1627,6 +1634,15 @@ namespace Core
         BaseString(const Self& other) { *this = other; }
 
         explicit BaseString(SizeT reserveCount) { Reserve(reserveCount); }
+
+        Self& operator=(const CharT* str)
+        {
+            Clear();
+            const auto size = Toolset::Length(str);
+            Resize(size);
+            memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
+            return *this;
+        }
 
         Self& operator=(StdStringViewT other)
         {
@@ -2044,8 +2060,9 @@ namespace Core
             {
                 expr = L"\\{\\}";
             }
-
+#ifdef UTILS__USE_STD_REGEX
             this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
+#endif
         }
     };
 
