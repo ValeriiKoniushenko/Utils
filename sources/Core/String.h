@@ -33,7 +33,7 @@
 #ifdef UTILS__USE_STD_REGEX
     #include <regex>mo
 #else
-    #include "jpcre2.hpp"
+
 #endif
 
 #include <codecvt>
@@ -439,7 +439,7 @@ namespace Core
         using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using StdRegexMatchResults = std::match_results<IteratorT>;
 #else
-        using jp = jpcre2::select<CharT>;
+
 #endif
 
         using value_type = CharT;
@@ -1240,9 +1240,9 @@ namespace Core
         }
 
 #ifdef UTILS__USE_STD_REGEX
-        [[nodiscard]] StdRegexMatchResults FindRegex(StdStringViewT expr, int baseOffset = 0,
-                                                     std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                     std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        [[nodiscard, deprecated]] StdRegexMatchResults FindRegex(
+            StdStringViewT expr, int baseOffset = 0, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+            std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (IsEmpty())
             {
@@ -1260,9 +1260,9 @@ namespace Core
             return match;
         }
 
-        void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
-                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        [[deprecated]] void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
+                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                         std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (IsEmpty())
             {
@@ -1286,8 +1286,9 @@ namespace Core
             }
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                      std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr,
+                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
@@ -1297,9 +1298,9 @@ namespace Core
             return false;
         }
 
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
-                                      std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                      std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
+                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
             if (!IsEmpty())
             {
@@ -1309,9 +1310,9 @@ namespace Core
             return false;
         }
 
-        bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
-                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                          std::regex::flag_type regexFlag = std::regex::ECMAScript)
+        [[deprecated]] bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
+                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                         std::regex::flag_type regexFlag = std::regex::ECMAScript)
         {
             const StdRegex regex(expr.data(), regexFlag);
 
@@ -1321,6 +1322,29 @@ namespace Core
             *this = std::move(temp);
             return wasReplaced;
         }
+
+#else
+
+        /*[[nodiscard]] typename jp::VecNum FindRegex(StdStringViewT expr, int baseOffset = 0)
+        {
+            return FindRegex(typename jp::Regex(expr.data()), baseOffset);
+        }
+
+        [[nodiscard]] typename jp::VecNum FindRegex(typename jp::Regex regex, int baseOffset = 0)
+        {
+            typename jp::VecNum result;
+
+            // clang-format off
+            regex.initMatch()
+                .setFindAll(true)
+                .setNumberedSubstringVector(&result)
+                .setSubject()
+                .match();
+            // clang-format on
+
+            return result;
+        }*/
+
 #endif
 
         [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }

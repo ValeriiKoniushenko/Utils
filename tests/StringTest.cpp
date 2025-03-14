@@ -81,14 +81,6 @@ TEST(StringTest, BaseString_char_Assigning)
     EXPECT_EQ("Hello", StringAtom(std::string_view("Hello")));
 }
 
-TEST(StringTest, BaseString_char_Regex)
-{
-    using Core::StringAtom;
-    using j = StringAtom::jp;
-    j::Regex regex;
-}
-
-/*
 TEST(StringTest, BaseString_char_default__Creation)
 {
     using Core::StringAtom;
@@ -676,17 +668,19 @@ TEST(StringTest, BaseString_char_default_PushBack)
     {
         auto str = "Hello World"_atom;
         const auto* text =
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            R"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
-containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)";
         str.push_back(text);
         EXPECT_EQ(
-            "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
+            R"(Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
 text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five
 centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
 Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem
-Ipsum", str); EXPECT_EQ(11 + strlen(text), str.Size());
+Ipsum)",
+            str);
+        EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
     {
@@ -716,17 +710,19 @@ TEST(StringTest, BaseString_char_default_PushFront)
     {
         auto str = "Hello World"_atom;
         const auto* text =
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            R"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
-containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)";
         str.push_front(text);
         EXPECT_EQ(
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            R"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
 containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello
-World", str); EXPECT_EQ(11 + strlen(text), str.Size());
+World)",
+            str);
+        EXPECT_EQ(11 + strlen(text), str.Size());
     }
 
     {
@@ -895,28 +891,6 @@ TEST(StringTest, BaseString_char_default_Replace)
     }
 }
 
-TEST(StringTest, BaseString_char_default_Regex)
-{
-    {
-        // check for pascal case
-        auto str = "RegEx"_atom;
-        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
-    }
-
-    {
-        auto str = "RegEx"_atom;
-        Core::StringAtom::StdRegexMatchResults match;
-        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
-        EXPECT_FALSE(match.empty());
-    }
-
-    {
-        auto str = "Hello this fucking world!"_atom;
-        str.RegexReplace(" ", "_=_");
-        EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
-    }
-}
-
 TEST(StringTest, BaseString_char_default_Copy)
 {
     {
@@ -992,148 +966,6 @@ TEST(StringTest, BaseString_char_AdvanceWorkFlow3)
         ASSERT_FALSE(str.IsEmpty());
         ASSERT_EQ("     HelloWorld", str);
     }
-}
-
-TEST(StringTest, BaseString_char_RegexFind)
-{
-    using Core::StringAtom;
-
-    {
-        StringAtom str = "Hello world!"_atom;
-        const auto match = str.FindRegex(" \\w+");
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!"_atom;
-        const auto match = str.FindRegex(" \\w+", 3);
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+");
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+", 3);
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+");
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+", 3);
-        EXPECT_EQ(" world", match.str());
-    }
-}
-
-TEST(StringTest, BaseString_char_IterateRegex)
-{
-    using Core::StringAtom;
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        str.IterateRegex("\\w+",
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        str.IterateRegex(std::string("\\w+"),
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        std::string expr("\\w+");
-        str.IterateRegex(expr,
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        std::string_view expr("\\w+");
-        str.IterateRegex(expr,
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        const auto expr = "\\w+"_atom;
-        str.IterateRegex(expr,
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        str.IterateRegex("\\w+"_atom,
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = "Hello world! How are you?"_atom;
-        StringAtom buffer;
-        str.IterateRegex(std::string_view("\\w+"),
-                         [&buffer](const StringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ("HelloworldHowareyou", buffer);
-    }
-}
-
-TEST(StringTest, BaseString_char_default__RegexReplace)
-{
-    auto str = "Hello world!"_atom;
-    EXPECT_FALSE(str.RegexReplace("\\?", ""));
-    EXPECT_EQ("Hello world!", str);
-    EXPECT_TRUE(str.RegexReplace(" ", "_"));
-    EXPECT_EQ("Hello_world!", str);
 }
 
 TEST(StringTest, BaseString_char_default__From)
@@ -1371,6 +1203,186 @@ TEST(StringTest, BaseString_char_FindPrevLine)
     const auto firstLine = StringAtom(ptr, tokens[0].Size());
     EXPECT_EQ("Hello", firstLine);
 }
+
+#ifdef UTILS__USE_STD_REGEX
+
+TEST(StringTest, BaseString_char_default_Regex)
+{
+    {
+        // check for pascal case
+        auto str = "RegEx"_atom;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
+    }
+
+    {
+        auto str = "RegEx"_atom;
+        Core::StringAtom::StdRegexMatchResults match;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
+        EXPECT_FALSE(match.empty());
+    }
+
+    {
+        auto str = "Hello this fucking world!"_atom;
+        str.RegexReplace(" ", "_=_");
+        EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
+    }
+}
+
+TEST(StringTest, BaseString_char_RegexFind)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+");
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.FindRegex(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
+    }
+}
+
+TEST(StringTest, BaseString_char_IterateRegex)
+{
+    using Core::StringAtom;
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex("\\w+",
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex(std::string("\\w+"),
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string expr("\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string_view expr("\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        const auto expr = "\\w+"_atom;
+        str.IterateRegex(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex("\\w+"_atom,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.IterateRegex(std::string_view("\\w+"),
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+}
+
+TEST(StringTest, BaseString_char_default__RegexReplace)
+{
+    auto str = "Hello world!"_atom;
+    EXPECT_FALSE(str.RegexReplace("\\?", ""));
+    EXPECT_EQ("Hello world!", str);
+    EXPECT_TRUE(str.RegexReplace(" ", "_"));
+    EXPECT_EQ("Hello_world!", str);
+}
+
+#else
+
+TEST(StringTest, BaseString_char_RegexFind)
+{
+    using Core::StringAtom;
+
+    /*{
+        StringAtom string = "Hello world";
+        auto found = string.FindRegex("\\w+");
+    }*/
+}
+
+#endif
 
 // =================================================================
 // ========================== WCHAR_T ==============================
@@ -1937,17 +1949,19 @@ TEST(StringTest, BaseString_wchar_t_default_PushBack)
     {
         auto str = L"Hello World"_atom;
         const auto* text =
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            LR"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
-containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)";
         str.push_back(text);
         EXPECT_EQ(
-            L"Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
+            LR"(Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
 text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five
 centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of
 Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem
-Ipsum", str); EXPECT_EQ(11 + wcslen(text), str.Size());
+Ipsum)",
+            str);
+        EXPECT_EQ(11 + wcslen(text), str.Size());
     }
 
     {
@@ -1977,17 +1991,19 @@ TEST(StringTest, BaseString_wchar_t_default_PushFront)
     {
         auto str = L"Hello World"_atom;
         const auto* text =
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            LR"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
-containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
+containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)";
         str.push_front(text);
         EXPECT_EQ(
-            L"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
+            LR"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever
 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets
 containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello
-World", str); EXPECT_EQ(11 + wcslen(text), str.Size());
+World)",
+            str);
+        EXPECT_EQ(11 + wcslen(text), str.Size());
     }
 
     {
@@ -2156,28 +2172,6 @@ TEST(StringTest, BaseString_wchar_t_default_Replace)
     }
 }
 
-TEST(StringTest, BaseString_wchar_t_default_Regex)
-{
-    {
-        // check for pascal case
-        auto str = L"RegEx"_atom;
-        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$"));
-    }
-
-    {
-        auto str = L"RegEx"_atom;
-        Core::WStringAtom::StdRegexMatchResults match;
-        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$", match));
-        EXPECT_FALSE(match.empty());
-    }
-
-    {
-        auto str = L"Hello this fucking world!"_atom;
-        str.RegexReplace(L" ", L"_=_");
-        EXPECT_EQ(L"Hello_=_this_=_fucking_=_world!", str);
-    }
-}
-
 TEST(StringTest, BaseString_wchar_t_default_Copy)
 {
     {
@@ -2252,139 +2246,6 @@ TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow3)
         str.push_back(L"World");
         ASSERT_FALSE(str.IsEmpty());
         ASSERT_EQ(L"     HelloWorld", str);
-    }
-}
-
-TEST(StringTest, BaseString_wchar_t_RegexFind)
-{
-    using Core::WStringAtom;
-
-    {
-        WStringAtom str = L"Hello world!"_atom;
-        const auto match = str.FindRegex(L" \\w+");
-        EXPECT_EQ(L" world", match.str());
-    }
-
-    {
-        WStringAtom str = L"Hello world!"_atom;
-        const auto match = str.FindRegex(L" \\w+", 3);
-        EXPECT_EQ(L" world", match.str());
-    }
-
-    {
-        WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+");
-        EXPECT_EQ(L" world", match.str());
-    }
-
-    {
-        WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+", 3);
-        EXPECT_EQ(L" world", match.str());
-    }
-
-    {
-        WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+");
-        EXPECT_EQ(L" world", match.str());
-    }
-
-    {
-        WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+", 3);
-        EXPECT_EQ(L" world", match.str());
-    }
-}
-
-TEST(StringTest, BaseString_wchar_t_IterateRegex)
-{
-    using Core::WStringAtom;
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        str.IterateRegex(L"\\w+",
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        str.IterateRegex(std::wstring(L"\\w+"),
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        std::wstring expr(L"\\w+");
-        str.IterateRegex(expr,
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        std::wstring_view expr(L"\\w+");
-        str.IterateRegex(expr,
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        const auto expr = L"\\w+"_atom;
-        str.IterateRegex(expr,
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        str.IterateRegex(L"\\w+"_atom,
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
-    }
-
-    {
-        const auto str = L"Hello world! How are you?"_atom;
-        WStringAtom buffer;
-        str.IterateRegex(std::wstring_view(L"\\w+"),
-                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
-                         {
-                             buffer.PushBack(match.str());
-                             return true;
-                         });
-        EXPECT_EQ(L"HelloworldHowareyou", buffer);
     }
 }
 
@@ -2575,4 +2436,162 @@ TEST(StringTest, BaseString_wchar_t_FindPrevLine)
     const auto firstLine = WStringAtom(ptr, tokens[0].Size());
     EXPECT_EQ(L"Hello", firstLine);
 }
-*/
+
+#ifdef UTILS__USE_STD_REGEX
+
+TEST(StringTest, BaseString_wchar_t_default_Regex)
+{
+    {
+        // check for pascal case
+        auto str = L"RegEx"_atom;
+        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$"));
+    }
+
+    {
+        auto str = L"RegEx"_atom;
+        Core::WStringAtom::StdRegexMatchResults match;
+        EXPECT_TRUE(str.RegexMatch(L"^([A-Z][a-z0-9]+)+$", match));
+        EXPECT_FALSE(match.empty());
+    }
+
+    {
+        auto str = L"Hello this fucking world!"_atom;
+        str.RegexReplace(L" ", L"_=_");
+        EXPECT_EQ(L"Hello_=_this_=_fucking_=_world!", str);
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_RegexFind)
+{
+    using Core::WStringAtom;
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!"_atom;
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+");
+        EXPECT_EQ(L" world", match.str());
+    }
+
+    {
+        WStringAtom str = L"Hello world!";
+        const auto match = str.FindRegex(L" \\w+", 3);
+        EXPECT_EQ(L" world", match.str());
+    }
+}
+
+TEST(StringTest, BaseString_wchar_t_IterateRegex)
+{
+    using Core::WStringAtom;
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(L"\\w+",
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(std::wstring(L"\\w+"),
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        std::wstring expr(L"\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        std::wstring_view expr(L"\\w+");
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        const auto expr = L"\\w+"_atom;
+        str.IterateRegex(expr,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(L"\\w+"_atom,
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = L"Hello world! How are you?"_atom;
+        WStringAtom buffer;
+        str.IterateRegex(std::wstring_view(L"\\w+"),
+                         [&buffer](const WStringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ(L"HelloworldHowareyou", buffer);
+    }
+}
+
+#endif
