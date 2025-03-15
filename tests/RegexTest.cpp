@@ -29,8 +29,10 @@ using namespace Core::SPcre2;
 
 TEST(RegexTest, SimpleRegex)
 {
-    Regex regex;
+    RegexMatch regex;
     regex.SetPattern("\\w+").SetSubject("Hello world!").SetOptions(PCRE2_MULTILINE);
 
     ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
 }

@@ -26,7 +26,7 @@ namespace Core::SPcre2
 {
     BaseRegex::~BaseRegex()
     {
-        Clear();
+        __Clear();
     }
 
     BaseRegex::String BaseRegex::GetErrorString(const BaseRegex& regex)
@@ -57,5 +57,43 @@ namespace Core::SPcre2
         }
 
         return true;
+    }
+
+    void BaseRegex::__Clear()
+    {
+        _errorOffset = 0;
+        _errorCode = 0;
+        _pattern.Clear();
+        _subject = nullptr;
+
+        if (_regex)
+        {
+            pcre2_code_free(_regex);
+            _regex = nullptr;
+        }
+    }
+
+    BaseRegexMatch::~BaseRegexMatch()
+    {
+        BaseRegexMatch::__Clear();
+    }
+
+    void BaseRegexMatch::Clear()
+    {
+        BaseRegex::Clear();
+        BaseRegexMatch::__Clear();
+    }
+
+    BaseRegexMatch::MatchedData BaseRegexMatch::Match()
+    {
+    }
+
+    void BaseRegexMatch::__Clear()
+    {
+        if (_matchData)
+        {
+            pcre2_match_data_free(_matchData);
+            _matchData = nullptr;
+        }
     }
 } // namespace Core::SPcre2

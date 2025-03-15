@@ -67,18 +67,7 @@ namespace Core::SPcre2
         [[nodiscard]] bool HasError() const noexcept { return _errorCode != 0; }
         [[nodiscard]] PCRE2_SIZE GetErrorOffset() const noexcept { return _errorOffset; }
 
-        void Clear()
-        {
-            _errorOffset = 0;
-            _errorCode = 0;
-            _pattern.Clear();
-            _subject = nullptr;
-
-            if (_regex)
-            {
-                pcre2_code_free(_regex);
-            }
-        }
+        virtual void Clear() { __Clear(); }
 
         bool Compile();
         [[nodiscard]] bool IsCompiled() const noexcept { return _regex; }
@@ -94,8 +83,34 @@ namespace Core::SPcre2
 
         const String::CharT* _subject = nullptr;
         pcre2_code* _regex = nullptr;
+
+    private:
+        void __Clear();
+    };
+
+    class BaseRegexMatch : public BaseRegex
+    {
+    public:
+        struct MatchedData
+        {
+        };
+
+    public:
+        BaseRegexMatch() = default;
+        ~BaseRegexMatch() override;
+
+        void Clear() override;
+
+        [[nodiscard]] MatchedData Match();
+
+    protected:
+        pcre2_match_data* _matchData = nullptr;
+
+    private:
+        void __Clear();
     };
 
     using Regex = BaseRegex;
+    using RegexMatch = BaseRegexMatch;
 
 } // namespace Core::SPcre2
