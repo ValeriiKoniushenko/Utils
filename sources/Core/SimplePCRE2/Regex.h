@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "Core/Assert.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -109,7 +110,18 @@ namespace Core::SPcre2
 
         [[nodiscard]] MatchedData Match(PCRE2_SIZE offset = 0);
         [[nodiscard]] std::vector<MatchedData> MatchAll(PCRE2_SIZE offset = 0);
-        void IterateOverMatches(std::function<void(MatchedData)>&& callback, PCRE2_SIZE offset = 0);
+
+        /**
+         * @brief Will iterate over every match until the end.
+         * @param callback can take a few function's type:
+         * - void(MatchedData) - will iterate until the end.
+         * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
+         */
+        template<class FuncT>
+        void IterateOverMatches(FuncT&& callback, PCRE2_SIZE offset = 0)
+        {
+            Impl_IterateOverMatches(std::forward<decltype(callback)>(callback), offset);
+        }
 
         void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
         [[nodiscard]] uint32_t GetMatchOptions(uint32_t options) const noexcept { return _matchOptions; }
@@ -123,6 +135,59 @@ namespace Core::SPcre2
 
     private:
         void _Clear();
+
+    private:
+        // ================== PIPMPLs =======================
+        template<class FuncT>
+        void Impl_IterateOverMatches(FuncT&& callback, PCRE2_SIZE offset = 0)
+        {
+            if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+            {
+                Assert("Regex wasn't compiled or match data was failed!");
+                return;
+            }
+
+            int result = 0;
+            do
+            {
+                result = pcre2_match(_regex,                                  // Compiled regex
+                                     reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
+                                     _limit,                                  // Subject is null-terminated
+                                     offset,                                  // Start at offset 0
+                                     _matchOptions,                           // Default options
+                                     _matchData,                              // Match data
+                                     nullptr                                  // Default match context
+                );
+
+                if (result > 0)
+                {
+                    MatchedData md;
+                    md.offset = pcre2_get_startchar(_matchData);
+                    const auto* ovector = pcre2_get_ovector_pointer(_matchData);
+                    if (!ovector) [[unlikely]]
+                    {
+                        Assert(false);
+                        return;
+                    }
+
+                    md.size = ovector[1] - ovector[0];
+
+                    if constexpr (std::is_void_v<decltype(callback(md))>)
+                    {
+                        std::invoke(callback, md);
+                    }
+                    else
+                    {
+                        if (!std::invoke(callback, md))
+                        {
+                            return;
+                        }
+                    }
+
+                    offset = ovector[1];
+                }
+            } while (result > 0);
+        }
     };
 
     using Regex = BaseRegex;
