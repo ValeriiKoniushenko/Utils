@@ -22,20 +22,28 @@
 
 #include "Regex.h"
 
+#include "Core/Assert.h"
+
 namespace Core::SPcre2
 {
     BaseRegex::~BaseRegex()
     {
-        __Clear();
+        _Clear();
     }
 
-    BaseRegex::String BaseRegex::GetErrorString(const BaseRegex& regex)
+    std::string BaseRegex::GetErrorString(const BaseRegex& regex)
     {
         char buffer[256]{};
         pcre2_get_error_message(regex._errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer), sizeof(buffer));
         if (buffer[0] != '\0')
         {
-            return "Regex failed at the offset: {}. Error message: {}"_f << regex._errorOffset << buffer;
+            std::string str;
+            str += "Regex failed at the offset: ";
+            str += std::to_string(regex._errorOffset);
+            str += ". Error message: ";
+            str += buffer;
+
+            return str;
         }
 
         return {};
@@ -43,29 +51,38 @@ namespace Core::SPcre2
 
     bool BaseRegex::Compile()
     {
+        _FreeRegex();
         _regex = pcre2_compile(reinterpret_cast<PCRE2_SPTR8>(_pattern.c_str()), // The regex pattern
-                               PCRE2_ZERO_TERMINATED,                           // Pattern is null-terminated
+                               _limit,                                          // Pattern is null-terminated
                                _options,                                        // Default options
                                &_errorCode,                                     // Error code
                                &_errorOffset,                                   // Error offset
                                nullptr                                          // Default compile context
         );
 
-        if (_regex == nullptr)
+        if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
         {
+            Assert(false);
             return false;
         }
+
+        OnRegexCompiled();
 
         return true;
     }
 
-    void BaseRegex::__Clear()
+    void BaseRegex::_Clear()
     {
         _errorOffset = 0;
         _errorCode = 0;
-        _pattern.Clear();
+        _pattern.clear();
         _subject = nullptr;
 
+        _FreeRegex();
+    }
+
+    void BaseRegex::_FreeRegex()
+    {
         if (_regex)
         {
             pcre2_code_free(_regex);
@@ -75,20 +92,64 @@ namespace Core::SPcre2
 
     BaseRegexMatch::~BaseRegexMatch()
     {
-        BaseRegexMatch::__Clear();
+        BaseRegexMatch::_Clear();
     }
 
     void BaseRegexMatch::Clear()
     {
         BaseRegex::Clear();
-        BaseRegexMatch::__Clear();
+        BaseRegexMatch::_Clear();
     }
 
     BaseRegexMatch::MatchedData BaseRegexMatch::Match()
     {
+        if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+        {
+            Assert(false);
+            return {};
+        }
+
+        const auto result = pcre2_match(_regex,                                  // Compiled regex
+                                        reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
+                                        _limit,                                  // Subject is null-terminated
+                                        0,                                       // Start at offset 0
+                                        0,                                       // Default options
+                                        _matchData,                              // Match data
+                                        nullptr                                  // Default match context
+        );
+
+        if (result > 0)
+        {
+            MatchedData md;
+            md.offset = pcre2_get_startchar(_matchData);
+            md.size = 0;
+            if (pcre2_get_ovector_count(_matchData) > 0)
+            {
+                PCRE2_SIZE* ovector = pcre2_get_ovector_pointer(_matchData);
+                md.size = ovector[1] - ovector[0];
+            }
+
+            return md;
+        }
+        else if (result == PCRE2_ERROR_NOMATCH)
+        {
+            return {};
+        }
+
+        Assert(false);
+        return {};
     }
 
-    void BaseRegexMatch::__Clear()
+    void BaseRegexMatch::OnRegexCompiled()
+    {
+        if (IsCompiled())
+        {
+            _Clear();
+            _matchData = pcre2_match_data_create_from_pattern(_regex, nullptr);
+        }
+    }
+
+    void BaseRegexMatch::_Clear()
     {
         if (_matchData)
         {

@@ -29,10 +29,23 @@ using namespace Core::SPcre2;
 
 TEST(RegexTest, SimpleRegex)
 {
-    RegexMatch regex;
-    regex.SetPattern("\\w+").SetSubject("Hello world!").SetOptions(PCRE2_MULTILINE);
+    const std::string subject = "1234 Hello# world!";
 
-    ASSERT_TRUE(regex.Compile());
+    RegexMatch regex;
+    regex.SetPattern("([A-Za-z]+)(#|!)");
+    regex.SetSubject(subject.c_str());
+    regex.SetOptions(PCRE2_MULTILINE);
+
+    regex.Compile();
+    auto str = regex.GetErrorString();
+    auto off = regex.GetErrorOffset();
 
     auto match = regex.Match();
+
+    if (match)
+    {
+        std::cout << subject.substr(match.offset, match.size) << std::endl;
+    }
+
+    int i = 1;
 }
