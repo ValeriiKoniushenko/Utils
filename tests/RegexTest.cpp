@@ -37,8 +37,6 @@ TEST(RegexTest, SimpleRegex)
     regex.SetOptions(PCRE2_MULTILINE);
 
     regex.Compile();
-    auto str = regex.GetErrorString();
-    auto off = regex.GetErrorOffset();
 
     auto match = regex.Match();
 

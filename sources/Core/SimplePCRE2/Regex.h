@@ -103,13 +103,17 @@ namespace Core::SPcre2
 
         void Clear() override;
 
-        [[nodiscard]] MatchedData Match();
+        [[nodiscard]] MatchedData Match(PCRE2_SIZE offset = 0);
+
+        void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
+        [[nodiscard]] uint32_t GetMatchOptions(uint32_t options) const noexcept { return _matchOptions; }
 
     protected:
         void OnRegexCompiled() override;
 
     protected:
         pcre2_match_data* _matchData = nullptr;
+        uint32_t _matchOptions = 0;
 
     private:
         void _Clear();

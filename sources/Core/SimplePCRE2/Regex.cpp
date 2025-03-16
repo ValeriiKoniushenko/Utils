@@ -101,7 +101,7 @@ namespace Core::SPcre2
         BaseRegexMatch::_Clear();
     }
 
-    BaseRegexMatch::MatchedData BaseRegexMatch::Match()
+    BaseRegexMatch::MatchedData BaseRegexMatch::Match(PCRE2_SIZE offset /* = 0*/)
     {
         if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
         {
@@ -112,8 +112,8 @@ namespace Core::SPcre2
         const auto result = pcre2_match(_regex,                                  // Compiled regex
                                         reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
                                         _limit,                                  // Subject is null-terminated
-                                        0,                                       // Start at offset 0
-                                        0,                                       // Default options
+                                        offset,                                  // Start at offset 0
+                                        _matchOptions,                           // Default options
                                         _matchData,                              // Match data
                                         nullptr                                  // Default match context
         );
