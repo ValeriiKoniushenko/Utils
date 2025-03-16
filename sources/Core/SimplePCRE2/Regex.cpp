@@ -199,6 +199,49 @@ namespace Core::SPcre2
         return matches;
     }
 
+    void BaseRegexMatch::IterateOverMatches(std::function<void(MatchedData)>&& callback, size_t offset /* = 0*/)
+    {
+        if (callback == nullptr) [[unlikely]]
+        {
+            return;
+        }
+
+        if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+        {
+            Assert("Regex wasn't compiled or match data was failed!");
+            return;
+        }
+
+        int result = 0;
+        do
+        {
+            result = pcre2_match(_regex,                                  // Compiled regex
+                                 reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
+                                 _limit,                                  // Subject is null-terminated
+                                 offset,                                  // Start at offset 0
+                                 _matchOptions,                           // Default options
+                                 _matchData,                              // Match data
+                                 nullptr                                  // Default match context
+            );
+
+            if (result > 0)
+            {
+                MatchedData md;
+                md.offset = pcre2_get_startchar(_matchData);
+                const auto* ovector = pcre2_get_ovector_pointer(_matchData);
+                if (!ovector) [[unlikely]]
+                {
+                    Assert(false);
+                    return;
+                }
+
+                md.size = ovector[1] - ovector[0];
+                std::invoke(callback, md);
+                offset = ovector[1];
+            }
+        } while (result > 0);
+    }
+
     void BaseRegexMatch::OnRegexCompiled()
     {
         if (IsCompiled())

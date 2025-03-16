@@ -27,6 +27,7 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -108,6 +109,7 @@ namespace Core::SPcre2
 
         [[nodiscard]] MatchedData Match(PCRE2_SIZE offset = 0);
         [[nodiscard]] std::vector<MatchedData> MatchAll(PCRE2_SIZE offset = 0);
+        void IterateOverMatches(std::function<void(MatchedData)>&& callback, PCRE2_SIZE offset = 0);
 
         void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
         [[nodiscard]] uint32_t GetMatchOptions(uint32_t options) const noexcept { return _matchOptions; }

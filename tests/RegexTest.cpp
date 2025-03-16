@@ -166,3 +166,25 @@ TEST(RegexTest, InvalidExpression2)
 
     ASSERT_FALSE(regex.Match());
 }
+
+TEST(RegexTest, IterateOverMatches)
+{
+    RegexMatch regex("[A-Za-z]+", "1234 Hello# world!");
+    regex.Compile();
+
+    std::vector<RegexMatch::MatchedData> matches;
+    regex.IterateOverMatches(
+        [&matches](auto m)
+        {
+            matches.push_back(m);
+        });
+
+    ASSERT_FALSE(matches.empty());
+    ASSERT_EQ(matches.size(), 2);
+
+    EXPECT_EQ(5, matches[0].offset);
+    EXPECT_EQ(5, matches[0].size);
+
+    EXPECT_EQ(12, matches[1].offset);
+    EXPECT_EQ(5, matches[1].size);
+}
