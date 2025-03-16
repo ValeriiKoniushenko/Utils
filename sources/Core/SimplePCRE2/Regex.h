@@ -29,6 +29,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace Core::SPcre2
 {
@@ -93,7 +94,7 @@ namespace Core::SPcre2
             uint64_t offset = invalid;
             uint64_t size = invalid;
 
-            [[nodiscard]] bool IsMatched() const noexcept { return size != 0 && offset != 0; }
+            [[nodiscard]] bool IsMatched() const noexcept { return size != invalid && offset != invalid; }
             [[nodiscard]] explicit operator bool() const noexcept { return IsMatched(); }
         };
 
@@ -106,6 +107,7 @@ namespace Core::SPcre2
         void Clear() override;
 
         [[nodiscard]] MatchedData Match(PCRE2_SIZE offset = 0);
+        [[nodiscard]] std::vector<MatchedData> MatchAll(PCRE2_SIZE offset = 0);
 
         void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
         [[nodiscard]] uint32_t GetMatchOptions(uint32_t options) const noexcept { return _matchOptions; }

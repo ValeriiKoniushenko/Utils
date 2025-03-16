@@ -137,7 +137,32 @@ TEST(RegexTest, MatchAll)
     regex.SetCompileOptions(PCRE2_MULTILINE);
     regex.Compile();
 
-    auto match = regex.Match();
+    auto match = regex.MatchAll();
 
-    ASSERT_FALSE(match);
+    ASSERT_FALSE(match.empty());
+    ASSERT_EQ(match.size(), 2);
+
+    EXPECT_EQ(5, match[0].offset);
+    EXPECT_EQ(6, match[0].size);
+
+    EXPECT_EQ(12, match[1].offset);
+    EXPECT_EQ(6, match[1].size);
+}
+
+TEST(RegexTest, InvalidExpression)
+{
+    RegexMatch regex("(A-Za-z]+)(#|!)", "1234 Hello# world!");
+    regex.Compile();
+
+    auto match = regex.MatchAll();
+
+    ASSERT_TRUE(match.empty());
+}
+
+TEST(RegexTest, InvalidExpression2)
+{
+    RegexMatch regex("(A-Za-z]+)(#|!)", "1234 Hello# world!");
+    regex.Compile();
+
+    ASSERT_FALSE(regex.Match());
 }

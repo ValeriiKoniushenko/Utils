@@ -135,12 +135,14 @@ namespace Core::SPcre2
         {
             MatchedData md;
             md.offset = pcre2_get_startchar(_matchData);
-            md.size = 0;
-            if (pcre2_get_ovector_count(_matchData) > 0)
+            const auto* ovector = pcre2_get_ovector_pointer(_matchData);
+            if (!ovector) [[unlikely]]
             {
-                PCRE2_SIZE* ovector = pcre2_get_ovector_pointer(_matchData);
-                md.size = ovector[1] - ovector[0];
+                Assert(false);
+                return {};
             }
+
+            md.size = ovector[1] - ovector[0];
 
             return md;
         }
@@ -151,6 +153,50 @@ namespace Core::SPcre2
 
         Assert(false);
         return {};
+    }
+
+    std::vector<BaseRegexMatch::MatchedData> BaseRegexMatch::MatchAll(size_t offset /* = 0*/)
+    {
+        if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+        {
+            Assert("Regex wasn't compiled or match data was failed!");
+            return {};
+        }
+
+        std::vector<MatchedData> matches;
+        matches.reserve(10);
+
+        int result = 0;
+        do
+        {
+            result = pcre2_match(_regex,                                  // Compiled regex
+                                 reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
+                                 _limit,                                  // Subject is null-terminated
+                                 offset,                                  // Start at offset 0
+                                 _matchOptions,                           // Default options
+                                 _matchData,                              // Match data
+                                 nullptr                                  // Default match context
+            );
+
+            if (result > 0)
+            {
+                MatchedData md;
+                md.offset = pcre2_get_startchar(_matchData);
+                const auto* ovector = pcre2_get_ovector_pointer(_matchData);
+                if (!ovector) [[unlikely]]
+                {
+                    Assert(false);
+                    return matches;
+                }
+
+                md.size = ovector[1] - ovector[0];
+                offset = ovector[1];
+
+                matches.emplace_back(md);
+            }
+        } while (result > 0);
+
+        return matches;
     }
 
     void BaseRegexMatch::OnRegexCompiled()
