@@ -34,16 +34,109 @@ TEST(RegexTest, SimpleRegex)
     RegexMatch regex;
     regex.SetPattern("([A-Za-z]+)(#|!)");
     regex.SetSubject(subject.c_str());
-    regex.SetOptions(PCRE2_MULTILINE);
+    regex.SetCompileOptions(PCRE2_MULTILINE);
 
-    regex.Compile();
+    ASSERT_TRUE(regex.Compile());
 
     auto match = regex.Match();
 
-    if (match)
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+}
+
+TEST(RegexTest, ObjectCopying)
+{
+    const std::string subject = "1234 Hello# world!";
+
+    RegexMatch regex;
     {
-        std::cout << subject.substr(match.offset, match.size) << std::endl;
+        RegexMatch re;
+        re.SetPattern("([A-Za-z]+)(#|!)");
+        re.SetSubject(subject.c_str());
+        re.SetCompileOptions(PCRE2_MULTILINE);
+        regex = re;
     }
 
-    int i = 1;
+    ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+}
+
+TEST(RegexTest, ObjectMoving)
+{
+    const std::string subject = "1234 Hello# world!";
+
+    RegexMatch regex;
+    {
+        RegexMatch re;
+        re.SetPattern("([A-Za-z]+)(#|!)");
+        re.SetSubject(subject.c_str());
+        re.SetCompileOptions(PCRE2_MULTILINE);
+        regex = std::move(re);
+    }
+
+    ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+}
+
+TEST(RegexTest, SimpleCreateUsingOnlyPattern)
+{
+    const std::string subject = "1234 Hello# world!";
+
+    RegexMatch regex("([A-Za-z]+)(#|!)");
+    regex.SetSubject(subject.c_str());
+    regex.SetCompileOptions(PCRE2_MULTILINE);
+
+    ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+}
+
+TEST(RegexTest, SimpleCreate)
+{
+    RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
+    regex.SetCompileOptions(PCRE2_MULTILINE);
+
+    ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ(5, match.offset);
+    EXPECT_EQ(6, match.size);
+}
+
+TEST(RegexTest, DISABLED_WitoutCompile)
+{
+    RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
+    regex.SetCompileOptions(PCRE2_MULTILINE);
+
+    auto match = regex.Match();
+
+    ASSERT_FALSE(match);
+}
+
+TEST(RegexTest, MatchAll)
+{
+    RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
+    regex.SetCompileOptions(PCRE2_MULTILINE);
+
+    auto match = regex.Match();
+
+    ASSERT_FALSE(match);
 }

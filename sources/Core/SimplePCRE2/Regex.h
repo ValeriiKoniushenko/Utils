@@ -44,8 +44,8 @@ namespace Core::SPcre2
         void SetPattern(std::string_view pattern) { _pattern = pattern; }
         [[nodiscard]] std::string GetPattern() const { return _pattern; }
 
-        void SetOptions(uint32_t options) noexcept { _options = options; }
-        [[nodiscard]] uint32_t GetOptions(uint32_t options) const noexcept { return _options; }
+        void SetCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
+        [[nodiscard]] uint32_t GetCompileOptions(uint32_t options) const noexcept { return _compileOptions; }
 
         void SetSubject(const char* subject) noexcept { _subject = subject; }
         [[nodiscard]] const char* GetSubject() const noexcept { return _subject; }
@@ -70,7 +70,7 @@ namespace Core::SPcre2
 
     protected:
         std::string _pattern;
-        uint32_t _options = 0;
+        uint32_t _compileOptions = 0;
         PCRE2_SIZE _limit = PCRE2_ZERO_TERMINATED;
 
         int _errorCode = 0;
@@ -100,6 +100,8 @@ namespace Core::SPcre2
     public:
         BaseRegexMatch() = default;
         ~BaseRegexMatch() override;
+
+        explicit BaseRegexMatch(const char* pattern, const char* subject = nullptr);
 
         void Clear() override;
 

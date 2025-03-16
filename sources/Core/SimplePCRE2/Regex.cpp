@@ -54,7 +54,7 @@ namespace Core::SPcre2
         _FreeRegex();
         _regex = pcre2_compile(reinterpret_cast<PCRE2_SPTR8>(_pattern.c_str()), // The regex pattern
                                _limit,                                          // Pattern is null-terminated
-                               _options,                                        // Default options
+                               _compileOptions,                                 // Default options
                                &_errorCode,                                     // Error code
                                &_errorOffset,                                   // Error offset
                                nullptr                                          // Default compile context
@@ -93,6 +93,19 @@ namespace Core::SPcre2
     BaseRegexMatch::~BaseRegexMatch()
     {
         BaseRegexMatch::_Clear();
+    }
+
+    BaseRegexMatch::BaseRegexMatch(const char* pattern, const char* subject)
+    {
+        if (pattern)
+        {
+            SetPattern(pattern);
+        }
+
+        if (subject)
+        {
+            SetSubject(subject);
+        }
     }
 
     void BaseRegexMatch::Clear()
