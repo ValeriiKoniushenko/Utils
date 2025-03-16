@@ -135,6 +135,7 @@ TEST(RegexTest, MatchAll)
 {
     RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
     regex.SetCompileOptions(PCRE2_MULTILINE);
+    regex.Compile();
 
     auto match = regex.Match();
 

@@ -62,7 +62,7 @@ namespace Core::SPcre2
 
         if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
         {
-            Assert(false);
+            Assert(GetErrorString().c_str());
             return false;
         }
 
@@ -118,7 +118,7 @@ namespace Core::SPcre2
     {
         if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
         {
-            Assert(false);
+            Assert("Regex wasn't compiled or match data was failed!");
             return {};
         }
 
