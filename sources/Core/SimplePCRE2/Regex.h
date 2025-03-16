@@ -42,9 +42,9 @@ namespace Core::SPcre2
         BaseRegex() = default;
         ~BaseRegex() override;
 
-        explicit BaseRegex(std::string_view pattern) { SetPattern(pattern); }
+        explicit BaseRegex(const char* pattern, const char* subject = nullptr);
 
-        void SetPattern(std::string_view pattern) { _pattern = pattern; }
+        void SetPattern(const char* pattern) { _pattern = pattern; }
         [[nodiscard]] std::string GetPattern() const { return _pattern; }
 
         void SetCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
@@ -54,6 +54,7 @@ namespace Core::SPcre2
         [[nodiscard]] const char* GetSubject() const noexcept { return _subject; }
 
         [[nodiscard]] static std::string GetErrorString(const BaseRegex& regex);
+        [[nodiscard]] static std::string GetErrorString(int errorCode);
         [[nodiscard]] std::string GetErrorString() const { return GetErrorString(*this); }
         [[nodiscard]] bool HasError() const noexcept { return _errorCode != 0; }
         [[nodiscard]] PCRE2_SIZE GetErrorOffset() const noexcept { return _errorOffset; }
@@ -65,6 +66,9 @@ namespace Core::SPcre2
 
         [[nodiscard]] PCRE2_SIZE GetLimit() const noexcept { return _limit; }
         void SetLimit(PCRE2_SIZE limit) noexcept { _limit = limit; }
+
+        [[nodiscard]] PCRE2_SIZE GetOffset() const noexcept { return _offset; }
+        void SetOffset(PCRE2_SIZE offset) noexcept { _offset = offset; }
 
         [[nodiscard]] pcre2_code* GetRawPcre2Code() noexcept { return _regex; }
 
@@ -81,6 +85,7 @@ namespace Core::SPcre2
 
         const char* _subject = nullptr;
         pcre2_code* _regex = nullptr;
+        PCRE2_SIZE _offset = 0;
 
     private:
         void _Clear();
@@ -100,16 +105,16 @@ namespace Core::SPcre2
             [[nodiscard]] explicit operator bool() const noexcept { return IsMatched(); }
         };
 
+        using BaseRegex::BaseRegex;
+
     public:
         BaseRegexMatch() = default;
         ~BaseRegexMatch() override;
 
-        explicit BaseRegexMatch(const char* pattern, const char* subject = nullptr);
-
         void Clear() override;
 
-        [[nodiscard]] MatchedData Match(PCRE2_SIZE offset = 0);
-        [[nodiscard]] std::vector<MatchedData> MatchAll(PCRE2_SIZE offset = 0);
+        [[nodiscard]] MatchedData Match();
+        [[nodiscard]] std::vector<MatchedData> MatchAll();
 
         /**
          * @brief Will iterate over every match until the end.
@@ -118,9 +123,9 @@ namespace Core::SPcre2
          * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
          */
         template<class FuncT>
-        void IterateOverMatches(FuncT&& callback, PCRE2_SIZE offset = 0)
+        void IterateOverMatches(FuncT&& callback)
         {
-            Impl_IterateOverMatches(std::forward<decltype(callback)>(callback), offset);
+            Impl_IterateOverMatches(std::forward<decltype(callback)>(callback), _offset);
         }
 
         void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
@@ -134,6 +139,7 @@ namespace Core::SPcre2
         uint32_t _matchOptions = 0;
 
     private:
+        void _FreeMatchData();
         void _Clear();
 
     private:
@@ -190,7 +196,39 @@ namespace Core::SPcre2
         }
     };
 
+    class BaseRegexReplace : public BaseRegex
+    {
+    public:
+        using BaseRegex::BaseRegex;
+
+    public:
+        bool Replace();
+
+        void SetReplaceOptions(uint32_t options) noexcept { _replaceOptions = options; }
+        [[nodiscard]] uint32_t GetReplaceOptions(uint32_t options) const noexcept { return _replaceOptions; }
+
+        void SetReplacementString(const char* string) noexcept { _replacement = string; }
+        [[nodiscard]] const char* GetReplacementString() const noexcept { return _replacement; }
+
+        void SetOutputString(char* allocatedString, PCRE2_SIZE size) noexcept;
+
+        void SetReplaceAll(bool value);
+
+        void Clear() override;
+
+    protected:
+        uint32_t _replaceOptions = 0;
+        const char* _replacement = nullptr;
+
+        char* _allocatedString = nullptr;
+        PCRE2_SIZE _allocatedSize = 0;
+
+    private:
+        void _Clear();
+    };
+
     using Regex = BaseRegex;
     using RegexMatch = BaseRegexMatch;
+    using RegexReplace = BaseRegexReplace;
 
 } // namespace Core::SPcre2

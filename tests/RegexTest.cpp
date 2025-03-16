@@ -208,3 +208,17 @@ TEST(RegexTest, IterateOverMatchesOneTime)
     EXPECT_EQ(5, matches[0].offset);
     EXPECT_EQ(5, matches[0].size);
 }
+
+TEST(RegexTest, SimpleReplace)
+{
+    char buff[1024]{};
+
+    RegexReplace regex("[0-9]+", "He3llo 123 world 456 how_are_you?");
+    regex.SetReplacementString("#");
+    regex.SetOutputString(buff, 1024);
+    regex.SetReplaceAll(true);
+    regex.Compile();
+
+    ASSERT_TRUE(regex.Replace());
+    EXPECT_STREQ("He#llo # world # how_are_you?", buff);
+}

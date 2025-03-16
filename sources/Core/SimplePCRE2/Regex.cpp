@@ -29,19 +29,43 @@ namespace Core::SPcre2
         _Clear();
     }
 
+    BaseRegex::BaseRegex(const char* pattern, const char* subject)
+    {
+        if (pattern)
+        {
+            SetPattern(pattern);
+        }
+
+        if (subject)
+        {
+            SetSubject(subject);
+        }
+    }
+
     std::string BaseRegex::GetErrorString(const BaseRegex& regex)
     {
+        auto str = GetErrorString(regex._errorCode);
+
+        if (!str.empty())
+        {
+            std::string msg;
+            msg += "Regex failed at the offset: ";
+            msg += std::to_string(regex._errorOffset);
+            msg += ". Error message: ";
+            msg += str;
+            return msg;
+        }
+
+        return {};
+    }
+
+    std::string BaseRegex::GetErrorString(int errorCode)
+    {
         char buffer[256]{};
-        pcre2_get_error_message(regex._errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer), sizeof(buffer));
+        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer), sizeof(buffer));
         if (buffer[0] != '\0')
         {
-            std::string str;
-            str += "Regex failed at the offset: ";
-            str += std::to_string(regex._errorOffset);
-            str += ". Error message: ";
-            str += buffer;
-
-            return str;
+            return { buffer };
         }
 
         return {};
@@ -49,6 +73,12 @@ namespace Core::SPcre2
 
     bool BaseRegex::Compile()
     {
+        if (_pattern.empty()) [[unlikely]]
+        {
+            Assert("The pattern is empty.");
+            return false;
+        }
+
         _FreeRegex();
         _regex = pcre2_compile(reinterpret_cast<PCRE2_SPTR8>(_pattern.c_str()), // The regex pattern
                                _limit,                                          // Pattern is null-terminated
@@ -71,10 +101,15 @@ namespace Core::SPcre2
 
     void BaseRegex::_Clear()
     {
-        _errorOffset = 0;
-        _errorCode = 0;
         _pattern.clear();
+        _compileOptions = 0;
+        _limit = PCRE2_ZERO_TERMINATED;
+
+        _errorCode = 0;
+        _errorOffset = 0;
+
         _subject = nullptr;
+        _offset = 0;
 
         _FreeRegex();
     }
@@ -93,26 +128,13 @@ namespace Core::SPcre2
         BaseRegexMatch::_Clear();
     }
 
-    BaseRegexMatch::BaseRegexMatch(const char* pattern, const char* subject)
-    {
-        if (pattern)
-        {
-            SetPattern(pattern);
-        }
-
-        if (subject)
-        {
-            SetSubject(subject);
-        }
-    }
-
     void BaseRegexMatch::Clear()
     {
         BaseRegex::Clear();
         BaseRegexMatch::_Clear();
     }
 
-    BaseRegexMatch::MatchedData BaseRegexMatch::Match(PCRE2_SIZE offset /* = 0*/)
+    BaseRegexMatch::MatchedData BaseRegexMatch::Match()
     {
         if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
         {
@@ -120,10 +142,16 @@ namespace Core::SPcre2
             return {};
         }
 
+        if (!_subject) [[unlikely]]
+        {
+            Assert("The subject is nullptr.");
+            return {};
+        }
+
         const auto result = pcre2_match(_regex,                                  // Compiled regex
                                         reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
                                         _limit,                                  // Subject is null-terminated
-                                        offset,                                  // Start at offset 0
+                                        _offset,                                 // Start at offset 0
                                         _matchOptions,                           // Default options
                                         _matchData,                              // Match data
                                         nullptr                                  // Default match context
@@ -153,7 +181,7 @@ namespace Core::SPcre2
         return {};
     }
 
-    std::vector<BaseRegexMatch::MatchedData> BaseRegexMatch::MatchAll(size_t offset /* = 0*/)
+    std::vector<BaseRegexMatch::MatchedData> BaseRegexMatch::MatchAll()
     {
         if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
         {
@@ -161,9 +189,16 @@ namespace Core::SPcre2
             return {};
         }
 
+        if (!_subject) [[unlikely]]
+        {
+            Assert("The subject is nullptr.");
+            return {};
+        }
+
         std::vector<MatchedData> matches;
         matches.reserve(10);
 
+        decltype(_offset) offset = _offset;
         int result = 0;
         do
         {
@@ -201,17 +236,104 @@ namespace Core::SPcre2
     {
         if (IsCompiled())
         {
-            _Clear();
+            _FreeMatchData();
             _matchData = pcre2_match_data_create_from_pattern(_regex, nullptr);
         }
     }
 
-    void BaseRegexMatch::_Clear()
+    void BaseRegexMatch::_FreeMatchData()
     {
         if (_matchData)
         {
             pcre2_match_data_free(_matchData);
             _matchData = nullptr;
         }
+    }
+
+    void BaseRegexMatch::_Clear()
+    {
+        _matchOptions = 0;
+        _FreeMatchData();
+    }
+
+    bool BaseRegexReplace::Replace()
+    {
+        if (!IsCompiled()) [[unlikely]]
+        {
+            Assert("Regex wasn't compiled!");
+            return false;
+        }
+
+        if (!_subject) [[unlikely]]
+        {
+            Assert("The subject is nullptr.");
+            return false;
+        }
+
+        if (!_replacement) [[unlikely]]
+        {
+            Assert("The replacement string is nullptr.");
+            return false;
+        }
+
+        if (!_allocatedString) [[unlikely]]
+        {
+            Assert("The output string is nullptr.");
+            return false;
+        }
+
+        int rc = pcre2_substitute(_regex,                                            // Compiled regex
+                                  reinterpret_cast<PCRE2_SPTR8>(_subject),           // Subject string
+                                  _limit,                                            // Subject is null-terminated
+                                  0,                                                 // Start at offset 0
+                                  _replaceOptions,                                   // Options
+                                  nullptr,                                           // Default match context
+                                  nullptr,                                           // Default substitute context
+                                  reinterpret_cast<PCRE2_SPTR8>(_replacement),       // Replacement string
+                                  PCRE2_ZERO_TERMINATED,                             // Replacement is null-terminated
+                                  reinterpret_cast<PCRE2_UCHAR8*>(_allocatedString), // Output buffer
+                                  &_allocatedSize                                    // Length of the output buffer
+        );
+
+        if (rc >= 0)
+        {
+            return true;
+        }
+
+        Assert(GetErrorString(rc).c_str());
+
+        return false;
+    }
+
+    void BaseRegexReplace::SetOutputString(char* allocatedString, size_t size) noexcept
+    {
+        _allocatedString = allocatedString;
+        _allocatedSize = size;
+    }
+
+    void BaseRegexReplace::SetReplaceAll(bool value)
+    {
+        if (value)
+        {
+            _replaceOptions |= PCRE2_SUBSTITUTE_GLOBAL;
+        }
+        else
+        {
+            _replaceOptions &= ~PCRE2_SUBSTITUTE_GLOBAL;
+        }
+    }
+
+    void BaseRegexReplace::Clear()
+    {
+        BaseRegex::Clear();
+        BaseRegexReplace::_Clear();
+    }
+
+    void BaseRegexReplace::_Clear()
+    {
+        _replaceOptions = 0;
+        _replacement = nullptr;
+        _allocatedString = nullptr;
+        _allocatedSize = 0;
     }
 } // namespace Core::SPcre2
