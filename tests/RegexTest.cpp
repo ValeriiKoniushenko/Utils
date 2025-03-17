@@ -22,6 +22,8 @@
 
 #include "Core/Regex.h"
 
+#include "Core/String.h"
+
 #include <gtest/gtest.h>
 
 using namespace Core;
@@ -225,20 +227,28 @@ TEST(RegexTest, SimpleReplace)
 TEST(RegexTest, MatchDataConverts)
 {
     const std::string subject = "1234 Hello# world!";
+    const std::string_view view = subject;
 
-    RegexMatch regex;
-    regex.SetPattern("([A-Za-z]+)(#|!)");
-    regex.SetSubject(subject.c_str());
-    regex.SetCompileOptions(PCRE2_MULTILINE);
+    RegexMatch::MatchedData match{ 5, 6 };
 
-    ASSERT_TRUE(regex.Compile());
+    {
+        const auto stdString = match.ConvertTo(subject);
+        EXPECT_EQ("Hello#", stdString);
+    }
 
-    auto match = regex.Match();
+    {
+        const auto stdString = match.ConvertTo<std::string>(view.data(), view.size());
+        EXPECT_EQ("Hello#", stdString);
+    }
 
-    ASSERT_TRUE(match);
+    {
+        const auto vector = match.ConvertTo<std::vector<char>>(view.data(), view.size());
+        ASSERT_EQ(vector.size(), 6);
+        EXPECT_EQ(0, memcmp("Hello#", vector.data(), 6));
+    }
 
-    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
-
-    const auto stdString = match.ConvertTo(subject);
-    EXPECT_EQ("Hello#", stdString);
+    {
+        const auto atom = match.ConvertTo<StringAtom>(view.data(), view.size());
+        EXPECT_EQ("Hello#", atom);
+    }
 }

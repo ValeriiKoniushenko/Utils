@@ -623,6 +623,7 @@ namespace Core
 
         [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
 
+        [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT Size() const noexcept { return _size; }
         [[nodiscard]] SizeT Length() const noexcept { return _size; }
         [[nodiscard]] bool IsEmpty() const noexcept { return _string == nullptr || _size == 0; }
@@ -1866,6 +1867,8 @@ namespace Core
 
             return *this;
         }
+
+        Self& resize(const SizeT newSize, bool isIgnoreMultiplier = false) { return Resize(newSize, isIgnoreMultiplier); }
 
         Self& Resize(const SizeT newSize, bool isIgnoreMultiplier = false)
         {

@@ -115,7 +115,13 @@ namespace Core
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
             [[nodiscard]] T ConvertTo(const T& original) const
             {
-                if (offset + size >= original.size()) [[unlikely]]
+                return ConvertTo<T>(original.data(), original.size());
+            }
+
+            template<BaseRegexMatch_MatchedData_Convert_Reqs T>
+            [[nodiscard]] T ConvertTo(const char* origStr, uint64_t origSize) const
+            {
+                if (offset + size >= origSize) [[unlikely]]
                 {
                     Assert();
                     return {};
@@ -123,7 +129,7 @@ namespace Core
 
                 T out;
                 out.resize(size);
-                memcpy_s(out.data(), size * sizeof(*out.data()), original.data() + offset, size * sizeof(*original.data()));
+                memcpy_s(out.data(), size * sizeof(*out.data()), origStr + offset, size * sizeof(*origStr));
                 return out;
             }
         };
