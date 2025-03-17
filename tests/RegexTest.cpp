@@ -20,12 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "Core/SimplePCRE2/Regex.h"
+#include "Core/Regex.h"
 
 #include <gtest/gtest.h>
 
 using namespace Core;
-using namespace Core::SPcre2;
 
 TEST(RegexTest, SimpleRegex)
 {

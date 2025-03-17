@@ -22,18 +22,17 @@
 
 #pragma once
 
-#include "Core/Assert.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
+#include "../Utils/CopyableAndMoveableBehaviour.h"
+#include "Assert.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
 
 #include <functional>
 #include <string>
-#include <string_view>
 #include <vector>
 
-namespace Core::SPcre2
+namespace Core
 {
 
     class BaseRegex : public Utils::CopyableAndMoveable
@@ -231,4 +230,4 @@ namespace Core::SPcre2
     using RegexMatch = BaseRegexMatch;
     using RegexReplace = BaseRegexReplace;
 
-} // namespace Core::SPcre2
+} // namespace Core

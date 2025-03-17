@@ -22,7 +22,7 @@
 
 #include "Regex.h"
 
-namespace Core::SPcre2
+namespace Core
 {
     BaseRegex::~BaseRegex()
     {
@@ -336,4 +336,4 @@ namespace Core::SPcre2
         _allocatedString = nullptr;
         _allocatedSize = 0;
     }
-} // namespace Core::SPcre2
+} // namespace Core
