@@ -31,9 +31,9 @@
 #include "Utils/TypeTraits.h"
 
 #ifdef UTILS__USE_STD_REGEX
-    #include <regex>mo
+    #include <regex>
 #else
-
+    #include "Regex.h"
 #endif
 
 #include <codecvt>
