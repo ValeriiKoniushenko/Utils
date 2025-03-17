@@ -438,8 +438,6 @@ namespace Core
 #ifdef UTILS__USE_STD_REGEX
         using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
         using StdRegexMatchResults = std::match_results<IteratorT>;
-#else
-
 #endif
 
         using value_type = CharT;
@@ -1240,7 +1238,7 @@ namespace Core
         }
 
 #ifdef UTILS__USE_STD_REGEX
-        [[nodiscard, deprecated]] StdRegexMatchResults FindRegex(
+        [[nodiscard, deprecated]] StdRegexMatchResults RegexFind(
             StdStringViewT expr, int baseOffset = 0, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
             std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
@@ -1260,7 +1258,7 @@ namespace Core
             return match;
         }
 
-        [[deprecated]] void IterateRegex(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
+        [[deprecated]] void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
                                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
@@ -1325,24 +1323,86 @@ namespace Core
 
 #else
 
-        /*[[nodiscard]] typename jp::VecNum FindRegex(StdStringViewT expr, int baseOffset = 0)
+        [[nodiscard]] RegexMatch::MatchedData RegexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            return FindRegex(typename jp::Regex(expr.data()), baseOffset);
+            if (IsEmpty())
+            {
+                return {};
+            }
+
+            RegexMatch regex(expr, _string);
+            regex.SetOffset(offset);
+            regex.SetLimit(limit);
+            regex.SetMatchOptions(matchOptions);
+            if (regex.Compile()) [[likely]]
+            {
+                return regex.Match();
+            }
+
+            return {};
         }
 
-        [[nodiscard]] typename jp::VecNum FindRegex(typename jp::Regex regex, int baseOffset = 0)
+        /*[[deprecated]] void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
+                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                         std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
-            typename jp::VecNum result;
+            if (IsEmpty())
+            {
+                return;
+            }
 
-            // clang-format off
-            regex.initMatch()
-                .setFindAll(true)
-                .setNumberedSubstringVector(&result)
-                .setSubject()
-                .match();
-            // clang-format on
+            if (!Verify(!expr.empty(), "RegEx expr is empty"))
+            {
+                return;
+            }
 
-            return result;
+            StdRegex regexExpr(expr.data(), regexFlag);
+            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
+            auto last = std::regex_iterator<IteratorT>();
+            for (; first != last; ++first)
+            {
+                if (!std::invoke(lambda, *first))
+                {
+                    break;
+                }
+            }
+        }
+
+        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr,
+                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        {
+            if (!IsEmpty())
+            {
+                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), matchFlag);
+            }
+
+            return false;
+        }
+
+        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
+                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        {
+            if (!IsEmpty())
+            {
+                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
+            }
+
+            return false;
+        }
+
+        [[deprecated]] bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
+                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
+                                         std::regex::flag_type regexFlag = std::regex::ECMAScript)
+        {
+            const StdRegex regex(expr.data(), regexFlag);
+
+            BaseString temp;
+            std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), matchFlag);
+            const auto wasReplaced = *this != temp;
+            *this = std::move(temp);
+            return wasReplaced;
         }*/
 
 #endif

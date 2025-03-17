@@ -221,3 +221,24 @@ TEST(RegexTest, SimpleReplace)
     ASSERT_TRUE(regex.Replace());
     EXPECT_STREQ("He#llo # world # how_are_you?", buff);
 }
+
+TEST(RegexTest, MatchDataConverts)
+{
+    const std::string subject = "1234 Hello# world!";
+
+    RegexMatch regex;
+    regex.SetPattern("([A-Za-z]+)(#|!)");
+    regex.SetSubject(subject.c_str());
+    regex.SetCompileOptions(PCRE2_MULTILINE);
+
+    ASSERT_TRUE(regex.Compile());
+
+    auto match = regex.Match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+
+    const auto stdString = match.ConvertTo(subject);
+    EXPECT_EQ("Hello#", stdString);
+}

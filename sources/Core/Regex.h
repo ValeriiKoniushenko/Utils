@@ -22,8 +22,9 @@
 
 #pragma once
 
-#include "../Utils/CopyableAndMoveableBehaviour.h"
 #include "Assert.h"
+#include "Utils/CopyableAndMoveableBehaviour.h"
+#include "Utils/CrossString.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
@@ -91,6 +92,14 @@ namespace Core
         void _FreeRegex();
     };
 
+    template<class T>
+    concept BaseRegexMatch_MatchedData_Convert_Reqs = requires(T t) {
+        { t.resize(0) };
+        { t.size() };
+        { t.data() };
+        { T() };
+    };
+
     class BaseRegexMatch : public BaseRegex
     {
     public:
@@ -102,6 +111,21 @@ namespace Core
 
             [[nodiscard]] bool IsMatched() const noexcept { return size != invalid && offset != invalid; }
             [[nodiscard]] explicit operator bool() const noexcept { return IsMatched(); }
+
+            template<BaseRegexMatch_MatchedData_Convert_Reqs T>
+            [[nodiscard]] T ConvertTo(const T& original) const
+            {
+                if (offset + size >= original.size()) [[unlikely]]
+                {
+                    Assert();
+                    return {};
+                }
+
+                T out;
+                out.resize(size);
+                memcpy_s(out.data(), size * sizeof(*out.data()), original.data() + offset, size * sizeof(*original.data()));
+                return out;
+            }
         };
 
         using BaseRegex::BaseRegex;
@@ -112,8 +136,8 @@ namespace Core
 
         void Clear() override;
 
-        [[nodiscard]] MatchedData Match();
-        [[nodiscard]] std::vector<MatchedData> MatchAll();
+        [[nodiscard]] MatchedData Match() const;
+        [[nodiscard]] std::vector<MatchedData> MatchAll() const;
 
         /**
          * @brief Will iterate over every match until the end.

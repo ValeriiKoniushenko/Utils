@@ -1220,49 +1220,49 @@ TEST(StringTest, BaseString_char_RegexFind)
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.FindRegex(" \\w+");
+        const auto match = str.RegexFind(" \\w+");
         EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.FindRegex(" \\w+", 3);
+        const auto match = str.RegexFind(" \\w+", 3);
         EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+");
+        const auto match = str.RegexFind(" \\w+");
         EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+", 3);
+        const auto match = str.RegexFind(" \\w+", 3);
         EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+");
+        const auto match = str.RegexFind(" \\w+");
         EXPECT_EQ(" world", match.str());
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.FindRegex(" \\w+", 3);
+        const auto match = str.RegexFind(" \\w+", 3);
         EXPECT_EQ(" world", match.str());
     }
 }
 
-TEST(StringTest, BaseString_char_IterateRegex)
+TEST(StringTest, BaseString_char_RegexIterate)
 {
     using Core::StringAtom;
 
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.IterateRegex("\\w+",
+        str.RegexIterate("\\w+",
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1274,7 +1274,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.IterateRegex(std::string("\\w+"),
+        str.RegexIterate(std::string("\\w+"),
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1287,7 +1287,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         std::string expr("\\w+");
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1300,7 +1300,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         std::string_view expr("\\w+");
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1313,7 +1313,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         const auto expr = "\\w+"_atom;
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1325,7 +1325,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.IterateRegex("\\w+"_atom,
+        str.RegexIterate("\\w+"_atom,
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1337,7 +1337,7 @@ TEST(StringTest, BaseString_char_IterateRegex)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.IterateRegex(std::string_view("\\w+"),
+        str.RegexIterate(std::string_view("\\w+"),
                          [&buffer](const StringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -1358,15 +1358,173 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
 
 #else
 
+/*TEST(StringTest, BaseString_char_default_Regex)
+{
+    {
+        // check for pascal case
+        auto str = "RegEx"_atom;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
+    }
+
+    {
+        auto str = "RegEx"_atom;
+        Core::StringAtom::StdRegexMatchResults match;
+        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
+        EXPECT_FALSE(match.empty());
+    }
+
+    {
+        auto str = "Hello this fucking world!"_atom;
+        str.RegexReplace(" ", "_=_");
+        EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
+    }
+}
+
 TEST(StringTest, BaseString_char_RegexFind)
 {
     using Core::StringAtom;
 
-    /*{
-        StringAtom string = "Hello world";
-        auto found = string.FindRegex("\\w+");
-    }*/
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto match = str.RegexFind("\\w+");
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!"_atom;
+        const auto match = str.RegexFind("\\w+", 3);
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind("\\w+");
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind("\\w+", 3);
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind(" \\w+");
+        EXPECT_EQ(" world", match.str());
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind(" \\w+", 3);
+        EXPECT_EQ(" world", match.str());
+    }
+}*/
+/*
+TEST(StringTest, BaseString_char_RegexIterate)
+{
+    using Core::StringAtom;
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.RegexIterate("\\w+",
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.RegexIterate(std::string("\\w+"),
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string expr("\\w+");
+        str.RegexIterate(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        std::string_view expr("\\w+");
+        str.RegexIterate(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        const auto expr = "\\w+"_atom;
+        str.RegexIterate(expr,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.RegexIterate("\\w+"_atom,
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
+
+    {
+        const auto str = "Hello world! How are you?"_atom;
+        StringAtom buffer;
+        str.RegexIterate(std::string_view("\\w+"),
+                         [&buffer](const StringAtom::StdRegexMatchResults& match)
+                         {
+                             buffer.PushBack(match.str());
+                             return true;
+                         });
+        EXPECT_EQ("HelloworldHowareyou", buffer);
+    }
 }
+
+TEST(StringTest, BaseString_char_default__RegexReplace)
+{
+    auto str = "Hello world!"_atom;
+    EXPECT_FALSE(str.RegexReplace("\\?", ""));
+    EXPECT_EQ("Hello world!", str);
+    EXPECT_TRUE(str.RegexReplace(" ", "_"));
+    EXPECT_EQ("Hello_world!", str);
+}*/
 
 #endif
 
@@ -2439,49 +2597,49 @@ TEST(StringTest, BaseString_wchar_t_RegexFind)
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        const auto match = str.FindRegex(L" \\w+");
+        const auto match = str.RegexFind(L" \\w+");
         EXPECT_EQ(L" world", match.str());
     }
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        const auto match = str.FindRegex(L" \\w+", 3);
+        const auto match = str.RegexFind(L" \\w+", 3);
         EXPECT_EQ(L" world", match.str());
     }
 
     {
         WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+");
+        const auto match = str.RegexFind(L" \\w+");
         EXPECT_EQ(L" world", match.str());
     }
 
     {
         WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+", 3);
+        const auto match = str.RegexFind(L" \\w+", 3);
         EXPECT_EQ(L" world", match.str());
     }
 
     {
         WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+");
+        const auto match = str.RegexFind(L" \\w+");
         EXPECT_EQ(L" world", match.str());
     }
 
     {
         WStringAtom str = L"Hello world!";
-        const auto match = str.FindRegex(L" \\w+", 3);
+        const auto match = str.RegexFind(L" \\w+", 3);
         EXPECT_EQ(L" world", match.str());
     }
 }
 
-TEST(StringTest, BaseString_wchar_t_IterateRegex)
+TEST(StringTest, BaseString_wchar_t_RegexIterate)
 {
     using Core::WStringAtom;
 
     {
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
-        str.IterateRegex(L"\\w+",
+        str.RegexIterate(L"\\w+",
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2493,7 +2651,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
     {
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
-        str.IterateRegex(std::wstring(L"\\w+"),
+        str.RegexIterate(std::wstring(L"\\w+"),
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2506,7 +2664,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
         std::wstring expr(L"\\w+");
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2519,7 +2677,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
         std::wstring_view expr(L"\\w+");
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2532,7 +2690,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
         const auto expr = L"\\w+"_atom;
-        str.IterateRegex(expr,
+        str.RegexIterate(expr,
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2544,7 +2702,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
     {
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
-        str.IterateRegex(L"\\w+"_atom,
+        str.RegexIterate(L"\\w+"_atom,
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
@@ -2556,7 +2714,7 @@ TEST(StringTest, BaseString_wchar_t_IterateRegex)
     {
         const auto str = L"Hello world! How are you?"_atom;
         WStringAtom buffer;
-        str.IterateRegex(std::wstring_view(L"\\w+"),
+        str.RegexIterate(std::wstring_view(L"\\w+"),
                          [&buffer](const WStringAtom::StdRegexMatchResults& match)
                          {
                              buffer.PushBack(match.str());
