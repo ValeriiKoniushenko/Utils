@@ -1378,7 +1378,7 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
         str.RegexReplace(" ", "_=_");
         EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
     }
-}
+}*/
 
 TEST(StringTest, BaseString_char_RegexFind)
 {
@@ -1386,44 +1386,44 @@ TEST(StringTest, BaseString_char_RegexFind)
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.RegexFind("\\w+");
+        const auto match = str.RegexFind(" \\w+");
         ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.str());
+        EXPECT_EQ(" world", match.ConvertTo(str));
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.RegexFind("\\w+", 3);
+        const auto match = str.RegexFind(" \\w+", 3);
         ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.RegexFind("\\w+");
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.str());
-    }
-
-    {
-        StringAtom str = "Hello world!";
-        const auto match = str.RegexFind("\\w+", 3);
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.str());
+        EXPECT_EQ(" world", match.ConvertTo(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+");
-        EXPECT_EQ(" world", match.str());
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.ConvertTo(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+", 3);
-        EXPECT_EQ(" world", match.str());
+        ASSERT_TRUE(match.IsMatched());
+        EXPECT_EQ(" world", match.ConvertTo(str));
     }
-}*/
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind(" \\w+");
+        EXPECT_EQ(" world", match.ConvertTo(str));
+    }
+
+    {
+        StringAtom str = "Hello world!";
+        const auto match = str.RegexFind(" \\w+", 3);
+        EXPECT_EQ(" world", match.ConvertTo(str));
+    }
+}
 /*
 TEST(StringTest, BaseString_char_RegexIterate)
 {

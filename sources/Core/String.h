@@ -1331,9 +1331,12 @@ namespace Core
                 return {};
             }
 
-            RegexMatch regex(expr, _string);
+            RegexMatch regex(expr.data(), _string);
             regex.SetOffset(offset);
-            regex.SetLimit(limit);
+            if (limit != 0)
+            {
+                regex.SetLimit(limit);
+            }
             regex.SetMatchOptions(matchOptions);
             if (regex.Compile()) [[likely]]
             {

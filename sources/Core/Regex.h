@@ -105,11 +105,11 @@ namespace Core
     public:
         struct MatchedData
         {
-            constexpr static auto invalid = ~static_cast<uint64_t>(0);
+            constexpr static auto invalid = 0;
             uint64_t offset = invalid;
             uint64_t size = invalid;
 
-            [[nodiscard]] bool IsMatched() const noexcept { return size != invalid && offset != invalid; }
+            [[nodiscard]] bool IsMatched() const noexcept { return !(size == invalid && offset == invalid); }
             [[nodiscard]] explicit operator bool() const noexcept { return IsMatched(); }
 
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
