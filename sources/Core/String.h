@@ -1427,18 +1427,57 @@ namespace Core
             }
         }
 
-        /*bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
-                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                         std::regex::flag_type regexFlag = std::regex::ECMAScript)
+        /**
+         * @param expr regex pattern
+         * @param predictedScaleSize will scale future string allocation size based on
+         * the programmer prediction. If new string will be bigger than needed - it will
+         * pretend to UB. This function is using BaseString::Reserve - so final value will
+         * be multiplied to BaseString::_capacityMultiplier
+         * @param newValue new string for the replacement
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param replaceOptions corresponding to PCRE2 rules
+         */
+        bool RegexReplace(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+                          uint32_t replaceOptions = 0)
         {
-            const StdRegex regex(expr.data(), regexFlag);
+            if (IsEmpty() || expr.empty())
+            {
+                return false;
+            }
 
-            BaseString temp;
-            std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), matchFlag);
-            const auto wasReplaced = *this != temp;
-            *this = std::move(temp);
-            return wasReplaced;
-        }*/
+            Core::RegexReplace regex(expr.data(), _string);
+            regex.SetOffset(offset);
+            if (limit != 0)
+            {
+                regex.SetLimit(limit);
+            }
+            regex.SetReplaceOptions(replaceOptions);
+
+            if (regex.Compile()) [[likely]]
+            {
+                Self output;
+                output.Reserve(_size * predictedScaleSize);
+                regex.SetOutputString(output._string, output._capacity - 1);
+                regex.SetReplacementString(newValue.data());
+
+                if (regex.Replace())
+                {
+                    // recal size
+                    while (output._string[output._size])
+                    {
+                        ++output._size;
+                    }
+
+                    const bool isChanged = output == *this;
+                    *this = std::move(output);
+                    return !isChanged;
+                }
+                return false;
+            }
+
+            return false;
+        }
 
 #endif
 

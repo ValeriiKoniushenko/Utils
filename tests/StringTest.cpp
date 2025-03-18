@@ -1582,8 +1582,6 @@ TEST(StringTest, BaseString_char_RegexIterate)
     }
 }
 
-/*
-
 TEST(StringTest, BaseString_char_default__RegexReplace)
 {
     auto str = "Hello world!"_atom;
@@ -1591,7 +1589,7 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
     EXPECT_EQ("Hello world!", str);
     EXPECT_TRUE(str.RegexReplace(" ", "_"));
     EXPECT_EQ("Hello_world!", str);
-}*/
+}
 
 #endif
 
