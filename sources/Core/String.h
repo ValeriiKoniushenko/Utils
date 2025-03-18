@@ -43,6 +43,7 @@
 #include <functional>
 #include <inttypes.h>
 #include <optional>
+#include <regex>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -1322,9 +1323,15 @@ namespace Core
 
 #else
 
+        /**
+         * @param expr regex pattern
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param matchOptions corresponding to PCRE2 rules
+         */
         [[nodiscard]] RegexMatch::MatchedData RegexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            if (IsEmpty())
+            if (IsEmpty() || expr.empty())
             {
                 return {};
             }
@@ -1344,10 +1351,16 @@ namespace Core
             return {};
         }
 
+        /**
+         * @param expr regex pattern
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param matchOptions corresponding to PCRE2 rules
+         */
         [[nodiscard]] RegexMatch::MatchedDataVector RegexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
                                                                  uint32_t matchOptions = 0) const
         {
-            if (IsEmpty())
+            if (IsEmpty() || expr.empty())
             {
                 return {};
             }
@@ -1367,6 +1380,12 @@ namespace Core
             return {};
         }
 
+        /**
+         * @param expr regex pattern
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param matchOptions corresponding to PCRE2 rules
+         */
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
             if (!IsEmpty())
@@ -1377,33 +1396,38 @@ namespace Core
             return false;
         }
 
-        /*void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
-                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                         std::regex::flag_type regexFlag = std::regex::ECMAScript) const
+        /**
+         * @brief Will iterate over every match until the end.
+         * @param expr regex pattern
+         * @param callback can take a few function's type:
+         * - void(MatchedData) - will iterate until the end.
+         * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param matchOptions corresponding to PCRE2 rules
+         */
+        template<class FuncT>
+        void RegexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            if (IsEmpty())
+            if (IsEmpty() || expr.empty())
             {
                 return;
             }
 
-            if (!Verify(!expr.empty(), "RegEx expr is empty"))
+            Core::RegexMatch regex(expr.data(), _string);
+            regex.SetOffset(offset);
+            if (limit != 0)
             {
-                return;
+                regex.SetLimit(limit);
             }
-
-            StdRegex regexExpr(expr.data(), regexFlag);
-            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
-            auto last = std::regex_iterator<IteratorT>();
-            for (; first != last; ++first)
+            regex.SetMatchOptions(matchOptions);
+            if (regex.Compile()) [[likely]]
             {
-                if (!std::invoke(lambda, *first))
-                {
-                    break;
-                }
+                regex.IterateOverMatches(std::forward<decltype(callback)>(callback));
             }
         }
 
-        [[deprecated]] bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
+        /*bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
                                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                          std::regex::flag_type regexFlag = std::regex::ECMAScript)
         {
