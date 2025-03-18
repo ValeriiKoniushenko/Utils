@@ -181,7 +181,7 @@ namespace Core
         return {};
     }
 
-    std::vector<BaseRegexMatch::MatchedData> BaseRegexMatch::MatchAll() const
+    BaseRegexMatch::MatchedDataVector BaseRegexMatch::MatchAll() const
     {
         if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
         {

@@ -1331,7 +1331,7 @@ namespace Core
                 return {};
             }
 
-            RegexMatch regex(expr.data(), _string);
+            Core::RegexMatch regex(expr.data(), _string);
             regex.SetOffset(offset);
             if (limit != 0)
             {
@@ -1346,7 +1346,40 @@ namespace Core
             return {};
         }
 
-        /*[[deprecated]] void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
+        [[nodiscard]] RegexMatch::MatchedDataVector RegexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                                 uint32_t matchOptions = 0) const
+        {
+            if (IsEmpty())
+            {
+                return {};
+            }
+
+            Core::RegexMatch regex(expr.data(), _string);
+            regex.SetOffset(offset);
+            if (limit != 0)
+            {
+                regex.SetLimit(limit);
+            }
+            regex.SetMatchOptions(matchOptions);
+            if (regex.Compile()) [[likely]]
+            {
+                return regex.MatchAll();
+            }
+
+            return {};
+        }
+
+        [[nodiscard]] bool RegexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        {
+            if (!IsEmpty())
+            {
+                return RegexFind(std::move(expr), offset, limit, matchOptions).IsMatched();
+            }
+
+            return false;
+        }
+
+        /*void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
                                          std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
                                          std::regex::flag_type regexFlag = std::regex::ECMAScript) const
         {
@@ -1370,30 +1403,6 @@ namespace Core
                     break;
                 }
             }
-        }
-
-        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr,
-                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (!IsEmpty())
-            {
-                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), matchFlag);
-            }
-
-            return false;
-        }
-
-        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
-                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (!IsEmpty())
-            {
-                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
-            }
-
-            return false;
         }
 
         [[deprecated]] bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,

@@ -1358,7 +1358,7 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
 
 #else
 
-/*TEST(StringTest, BaseString_char_default_Regex)
+TEST(StringTest, BaseString_char_RegexMatch)
 {
     {
         // check for pascal case
@@ -1367,18 +1367,10 @@ TEST(StringTest, BaseString_char_default__RegexReplace)
     }
 
     {
-        auto str = "RegEx"_atom;
-        Core::StringAtom::StdRegexMatchResults match;
-        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$", match));
-        EXPECT_FALSE(match.empty());
+        auto str = "RegEx\n\rHello"_atom;
+        EXPECT_TRUE(str.RegexMatch("^(\\w+\\s*)+$"));
     }
-
-    {
-        auto str = "Hello this fucking world!"_atom;
-        str.RegexReplace(" ", "_=_");
-        EXPECT_EQ("Hello_=_this_=_fucking_=_world!", str);
-    }
-}*/
+}
 
 TEST(StringTest, BaseString_char_RegexFind)
 {
@@ -1424,6 +1416,18 @@ TEST(StringTest, BaseString_char_RegexFind)
         EXPECT_EQ(" world", match.ConvertTo(str));
     }
 }
+
+TEST(StringTest, BaseString_char_RegexFindAll)
+{
+    auto str = "How are you, Jim?"_atom;
+    auto vec = str.RegexFindAll("\\w+");
+    ASSERT_EQ(4, vec.size());
+    EXPECT_EQ("How", vec[0].ConvertTo(str));
+    EXPECT_EQ("are", vec[1].ConvertTo(str));
+    EXPECT_EQ("you", vec[2].ConvertTo(str));
+    EXPECT_EQ("Jim", vec[3].ConvertTo(str));
+}
+
 /*
 TEST(StringTest, BaseString_char_RegexIterate)
 {

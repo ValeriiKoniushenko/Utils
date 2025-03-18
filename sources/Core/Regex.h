@@ -135,6 +135,7 @@ namespace Core
         };
 
         using BaseRegex::BaseRegex;
+        using MatchedDataVector = std::vector<MatchedData>;
 
     public:
         BaseRegexMatch() = default;
@@ -143,7 +144,7 @@ namespace Core
         void Clear() override;
 
         [[nodiscard]] MatchedData Match() const;
-        [[nodiscard]] std::vector<MatchedData> MatchAll() const;
+        [[nodiscard]] MatchedDataVector MatchAll() const;
 
         /**
          * @brief Will iterate over every match until the end.
