@@ -704,7 +704,7 @@ namespace Core
         {
             if (IsEmpty() || !other)
             {
-                if (_string && _string[0] == 0 && other && other[0] == 0)
+                if (((_string && _string[0] == 0) || _string == nullptr) && ((other && other[0] == 0) || other == nullptr))
                 {
                     return true;
                 }
@@ -771,12 +771,11 @@ namespace Core
         {
             if (IsEmpty() || other.empty())
             {
-                if (_string && _string[0] == 0 && other.empty())
+                if (((_string && _string[0] == 0) || _string == nullptr) && other.empty())
                 {
                     return true;
                 }
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return false;
             }
             return *this == other.data();
         }
@@ -1046,7 +1045,6 @@ namespace Core
             {
                 return std::hash<StdStringViewT>{}({ _string, _size });
             }
-            Assert("Impossible to make a hash from nullptr string.");
             return {};
         }
 
@@ -1528,7 +1526,7 @@ namespace Core
             return *this;
         }
 
-        const Self& Copy(CharT* dest, SizeT count, SizeT offset = 0) const
+        const Self& CopyTo(CharT* dest, SizeT count, SizeT offset = 0) const
         {
             if (!IsEmpty())
             {
@@ -1542,6 +1540,11 @@ namespace Core
 
         Self& shrink_to_fit() noexcept
         {
+            if (IsEmpty())
+            {
+                return *this;
+            }
+
             const auto* oldString = _string;
             const auto capacity = _size + static_cast<SizeT>(1);
 
@@ -1621,6 +1624,11 @@ namespace Core
         {
             if (IsEmpty() || other.empty())
             {
+                if (IsEmpty() && other.empty())
+                {
+                    return Comparison::Equal;
+                }
+
                 return Comparison::None;
             }
 
@@ -1719,8 +1727,11 @@ namespace Core
 
         BaseString(const CharT* str, SizeT size = Settings::invalidSize)
         {
-            Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
-            memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
+            if (str)
+            {
+                Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
+                memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
+            }
         }
 
         explicit BaseString(StdStringViewT str)
@@ -1884,7 +1895,7 @@ namespace Core
 
         Self& Resize(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
-            if (newSize < _size && _policy != StringPolicy::Static)
+            if (_string && newSize < _size && _policy != StringPolicy::Static)
             {
                 _string[newSize] = 0;
             }

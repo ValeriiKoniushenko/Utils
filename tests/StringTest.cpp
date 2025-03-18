@@ -284,6 +284,68 @@ TEST(StringTest, BaseString_char_default__Comparision)
     }
 }
 
+TEST(StringTest, BaseString_char_OperationsWithEmptyString)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str;
+        auto dynamic = str.GetCopyAsDynamic();
+        EXPECT_EQ(0, dynamic.Size());
+        EXPECT_EQ(0, dynamic.Capacity());
+        EXPECT_EQ(nullptr, dynamic.c_str());
+    }
+
+    {
+        StringAtom str;
+
+        EXPECT_EQ(0, str.MakeHash());
+        EXPECT_EQ(str.end(), str.begin());
+        EXPECT_TRUE("" == str);
+        EXPECT_TRUE(str == "");
+    }
+
+    {
+        StringAtom str = "";
+
+        EXPECT_EQ(0, str.MakeHash());
+        EXPECT_EQ(str.end(), str.begin());
+        EXPECT_TRUE("" == str);
+        EXPECT_TRUE(str == "");
+    }
+
+    {
+        StringAtom str;
+        str.PushBack("Hello");
+        EXPECT_EQ(5, str.size());
+        EXPECT_GE(str.Capacity(), 5);
+    }
+
+    {
+        StringAtom str;
+        str.PushFront("Hello");
+        EXPECT_EQ(5, str.size());
+        EXPECT_GE(str.Capacity(), 5);
+    }
+
+    {
+        StringAtom str;
+        EXPECT_FALSE(str.RegexFind("Hello").IsMatched());
+    }
+
+    {
+        StringAtom str;
+        EXPECT_TRUE(str.RegexFindAll("Hello").empty());
+    }
+
+    {
+        StringAtom str;
+        EXPECT_FALSE(str.RegexMatch("Hello"));
+
+        str.shrink_to_fit();
+    }
+}
+
 TEST(StringTest, BaseString_char_default__InStdSet)
 {
     using Core::StringAtom;
@@ -882,7 +944,7 @@ TEST(StringTest, BaseString_char_default_Copy)
     {
         const auto str = "Hello world!"_atom;
         char arr[128]{};
-        str.Copy(arr, str.Size());
+        str.CopyTo(arr, str.Size());
         EXPECT_EQ(str, arr);
     }
 }
@@ -2311,7 +2373,7 @@ TEST(StringTest, BaseString_wchar_t_default_Copy)
     {
         const auto str = L"Hello world!"_atom;
         wchar_t arr[128]{};
-        str.Copy(arr, str.Size());
+        str.CopyTo(arr, str.Size());
         EXPECT_EQ(str, arr);
     }
 }
