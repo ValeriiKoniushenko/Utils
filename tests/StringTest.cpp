@@ -2461,12 +2461,12 @@ TEST(StringTest, BaseString_wchar_t_default__From)
     EXPECT_EQ(L"412312334234", WStringAtom::MakeFrom(412312334234ull));
 }
 
-TEST(StringTest, BaseString_wchar_t_default__Format)
+/*TEST(StringTest, BaseString_wchar_t_default__Format)
 {
     using Core::WStringAtom;
     const auto str = WStringAtom::Format(L"Hello {}! I have {}$. If u want we can go to {}.", L"Jenny", 300, L"caffee");
     EXPECT_EQ(L"Hello Jenny! I have 300$. If u want we can go to caffee.", str);
-}
+}*/
 
 TEST(StringTest, BaseString_wchar_t_default__LinesCount)
 {

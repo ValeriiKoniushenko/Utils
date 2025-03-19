@@ -1036,6 +1036,8 @@ namespace Core
             }
 #ifdef UTILS__USE_STD_REGEX
             (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
+#else
+            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args).ToStdStringView()), ...);
 #endif
             return temp;
         }
@@ -1329,6 +1331,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
          */
+        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         [[nodiscard]] RegexMatch::MatchedData RegexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
             if (IsEmpty() || expr.empty())
@@ -1357,6 +1360,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
          */
+        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         [[nodiscard]] RegexMatch::MatchedDataVector RegexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
                                                                  uint32_t matchOptions = 0) const
         {
@@ -1386,6 +1390,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
          */
+        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         [[nodiscard]] bool RegexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
             if (!IsEmpty())
@@ -1406,7 +1411,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
          */
-        template<class FuncT>
+        template<class FuncT, class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         void RegexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
             if (IsEmpty() || expr.empty())
@@ -1438,6 +1443,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
+        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         bool RegexReplace(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
                           uint32_t replaceOptions = 0)
         {
@@ -2235,6 +2241,8 @@ namespace Core
             }
 #ifdef UTILS__USE_STD_REGEX
             this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
+#else
+            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg));
 #endif
         }
     };
