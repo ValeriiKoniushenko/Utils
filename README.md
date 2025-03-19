@@ -1,99 +1,298 @@
 # Utils
 
-The utilitary library for my own common projects. It has some count of already implemented things as:
-- Project validator
+The utilitary library for common solutions in your code. It has some count of already implemented things as:
 - Common concepts(from C++20)
-- Common classes for working with a space
+- Common classes for working with a space coordinates
 - Common functions to work with Math
 - Common interfaces\patterns
 - Enum-generator
-- Atomic string for working with compile-time strings
+- Atomic string for working with compile-time and dynamic strings
 - Delegates
 - Run-time asserts
+
+___
 
 # Getting started
 
 ## Requirements
 Needed settings\programs on your system are:
 - cmake 3.30 >=
-- clang 18.1.8 >=
+- clang 18.1.8 >= | gcc 14.2.1 >=
+- Python 3.13.2 >=
 
 For better experience:
 - setup ```core.autocrlf=true``` for git environment
 
 ## Installation
-1. Clone this repository
-2. Install\update all dependencies. In terminal: ```git submodule update --recursive --remote --init```
-3. Install ```python3```
-4. Install ```pip```
-5. Run ```/scripts/check.py``` and following instructions(if it will be needed)
 
-## Building
+### Step #1: Repository preparation
+
+#### Automatic
+
+Automation pre-installation will check needed dependencies, its version and many others.
+So, in general it's more safe way to prepare the cloned repo. But if you have some troubles
+with this point, just go below to the 'Manual' part.
+
+1. Clone this repository
+2. In the terminal run the script './install.py' using your python3: ```python install.py```
+
+#### Manual
+
+If you have some trouble with automation pre-installation you can try to do main steps by
+your hands.
+
+1. Clone this repository
+2. In the terminal run: ```git submodule update --init --force --remot```
+
+### Step #2: Building
 1. Open the terminal and make sure that your current path inside project root folder 
-2. Create build dir & go into: ```mkdir build; cd build```
-3. Run cmake: ```cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_BUILD_TYPE="Debug" ../```
+2. Create build dir & go into it: ```mkdir build; cd build```
+3. Run cmake: ```cmake -DCMAKE_BUILD_TYPE="Debug" ../```
 4. Build project using cmake: ```cmake --build .```
 
 PS: to build Debug or Release version of the project set ```Debug``` or ```Release``` to ```-DCMAKE_BUILD_TYPE```.
 E.g: ```-DCMAKE_BUILD_TYPE="Release"```
 
-## Project validator
-This tools was created for using with CI\CD or using with git-hooks.
-To run this tool you need to:
-1. Run python script by the next path: ```/scripts/check.py``` - it will check all needed dependencies on your system.
-2. After this your env will be checked and the next step you can do:
-   1. You can run file\[s\]-checking. Just run python script: ```/scripts/file_validator.py``` and pass as argument\[s\] the path to your file\[s\]
-   2. You can run project-checking. Just run python script without arguments: ```/scripts/project_validator.py```. It'll find your project by the root ```.git``` folder
+---
+
+# Road map
 
 ## Common concepts
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can check all common concepts by the next path: ```sources/Utils/Concepts.h```
 
-## Common classes
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can check all common classes by the next path: ```sources/Core/```
-At this moment the library has next common classes:
-- ```Core::Rect<ArithmeticType>```
-- ```Core::GlobalPosition<Len, Type, Precision>```
-- ```Core::Size<Dimension, ArithmeticType>```
+### Intro
+
+Quite simple thing: just wrapper for common practacies in your code which you can use.
+Next concepts already implemented instead of you:
+
+- ```Utils::IsArithmetic```
+- ```Utils::IsFloating```
+- ```Utils::IsIntegral```
+
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Utils```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Utils)```
+
+#### C++ includes
+
+Include it to your file: ```#include "Utils/Concepts.h"```
+
+___
+
+## Working with space coordinates
+
+### Intro
+
+Of course, it has basic set of tools to work with space coordinates.
+
+- ```Core::Rect<ArithmeticType>``` - use it to create you own Rectangle abstraction
+- ```Core::GlobalPosition<Len, Type, Precision>``` - the same glm::vec2 or vec3 but better
+- ```Core::Size<Dimension, ArithmeticType>``` - better than glm::vecX
+- ```Core::LocalPosition<Len, Type, Precision>``` - the friend of the GlobalPosition, but for now - **not implemented**.
+
+*More detailed view & examples you can find here: [link](docs/SpaceCoordinates.md)*
+
+### Fast example
+
+Working with ```Rect```.
+
+```c++
+#include "Core/Rect.h"
+
+using namespace Core;
+using namespace std;
+
+FRect rect = { 0.f, 10.f, 10.f, 0.f };
+
+FRect::GlobalPositionT innerPoint = { 3.f, 3.f };
+if (rect.isContain(innerPoint))
+    cout << "The rect contains this point"
+
+auto corner = rect.getLeftTop();
+cout << "LT: " << corner.x << ":" << corner.y;
+
+// Output:
+// > The rect contains this point
+// > LT: 0:10
+```
+
+Working with ```Size```.
+
+```c++
+#include "Core/Size.h"
+
+using namespace Core;
+using namespace std;
+
+ISize2 a = { 5, 10 }; // ISize2 == int size 2D
+ISize2 b = { 2, 4 };
+cout << "Area 'a' = " << a.area() << endl;
+cout << "Area 'b' = " << b.area() << endl;
+
+if (a > b)
+    cout << "Hello";
+
+// Output:
+// > Area 'a' = 50
+// > Area 'b' = 8
+// > Hello
+```
+
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ includes
+
+- For ```Rect```: ```#include "Core/Rect.h"```
+- For ```GlobalPosition```: ```#include "Core/Position.h"```
+- For ```Size```: ```#include "Core/Size.h"```
+
+___
 
 ## Common functions to work with Math
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can check all common functions to work with Math by the next path: ```sources/Core/Math.h```
+
+### Intro
+
+Usually functions for you, but in ```compile-time```!
+
+- ```Math::Abs``` - for working with any arithmetical type
+- ```Math::IsEqual``` - comparing of the float or double
+- ```Math::IsZero``` - checking for 0.0 for types with floating point
+
+### Fast example
+
+```c++
+#include "Core/Math.h"
+
+using namespace Math;
+using namespace std;
+
+if (IsZero(0.0001f))
+    cout << "YES #1" << endl;
+else
+    cout << "NO #1" << endl;
+
+
+if (IsZero<float, 0.01f>(0.0001f))
+    cout << "YES #2" << endl;
+else
+    cout << "NO #2" << endl;
+    
+// Output:
+// > YES #1
+// > NO #2
+```
+
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ includes
+
+Just include it to your file: ```#include "Core/Math.h"```
+
+___
 
 ## Common interfaces & patterns
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can check all common concepts by the next path: ```sources/Core/```
-- ```Singleton.h``` - thread safe Singleton
-- ```CommonInterfaces.h```
+
+### Intro
+
+Popular practice is to add a function 'swap' to your classes. Why we can't
+bring it out to the interface? Yes, we did it!
+Or working with our the ~~anti~~ best pattern: Singleton? We also have it.
+
+### Fast example
+
+```c++
+#include "Core/CommonInterfaces.h"
+
+struct MyType : public Core::ISwappable<MyType>
+{
+    void swap(MyType&) override { ... }
+};
+```
+
+Working with singleton:
+
+```c++
+#include "Core/Singleton.h"
+
+struct MyType : public Core::Singleton<MyType>
+{
+    // Yes, it's ready to use!
+};
+```
+
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ includes
+
+- For singleton: ```#include "Core/Singleton.h"```
+- For interfaces: ```#include "Core/CommonInterfaces.h"```
+
+___
 
 ## Enum-generator
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can use the code to simplify working with ```enum class```-es. Just include a header file: ```sources/Core/Enum.h```
-And just create your own enum type.
+
+### Intro
+
+Do you want to convert an enum's constant to string or vise versa? Or you want to
+know home many constants in your enum? I think it's not a problem. Use compile-time
+wrapper for it without loosing of optimization privelegious.
+
+### Fast example
+
 ```c++
 #include "Core/Enum.h"
-#include <iostream>
 
-CreateEnum(Color, int, Red, Green, Blue);
+using namespace std;
 
-int main()
-{
-    using namespace std;
-    Color color = Color::Red;
-    cout << color.ToStr() << endl; // => Red
-    cout << color.Cast() << endl; // => 0
+CreateEnum(
+    Color, int, 
+    Red, 
+    Green, 
+    Blue
+);
 
-    color = Color::Blue;
-    cout << color.ToStr() << endl; // => Blue
-    cout << color.Cast() << endl; // => 2
-    cout << color.Cast() << endl; // => 2
-    cout << (color == Color::FromStr("Blue")) << endl; // => true
-    cout << (Color::Green == Color::FromStr("Green")) << endl; // => true
-    cout << (1 == Color::FromStr("Green").Cast()) << endl; // => true
+Color color = Color::Red;
+cout << color.toStr() << endl;
+cout << color.cast() << endl;
 
-    return 0;
-}
+color = Color::Blue;
+cout << color.toStr() << endl;
+cout << color.cast() << endl;
+cout << color.cast() << endl;
+cout << (color == Color::fromStr("Blue")) << endl;
+cout << (Color::Green == Color::fromStr("Green")) << endl;
+cout << (1 == Color::fromStr("Green").cast()) << endl;
+
+// Output:
+// > Red
+// > 0
+// > Blue
+// > 2
+// > 2
+// > true
+// > true
+// > true
 ```
 
 ## Atomic strings

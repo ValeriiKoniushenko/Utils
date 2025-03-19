@@ -40,7 +40,7 @@
                                                                                                                                                      \
     public:                                                                                                                                          \
         Name(Type value)                                                                                                                             \
-            : mValue(value)                                                                                                                          \
+            : _value(value)                                                                                                                          \
         {                                                                                                                                            \
         }                                                                                                                                            \
         ~Name() = default;                                                                                                                           \
@@ -50,40 +50,40 @@
                                                                                                                                                      \
         bool operator==(Name other) const noexcept                                                                                                   \
         {                                                                                                                                            \
-            return mValue == other.mValue;                                                                                                           \
+            return _value == other._value;                                                                                                           \
         }                                                                                                                                            \
         Name& operator=(Name other) noexcept                                                                                                         \
         {                                                                                                                                            \
-            mValue = other.mValue;                                                                                                                   \
+            _value = other._value;                                                                                                                   \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
         Name& operator=(Type value) noexcept                                                                                                         \
         {                                                                                                                                            \
-            mValue = value;                                                                                                                          \
+            _value = value;                                                                                                                          \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
         bool operator!=(Name other) const noexcept                                                                                                   \
         {                                                                                                                                            \
-            return mValue != other.mValue;                                                                                                           \
+            return _value != other._value;                                                                                                           \
         }                                                                                                                                            \
-        Type Cast() const noexcept                                                                                                                   \
+        Type cast() const noexcept                                                                                                                   \
         {                                                                                                                                            \
-            return mValue;                                                                                                                           \
+            return _value;                                                                                                                           \
         }                                                                                                                                            \
         operator Type() const noexcept                                                                                                               \
         {                                                                                                                                            \
-            return mValue;                                                                                                                           \
+            return _value;                                                                                                                           \
         }                                                                                                                                            \
-        ValueT ToStr() const                                                                                                                         \
+        ValueT toStr() const                                                                                                                         \
         {                                                                                                                                            \
-            return Name::ToStr(mValue);                                                                                                              \
+            return Name::toStr(_value);                                                                                                              \
         }                                                                                                                                            \
                                                                                                                                                      \
         enum : Type                                                                                                                                  \
         {                                                                                                                                            \
             __VA_ARGS__                                                                                                                              \
         };                                                                                                                                           \
-        inline static const SizeT Count = []() -> Name::SizeT                                                                                        \
+        inline static const SizeT count = []() -> Name::SizeT                                                                                        \
         {                                                                                                                                            \
             std::regex const expression(",");                                                                                                        \
             ValueT const text(#__VA_ARGS__);                                                                                                         \
@@ -91,12 +91,12 @@
             return static_cast<Name::SizeT>(match_count + 1);                                                                                        \
         }();                                                                                                                                         \
                                                                                                                                                      \
-        static ValueT ToStr(Type key)                                                                                                                \
+        static ValueT toStr(Type key)                                                                                                                \
         {                                                                                                                                            \
             auto it = map.find(KeyT(key));                                                                                                           \
             if (it == map.end())                                                                                                                     \
             {                                                                                                                                        \
-                std::cerr << "Impossible to find a way to convert a value '" << key << "' to string inside the enum: '" << Name::GetName() << "'"    \
+                std::cerr << "Impossible to find a way to convert a value '" << key << "' to string inside the enum: '" << Name::getName() << "'"    \
                           << std::endl;                                                                                                              \
                 return {};                                                                                                                           \
             }                                                                                                                                        \
@@ -104,7 +104,7 @@
             return it->second;                                                                                                                       \
         }                                                                                                                                            \
                                                                                                                                                      \
-        static KeyT FromStr(const ValueT& value)                                                                                                     \
+        static KeyT fromStr(const ValueT& value)                                                                                                     \
         {                                                                                                                                            \
             auto it = std::find_if(map.begin(), map.end(),                                                                                           \
                                    [&value](auto pair)                                                                                               \
@@ -114,7 +114,7 @@
                                                                                                                                                      \
             if (it == map.end())                                                                                                                     \
             {                                                                                                                                        \
-                std::cerr << "Impossible to find a way to convert a string '" << value << "' to string inside the enum: '" << Name::GetName() << "'" \
+                std::cerr << "Impossible to find a way to convert a string '" << value << "' to string inside the enum: '" << Name::getName() << "'" \
                           << std::endl;                                                                                                              \
                 return {};                                                                                                                           \
             }                                                                                                                                        \
@@ -122,13 +122,13 @@
             return it->first;                                                                                                                        \
         }                                                                                                                                            \
                                                                                                                                                      \
-        [[nodiscard]] static constexpr std::string GetName() noexcept                                                                                \
+        [[nodiscard]] static constexpr std::string getName() noexcept                                                                                \
         {                                                                                                                                            \
             return #Name;                                                                                                                            \
         }                                                                                                                                            \
                                                                                                                                                      \
     private:                                                                                                                                         \
-        Type mValue{};                                                                                                                               \
+        Type _value{};                                                                                                                               \
         using ContainerT = std::unordered_map<KeyT, ValueT>;                                                                                         \
         inline static const ValueT text = #__VA_ARGS__;                                                                                              \
         inline static const ContainerT map = []()                                                                                                    \
@@ -153,7 +153,7 @@
                 auto it = std::sregex_iterator(token.begin(), token.end(), r);                                                                       \
                 if (it == std::sregex_iterator())                                                                                                    \
                 {                                                                                                                                    \
-                    std::cerr << "Can't find a property inside an enum: '" << Name::GetName() << "'" << std::endl;                                   \
+                    std::cerr << "Can't find a property inside an enum: '" << Name::getName() << "'" << std::endl;                                   \
                     continue;                                                                                                                        \
                 }                                                                                                                                    \
                                                                                                                                                      \
@@ -171,7 +171,7 @@
                     if (it == std::sregex_iterator())                                                                                                \
                     {                                                                                                                                \
                         key.reset();                                                                                                                 \
-                        std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::GetName() << "'" << std::endl;  \
+                        std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::getName() << "'" << std::endl;  \
                         isCouldntParseInThePast = true;                                                                                              \
                     }                                                                                                                                \
                     else                                                                                                                             \
@@ -182,7 +182,7 @@
                 }                                                                                                                                    \
                 else if (isCouldntParseInThePast)                                                                                                    \
                 {                                                                                                                                    \
-                    std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::GetName() << "'" << std::endl;      \
+                    std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::getName() << "'" << std::endl;      \
                 }                                                                                                                                    \
                                                                                                                                                      \
                 ++counter;                                                                                                                           \

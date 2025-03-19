@@ -29,14 +29,11 @@
 
 namespace Core
 {
-    template<class T>
-    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<Utils::CopyableAndMoveableBehaviour, T>;
-
-    template<class T, IsCopyableAndMoveableBehaviour CopyBehaviour>
+    template<class T, Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
     class Singleton : public CopyBehaviour
     {
     public:
-        static T& Instance()
+        static T& instance()
         {
             static std::unique_ptr<T> object;
             static std::mutex mutex;

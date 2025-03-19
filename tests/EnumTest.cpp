@@ -29,12 +29,12 @@ CreateEnum(Color, int, Red, Green, Blue);
 TEST(EnumTest, MainTest)
 {
     Color color = Color::Red;
-    EXPECT_EQ("Red", color.ToStr());
-    EXPECT_EQ(0, color.Cast());
+    EXPECT_EQ("Red", color.toStr());
+    EXPECT_EQ(0, color.cast());
 
     color = Color::Blue;
-    EXPECT_EQ("Blue", color.ToStr());
-    EXPECT_EQ(2, color.Cast());
-    EXPECT_EQ(Color::FromStr("Blue").value_or(999), color.Cast());
-    EXPECT_EQ(Color::FromStr("Blue").value_or(999), 2);
+    EXPECT_EQ("Blue", color.toStr());
+    EXPECT_EQ(2, color.cast());
+    EXPECT_EQ(Color::fromStr("Blue").value_or(999), color.cast());
+    EXPECT_EQ(Color::fromStr("Blue").value_or(999), 2);
 }

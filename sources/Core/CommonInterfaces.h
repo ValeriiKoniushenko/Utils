@@ -32,7 +32,7 @@ namespace Core
 
         virtual ~ISwappable() = default;
 
-        virtual void Swap(DerivedT&) = 0;
+        virtual void swap(DerivedT&) = 0;
     };
 
 } // namespace Core

@@ -552,7 +552,7 @@ namespace Core
                 return result == Comparison::Equal || result == Comparison::Less;
             }
 
-            void Swap(Self& other) override
+            void swap(Self& other) override
             {
                 auto temp = *this;
                 *this = other;
@@ -618,11 +618,11 @@ namespace Core
         [[nodiscard]] const ReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
         [[nodiscard]] const ReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::Instance().Add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().Add(newString, Toolset::Length(newString)) }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::Instance().Add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().Add(newString, size) }; }
 
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::Instance().Add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().Add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT Size() const noexcept { return _size; }

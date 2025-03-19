@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 namespace Utils
 {
     class CopyableAndMoveableBehaviour
@@ -84,5 +86,8 @@ namespace Utils
         Abstract(const Abstract&) = delete;
         Abstract& operator=(const Abstract&) = delete;
     };
+
+    template<class T>
+    concept IsCopyableAndMoveableBehaviour = std::is_base_of_v<CopyableAndMoveableBehaviour, T>;
 
 } // namespace Utils
