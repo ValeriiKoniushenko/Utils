@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2024 Valerii Koniushenko
+// Copyright (c) 1024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,95 +24,91 @@
 
 #include <benchmark/benchmark.h>
 
-static void BM_StdString(benchmark::State& state)
+static void BM_StdStringComparison(benchmark::State& state)
 {
-    std::string str1 = "Hello";
-    std::string str2 = "World";
+    std::string str1(state.range(0), 'a');
+    std::string str2(state.range(0), 'a');
 
     for (auto _ : state)
     {
         benchmark::DoNotOptimize(str1 == str2);
-        benchmark::ClobberMemory();
     }
+    state.SetComplexityN(state.range(0));
 }
 
-static void BM_StdStringLong(benchmark::State& state)
+static void BM_StdStringPushingBack(benchmark::State& state)
 {
-    std::string str1 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-    std::string str2 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
+    for (auto _ : state)
+    {
+        std::string str;
+        for (std::size_t i = 0; i < state.range(0); ++i)
+        {
+            str.push_back('a');
+        }
+        benchmark::DoNotOptimize(str);
+    }
+    state.SetComplexityN(state.range(0));
+}
+
+static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
+{
+    Core::StringAtom str1;
+    for (int i = 0; i < state.range(0); ++i)
+    {
+        str1.push_back('a');
+    }
+
+    Core::StringAtom str2;
+    for (int i = 0; i < state.range(0); ++i)
+    {
+        str2.push_back('a');
+    }
+
     for (auto _ : state)
     {
         benchmark::DoNotOptimize(str1 == str2);
-        benchmark::ClobberMemory();
     }
+    state.SetComplexityN(state.range(0));
 }
 
-static void BM_StdStringConst(benchmark::State& state)
+static void BM_StringAtom_Static_Comparison(benchmark::State& state)
 {
-    const std::string str1 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-    const std::string str2 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
+    Core::StringAtom mainString;
+    for (int i = 0; i < state.range(0); ++i)
+    {
+        mainString.push_back('a');
+    }
+
+    auto str1 = Core::StringAtom::Intern(mainString);
+    auto str2 = Core::StringAtom::Intern(mainString);
+    mainString.clear();
 
     for (auto _ : state)
     {
         benchmark::DoNotOptimize(str1 == str2);
-        benchmark::ClobberMemory();
     }
+    state.SetComplexityN(state.range(0));
 }
 
-static void BM_CString(benchmark::State& state)
+static void BM_StringAtomPushingBack(benchmark::State& state)
 {
-    const char* str1 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-    const char* str2 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
     for (auto _ : state)
     {
-        benchmark::DoNotOptimize(strcmp(str1, str2) == 0);
-        benchmark::ClobberMemory();
+        Core::StringAtom str;
+        for (std::size_t i = 0; i < state.range(0); ++i)
+        {
+            str.push_back('a');
+        }
+        benchmark::DoNotOptimize(str);
     }
+    state.SetComplexityN(state.range(0));
 }
 
-static void BM_CStringAddr(benchmark::State& state)
-{
-    const char* str1 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-    const char* str2 =
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
-    for (auto _ : state)
-    {
-        benchmark::DoNotOptimize(str1 == str2);
-        benchmark::ClobberMemory();
-    }
-}
+BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
 
-static void BM_StdStringPushBack(benchmark::State& state)
-{
-    std::string str;
-    for (auto _ : state)
-    {
-        str.push_back('1');
-    }
-}
-
-static void BM_PushBack(benchmark::State& state)
-{
-    Core::StringAtom str;
-    for (auto _ : state)
-    {
-        str.push_back('1');
-    }
-}
-
-BENCHMARK(BM_StdString);
-BENCHMARK(BM_StdStringLong);
-BENCHMARK(BM_StdStringConst);
-BENCHMARK(BM_CString);
-BENCHMARK(BM_CStringAddr);
-BENCHMARK(BM_StdStringPushBack);
-BENCHMARK(BM_PushBack);
+// BENCHMARK(BM_StringAtom_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
 
 BENCHMARK_MAIN();
