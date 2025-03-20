@@ -34,9 +34,9 @@ inline char* strtok_s(char* s, const char* delim, char** context)
     return strtok_r(s, delim, context);
 }
 
-inline int32_t _wtoi(const wchar_t* str)
+inline int _wtoi(const wchar_t* str)
 {
-    return static_cast<int32_t>(wcstol(str, 0, 10));
+    return static_cast<int>(wcstol(str, 0, 10));
 }
 
 inline float _wtof(const wchar_t* str)

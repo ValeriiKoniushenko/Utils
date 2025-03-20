@@ -89,8 +89,8 @@ TEST(StringTest, BaseString_char_default__Creation)
         const StringAtom str1 = "";
 
         EXPECT_EQ("", str1);
-        EXPECT_EQ(0, str1.Size());
-        EXPECT_NE(0, str1.Capacity());
+        EXPECT_EQ(0, str1.size());
+        EXPECT_NE(0, str1.capacity());
     }
 
     {
@@ -135,13 +135,13 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
         StringAtom str1 = "Hello"_atom;
         StringAtom str2(str1);
 
-        ASSERT_FALSE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_EQ(str1.CStr(), str2.CStr());
-        EXPECT_TRUE(str1.IsStatic());
-        EXPECT_TRUE(str2.IsStatic());
-        EXPECT_EQ(5, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_FALSE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_EQ(str1.c_str(), str2.c_str());
+        EXPECT_TRUE(str1.isStatic());
+        EXPECT_TRUE(str2.isStatic());
+        EXPECT_EQ(5, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ("Hello", str1);
         EXPECT_EQ("Hello", str2);
     }
@@ -150,13 +150,13 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
         StringAtom str1 = "Hello"_atom;
         StringAtom str2(std::move(str1));
 
-        ASSERT_TRUE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_FALSE(str1.IsStatic());
-        EXPECT_TRUE(str2.IsStatic());
-        EXPECT_EQ(0, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_TRUE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_FALSE(str1.isStatic());
+        EXPECT_TRUE(str2.isStatic());
+        EXPECT_EQ(0, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ("Hello", str2);
     }
 
@@ -164,13 +164,13 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
         StringAtom str1 = "Hello";
         StringAtom str2(str1);
 
-        ASSERT_FALSE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_TRUE(str1.IsDynamic());
-        EXPECT_TRUE(str2.IsDynamic());
-        EXPECT_EQ(5, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_FALSE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_TRUE(str1.isDynamic());
+        EXPECT_TRUE(str2.isDynamic());
+        EXPECT_EQ(5, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ("Hello", str1);
         EXPECT_EQ("Hello", str2);
     }
@@ -179,14 +179,14 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
         StringAtom str1 = "Hello";
         StringAtom str2(std::move(str1));
 
-        ASSERT_TRUE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_EQ(nullptr, str1.CStr());
-        EXPECT_FALSE(str1.IsDynamic());
-        EXPECT_TRUE(str2.IsDynamic());
-        EXPECT_EQ(0, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_TRUE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_EQ(nullptr, str1.c_str());
+        EXPECT_FALSE(str1.isDynamic());
+        EXPECT_TRUE(str2.isDynamic());
+        EXPECT_EQ(0, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ("Hello", str2);
     }
 }
@@ -290,16 +290,16 @@ TEST(StringTest, BaseString_char_OperationsWithEmptyString)
 
     {
         StringAtom str;
-        auto dynamic = str.GetCopyAsDynamic();
-        EXPECT_EQ(0, dynamic.Size());
-        EXPECT_EQ(0, dynamic.Capacity());
+        auto dynamic = str.getCopyAsDynamic();
+        EXPECT_EQ(0, dynamic.size());
+        EXPECT_EQ(0, dynamic.capacity());
         EXPECT_EQ(nullptr, dynamic.c_str());
     }
 
     {
         StringAtom str;
 
-        EXPECT_EQ(0, str.MakeHash());
+        EXPECT_EQ(0, str.makeHash());
         EXPECT_EQ(str.end(), str.begin());
         EXPECT_TRUE("" == str);
         EXPECT_TRUE(str == "");
@@ -308,7 +308,7 @@ TEST(StringTest, BaseString_char_OperationsWithEmptyString)
     {
         StringAtom str = "";
 
-        EXPECT_EQ(0, str.MakeHash());
+        EXPECT_EQ(0, str.makeHash());
         EXPECT_EQ(str.end(), str.begin());
         EXPECT_TRUE("" == str);
         EXPECT_TRUE(str == "");
@@ -316,31 +316,31 @@ TEST(StringTest, BaseString_char_OperationsWithEmptyString)
 
     {
         StringAtom str;
-        str.PushBack("Hello");
+        str.push_back("Hello");
         EXPECT_EQ(5, str.size());
-        EXPECT_GE(str.Capacity(), 5);
+        EXPECT_GE(str.capacity(), 5);
     }
 
     {
         StringAtom str;
-        str.PushFront("Hello");
+        str.push_front("Hello");
         EXPECT_EQ(5, str.size());
-        EXPECT_GE(str.Capacity(), 5);
+        EXPECT_GE(str.capacity(), 5);
     }
 
     {
         StringAtom str;
-        EXPECT_FALSE(str.RegexFind("Hello").isMatched());
+        EXPECT_FALSE(str.regexFind("Hello").isMatched());
     }
 
     {
         StringAtom str;
-        EXPECT_TRUE(str.RegexFindAll("Hello").empty());
+        EXPECT_TRUE(str.regexFindAll("Hello").empty());
     }
 
     {
         StringAtom str;
-        EXPECT_FALSE(str.RegexMatch("Hello"));
+        EXPECT_FALSE(str.regexMatch("Hello"));
 
         str.shrink_to_fit();
     }
@@ -404,27 +404,27 @@ TEST(StringTest, BaseString_char_default__Converts)
 
     {
         const StringAtom str = "123"_atom;
-        EXPECT_EQ(123, str.ConvertTo<int>());
+        EXPECT_EQ(123, str.convertTo<int>());
     }
 
     {
         const StringAtom str = "123.1234"_atom;
-        EXPECT_EQ(123.1234f, str.ConvertTo<float>());
+        EXPECT_EQ(123.1234f, str.convertTo<float>());
     }
 
     {
         const StringAtom str = "1231234567"_atom;
-        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+        EXPECT_EQ(1231234567, str.convertTo<long long>());
     }
 
     {
         const StringAtom str = "f1231234567"_atom;
-        EXPECT_EQ(0, str.ConvertTo<long long>());
+        EXPECT_EQ(0, str.convertTo<long long>());
     }
 
     {
         const StringAtom str = "1231234567f"_atom;
-        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+        EXPECT_EQ(1231234567, str.convertTo<long long>());
     }
 }
 
@@ -435,7 +435,7 @@ TEST(StringTest, BaseString_char_default__UtilsFunctions)
     // Split
     {
         const StringAtom str = "Hello fucking world!"_atom;
-        auto tokens = str.Split(" ");
+        auto tokens = str.split(" ");
         ASSERT_EQ(3, tokens.size());
         EXPECT_EQ(tokens[0], "Hello");
         EXPECT_EQ(tokens[1], "fucking");
@@ -481,10 +481,10 @@ TEST(StringTest, BaseString_char_default__Iterator)
 
     {
         StringAtom str = "Hello world!"_atom;
-        auto front = str.Front();
+        auto front = str.front();
         EXPECT_EQ('H', front);
 
-        auto back = str.Back();
+        auto back = str.back();
         EXPECT_EQ('!', back);
     }
 
@@ -518,10 +518,10 @@ TEST(StringTest, BaseString_char_default__Iterator)
         ASSERT_TRUE(in.is_open());
 
         StringAtom str((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-        ASSERT_FALSE(str.IsEmpty());
-        EXPECT_TRUE(str.IsDynamic());
+        ASSERT_FALSE(str.isEmpty());
+        EXPECT_TRUE(str.isDynamic());
         EXPECT_EQ("Hello world!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
         in.close();
         std::filesystem::remove("temp.txt");
     }
@@ -549,23 +549,23 @@ TEST(StringTest, BaseString_char_default_Modifications_SubStr)
 
     {
         StringAtom str = "Hello world!"_atom;
-        str.SubStr(6);
+        str.subStr(6);
         EXPECT_EQ("world!", str);
-        EXPECT_EQ(6, str.Size());
+        EXPECT_EQ(6, str.size());
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        str.SubStr(0, 5);
+        str.subStr(0, 5);
         EXPECT_EQ("Hello", str);
-        EXPECT_EQ(5, str.Size());
+        EXPECT_EQ(5, str.size());
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        str.SubStr(2, 5);
+        str.subStr(2, 5);
         EXPECT_EQ("llo", str);
-        EXPECT_EQ(3, str.Size());
+        EXPECT_EQ(3, str.size());
     }
 }
 
@@ -575,28 +575,28 @@ TEST(StringTest, BaseString_char_default_Find)
 
     {
         const auto str = "Hello world!"_atom;
-        const auto* found = str.Find(" ");
+        const auto* found = str.find(" ");
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = "Hello world!"_atom;
-        const auto* found = str.Find(std::string(" "));
+        const auto* found = str.find(std::string(" "));
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = "Hello world!"_atom;
-        const auto* found = str.Find(" "_atom);
+        const auto* found = str.find(" "_atom);
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = "Hello world! How are you, world?"_atom;
-        const auto strings = str.FindAll("world");
+        const auto strings = str.findAll("world");
         ASSERT_FALSE(strings.empty());
         for (const auto& string : strings)
         {
@@ -611,13 +611,13 @@ TEST(StringTest, BaseString_char_default_Cmp)
 
     {
         const auto str = "Hello world!"_atom;
-        EXPECT_TRUE(str.Compare("hello world!", true) == Core::Comparison::Equal);
-        EXPECT_TRUE(str.Compare("hello world", true) == Core::Comparison::Less);
+        EXPECT_TRUE(str.compare("hello world!", true) == Core::Comparison::Equal);
+        EXPECT_TRUE(str.compare("hello world", true) == Core::Comparison::Less);
     }
 
     {
         const auto str = "AAA"_atom;
-        EXPECT_TRUE(str.Compare("bbb", true) == Core::Comparison::Less);
+        EXPECT_TRUE(str.compare("bbb", true) == Core::Comparison::Less);
     }
 }
 
@@ -627,74 +627,74 @@ TEST(StringTest, BaseString_char_default_Trim)
 
     {
         auto str = "  MyLogin"_atom;
-        str.TrimStart(' ');
+        str.trimStart(' ');
         EXPECT_EQ("MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = "__MyLogin"_atom;
-        str.TrimStart(' ');
+        str.trimStart(' ');
         EXPECT_EQ("__MyLogin", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = "MyLogin  "_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ("MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = "MyLogin__"_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ("MyLogin__", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = "MyLogin  "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ("MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = "  MyLogin  "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ("MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = "MyLogin__"_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ("MyLogin__", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = "MyLogin;"_atom;
-        str.Trim(';');
+        str.trim(';');
         EXPECT_EQ("MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = "   "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ("", str);
-        EXPECT_EQ(0, str.Size());
-        EXPECT_NE(0, str.Capacity());
+        EXPECT_EQ(0, str.size());
+        EXPECT_NE(0, str.capacity());
     }
 
     {
         auto str = "   "_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ("", str);
-        EXPECT_EQ(0, str.Size());
-        EXPECT_NE(0, str.Capacity());
+        EXPECT_EQ(0, str.size());
+        EXPECT_NE(0, str.capacity());
     }
 }
 
@@ -702,9 +702,9 @@ TEST(StringTest, BaseString_char_default_ToLower)
 {
     {
         auto str = "Hello World!"_atom;
-        str.ToLowerCase();
+        str.toLowerCase();
         EXPECT_EQ("hello world!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 }
 
@@ -712,9 +712,9 @@ TEST(StringTest, BaseString_char_default_ToUpper)
 {
     {
         auto str = "Hello World!"_atom;
-        str.ToUpperCase();
+        str.toUpperCase();
         EXPECT_EQ("HELLO WORLD!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 }
 
@@ -724,7 +724,7 @@ TEST(StringTest, BaseString_char_default_PushBack)
         auto str = "Hello World"_atom;
         str.push_back('!');
         EXPECT_EQ("Hello World!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 
     {
@@ -735,21 +735,21 @@ TEST(StringTest, BaseString_char_default_PushBack)
         EXPECT_EQ(
             R"(Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)",
             str);
-        EXPECT_EQ(11 + strlen(text), str.Size());
+        EXPECT_EQ(11 + strlen(text), str.size());
     }
 
     {
         auto str = "Hello World"_atom;
         str.push_back(std::string("!!!"));
         EXPECT_EQ("Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.PushBack(std::string("!!!"));
+        str.push_back(std::string("!!!"));
         EXPECT_EQ("Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -759,7 +759,7 @@ TEST(StringTest, BaseString_char_default_PushFront)
         auto str = "Hello World"_atom;
         str.push_front('!');
         EXPECT_EQ("!Hello World", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 
     {
@@ -770,21 +770,21 @@ TEST(StringTest, BaseString_char_default_PushFront)
         EXPECT_EQ(
             R"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World)",
             str);
-        EXPECT_EQ(11 + strlen(text), str.Size());
+        EXPECT_EQ(11 + strlen(text), str.size());
     }
 
     {
         auto str = "Hello World"_atom;
         str.push_front(std::string("!!!"));
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.PushFront(std::string("!!!"));
+        str.push_front(std::string("!!!"));
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -794,56 +794,56 @@ TEST(StringTest, BaseString_char_default_Insert)
         auto str = "Hello World"_atom;
         str.insert(0, "!!!");
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.Insert(0, "!!!");
+        str.insert(0, "!!!");
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.insert(str.Size(), "!!!");
+        str.insert(str.size(), "!!!");
         EXPECT_EQ("Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.Insert(str.Size(), "!!!");
+        str.insert(str.size(), "!!!");
         EXPECT_EQ("Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
         str.insert(5, "!!!");
         EXPECT_EQ("Hello!!! World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.Insert(5, "!!!");
+        str.insert(5, "!!!");
         EXPECT_EQ("Hello!!! World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
         str.insert(str.begin(), "!!!");
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = "Hello World"_atom;
-        str.Insert(str.begin(), "!!!");
+        str.insert(str.begin(), "!!!");
         EXPECT_EQ("!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -851,22 +851,22 @@ TEST(StringTest, BaseString_char_default_PopBack)
 {
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
 
         str.pop_back();
 
         EXPECT_EQ("Hello World", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
 
-        str.PopBack();
+        str.pop_back();
 
         EXPECT_EQ("Hello World", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 }
 
@@ -874,22 +874,22 @@ TEST(StringTest, BaseString_char_default_PopFront)
 {
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
         std::string s;
         str.pop_front();
 
         EXPECT_EQ("ello World!", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
         std::string s;
-        str.PopFront();
+        str.pop_front();
 
         EXPECT_EQ("ello World!", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 }
 
@@ -897,30 +897,30 @@ TEST(StringTest, BaseString_char_default_ShrinkToFit)
 {
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
 
-        str.Reserve(100);
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(201, str.Capacity());
+        str.reserve(100);
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(201, str.capacity());
 
         str.shrink_to_fit();
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
     }
 
     {
         auto str = "Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
 
-        str.Reserve(100);
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(201, str.Capacity());
+        str.reserve(100);
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(201, str.capacity());
 
-        str.ShrinkToFit();
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        str.shrink_to_fit();
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
     }
 }
 
@@ -928,13 +928,13 @@ TEST(StringTest, BaseString_char_default_Replace)
 {
     {
         auto str = "Hello World! Hello World!"_atom;
-        str.ReplaceFirst("llo", "LLO___LLO");
+        str.replaceFirst("llo", "LLO___LLO");
         EXPECT_EQ("HeLLO___LLO World! Hello World!", str);
     }
 
     {
         auto str = "Hello World! Hello World!"_atom;
-        str.ReplaceAll("o", "!o!");
+        str.replaceAll("o", "!o!");
         EXPECT_EQ("Hell!o! W!o!rld! Hell!o! W!o!rld!", str);
     }
 }
@@ -944,7 +944,7 @@ TEST(StringTest, BaseString_char_default_Copy)
     {
         const auto str = "Hello world!"_atom;
         char arr[128]{};
-        str.CopyTo(arr, str.Size());
+        str.copyTo(arr, str.size());
         EXPECT_EQ(str, arr);
     }
 }
@@ -954,50 +954,50 @@ TEST(StringTest, BaseString_char_AdvanceWorkFlow)
     auto str = "Hello World!"_atom;
 
     {
-        auto tokens = str.Split(" ");
+        auto tokens = str.split(" ");
         ASSERT_EQ(2, tokens.size());
         EXPECT_EQ("Hello", tokens[0]);
         EXPECT_EQ("World!", tokens[1]);
     }
 
-    str.ToLowerCase();
+    str.toLowerCase();
     ASSERT_EQ("hello world!", str);
     ASSERT_EQ(str, "hello world!");
     ASSERT_EQ(std::string("hello world!"), str);
     ASSERT_EQ(str, std::string("hello world!"));
 
-    str.ToUpperCase();
+    str.toUpperCase();
     ASSERT_EQ("HELLO WORLD!", str);
     ASSERT_EQ(str, "HELLO WORLD!");
     ASSERT_EQ(std::string("HELLO WORLD!"), str);
     ASSERT_EQ(str, std::string("HELLO WORLD!"));
 
-    str.ReplaceAll("!", "???");
+    str.replaceAll("!", "???");
     ASSERT_EQ("HELLO WORLD???", str);
     ASSERT_EQ(str, "HELLO WORLD???");
     ASSERT_EQ(std::string("HELLO WORLD???"), str);
     ASSERT_EQ(str, std::string("HELLO WORLD???"));
     ASSERT_TRUE(strcmp(str.c_str(), "HELLO WORLD???") == 0);
 
-    ASSERT_TRUE(str.Compare("AAA", true) == Core::Comparison::Greater);
-    ASSERT_TRUE(str.Compare("AAA") == Core::Comparison::Greater);
-    ASSERT_TRUE(str.Compare("aaa") == Core::Comparison::Less);
+    ASSERT_TRUE(str.compare("AAA", true) == Core::Comparison::Greater);
+    ASSERT_TRUE(str.compare("AAA") == Core::Comparison::Greater);
+    ASSERT_TRUE(str.compare("aaa") == Core::Comparison::Less);
 
-    str.Trim('?');
+    str.trim('?');
     ASSERT_EQ(str, "HELLO WORLD");
 }
 
 TEST(StringTest, BaseString_char_AdvanceWorkFlow2)
 {
     Core::StringAtom str(128);
-    ASSERT_TRUE(str.IsEmpty());
+    ASSERT_TRUE(str.isEmpty());
     ASSERT_TRUE(!str);
     if (!str)
     {
         str.push_back("Hello");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         str.push_back("World");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         ASSERT_EQ("HelloWorld", str);
     }
 }
@@ -1005,13 +1005,13 @@ TEST(StringTest, BaseString_char_AdvanceWorkFlow2)
 TEST(StringTest, BaseString_char_AdvanceWorkFlow3)
 {
     Core::StringAtom str;
-    str.Resize(5);
+    str.resize(5);
     if (!str)
     {
         str.push_back("Hello");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         str.push_back("World");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         ASSERT_EQ("     HelloWorld", str);
     }
 }
@@ -1038,7 +1038,7 @@ TEST(StringTest, BaseString_char_default__LinesCount)
     const auto str = R"(Hello
 World!
 How are you?)"_atom;
-    EXPECT_EQ(3, StringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.Size()));
+    EXPECT_EQ(3, StringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.size()));
 }
 
 TEST(StringTest, BaseString_char_default__iterate_over_lines)
@@ -1050,7 +1050,7 @@ TEST(StringTest, BaseString_char_default__iterate_over_lines)
 
     std::vector<bool> linesValidator;
     int i = 0;
-    str.ForEachByLine(
+    str.forEachByLine(
         [&](auto str)
         {
             linesValidator.push_back(str == lines[i++]);
@@ -1071,25 +1071,25 @@ TEST(StringTest, BaseString_char_default__Erase)
     using Core::StringAtom;
     {
         auto str = "Hello world!"_atom;
-        str.Erase(5);
+        str.erase(5);
         EXPECT_EQ("Helloworld!", str);
     }
 
     {
         auto str = "Hello world!"_atom;
-        str.Erase(5, 7);
+        str.erase(5, 7);
         EXPECT_EQ("Hellorld!", str);
     }
 
     {
         auto str = "Hello world!"_atom;
-        str.Erase(str.begin() + 5);
+        str.erase(str.begin() + 5);
         EXPECT_EQ("Helloworld!", str);
     }
 
     {
         auto str = "Hello world!"_atom;
-        str.Erase(str.begin() + 5, str.begin() + 7);
+        str.erase(str.begin() + 5, str.begin() + 7);
         EXPECT_EQ("Hellorld!", str);
     }
 }
@@ -1120,14 +1120,14 @@ TEST(StringTest, BaseString_char_addition)
 TEST(StringTest, BaseString_char_simple_copy)
 {
     Core::StringAtom str = "Hello world!";
-    const auto baseCapacity = str.Capacity();
-    str.ShrinkToFit();
-    const auto shrinkedCapacity = str.Capacity();
+    const auto baseCapacity = str.capacity();
+    str.shrink_to_fit();
+    const auto shrinkedCapacity = str.capacity();
     EXPECT_LE(shrinkedCapacity, baseCapacity);
 
     Core::StringAtom copyStr = "Smth";
     copyStr = str;
-    EXPECT_EQ(shrinkedCapacity, str.Capacity());
+    EXPECT_EQ(shrinkedCapacity, str.capacity());
 }
 
 TEST(StringTest, BaseString_char_working_with_std_filesystem_path)
@@ -1165,7 +1165,7 @@ TEST(StringTest, BaseString_char_foreachbyline)
 
     StringAtom str = "Hello\nWorld\n!";
     std::vector<StringAtom> tokens;
-    str.ForEachByLine(
+    str.forEachByLine(
         [&tokens](auto str)
         {
             tokens.emplace_back(std::move(str));
@@ -1186,19 +1186,19 @@ TEST(StringTest, BaseString_char_FindNextLine)
 
     const auto* ptr = str.c_str();
 
-    const auto firstLineStr = StringAtom(ptr, tokens[0].Size());
+    const auto firstLineStr = StringAtom(ptr, tokens[0].size());
     ASSERT_TRUE(firstLineStr);
     ASSERT_EQ("Hello", firstLineStr);
 
     const auto secondLine = StringAtom::FindNextLine(ptr);
     ASSERT_TRUE(secondLine);
-    const auto secondLineStr = StringAtom(secondLine, tokens[1].Size());
+    const auto secondLineStr = StringAtom(secondLine, tokens[1].size());
     ASSERT_EQ("World", secondLineStr);
     ptr = secondLine;
 
     const auto thirdLine = StringAtom::FindNextLine(ptr);
     ASSERT_TRUE(thirdLine);
-    const auto thirdLineStr = StringAtom(thirdLine, tokens[2].Size());
+    const auto thirdLineStr = StringAtom(thirdLine, tokens[2].size());
     ASSERT_EQ("!", thirdLineStr);
     ptr = thirdLine;
 
@@ -1209,21 +1209,21 @@ TEST(StringTest, BaseString_char_ReverseStrStr)
 {
     using namespace Core;
 
-    const auto lenHello = StringAtom("Hello").Length();
+    const auto lenHello = StringAtom("Hello").length();
 
     {
         StringAtom str = "HelloHello";
-        EXPECT_EQ(str.c_str() + lenHello, str.ReverseFind("Hello"));
+        EXPECT_EQ(str.c_str() + lenHello, str.reverseFind("Hello"));
     }
 
     {
         StringAtom str = "HelloHello";
-        EXPECT_EQ(str.c_str(), str.ReverseFind("Hello", 0, 1));
+        EXPECT_EQ(str.c_str(), str.reverseFind("Hello", 0, 1));
     }
 
     {
         StringAtom str = "";
-        EXPECT_EQ(nullptr, str.ReverseFind("Hello", 0, 1));
+        EXPECT_EQ(nullptr, str.reverseFind("Hello", 0, 1));
     }
 }
 
@@ -1234,21 +1234,21 @@ TEST(StringTest, BaseString_char_FindPrevLine)
     StringAtom str = "Hello\nWorld\n!";
     std::vector<StringAtom> tokens = { "Hello", "World", "!" };
 
-    const auto* end = str.c_str() + str.Size();
+    const auto* end = str.c_str() + str.size();
 
     const auto* ptr = StringAtom::FindPrevLine(str.c_str());
     ASSERT_TRUE(ptr);
-    const auto thirdLine = StringAtom(ptr, tokens[2].Size());
+    const auto thirdLine = StringAtom(ptr, tokens[2].size());
     EXPECT_EQ("!", thirdLine);
 
     ptr = StringAtom::FindPrevLine(str.c_str(), ptr - 1);
     ASSERT_TRUE(ptr);
-    const auto secondLine = StringAtom(ptr, tokens[1].Size());
+    const auto secondLine = StringAtom(ptr, tokens[1].size());
     EXPECT_EQ("World", secondLine);
 
     ptr = StringAtom::FindPrevLine(str.c_str(), ptr - 1);
     ASSERT_TRUE(ptr);
-    const auto firstLine = StringAtom(ptr, tokens[0].Size());
+    const auto firstLine = StringAtom(ptr, tokens[0].size());
     EXPECT_EQ("Hello", firstLine);
 }
 
@@ -1425,12 +1425,12 @@ TEST(StringTest, BaseString_char_RegexMatch)
     {
         // check for pascal case
         auto str = "RegEx"_atom;
-        EXPECT_TRUE(str.RegexMatch("^([A-Z][a-z0-9]+)+$"));
+        EXPECT_TRUE(str.regexMatch("^([A-Z][a-z0-9]+)+$"));
     }
 
     {
         auto str = "RegEx\n\rHello"_atom;
-        EXPECT_TRUE(str.RegexMatch("^(\\w+\\s*)+$"));
+        EXPECT_TRUE(str.regexMatch("^(\\w+\\s*)+$"));
     }
 }
 
@@ -1440,41 +1440,41 @@ TEST(StringTest, BaseString_char_RegexFind)
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.RegexFind(" \\w+");
+        const auto match = str.regexFind(" \\w+");
         ASSERT_TRUE(match.isMatched());
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!"_atom;
-        const auto match = str.RegexFind(" \\w+", 3);
+        const auto match = str.regexFind(" \\w+", 3);
         ASSERT_TRUE(match.isMatched());
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.RegexFind(" \\w+");
+        const auto match = str.regexFind(" \\w+");
         ASSERT_TRUE(match.isMatched());
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.RegexFind(" \\w+", 3);
+        const auto match = str.regexFind(" \\w+", 3);
         ASSERT_TRUE(match.isMatched());
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.RegexFind(" \\w+");
+        const auto match = str.regexFind(" \\w+");
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
-        const auto match = str.RegexFind(" \\w+", 3);
+        const auto match = str.regexFind(" \\w+", 3);
         EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 }
@@ -1482,7 +1482,7 @@ TEST(StringTest, BaseString_char_RegexFind)
 TEST(StringTest, BaseString_char_RegexFindAll)
 {
     auto str = "How are you, Jim?"_atom;
-    auto vec = str.RegexFindAll("\\w+");
+    auto vec = str.regexFindAll("\\w+");
     ASSERT_EQ(4, vec.size());
     EXPECT_EQ("How", vec[0].convertBasedOn(str));
     EXPECT_EQ("are", vec[1].convertBasedOn(str));
@@ -1497,10 +1497,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.RegexIterate("\\w+",
+        str.regexIterate("\\w+",
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1509,10 +1509,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.RegexIterate(std::string("\\w+"),
+        str.regexIterate(std::string("\\w+"),
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1522,10 +1522,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         std::string expr("\\w+");
-        str.RegexIterate(expr,
+        str.regexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1535,10 +1535,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         std::string_view expr("\\w+");
-        str.RegexIterate(expr,
+        str.regexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1548,10 +1548,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
         const auto expr = "\\w+"_atom;
-        str.RegexIterate(expr,
+        str.regexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1560,10 +1560,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.RegexIterate("\\w+"_atom,
+        str.regexIterate("\\w+"_atom,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1572,10 +1572,10 @@ TEST(StringTest, BaseString_char_RegexIterate)
     {
         const auto str = "Hello world! How are you?"_atom;
         StringAtom buffer;
-        str.RegexIterate(std::string_view("\\w+"),
+        str.regexIterate(std::string_view("\\w+"),
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.convertBasedOn(str));
+                             buffer.push_back(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1585,9 +1585,9 @@ TEST(StringTest, BaseString_char_RegexIterate)
 TEST(StringTest, BaseString_char_default__RegexReplace)
 {
     auto str = "Hello world!"_atom;
-    EXPECT_FALSE(str.RegexReplace("\\?", ""));
+    EXPECT_FALSE(str.regexReplace("\\?", ""));
     EXPECT_EQ("Hello world!", str);
-    EXPECT_TRUE(str.RegexReplace(" ", "_"));
+    EXPECT_TRUE(str.regexReplace(" ", "_"));
     EXPECT_EQ("Hello_world!", str);
 }
 
@@ -1643,13 +1643,13 @@ TEST(StringTest, BaseString_wchar_t_default__DefaultCopyAndMove)
         WStringAtom str1 = L"Hello"_atom;
         WStringAtom str2(str1);
 
-        ASSERT_FALSE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_EQ(str1.CStr(), str2.CStr());
-        EXPECT_TRUE(str1.IsStatic());
-        EXPECT_TRUE(str2.IsStatic());
-        EXPECT_EQ(5, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_FALSE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_EQ(str1.c_str(), str2.c_str());
+        EXPECT_TRUE(str1.isStatic());
+        EXPECT_TRUE(str2.isStatic());
+        EXPECT_EQ(5, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ(L"Hello", str1);
         EXPECT_EQ(L"Hello", str2);
     }
@@ -1658,13 +1658,13 @@ TEST(StringTest, BaseString_wchar_t_default__DefaultCopyAndMove)
         WStringAtom str1 = L"Hello"_atom;
         WStringAtom str2(std::move(str1));
 
-        ASSERT_TRUE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_FALSE(str1.IsStatic());
-        EXPECT_TRUE(str2.IsStatic());
-        EXPECT_EQ(0, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_TRUE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_FALSE(str1.isStatic());
+        EXPECT_TRUE(str2.isStatic());
+        EXPECT_EQ(0, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ(L"Hello", str2);
     }
 
@@ -1672,13 +1672,13 @@ TEST(StringTest, BaseString_wchar_t_default__DefaultCopyAndMove)
         WStringAtom str1 = L"Hello";
         WStringAtom str2(str1);
 
-        ASSERT_FALSE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_TRUE(str1.IsDynamic());
-        EXPECT_TRUE(str2.IsDynamic());
-        EXPECT_EQ(5, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_FALSE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_TRUE(str1.isDynamic());
+        EXPECT_TRUE(str2.isDynamic());
+        EXPECT_EQ(5, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ(L"Hello", str1);
         EXPECT_EQ(L"Hello", str2);
     }
@@ -1687,14 +1687,14 @@ TEST(StringTest, BaseString_wchar_t_default__DefaultCopyAndMove)
         WStringAtom str1 = L"Hello";
         WStringAtom str2(std::move(str1));
 
-        ASSERT_TRUE(str1.IsEmpty());
-        ASSERT_FALSE(str2.IsEmpty());
-        EXPECT_NE(str1.CStr(), str2.CStr());
-        EXPECT_EQ(nullptr, str1.CStr());
-        EXPECT_FALSE(str1.IsDynamic());
-        EXPECT_TRUE(str2.IsDynamic());
-        EXPECT_EQ(0, str1.Size());
-        EXPECT_EQ(5, str2.Size());
+        ASSERT_TRUE(str1.isEmpty());
+        ASSERT_FALSE(str2.isEmpty());
+        EXPECT_NE(str1.c_str(), str2.c_str());
+        EXPECT_EQ(nullptr, str1.c_str());
+        EXPECT_FALSE(str1.isDynamic());
+        EXPECT_TRUE(str2.isDynamic());
+        EXPECT_EQ(0, str1.size());
+        EXPECT_EQ(5, str2.size());
         EXPECT_EQ(L"Hello", str2);
     }
 }
@@ -1850,27 +1850,27 @@ TEST(StringTest, BaseString_wchar_t_default__Converts)
 
     {
         const WStringAtom str = L"123"_atom;
-        EXPECT_EQ(123, str.ConvertTo<int>());
+        EXPECT_EQ(123, str.convertTo<int>());
     }
 
     {
         const WStringAtom str = L"123.123"_atom;
-        EXPECT_FLOAT_EQ(123.123f, str.ConvertTo<float>());
+        EXPECT_FLOAT_EQ(123.123f, str.convertTo<float>());
     }
 
     {
         const WStringAtom str = L"1231234567"_atom;
-        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+        EXPECT_EQ(1231234567, str.convertTo<long long>());
     }
 
     {
         const WStringAtom str = L"f1231234567"_atom;
-        EXPECT_EQ(0, str.ConvertTo<long long>());
+        EXPECT_EQ(0, str.convertTo<long long>());
     }
 
     {
         const WStringAtom str = L"1231234567f"_atom;
-        EXPECT_EQ(1231234567, str.ConvertTo<long long>());
+        EXPECT_EQ(1231234567, str.convertTo<long long>());
     }
 }
 
@@ -1881,7 +1881,7 @@ TEST(StringTest, BaseString_wchar_t_default__UtilsFunctions)
     // Split
     {
         const WStringAtom str = L"Hello fucking world!"_atom;
-        auto tokens = str.Split(L" L");
+        auto tokens = str.split(L" L");
         ASSERT_EQ(3, tokens.size());
         EXPECT_EQ(tokens[0], L"Hello");
         EXPECT_EQ(tokens[1], L"fucking");
@@ -1927,10 +1927,10 @@ TEST(StringTest, BaseString_wchar_t_default__Iterator)
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        auto front = str.Front();
+        auto front = str.front();
         EXPECT_EQ('H', front);
 
-        auto back = str.Back();
+        auto back = str.back();
         EXPECT_EQ('!', back);
     }
 
@@ -1977,23 +1977,23 @@ TEST(StringTest, BaseString_wchar_t_default_Modifications_SubStr)
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        str.SubStr(6);
+        str.subStr(6);
         EXPECT_EQ(L"world!", str);
-        EXPECT_EQ(6, str.Size());
+        EXPECT_EQ(6, str.size());
     }
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        str.SubStr(0, 5);
+        str.subStr(0, 5);
         EXPECT_EQ(L"Hello", str);
-        EXPECT_EQ(5, str.Size());
+        EXPECT_EQ(5, str.size());
     }
 
     {
         WStringAtom str = L"Hello world!"_atom;
-        str.SubStr(2, 5);
+        str.subStr(2, 5);
         EXPECT_EQ(L"llo", str);
-        EXPECT_EQ(3, str.Size());
+        EXPECT_EQ(3, str.size());
     }
 }
 
@@ -2003,28 +2003,28 @@ TEST(StringTest, BaseString_wchar_t_default_Find)
 
     {
         const auto str = L"Hello world!"_atom;
-        const auto* found = str.Find(L" ");
+        const auto* found = str.find(L" ");
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = L"Hello world!"_atom;
-        const auto* found = str.Find(std::wstring(L" "));
+        const auto* found = str.find(std::wstring(L" "));
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = L"Hello world!"_atom;
-        const auto* found = str.Find(L" "_atom);
+        const auto* found = str.find(L" "_atom);
         ASSERT_TRUE(found);
         EXPECT_EQ(' ', *found);
     }
 
     {
         const auto str = L"Hello world! How are you, world?"_atom;
-        const auto strings = str.FindAll(L"world");
+        const auto strings = str.findAll(L"world");
         ASSERT_FALSE(strings.empty());
         for (const auto& string : strings)
         {
@@ -2039,13 +2039,13 @@ TEST(StringTest, BaseString_wchar_t_default_Cmp)
 
     {
         const auto str = L"Hello world!"_atom;
-        EXPECT_TRUE(str.Compare(L"hello world!", true) == Core::Comparison::Equal);
-        EXPECT_TRUE(str.Compare(L"hello world", true) == Core::Comparison::Less);
+        EXPECT_TRUE(str.compare(L"hello world!", true) == Core::Comparison::Equal);
+        EXPECT_TRUE(str.compare(L"hello world", true) == Core::Comparison::Less);
     }
 
     {
         const auto str = L"AAA"_atom;
-        EXPECT_TRUE(str.Compare(L"bbb", true) == Core::Comparison::Less);
+        EXPECT_TRUE(str.compare(L"bbb", true) == Core::Comparison::Less);
     }
 }
 
@@ -2055,74 +2055,74 @@ TEST(StringTest, BaseString_wchar_t_default_Trim)
 
     {
         auto str = L"  MyLogin"_atom;
-        str.TrimStart(' ');
+        str.trimStart(' ');
         EXPECT_EQ(L"MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = L"__MyLogin"_atom;
-        str.TrimStart(' ');
+        str.trimStart(' ');
         EXPECT_EQ(L"__MyLogin", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = L"MyLogin  "_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ(L"MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = L"MyLogin__"_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ(L"MyLogin__", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = L"MyLogin  "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ(L"MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = L"  MyLogin  "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ(L"MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = L"MyLogin__"_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ(L"MyLogin__", str);
-        EXPECT_EQ(9, str.Size());
+        EXPECT_EQ(9, str.size());
     }
 
     {
         auto str = L"MyLogin;"_atom;
-        str.Trim(';');
+        str.trim(';');
         EXPECT_EQ(L"MyLogin", str);
-        EXPECT_EQ(7, str.Size());
+        EXPECT_EQ(7, str.size());
     }
 
     {
         auto str = L"   "_atom;
-        str.Trim(' ');
+        str.trim(' ');
         EXPECT_EQ(L"", str);
-        EXPECT_EQ(0, str.Size());
-        EXPECT_NE(0, str.Capacity());
+        EXPECT_EQ(0, str.size());
+        EXPECT_NE(0, str.capacity());
     }
 
     {
         auto str = L"   "_atom;
-        str.TrimEnd(' ');
+        str.trimEnd(' ');
         EXPECT_EQ(L"", str);
-        EXPECT_EQ(0, str.Size());
-        EXPECT_NE(0, str.Capacity());
+        EXPECT_EQ(0, str.size());
+        EXPECT_NE(0, str.capacity());
     }
 }
 
@@ -2130,9 +2130,9 @@ TEST(StringTest, BaseString_wchar_t_default_ToLower)
 {
     {
         auto str = L"Hello World!"_atom;
-        str.ToLowerCase();
+        str.toLowerCase();
         EXPECT_EQ(L"hello world!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 }
 
@@ -2140,9 +2140,9 @@ TEST(StringTest, BaseString_wchar_t_default_ToUpper)
 {
     {
         auto str = L"Hello World!"_atom;
-        str.ToUpperCase();
+        str.toUpperCase();
         EXPECT_EQ(L"HELLO WORLD!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 }
 
@@ -2152,7 +2152,7 @@ TEST(StringTest, BaseString_wchar_t_default_PushBack)
         auto str = L"Hello World"_atom;
         str.push_back('!');
         EXPECT_EQ(L"Hello World!", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 
     {
@@ -2163,21 +2163,21 @@ TEST(StringTest, BaseString_wchar_t_default_PushBack)
         EXPECT_EQ(
             LR"(Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum)",
             str);
-        EXPECT_EQ(11 + wcslen(text), str.Size());
+        EXPECT_EQ(11 + wcslen(text), str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
         str.push_back(std::wstring(L"!!!"));
         EXPECT_EQ(L"Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.PushBack(std::wstring(L"!!!"));
+        str.push_back(std::wstring(L"!!!"));
         EXPECT_EQ(L"Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -2187,7 +2187,7 @@ TEST(StringTest, BaseString_wchar_t_default_PushFront)
         auto str = L"Hello World"_atom;
         str.push_front('!');
         EXPECT_EQ(L"!Hello World", str);
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
     }
 
     {
@@ -2198,21 +2198,21 @@ TEST(StringTest, BaseString_wchar_t_default_PushFront)
         EXPECT_EQ(
             LR"(Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World)",
             str);
-        EXPECT_EQ(11 + wcslen(text), str.Size());
+        EXPECT_EQ(11 + wcslen(text), str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
         str.push_front(std::wstring(L"!!!"));
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.PushFront(std::wstring(L"!!!"));
+        str.push_front(std::wstring(L"!!!"));
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -2222,56 +2222,56 @@ TEST(StringTest, BaseString_wchar_t_default_Insert)
         auto str = L"Hello World"_atom;
         str.insert(0, L"!!!");
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.Insert(0, L"!!!");
+        str.insert(0, L"!!!");
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.insert(str.Size(), L"!!!");
+        str.insert(str.size(), L"!!!");
         EXPECT_EQ(L"Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.Insert(str.Size(), L"!!!");
+        str.insert(str.size(), L"!!!");
         EXPECT_EQ(L"Hello World!!!", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
         str.insert(5, L"!!!");
         EXPECT_EQ(L"Hello!!! World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.Insert(5, L"!!!");
+        str.insert(5, L"!!!");
         EXPECT_EQ(L"Hello!!! World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
         str.insert(str.begin(), L"!!!");
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 
     {
         auto str = L"Hello World"_atom;
-        str.Insert(str.begin(), L"!!!");
+        str.insert(str.begin(), L"!!!");
         EXPECT_EQ(L"!!!Hello World", str);
-        EXPECT_EQ(14, str.Size());
+        EXPECT_EQ(14, str.size());
     }
 }
 
@@ -2279,22 +2279,22 @@ TEST(StringTest, BaseString_wchar_t_default_PopBack)
 {
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
 
         str.pop_back();
 
         EXPECT_EQ(L"Hello World", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
 
-        str.PopBack();
+        str.pop_back();
 
         EXPECT_EQ(L"Hello World", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 }
 
@@ -2302,22 +2302,22 @@ TEST(StringTest, BaseString_wchar_t_default_PopFront)
 {
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
         std::wstring s;
         str.pop_front();
 
         EXPECT_EQ(L"ello World!", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
+        EXPECT_EQ(12, str.size());
         std::wstring s;
-        str.PopFront();
+        str.pop_front();
 
         EXPECT_EQ(L"ello World!", str);
-        EXPECT_EQ(11, str.Size());
+        EXPECT_EQ(11, str.size());
     }
 }
 
@@ -2325,30 +2325,30 @@ TEST(StringTest, BaseString_wchar_t_default_ShrinkToFit)
 {
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
 
-        str.Reserve(100);
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(201, str.Capacity());
+        str.reserve(100);
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(201, str.capacity());
 
         str.shrink_to_fit();
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
     }
 
     {
         auto str = L"Hello World!"_atom;
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
 
-        str.Reserve(100);
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(201, str.Capacity());
+        str.reserve(100);
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(201, str.capacity());
 
-        str.ShrinkToFit();
-        EXPECT_EQ(12, str.Size());
-        EXPECT_EQ(12 + 1, str.Capacity());
+        str.shrink_to_fit();
+        EXPECT_EQ(12, str.size());
+        EXPECT_EQ(12 + 1, str.capacity());
     }
 }
 
@@ -2356,13 +2356,13 @@ TEST(StringTest, BaseString_wchar_t_default_Replace)
 {
     {
         auto str = L"Hello World! Hello World!"_atom;
-        str.ReplaceFirst(L"llo", L"LLO___LLO");
+        str.replaceFirst(L"llo", L"LLO___LLO");
         EXPECT_EQ(L"HeLLO___LLO World! Hello World!", str);
     }
 
     {
         auto str = L"Hello World! Hello World!"_atom;
-        str.ReplaceAll(L"o", L"!o!");
+        str.replaceAll(L"o", L"!o!");
         EXPECT_EQ(L"Hell!o! W!o!rld! Hell!o! W!o!rld!", str);
     }
 }
@@ -2372,7 +2372,7 @@ TEST(StringTest, BaseString_wchar_t_default_Copy)
     {
         const auto str = L"Hello world!"_atom;
         wchar_t arr[128]{};
-        str.CopyTo(arr, str.Size());
+        str.copyTo(arr, str.size());
         EXPECT_EQ(str, arr);
     }
 }
@@ -2382,50 +2382,50 @@ TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow)
     auto str = L"Hello World!"_atom;
 
     {
-        auto tokens = str.Split(L" L");
+        auto tokens = str.split(L" L");
         ASSERT_EQ(2, tokens.size());
         EXPECT_EQ(L"Hello", tokens[0]);
         EXPECT_EQ(L"World!", tokens[1]);
     }
 
-    str.ToLowerCase();
+    str.toLowerCase();
     ASSERT_EQ(L"hello world!", str);
     ASSERT_EQ(str, L"hello world!");
     ASSERT_EQ(std::wstring(L"hello world!"), str);
     ASSERT_EQ(str, std::wstring(L"hello world!"));
 
-    str.ToUpperCase();
+    str.toUpperCase();
     ASSERT_EQ(L"HELLO WORLD!", str);
     ASSERT_EQ(str, L"HELLO WORLD!");
     ASSERT_EQ(std::wstring(L"HELLO WORLD!"), str);
     ASSERT_EQ(str, std::wstring(L"HELLO WORLD!"));
 
-    str.ReplaceAll(L"!", L"???");
+    str.replaceAll(L"!", L"???");
     ASSERT_EQ(L"HELLO WORLD???", str);
     ASSERT_EQ(str, L"HELLO WORLD???");
     ASSERT_EQ(std::wstring(L"HELLO WORLD???"), str);
     ASSERT_EQ(str, std::wstring(L"HELLO WORLD???"));
     ASSERT_TRUE(wcscmp(str.c_str(), L"HELLO WORLD???") == 0);
 
-    ASSERT_TRUE(str.Compare(L"AAA", true) == Core::Comparison::Greater);
-    ASSERT_TRUE(str.Compare(L"AAA") == Core::Comparison::Greater);
-    ASSERT_TRUE(str.Compare(L"aaa") == Core::Comparison::Less);
+    ASSERT_TRUE(str.compare(L"AAA", true) == Core::Comparison::Greater);
+    ASSERT_TRUE(str.compare(L"AAA") == Core::Comparison::Greater);
+    ASSERT_TRUE(str.compare(L"aaa") == Core::Comparison::Less);
 
-    str.Trim('?');
+    str.trim('?');
     ASSERT_EQ(str, L"HELLO WORLD");
 }
 
 TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow2)
 {
     Core::WStringAtom str(128);
-    ASSERT_TRUE(str.IsEmpty());
+    ASSERT_TRUE(str.isEmpty());
     ASSERT_TRUE(!str);
     if (!str)
     {
         str.push_back(L"Hello");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         str.push_back(L"World");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         ASSERT_EQ(L"HelloWorld", str);
     }
 }
@@ -2433,13 +2433,13 @@ TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow2)
 TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow3)
 {
     Core::WStringAtom str;
-    str.Resize(5);
+    str.resize(5);
     if (!str)
     {
         str.push_back(L"Hello");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         str.push_back(L"World");
-        ASSERT_FALSE(str.IsEmpty());
+        ASSERT_FALSE(str.isEmpty());
         ASSERT_EQ(L"     HelloWorld", str);
     }
 }
@@ -2447,9 +2447,9 @@ TEST(StringTest, BaseString_wchar_t_AdvanceWorkFlow3)
 TEST(StringTest, BaseString_wchar_t_to_char)
 {
     const auto wstr = L"Hello world!"_atom;
-    const auto str = wstr.ToASCII();
+    const auto str = wstr.toASCII();
     EXPECT_EQ("Hello world!", str);
-    EXPECT_EQ(12, str.Size());
+    EXPECT_EQ(12, str.size());
 }
 
 TEST(StringTest, BaseString_wchar_t_default__From)
@@ -2475,7 +2475,7 @@ TEST(StringTest, BaseString_wchar_t_default__LinesCount)
         LR"(Hello
 World!
 How are you?)"_atom;
-    EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.Size()));
+    EXPECT_EQ(3, WStringAtom::GetLinesCountInText(str.c_str(), str.c_str() + str.size()));
 }
 
 TEST(StringTest, BaseString_wchar_t_default__iterate_over_lines)
@@ -2487,7 +2487,7 @@ TEST(StringTest, BaseString_wchar_t_default__iterate_over_lines)
 
     std::vector<bool> linesValidator;
     int i = 0;
-    str.ForEachByLine(
+    str.forEachByLine(
         [&](auto str)
         {
             linesValidator.push_back(str == lines[i++]);
@@ -2507,25 +2507,25 @@ TEST(StringTest, BaseString_wchar_t_default__Erase)
     using Core::WStringAtom;
     {
         auto str = L"Hello world!"_atom;
-        str.Erase(5);
+        str.erase(5);
         EXPECT_EQ(L"Helloworld!", str);
     }
 
     {
         auto str = L"Hello world!"_atom;
-        str.Erase(5, 7);
+        str.erase(5, 7);
         EXPECT_EQ(L"Hellorld!", str);
     }
 
     {
         auto str = L"Hello world!"_atom;
-        str.Erase(str.begin() + 5);
+        str.erase(str.begin() + 5);
         EXPECT_EQ(L"Helloworld!", str);
     }
 
     {
         auto str = L"Hello world!"_atom;
-        str.Erase(str.begin() + 5, str.begin() + 7);
+        str.erase(str.begin() + 5, str.begin() + 7);
         EXPECT_EQ(L"Hellorld!", str);
     }
 }
@@ -2545,7 +2545,7 @@ TEST(StringTest, BaseString_wchar_t_foreachbyline)
 
     WStringAtom str = L"Hello\nWorld\n!";
     std::vector<WStringAtom> tokens;
-    str.ForEachByLine(
+    str.forEachByLine(
         [&tokens](auto str)
         {
             tokens.emplace_back(std::move(str));
@@ -2566,19 +2566,19 @@ TEST(StringTest, BaseString_wchar_t_FindNextLine)
 
     const auto* ptr = str.c_str();
 
-    const auto firstLineStr = WStringAtom(ptr, tokens[0].Size());
+    const auto firstLineStr = WStringAtom(ptr, tokens[0].size());
     ASSERT_TRUE(firstLineStr);
     ASSERT_EQ(L"Hello", firstLineStr);
 
     const auto secondLine = WStringAtom::FindNextLine(ptr);
     ASSERT_TRUE(secondLine);
-    const auto secondLineStr = WStringAtom(secondLine, tokens[1].Size());
+    const auto secondLineStr = WStringAtom(secondLine, tokens[1].size());
     ASSERT_EQ(L"World", secondLineStr);
     ptr = secondLine;
 
     const auto thirdLine = WStringAtom::FindNextLine(ptr);
     ASSERT_TRUE(thirdLine);
-    const auto thirdLineStr = WStringAtom(thirdLine, tokens[2].Size());
+    const auto thirdLineStr = WStringAtom(thirdLine, tokens[2].size());
     ASSERT_EQ(L"!", thirdLineStr);
     ptr = thirdLine;
 
@@ -2589,21 +2589,21 @@ TEST(StringTest, BaseString_wchar_t_ReverseStrStr)
 {
     using namespace Core;
 
-    const auto lenHello = WStringAtom(L"Hello").Length();
+    const auto lenHello = WStringAtom(L"Hello").length();
 
     {
         WStringAtom str = L"HelloHello";
-        EXPECT_EQ(str.c_str() + lenHello, str.ReverseFind(L"Hello"));
+        EXPECT_EQ(str.c_str() + lenHello, str.reverseFind(L"Hello"));
     }
 
     {
         WStringAtom str = L"HelloHello";
-        EXPECT_EQ(str.c_str(), str.ReverseFind(L"Hello", 0, 1));
+        EXPECT_EQ(str.c_str(), str.reverseFind(L"Hello", 0, 1));
     }
 
     {
         WStringAtom str = L"";
-        EXPECT_EQ(nullptr, str.ReverseFind(L"Hello", 0, 1));
+        EXPECT_EQ(nullptr, str.reverseFind(L"Hello", 0, 1));
     }
 }
 
@@ -2614,21 +2614,21 @@ TEST(StringTest, BaseString_wchar_t_FindPrevLine)
     WStringAtom str = L"Hello\nWorld\n!";
     std::vector<WStringAtom> tokens = { L"Hello", L"World", L"!" };
 
-    const auto* end = str.c_str() + str.Size();
+    const auto* end = str.c_str() + str.size();
 
     const auto* ptr = WStringAtom::FindPrevLine(str.c_str());
     ASSERT_TRUE(ptr);
-    const auto thirdLine = WStringAtom(ptr, tokens[2].Size());
+    const auto thirdLine = WStringAtom(ptr, tokens[2].size());
     EXPECT_EQ(L"!", thirdLine);
 
     ptr = WStringAtom::FindPrevLine(str.c_str(), ptr - 1);
     ASSERT_TRUE(ptr);
-    const auto secondLine = WStringAtom(ptr, tokens[1].Size());
+    const auto secondLine = WStringAtom(ptr, tokens[1].size());
     EXPECT_EQ(L"World", secondLine);
 
     ptr = WStringAtom::FindPrevLine(str.c_str(), ptr - 1);
     ASSERT_TRUE(ptr);
-    const auto firstLine = WStringAtom(ptr, tokens[0].Size());
+    const auto firstLine = WStringAtom(ptr, tokens[0].size());
     EXPECT_EQ(L"Hello", firstLine);
 }
 

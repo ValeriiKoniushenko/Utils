@@ -208,7 +208,7 @@ namespace Core
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
 
-        [[nodiscard]] static int32_t ToInt(const CharT* str) noexcept { return _wtoi(str); }
+        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
         [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
         [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
         [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
@@ -352,7 +352,7 @@ namespace Core
             memcpy_s(str.get(), size * sizeof(CharType), newString, newSize * sizeof(CharType));
         }
 
-        [[nodiscard]] StringDataReadOnly<CharType> ToReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
+        [[nodiscard]] StringDataReadOnly<CharType> toReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
 
         [[nodiscard]] bool operator<(const StringData& other) const
         {
@@ -390,12 +390,12 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT Add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
         {
             const auto currentHash = std::hash<StdStringViewT>{}({ string, size });
             if (auto&& it = _strings.find(currentHash); it != _strings.end())
             {
-                return it->second.ToReadOnly();
+                return it->second.toReadOnly();
             }
 
             auto&& ptr = std::make_unique<CharT[]>(size + static_cast<typename Settings::SizeT>(1));
@@ -618,50 +618,58 @@ namespace Core
         [[nodiscard]] const ReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
         [[nodiscard]] const ReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().Add(newString, Toolset::Length(newString)) }; }
+        /**
+         * @brief This function will use the provided string as a static string
+         */
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
 
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().Add(newString, size) }; }
+        /**
+         * @brief This function will use the provided string as a static string
+         */
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
 
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().Add(string.data(), string.size()) }; }
+        /**
+         * @brief This function will use the provided string as a static string
+         */
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
-        [[nodiscard]] SizeT Size() const noexcept { return _size; }
-        [[nodiscard]] SizeT Length() const noexcept { return _size; }
-        [[nodiscard]] bool IsEmpty() const noexcept { return _string == nullptr || _size == 0; }
+        [[nodiscard]] SizeT length() const noexcept { return _size; }
+        [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
-        [[nodiscard]] operator StdStringViewT() const noexcept { return ToStdStringView(); }
+        [[nodiscard]] operator StdStringViewT() const noexcept { return toStdStringView(); }
         [[nodiscard]] CharT operator[](IndexT index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
-                if (IsEmpty() && other.IsEmpty())
+                if (isEmpty() && other.isEmpty())
                 {
                     return true;
                 }
                 return false;
             }
-            return IsStatic() && other.IsStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
+            return isStatic() && other.isStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
 
         [[nodiscard]] bool operator!=(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
-                if ((IsEmpty() && !other.IsEmpty()) || (!IsEmpty() && other.IsEmpty()))
+                if ((isEmpty() && !other.isEmpty()) || (!isEmpty() && other.isEmpty()))
                 {
                     return true;
                 }
 
                 return false;
             }
-            return IsStatic() && other.IsStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
+            return isStatic() && other.isStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
         }
 
         [[nodiscard]] bool operator>(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -671,7 +679,7 @@ namespace Core
 
         [[nodiscard]] bool operator>=(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -682,7 +690,7 @@ namespace Core
 
         [[nodiscard]] bool operator<(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -692,7 +700,7 @@ namespace Core
 
         [[nodiscard]] bool operator<=(const Self& other) const
         {
-            if (IsEmpty() || other.IsEmpty())
+            if (isEmpty() || other.isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -703,7 +711,7 @@ namespace Core
 
         [[nodiscard]] bool operator==(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 if (((_string && _string[0] == 0) || _string == nullptr) && ((other && other[0] == 0) || other == nullptr))
                 {
@@ -718,7 +726,7 @@ namespace Core
 
         [[nodiscard]] bool operator!=(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -728,7 +736,7 @@ namespace Core
 
         [[nodiscard]] bool operator>(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -738,7 +746,7 @@ namespace Core
 
         [[nodiscard]] bool operator>=(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -749,7 +757,7 @@ namespace Core
 
         [[nodiscard]] bool operator<(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -759,7 +767,7 @@ namespace Core
 
         [[nodiscard]] bool operator<=(const CharT* other) const
         {
-            if (IsEmpty() || !other)
+            if (isEmpty() || !other)
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -770,7 +778,7 @@ namespace Core
 
         [[nodiscard]] bool operator==(StdStringViewT other) const
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 if (((_string && _string[0] == 0) || _string == nullptr) && other.empty())
                 {
@@ -783,7 +791,7 @@ namespace Core
 
         [[nodiscard]] bool operator>(StdStringViewT other) const
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -793,7 +801,7 @@ namespace Core
 
         [[nodiscard]] bool operator>=(StdStringViewT other) const
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -803,7 +811,7 @@ namespace Core
 
         [[nodiscard]] bool operator<(StdStringViewT other) const
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -813,7 +821,7 @@ namespace Core
 
         [[nodiscard]] bool operator<=(StdStringViewT other) const
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -821,12 +829,12 @@ namespace Core
             return *this <= other.data();
         }
 
-        [[nodiscard]] bool operator!() const noexcept { return IsEmpty(); }
-        [[nodiscard]] explicit operator bool() const noexcept { return !IsEmpty(); }
+        [[nodiscard]] bool operator!() const noexcept { return isEmpty(); }
+        [[nodiscard]] explicit operator bool() const noexcept { return !isEmpty(); }
 
-        [[nodiscard]] CharT Front() const
+        [[nodiscard]] CharT front() const
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -835,9 +843,9 @@ namespace Core
             return _string[0];
         }
 
-        [[nodiscard]] CharT Back() const
+        [[nodiscard]] CharT back() const
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 Assert("Impossible to work with nullptr string.");
                 return {};
@@ -846,9 +854,9 @@ namespace Core
             return _string[_size - static_cast<SizeT>(1)];
         }
 
-        [[nodiscard]] StdStringViewT ToStdStringView() const
+        [[nodiscard]] StdStringViewT toStdStringView() const
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 if constexpr (sizeof(CharT) == 1)
                 {
@@ -863,9 +871,9 @@ namespace Core
             return { _string, _size };
         }
 
-        [[nodiscard]] StdStringT ToStdString() const
+        [[nodiscard]] StdStringT toStdString() const
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 return {};
             }
@@ -873,9 +881,9 @@ namespace Core
             return { _string };
         }
 
-        [[nodiscard]] CharT At(IndexT index) const noexcept
+        [[nodiscard]] CharT at(IndexT index) const noexcept
         {
-            if (!Verify(!IsEmpty() && _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!Verify(!isEmpty() && _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
@@ -884,22 +892,18 @@ namespace Core
         }
 
         [[nodiscard]] const CharT* c_str() const noexcept { return _string; }
-        [[nodiscard]] const CharT* CStr() const noexcept { return c_str(); }
 
         [[nodiscard]] const CharT* data() const noexcept { return _string; }
-        [[nodiscard]] const CharT* Data() const noexcept { return data(); }
 
         [[nodiscard]] CharT* data() noexcept
         {
-            TryToMakeAsDynamic();
+            tryToMakeAsDynamic();
             return _string;
         }
 
-        [[nodiscard]] CharT* Data() noexcept { return data(); }
-
-        [[nodiscard]] std::vector<Self> Split(const Self& delimiter) const
+        [[nodiscard]] std::vector<Self> split(const Self& delimiter) const
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 return {};
             }
@@ -938,19 +942,19 @@ namespace Core
         {
             // TODO: optimize it using static array
             Self temp;
-            temp.Reserve(32);
+            temp.reserve(32);
 
             if constexpr (std::is_unsigned_v<T>)
             {
-                Toolset::FromUInt64(value, temp.Data(), temp.Capacity());
+                Toolset::FromUInt64(value, temp.data(), temp.capacity());
             }
             else
             {
-                Toolset::FromInt64(value, temp.Data(), temp.Capacity());
+                Toolset::FromInt64(value, temp.data(), temp.capacity());
             }
 
-            temp._size = Toolset::Length(temp.Data());
-            temp.ShrinkToFit();
+            temp._size = Toolset::Length(temp.data());
+            temp.shrink_to_fit();
 
             return temp;
         }
@@ -964,34 +968,34 @@ namespace Core
         static Self MakeFrom(float value)
         {
             Self temp;
-            temp.Reserve(16);
-            Toolset::FromFloat(value, temp.Data(), temp.Capacity());
-            temp._size = Toolset::Length(temp.Data());
+            temp.reserve(16);
+            Toolset::FromFloat(value, temp.data(), temp.capacity());
+            temp._size = Toolset::Length(temp.data());
             return temp;
         }
 
         static Self MakeFrom(double value)
         {
             Self temp;
-            temp.Reserve(32);
-            Toolset::FromDouble(value, temp.Data(), temp.Capacity());
-            temp._size = Toolset::Length(temp.Data());
+            temp.reserve(32);
+            Toolset::FromDouble(value, temp.data(), temp.capacity());
+            temp._size = Toolset::Length(temp.data());
             return temp;
         }
 
         static Self MakeFrom(const std::filesystem::path& value)
         {
             Self temp;
-            temp.Reserve(1024);
-            Toolset::FromStdFilesystemPath(value, temp.Data(), temp.Capacity());
-            temp._size = Toolset::Length(temp.Data());
+            temp.reserve(1024);
+            Toolset::FromStdFilesystemPath(value, temp.data(), temp.capacity());
+            temp._size = Toolset::Length(temp.data());
             return temp;
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, uint64_t> && std::is_unsigned_v<T>, T> ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, uint64_t> && std::is_unsigned_v<T>, T> convertTo() const noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 return static_cast<T>(Toolset::ToUInt64(_string));
             }
@@ -1000,9 +1004,9 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, int64_t> && std::is_signed_v<T>, T> ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, int64_t> && std::is_signed_v<T>, T> convertTo() const noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 return static_cast<T>(Toolset::ToInt64(_string));
             }
@@ -1011,9 +1015,9 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<std::is_floating_point_v<T>, T> ConvertTo() const noexcept
+        [[nodiscard]] std::enable_if_t<std::is_floating_point_v<T>, T> convertTo() const noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 return static_cast<T>(Toolset::ToDouble(_string));
             }
@@ -1037,23 +1041,23 @@ namespace Core
 #ifdef UTILS__USE_STD_REGEX
             (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
 #else
-            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args).ToStdStringView()), ...);
+            (temp.regexReplace(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()), ...);
 #endif
             return temp;
         }
 
-        [[nodiscard]] HashT MakeHash() const noexcept
+        [[nodiscard]] HashT makeHash() const noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 return std::hash<StdStringViewT>{}({ _string, _size });
             }
             return {};
         }
 
-        Self& SubStr(IndexT index, SizeT count = 0) noexcept
+        Self& subStr(IndexT index, SizeT count = 0) noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 const SizeT finalCount = count == 0 ? _size - index : count - index;
                 *this = std::move(Self(_string + index, finalCount));
@@ -1062,9 +1066,9 @@ namespace Core
             return *this;
         }
 
-        Self& TrimStart(CharT ch) noexcept
+        Self& trimStart(CharT ch) noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 SizeT offset = 0;
                 while (_string[offset] == ch && offset < _size)
@@ -1080,9 +1084,9 @@ namespace Core
             return *this;
         }
 
-        Self& TrimEnd(CharT ch) noexcept
+        Self& trimEnd(CharT ch) noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 SizeT count = 0;
                 const CharT* end = _string + _size;
@@ -1093,20 +1097,20 @@ namespace Core
 
                 if (count != 0)
                 {
-                    Resize(_size - count);
+                    resize(_size - count);
                 }
             }
 
             return *this;
         }
 
-        Self& Trim(CharT ch) noexcept { return TrimStart(ch).TrimEnd(ch); }
+        Self& trim(CharT ch) noexcept { return trimStart(ch).trimEnd(ch); }
 
-        Self& ToUpperCase() noexcept
+        Self& toUpperCase() noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
-                TryToMakeAsDynamic();
+                tryToMakeAsDynamic();
                 for (IndexT i = 0; i < _size; ++i)
                 {
                     _string[i] = Toolset::ToUpper(_string[i]);
@@ -1116,11 +1120,11 @@ namespace Core
             return *this;
         }
 
-        Self& ToLowerCase() noexcept
+        Self& toLowerCase() noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
-                TryToMakeAsDynamic();
+                tryToMakeAsDynamic();
                 for (IndexT i = 0; i < _size; ++i)
                 {
                     _string[i] = Toolset::ToLower(_string[i]);
@@ -1130,9 +1134,9 @@ namespace Core
             return *this;
         }
 
-        Self& Erase(IndexT index)
+        Self& erase(IndexT index)
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 if (!Verify(index < _size, "Invalid index"))
                 {
@@ -1147,9 +1151,9 @@ namespace Core
             return *this;
         }
 
-        Self& Erase(IndexT from, IndexT to)
+        Self& erase(IndexT from, IndexT to)
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 if (!Verify(from < _size && to < _size, "Invalid index"))
                 {
@@ -1164,36 +1168,36 @@ namespace Core
             return *this;
         }
 
-        Self& Erase(Iterator iterator)
+        Self& erase(Iterator iterator)
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 if (Verify(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
                 {
-                    return Erase(iterator._data - _string);
+                    return erase(iterator._data - _string);
                 }
             }
             return *this;
         }
 
-        Self& Erase(Iterator from, Iterator to)
+        Self& erase(Iterator from, Iterator to)
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
                     Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
-                    return Erase(from._data - _string, to._data - _string);
+                    return erase(from._data - _string, to._data - _string);
                 }
             }
             return *this;
         }
 
-        Self& ReplaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
+        Self& replaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
-                if (auto* found = Find(mainValue))
+                if (auto* found = find(mainValue))
                 {
                     auto temp = Self(_string, found - _string);
                     temp += newValue;
@@ -1205,13 +1209,13 @@ namespace Core
             return *this;
         }
 
-        Self& ReplaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
+        Self& replaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 int offset = 0;
                 // TODO: optimize this code
-                while (auto* found = Find(mainValue, offset))
+                while (auto* found = find(mainValue, offset))
                 {
                     offset = found - _string + newValue.size();
                     auto temp = Self(_string, found - _string);
@@ -1332,9 +1336,9 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedData RegexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            if (IsEmpty() || expr.empty())
+            if (isEmpty() || expr.empty())
             {
                 return {};
             }
@@ -1361,10 +1365,10 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedDataVector RegexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
                                                                  uint32_t matchOptions = 0) const
         {
-            if (IsEmpty() || expr.empty())
+            if (isEmpty() || expr.empty())
             {
                 return {};
             }
@@ -1391,11 +1395,11 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] bool RegexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
-                return RegexFind(std::move(expr), offset, limit, matchOptions).isMatched();
+                return regexFind(std::move(expr), offset, limit, matchOptions).isMatched();
             }
 
             return false;
@@ -1412,9 +1416,9 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class FuncT, class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        void RegexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
         {
-            if (IsEmpty() || expr.empty())
+            if (isEmpty() || expr.empty())
             {
                 return;
             }
@@ -1444,10 +1448,10 @@ namespace Core
          * @param replaceOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        bool RegexReplace(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+        bool regexReplace(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
                           uint32_t replaceOptions = 0)
         {
-            if (IsEmpty() || expr.empty())
+            if (isEmpty() || expr.empty())
             {
                 return false;
             }
@@ -1463,7 +1467,7 @@ namespace Core
             if (regex.compile()) [[likely]]
             {
                 Self output;
-                output.Reserve(_size * predictedScaleSize);
+                output.reserve(_size * predictedScaleSize);
                 regex.setOutputString(output._string, output._capacity - 1);
                 regex.setReplacementString(newValue.data());
 
@@ -1487,7 +1491,7 @@ namespace Core
 
 #endif
 
-        [[nodiscard]] Self GetCopyAsDynamic() const { return BaseString(_string, _size); }
+        [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
 
         Self operator+(CharT ch)
         {
@@ -1506,11 +1510,8 @@ namespace Core
         Self& operator+=(StdStringViewT str) { return push_back(str); }
 
         Self& push_back(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
-        Self& PushBack(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
 
-        Self& push_back(StdStringViewT str) { return PushBack(str); }
-
-        Self& PushBack(StdStringViewT str)
+        Self& push_back(StdStringViewT str)
         {
             if (str.empty())
             {
@@ -1521,7 +1522,7 @@ namespace Core
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
             {
-                Reserve(finalSize);
+                reserve(finalSize);
             }
 
             for (IndexT i = oldSize, j = 0; i < finalSize && j < str.size(); ++i, ++j)
@@ -1534,12 +1535,9 @@ namespace Core
             return *this;
         }
 
-        Self& push_front(CharT ch) { return PushFront(StdStringViewT(&ch, 1)); }
-        Self& PushFront(CharT ch) { return PushFront(StdStringViewT(&ch, 1)); }
+        Self& push_front(CharT ch) { return push_front(StdStringViewT(&ch, 1)); }
 
-        Self& push_front(StdStringViewT str) { return PushFront(str); }
-
-        Self& PushFront(StdStringViewT str)
+        Self& push_front(StdStringViewT str)
         {
             if (str.empty())
             {
@@ -1550,7 +1548,7 @@ namespace Core
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
             {
-                Reserve(finalSize);
+                reserve(finalSize);
             }
 
             for (int64_t i = oldSize; i >= 0; --i)
@@ -1567,25 +1565,21 @@ namespace Core
             return *this;
         }
 
-        Self& PopBack() { return pop_back(); }
-
         Self& pop_back()
         {
             if (_size > 0)
             {
-                TryToMakeAsDynamic();
+                tryToMakeAsDynamic();
                 _string[--_size] = 0;
             }
             return *this;
         }
 
-        Self& PopFront() { return pop_front(); }
-
         Self& pop_front()
         {
             if (_size > 0)
             {
-                TryToMakeAsDynamic();
+                tryToMakeAsDynamic();
                 for (int64_t i = 1ll; i < _size; ++i)
                 {
                     _string[i - 1ll] = _string[i];
@@ -1595,9 +1589,9 @@ namespace Core
             return *this;
         }
 
-        const Self& CopyTo(CharT* dest, SizeT count, SizeT offset = 0) const
+        const Self& copyTo(CharT* dest, SizeT count, SizeT offset = 0) const
         {
-            if (!IsEmpty())
+            if (!isEmpty())
             {
                 memcpy_s(dest, count * sizeof(CharT), _string + offset, (std::min)(_size - offset, count) * sizeof(CharT));
                 dest[count] = 0;
@@ -1605,11 +1599,9 @@ namespace Core
             return *this;
         }
 
-        Self& ShrinkToFit() noexcept { return shrink_to_fit(); }
-
         Self& shrink_to_fit() noexcept
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 return *this;
             }
@@ -1636,12 +1628,7 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] SizeT Capacity() const noexcept { return _capacity; }
-
-        Self& Insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
-        {
-            return insert(std::move(iterator), str, size);
-        }
+        [[nodiscard]] SizeT capacity() const noexcept { return _capacity; }
 
         Self& insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
@@ -1654,8 +1641,6 @@ namespace Core
             return *this;
         }
 
-        Self& Insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept { return insert(pos, str, size); }
-
         Self& insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
         {
             if (size == Settings::invalidSize)
@@ -1667,7 +1652,7 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                Reserve(finalSize);
+                reserve(finalSize);
             }
 
             for (int64_t i = oldSize; i >= pos; --i)
@@ -1685,15 +1670,15 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] bool IsStatic() const noexcept { return _policy == StringPolicy::Static; }
-        [[nodiscard]] bool IsDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
-        [[nodiscard]] bool CheckForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
+        [[nodiscard]] bool isStatic() const noexcept { return _policy == StringPolicy::Static; }
+        [[nodiscard]] bool isDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
+        [[nodiscard]] bool checkForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
 
-        [[nodiscard]] Comparison Compare(StdStringViewT other, const bool isIgnoreCase = false) const noexcept
+        [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const noexcept
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
-                if (IsEmpty() && other.empty())
+                if (isEmpty() && other.empty())
                 {
                     return Comparison::Equal;
                 }
@@ -1726,9 +1711,9 @@ namespace Core
             return Toolset::Cmp(_string, other.data());
         }
 
-        [[nodiscard]] const CharT* Find(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* find(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 return nullptr;
             }
@@ -1740,9 +1725,9 @@ namespace Core
             return Toolset::StrStr(_string + baseOffset, other.data());
         }
 
-        [[nodiscard]] const CharT* ReverseFind(StdStringViewT other, uint64_t baseOffset = 0, uint64_t limitOffset = 0) const noexcept
+        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, uint64_t baseOffset = 0, uint64_t limitOffset = 0) const noexcept
         {
-            if (IsEmpty())
+            if (isEmpty())
             {
                 return nullptr;
             }
@@ -1752,12 +1737,12 @@ namespace Core
                 return _string;
             }
 
-            return Toolset::ReverseStrStr(_string + baseOffset, other.data(), _string + Size() - limitOffset);
+            return Toolset::ReverseStrStr(_string + baseOffset, other.data(), _string + size() - limitOffset);
         }
 
-        [[nodiscard]] std::vector<const CharT*> FindAll(StdStringViewT other) const noexcept
+        [[nodiscard]] std::vector<const CharT*> findAll(StdStringViewT other) const noexcept
         {
-            if (IsEmpty() || other.empty())
+            if (isEmpty() || other.empty())
             {
                 return {};
             }
@@ -1785,10 +1770,10 @@ namespace Core
             if (first != last)
             {
                 constexpr const SizeT defaultCapacity = 16;
-                Reserve(defaultCapacity);
+                reserve(defaultCapacity);
                 for (; first != last; ++first)
                 {
-                    PushBack(static_cast<CharT>(0));
+                    push_back(static_cast<CharT>(0));
                     std::char_traits<CharT>::assign(_string[_size - static_cast<SizeT>(1)], *first);
                 }
             }
@@ -1798,7 +1783,7 @@ namespace Core
         {
             if (str)
             {
-                Resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
+                resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
             }
         }
@@ -1810,21 +1795,21 @@ namespace Core
 
         BaseString(const Self& other) { *this = other; }
 
-        explicit BaseString(SizeT reserveCount) { Reserve(reserveCount); }
+        explicit BaseString(SizeT reserveCount) { reserve(reserveCount); }
 
         Self& operator=(const CharT* str)
         {
-            Clear();
+            clear();
             const auto size = Toolset::Length(str);
-            Resize(size);
+            resize(size);
             memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
             return *this;
         }
 
         Self& operator=(StdStringViewT other)
         {
-            Clear();
-            Resize(other.size());
+            clear();
+            resize(other.size());
             memcpy_s(_string, _size * sizeof(CharT), other.data(), other.size() * sizeof(CharT));
             return *this;
         }
@@ -1838,13 +1823,13 @@ namespace Core
 
             if (other._policy == StringPolicy::Dynamic)
             {
-                Clear();
-                Resize(other._size, true);
+                clear();
+                resize(other._size, true);
                 memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
             }
             else if (other._policy == StringPolicy::Static)
             {
-                Clear();
+                clear();
                 _policy = other._policy;
                 _string = other._string;
                 _size = other._size;
@@ -1852,7 +1837,7 @@ namespace Core
             }
             else
             {
-                Clear();
+                clear();
             }
 
             return *this;
@@ -1864,7 +1849,7 @@ namespace Core
         {
             if (other._policy == StringPolicy::Dynamic)
             {
-                Clear();
+                clear();
                 _string = other._string;
                 _size = other._size;
                 _policy = StringPolicy::Dynamic;
@@ -1877,7 +1862,7 @@ namespace Core
             }
             else if (other._policy == StringPolicy::Static)
             {
-                Clear();
+                clear();
                 _policy = StringPolicy::Static;
                 _string = other._string;
                 _size = other._size;
@@ -1890,13 +1875,13 @@ namespace Core
             }
             else
             {
-                Clear();
+                clear();
             }
 
             return *this;
         }
 
-        void Clear()
+        void clear()
         {
             if (_string)
             {
@@ -1922,7 +1907,7 @@ namespace Core
             }
         }
 
-        Self& Reserve(const SizeT newSize, bool isIgnoreMultiplier = false)
+        Self& reserve(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
             const auto* oldString = _string;
             const auto oldCapacity = _capacity;
@@ -1960,9 +1945,7 @@ namespace Core
             return *this;
         }
 
-        Self& resize(const SizeT newSize, bool isIgnoreMultiplier = false) { return Resize(newSize, isIgnoreMultiplier); }
-
-        Self& Resize(const SizeT newSize, bool isIgnoreMultiplier = false)
+        Self& resize(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
             if (_string && newSize < _size && _policy != StringPolicy::Static)
             {
@@ -1970,19 +1953,19 @@ namespace Core
             }
             else if (newSize > _size || _policy == StringPolicy::Static)
             {
-                Reserve(newSize, isIgnoreMultiplier);
+                reserve(newSize, isIgnoreMultiplier);
             }
             // for empty init
             else if (newSize == 0 && _policy == StringPolicy::None)
             {
-                Reserve(1, isIgnoreMultiplier);
+                reserve(1, isIgnoreMultiplier);
             }
             _size = newSize;
 
             return *this;
         }
 
-        [[nodiscard]] BaseString<char> ToASCII() const
+        [[nodiscard]] BaseString<char> toASCII() const
         {
             BaseString<char> temp;
             for (auto ch : *this)
@@ -1992,7 +1975,7 @@ namespace Core
             return temp;
         }
 
-        ~BaseString() override { Clear(); }
+        ~BaseString() override { clear(); }
 
         // ============= Utils ===============
         static constexpr const CharT* GetLineSeparatorString(LineSeparator separator)
@@ -2125,7 +2108,7 @@ namespace Core
          * void(String) - will iterate without stopping through all main string
          */
         template<class FuncT>
-        void ForEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF)
+        void forEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF)
         {
             ForEachByLineImpl<false, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
         }
@@ -2136,7 +2119,7 @@ namespace Core
          * void(String) - will iterate without stopping through all main string
          */
         template<class FuncT>
-        void ForEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF) const
+        void forEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF) const
         {
             ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
         }
@@ -2150,11 +2133,11 @@ namespace Core
         {
         }
 
-        void TryToMakeAsDynamic()
+        void tryToMakeAsDynamic()
         {
-            if (_policy != StringPolicy::Dynamic && !IsEmpty())
+            if (_policy != StringPolicy::Dynamic && !isEmpty())
             {
-                Reserve(_size);
+                reserve(_size);
             }
         }
 
@@ -2188,10 +2171,10 @@ namespace Core
                 }
 
                 Self temp(oldString, size);
-                temp.Trim(static_cast<CharT>('\n'));
-                temp.Trim(static_cast<CharT>('\r'));
-                temp.Trim(static_cast<CharT>('\n'));
-                temp.Trim(static_cast<CharT>('\r'));
+                temp.trim(static_cast<CharT>('\n'));
+                temp.trim(static_cast<CharT>('\r'));
+                temp.trim(static_cast<CharT>('\n'));
+                temp.trim(static_cast<CharT>('\r'));
 
                 if constexpr (std::is_void_v<decltype(callback(temp))>)
                 {
@@ -2242,7 +2225,7 @@ namespace Core
 #ifdef UTILS__USE_STD_REGEX
             this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
 #else
-            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg));
+            this->regexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg));
 #endif
         }
     };
@@ -2254,7 +2237,7 @@ namespace Core
 template<class CharType>
 struct std::hash<Core::BaseString<CharType>>
 {
-    size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.MakeHash(); }
+    size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.makeHash(); }
 };
 
 inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size) noexcept
