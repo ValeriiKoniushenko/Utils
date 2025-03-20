@@ -330,7 +330,7 @@ TEST(StringTest, BaseString_char_OperationsWithEmptyString)
 
     {
         StringAtom str;
-        EXPECT_FALSE(str.RegexFind("Hello").IsMatched());
+        EXPECT_FALSE(str.RegexFind("Hello").isMatched());
     }
 
     {
@@ -1441,41 +1441,41 @@ TEST(StringTest, BaseString_char_RegexFind)
     {
         StringAtom str = "Hello world!"_atom;
         const auto match = str.RegexFind(" \\w+");
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        ASSERT_TRUE(match.isMatched());
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!"_atom;
         const auto match = str.RegexFind(" \\w+", 3);
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        ASSERT_TRUE(match.isMatched());
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+");
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        ASSERT_TRUE(match.isMatched());
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+", 3);
-        ASSERT_TRUE(match.IsMatched());
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        ASSERT_TRUE(match.isMatched());
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+");
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 
     {
         StringAtom str = "Hello world!";
         const auto match = str.RegexFind(" \\w+", 3);
-        EXPECT_EQ(" world", match.ConvertTo(str));
+        EXPECT_EQ(" world", match.convertBasedOn(str));
     }
 }
 
@@ -1484,10 +1484,10 @@ TEST(StringTest, BaseString_char_RegexFindAll)
     auto str = "How are you, Jim?"_atom;
     auto vec = str.RegexFindAll("\\w+");
     ASSERT_EQ(4, vec.size());
-    EXPECT_EQ("How", vec[0].ConvertTo(str));
-    EXPECT_EQ("are", vec[1].ConvertTo(str));
-    EXPECT_EQ("you", vec[2].ConvertTo(str));
-    EXPECT_EQ("Jim", vec[3].ConvertTo(str));
+    EXPECT_EQ("How", vec[0].convertBasedOn(str));
+    EXPECT_EQ("are", vec[1].convertBasedOn(str));
+    EXPECT_EQ("you", vec[2].convertBasedOn(str));
+    EXPECT_EQ("Jim", vec[3].convertBasedOn(str));
 }
 
 TEST(StringTest, BaseString_char_RegexIterate)
@@ -1500,7 +1500,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate("\\w+",
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1512,7 +1512,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate(std::string("\\w+"),
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1525,7 +1525,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1538,7 +1538,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1551,7 +1551,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate(expr,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1563,7 +1563,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate("\\w+"_atom,
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);
@@ -1575,7 +1575,7 @@ TEST(StringTest, BaseString_char_RegexIterate)
         str.RegexIterate(std::string_view("\\w+"),
                          [&buffer, &str](const Core::RegexMatch::MatchedData& match)
                          {
-                             buffer.PushBack(match.ConvertTo(str));
+                             buffer.PushBack(match.convertBasedOn(str));
                              return true;
                          });
         EXPECT_EQ("HelloworldHowareyou", buffer);

@@ -30,13 +30,13 @@ TEST(DelegateTest, SimpleTest1)
 
     bool wasInvoked = false;
 
-    auto id = delegate.SubscribeAndGetID(
+    auto id = delegate.subscribeAndGetID(
         [&]()
         {
             wasInvoked = true;
         });
 
-    delegate.Trigger();
+    delegate.trigger();
     EXPECT_TRUE(wasInvoked);
 }
 
@@ -46,21 +46,21 @@ TEST(DelegateTest, SimpleTest2)
 
     bool wasInvoked = false;
 
-    auto id = delegate.SubscribeAndGetID(
+    auto id = delegate.subscribeAndGetID(
         [&]()
         {
             wasInvoked = true;
         });
-    EXPECT_EQ(1, delegate.GetSubscriptionsCount());
-    EXPECT_FALSE(delegate.IsEmpty());
+    EXPECT_EQ(1, delegate.getSubscriptionsCount());
+    EXPECT_FALSE(delegate.isEmpty());
 
-    delegate.Trigger();
+    delegate.trigger();
     EXPECT_TRUE(wasInvoked);
 
-    delegate.Unsubscribe(id);
+    delegate.unsubscribe(id);
 
-    EXPECT_EQ(0, delegate.GetSubscriptionsCount());
-    EXPECT_TRUE(delegate.IsEmpty());
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
 }
 
 TEST(DelegateTest, SimpleTest3)
@@ -69,16 +69,16 @@ TEST(DelegateTest, SimpleTest3)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.SubscribeAndGetID(
+        auto id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
             });
-        delegate.Trigger();
+        delegate.trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(0, delegate.GetSubscriptionsCount());
-    EXPECT_TRUE(delegate.IsEmpty());
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
 }
 
 TEST(DelegateTest, SimpleTest4)
@@ -88,24 +88,24 @@ TEST(DelegateTest, SimpleTest4)
         bool wasInvoked1 = false;
         bool wasInvoked2 = false;
 
-        auto id1 = delegate.SubscribeAndGetID(
+        auto id1 = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked1 = true;
             });
 
-        auto id2 = delegate.SubscribeAndGetID(
+        auto id2 = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked2 = true;
             });
 
-        delegate.Trigger();
+        delegate.trigger();
         EXPECT_TRUE(wasInvoked1);
         EXPECT_TRUE(wasInvoked2);
     }
-    EXPECT_EQ(0, delegate.GetSubscriptionsCount());
-    EXPECT_TRUE(delegate.IsEmpty());
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
 }
 
 TEST(DelegateTest, SimpleTest5)
@@ -114,32 +114,32 @@ TEST(DelegateTest, SimpleTest5)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.SubscribeAndGetID(
+        auto id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
             });
 
-        delegate.Trigger();
+        delegate.trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(0, delegate.GetSubscriptionsCount());
-    EXPECT_TRUE(delegate.IsEmpty());
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
 
     {
         bool wasInvoked = false;
 
-        auto id = delegate.SubscribeAndGetID(
+        auto id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
             });
 
-        delegate.Trigger();
+        delegate.trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(0, delegate.GetSubscriptionsCount());
-    EXPECT_TRUE(delegate.IsEmpty());
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
 }
 
 TEST(DelegateTest, SubscribeWithoutIDGetting)
@@ -148,15 +148,15 @@ TEST(DelegateTest, SubscribeWithoutIDGetting)
     {
         bool wasInvoked = false;
 
-        delegate.Subscribe(
+        delegate.subscribe(
             [&]()
             {
                 wasInvoked = true;
             });
 
-        delegate.Trigger();
+        delegate.trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(1, delegate.GetSubscriptionsCount());
-    EXPECT_FALSE(delegate.IsEmpty());
+    EXPECT_EQ(1, delegate.getSubscriptionsCount());
+    EXPECT_FALSE(delegate.isEmpty());
 }

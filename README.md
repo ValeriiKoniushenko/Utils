@@ -76,7 +76,7 @@ Needed target for you is: ```Utils::Utils```
 Just link it with your alredy existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Utils)```
 
-#### C++ includes
+#### C++ side
 
 Include it to your file: ```#include "Utils/Concepts.h"```
 
@@ -95,7 +95,7 @@ Of course, it has basic set of tools to work with space coordinates.
 
 *More detailed view & examples you can find here: [link](docs/SpaceCoordinates.md)*
 
-### Fast example
+### Quick example
 
 Working with ```Rect```.
 
@@ -103,7 +103,8 @@ Working with ```Rect```.
 #include "Core/Rect.h"
 
 using namespace Core;
-using namespace std;
+using std::cout;
+using std::endl;
 
 FRect rect = { 0.f, 10.f, 10.f, 0.f };
 
@@ -125,7 +126,8 @@ Working with ```Size```.
 #include "Core/Size.h"
 
 using namespace Core;
-using namespace std;
+using std::cout;
+using std::endl;
 
 ISize2 a = { 5, 10 }; // ISize2 == int size 2D
 ISize2 b = { 2, 4 };
@@ -149,13 +151,11 @@ Needed target for you is: ```Utils::Core```
 Just link it with your alredy existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
-#### C++ includes
+#### C++ side
 
 - For ```Rect```: ```#include "Core/Rect.h"```
 - For ```GlobalPosition```: ```#include "Core/Position.h"```
 - For ```Size```: ```#include "Core/Size.h"```
-
-___
 
 ## Common functions to work with Math
 
@@ -167,13 +167,14 @@ Usually functions for you, but in ```compile-time```!
 - ```Math::IsEqual``` - comparing of the float or double
 - ```Math::IsZero``` - checking for 0.0 for types with floating point
 
-### Fast example
+### Quick example
 
 ```c++
 #include "Core/Math.h"
 
 using namespace Math;
-using namespace std;
+using std::cout;
+using std::endl;
 
 if (IsZero(0.0001f))
     cout << "YES #1" << endl;
@@ -199,11 +200,9 @@ Needed target for you is: ```Utils::Core```
 Just link it with your alredy existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
-#### C++ includes
+#### C++ side
 
 Just include it to your file: ```#include "Core/Math.h"```
-
-___
 
 ## Common interfaces & patterns
 
@@ -213,7 +212,7 @@ Popular practice is to add a function 'swap' to your classes. Why we can't
 bring it out to the interface? Yes, we did it!
 Or working with our the ~~anti~~ best pattern: Singleton? We also have it.
 
-### Fast example
+### Quick example
 
 ```c++
 #include "Core/CommonInterfaces.h"
@@ -243,12 +242,10 @@ Needed target for you is: ```Utils::Core```
 Just link it with your alredy existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
-#### C++ includes
+#### C++ side
 
 - For singleton: ```#include "Core/Singleton.h"```
 - For interfaces: ```#include "Core/CommonInterfaces.h"```
-
-___
 
 ## Enum-generator
 
@@ -258,12 +255,13 @@ Do you want to convert an enum's constant to string or vise versa? Or you want t
 know home many constants in your enum? I think it's not a problem. Use compile-time
 wrapper for it without loosing of optimization privelegious.
 
-### Fast example
+### Quick example
 
 ```c++
 #include "Core/Enum.h"
 
-using namespace std;
+using std::cout;
+using std::endl;
 
 CreateEnum(
     Color, int, 
@@ -295,106 +293,213 @@ cout << (1 == Color::fromStr("Green").cast()) << endl;
 // > true
 ```
 
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ side
+
+Just include: ```#include "Core/Enum.h"```
+
 ## Atomic strings
-This file will be filled up in the future. Just track the latest version of this library.
-But now, you can use this class to get better perfomance experience working with compile-time strings; but, also, you can work and with dynamic strings.
-So about a class: you can find this class by the next path: ```sources/Core/String.h```
-Main class is ```Core::BaseClass<CharType>```. But to use it easier just use aliases ```Core::StringAtom``` for working with one-byte charset.
-I can say a lot about this class but want to highlight main concepts:
-1. Try to use this class only with compile time strings. It was created mainly for these purposes. For example to increase equality comparision between two compile-time strings.
-2. But if you want to put your own dynamic string you also can do it. It has the same methods like std::string and more.
-Let's go to the examples:
+
+### Intro
+
+Have you ever wondered why sometimes we have absolutley the same strings, but we still compare it character
+to character? So, let's imagine that you can predict some behavior and you konw - next string X will be the same
+as next string Y. Let's not compair its characters, let's just compare their addresses!
+
+```c++
+std::string A = "Hello";
+std::string B = "Hello";
+
+// Comparing character to character, but strings are the same - we know it!
+if (A == B){} 
+
+// Comparing addresses, because it's the same literals
+if ("Hello" == "Hello"){}
+```
+
+So, the implemetation of the new string brings you up second solution of the code example above! But it will
+be processed automatically.
+
+*More detailed view & examples you can find here: [link](docs/Strings.md)*
+
+### Quick example
 ```c++
 #include "Core/Strings.h"
-#include <iostream>
 
-int main()
-{
-    using namespace std;
-    Core::StringAtom name = "Andrew"_atom; // At this moment you put a compile-time(static) string to the internal string-pool. It's absolutely static string.
-    cout << name.Data() << endl; // => Andrew
-    cout << (name == "Andrew") << endl; // => true; now a compiler compare not two strings, but their addresses.
+using std::cout;
+using std::endl;
+using namespace Core;
 
-    // From this code's line you will work with a variable 'name' as with dynamic-string.
-    name.PushBack("!"); // But it's not a problem to make from static string -> dynamic. Don't worry about it, just use methods as you want.
-    cout << (name == "Andrew!") << endl; // => true; now a compiler compare JUST two strings. You'll get small deoptimization, but it's okay. As with std::string.
-    cout << name.Data() << endl; // => Andrew!
+// At this moment you put a compile-time(static) string 
+// to the internal string-pool. It's absolutely static string.    
+StringAtom name = "Andrew"_atom;    
+cout << name.data() << endl; // => Andrew
 
-    name.Trim("!");
-    cout << name.Data() << endl; // => Andrew
+// Now an executed code is comparing not two strings, 
+// but its addresses.
+cout << (name == "Andrew") << endl; // => true 
 
-    if (stdname.Match("\\w+\\!"))
-        cout << "Matched" << endl;
-    else
-        cout << "NOT matched" << endl;
-    // => Matched
+// But it's not a problem to make from static string -> dynamic. 
+// Don't worry about it, just use methods as you want.
+// From this code's line you will work with a variable 
+// 'name' as with dynamic-string.
+name.pushBack("!");
 
-    return 0;
-}
+// Now, an execution code is compare two strings(chars to chars). 
+// You'll get small de-optimization, but it's okay. 
+// Logically 'name' like std::string.
+cout << (name == "Andrew!") << endl; // => true
+cout << name.data() << endl; // => Andrew!
+
+name.trim("!");
+cout << name.data() << endl; // => Andrew
+
+if (name.regexMatch("\\w+\\!"))
+    cout << "Matched" << endl;
+else
+    cout << "NOT matched" << endl;
+// => Matched
 ```
 
-Just want to highlight again: it has absolutely full functionality of the std::string, and also has new features.
-To check it all you can look at the header file 'String.h', or make the same with examples in the 'test' directory: ```tests/StringTest.cpp```
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ side
+
+- Main class: ```#include "Core/String.h"```
+- Strings' helpers: ```#include "Core/StringHelper.h"```
 
 ## Delegates
-It's quite common practice to extend your program; to use Event Orienting Programming. And delegates can help you to make more comfortable.
-Let's look into the code:
+
+### Intro
+
+I think you heard before about Event Oriented Programming. So, if yes - you can include Core/Delegate.h
+and use as you want.
+
+If no - let's understand it in one minute!
+For example, let's take YouTube and video about 'cute cats'. If you really like a video's content
+you can subscribe to the channel. And when new video will be published you'll get notification about
+that. So, Delegates in the code - are the same.
+
+Let's look on the example below.
+
+*More detailed view & examples you can find here: [link](docs/Delegate.md)*
+
+### Quick example
 ```c++
 #include "Core/Delegate.h"
-#include <iostream>
 
-int main()
-{
-    using namespace std;
+using std::cout;
+using std::endl;
 
-    // At this line was created a delegate. So, it's just listener of some custom events and you can trigger subscribed function from any part of you block-scope.
-    Core::Delegate<void()> delegate;
+// At this line a delegate was created. So, it's just listener 
+// of some events and you can trigger subscribed function from 
+// any part of you block-scope.
+Core::Delegate<void()> cuteCatsChannel;
 
-    bool wasInvoked = false;
+// Subscribing to the delegate. So, after function 'trigger' 
+// your lambda will be invoked.
+auto id = cuteCatsChannel.subscribeAndGetID(
+    [&]()
+    {
+        cout << "Wow, new video!" << endl; 
+    });
 
-    // Subscribing to the delegate. So, after function 'Trigger' your lambda will be invoked.
-    auto id = delegate.Subscribe(
-        [&]()
-        {
-            wasInvoked = true;
-        });
+// ==== Channel's code ====
+delegate.trigger();
+// ========================
 
-    delegate.Trigger(); // Invoking of your lambda above.
+// After 'trigger' above, you'll get a message to a console:
+// > Wow, new video!
 
-    cout << (wasInvoked) << endl; // => true
-
-    return 0;
-}
+// And, let's imagine that 'cute cats' channel is boring for 
+// you after. What are we doing when you met boring channel? 
+// Yes - put a button 'unsubscribe'! In the code we'll do the same:
+delegate.unsubscribe(id);
 ```
 
-If you want to get more complex cases & functionality just look at the test: ```tests/DelegateTest.cpp```
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ side
+
+Just include: ```#include "Core/Delegate.h"```
 
 ## Asserts
-Sometimes you don't want to core user's programm especially in the enterprise\release version but want to say smth. you can use Assert function.
-It's easy, let's do it:
+
+### Intro
+
+Sometimes you don't want to interrupt user's programm especially in
+the enterprise\release version but want to say something to developer
+of just for debug. For these purposes you can use Assert functionality.
+
+It has two main way to work with it:
+
+- ```Assert([condition], [message])``` - thow an assert with/without a message
+- ```Verify([condition], [message])``` - the same, but will return true\false
+
+Main benefits of it are:
+
+- Printing all messages to ```std::cerr```
+- Printing of the callstack\backstrace of an assert (if a compiler supports it)
+
+That's ease, let's look in the code.
+
+### Quick example
+
 ```c++
 #include "Core/Assert.h"
-#include <iostream>
 
-int main()
+using std::cout;
+using std::endl;
+
+if (1 < 2)
 {
-    using namespace std;
-
-    constexpr const float tax = 0.05f;
-    float bruttoSalary = 0;
-    cout << "Brutto salary: ";
-    cin >> bruttoSalary;
-
-    Assert(yourMoney < 0.f, "Money can't be less then zero"); // At this moment you can see potentially OS-window with a described error.
-    if (yourMoney >= 0.f)
-    {
-        cout << "Netto salary: " << bruttoSalary * (1.f - tax) << endl;
-    }
-
-    return 0;
+    // Without params - just throw it.
+    Assert(); // Catch the Assert!
 }
+
+// The same, but with condition. 
+// If condition is false - assert will be thrown
+Assert(1 < 2);
+
+// Same, but with a message
+Assert(1 < 2, "Some message here");
+
+// Question: 1 < 2? Yes! It's true. 
+// So, you will go to the if's body 
+if (Verify(1 < 2, "I'm in 'if' statement") {}
 ```
 
-## 📞 Feedback & Contacts
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your alredy existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ side
+
+Just include: ```#include "Core/Assert.h"```
+
+# 📞 Feedback & Contacts
 
 You can send me e-mail: Valerii.Koniushenko@gmail.com or try to find me in telegram: @markmoran24

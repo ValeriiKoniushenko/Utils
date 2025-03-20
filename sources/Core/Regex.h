@@ -44,36 +44,36 @@ namespace Core
 
         explicit BaseRegex(const char* pattern, const char* subject = nullptr);
 
-        void SetPattern(const char* pattern) { _pattern = pattern; }
-        [[nodiscard]] std::string GetPattern() const { return _pattern; }
+        void setPattern(const char* pattern) { _pattern = pattern; }
+        [[nodiscard]] std::string getPattern() const { return _pattern; }
 
-        void SetCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
-        [[nodiscard]] uint32_t GetCompileOptions(uint32_t options) const noexcept { return _compileOptions; }
+        void setCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
+        [[nodiscard]] uint32_t getCompileOptions(uint32_t options) const noexcept { return _compileOptions; }
 
-        void SetSubject(const char* subject) noexcept { _subject = subject; }
-        [[nodiscard]] const char* GetSubject() const noexcept { return _subject; }
+        void setSubject(const char* subject) noexcept { _subject = subject; }
+        [[nodiscard]] const char* getSubject() const noexcept { return _subject; }
 
-        [[nodiscard]] static std::string GetErrorString(const BaseRegex& regex);
-        [[nodiscard]] static std::string GetErrorString(int errorCode);
-        [[nodiscard]] std::string GetErrorString() const { return GetErrorString(*this); }
-        [[nodiscard]] bool HasError() const noexcept { return _errorCode != 0; }
-        [[nodiscard]] PCRE2_SIZE GetErrorOffset() const noexcept { return _errorOffset; }
+        [[nodiscard]] static std::string getErrorString(const BaseRegex& regex);
+        [[nodiscard]] static std::string getErrorString(int errorCode);
+        [[nodiscard]] std::string getErrorString() const { return getErrorString(*this); }
+        [[nodiscard]] bool hasError() const noexcept { return _errorCode != 0; }
+        [[nodiscard]] PCRE2_SIZE getErrorOffset() const noexcept { return _errorOffset; }
 
-        virtual void Clear() { _Clear(); }
+        virtual void clear() { _clear(); }
 
-        bool Compile();
-        [[nodiscard]] bool IsCompiled() const noexcept { return _regex; }
+        bool compile();
+        [[nodiscard]] bool isCompiled() const noexcept { return _regex; }
 
-        [[nodiscard]] PCRE2_SIZE GetLimit() const noexcept { return _limit; }
-        void SetLimit(PCRE2_SIZE limit) noexcept { _limit = limit; }
+        [[nodiscard]] PCRE2_SIZE getLimit() const noexcept { return _limit; }
+        void setLimit(PCRE2_SIZE limit) noexcept { _limit = limit; }
 
-        [[nodiscard]] PCRE2_SIZE GetOffset() const noexcept { return _offset; }
-        void SetOffset(PCRE2_SIZE offset) noexcept { _offset = offset; }
+        [[nodiscard]] PCRE2_SIZE getOffset() const noexcept { return _offset; }
+        void setOffset(PCRE2_SIZE offset) noexcept { _offset = offset; }
 
-        [[nodiscard]] pcre2_code* GetRawPcre2Code() noexcept { return _regex; }
+        [[nodiscard]] pcre2_code* getRawPcre2Code() noexcept { return _regex; }
 
     protected:
-        virtual void OnRegexCompiled() {}
+        virtual void onRegexCompiled() {}
 
     protected:
         std::string _pattern;
@@ -88,8 +88,8 @@ namespace Core
         PCRE2_SIZE _offset = 0;
 
     private:
-        void _Clear();
-        void _FreeRegex();
+        void _clear();
+        void _freeRegex();
     };
 
     template<class T>
@@ -109,17 +109,17 @@ namespace Core
             uint64_t offset = invalid;
             uint64_t size = invalid;
 
-            [[nodiscard]] bool IsMatched() const noexcept { return !(size == invalid && offset == invalid); }
-            [[nodiscard]] explicit operator bool() const noexcept { return IsMatched(); }
+            [[nodiscard]] bool isMatched() const noexcept { return !(size == invalid && offset == invalid); }
+            [[nodiscard]] explicit operator bool() const noexcept { return isMatched(); }
 
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
-            [[nodiscard]] T ConvertTo(const T& original) const
+            [[nodiscard]] T convertBasedOn(const T& original) const
             {
-                return ConvertTo<T>(original.data(), original.size());
+                return convertBasedOn<T>(original.data(), original.size());
             }
 
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
-            [[nodiscard]] T ConvertTo(const char* origStr, uint64_t origSize) const
+            [[nodiscard]] T convertBasedOn(const char* origStr, uint64_t origSize) const
             {
                 if (offset + size >= origSize) [[unlikely]]
                 {
@@ -141,10 +141,10 @@ namespace Core
         BaseRegexMatch() = default;
         ~BaseRegexMatch() override;
 
-        void Clear() override;
+        void clear() override;
 
-        [[nodiscard]] MatchedData Match() const;
-        [[nodiscard]] MatchedDataVector MatchAll() const;
+        [[nodiscard]] MatchedData match() const;
+        [[nodiscard]] MatchedDataVector matchAll() const;
 
         /**
          * @brief Will iterate over every match until the end.
@@ -153,31 +153,31 @@ namespace Core
          * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
          */
         template<class FuncT>
-        void IterateOverMatches(FuncT&& callback)
+        void iterateOverMatches(FuncT&& callback)
         {
-            Impl_IterateOverMatches(std::forward<decltype(callback)>(callback), _offset);
+            impl_IterateOverMatches(std::forward<decltype(callback)>(callback), _offset);
         }
 
-        void SetMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
-        [[nodiscard]] uint32_t GetMatchOptions(uint32_t options) const noexcept { return _matchOptions; }
+        void setMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
+        [[nodiscard]] uint32_t getMatchOptions(uint32_t options) const noexcept { return _matchOptions; }
 
     protected:
-        void OnRegexCompiled() override;
+        void onRegexCompiled() override;
 
     protected:
         pcre2_match_data* _matchData = nullptr;
         uint32_t _matchOptions = 0;
 
     private:
-        void _FreeMatchData();
-        void _Clear();
+        void _freeMatchData();
+        void _clear();
 
     private:
         // ================== PIPMPLs =======================
         template<class FuncT>
-        void Impl_IterateOverMatches(FuncT&& callback, PCRE2_SIZE offset = 0)
+        void impl_IterateOverMatches(FuncT&& callback, PCRE2_SIZE offset = 0)
         {
-            if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+            if (!isCompiled() || _matchData == nullptr) [[unlikely]]
             {
                 Assert("Regex wasn't compiled or match data was failed!");
                 return;
@@ -232,19 +232,19 @@ namespace Core
         using BaseRegex::BaseRegex;
 
     public:
-        bool Replace();
+        bool replace();
 
-        void SetReplaceOptions(uint32_t options) noexcept { _replaceOptions = options; }
+        void setReplaceOptions(uint32_t options) noexcept { _replaceOptions = options; }
         [[nodiscard]] uint32_t GetReplaceOptions(uint32_t options) const noexcept { return _replaceOptions; }
 
-        void SetReplacementString(const char* string) noexcept { _replacement = string; }
-        [[nodiscard]] const char* GetReplacementString() const noexcept { return _replacement; }
+        void setReplacementString(const char* string) noexcept { _replacement = string; }
+        [[nodiscard]] const char* getReplacementString() const noexcept { return _replacement; }
 
-        void SetOutputString(char* allocatedString, PCRE2_SIZE size) noexcept;
+        void setOutputString(char* allocatedString, PCRE2_SIZE size) noexcept;
 
-        void SetReplaceAll(bool value);
+        void setReplaceAll(bool value);
 
-        void Clear() override;
+        void clear() override;
 
     protected:
         uint32_t _replaceOptions = 0;
@@ -254,7 +254,7 @@ namespace Core
         PCRE2_SIZE _allocatedSize = 0;
 
     private:
-        void _Clear();
+        void _clear();
     };
 
     using Regex = BaseRegex;

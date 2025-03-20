@@ -26,25 +26,25 @@ namespace Core
 {
     BaseRegex::~BaseRegex()
     {
-        _Clear();
+        _clear();
     }
 
     BaseRegex::BaseRegex(const char* pattern, const char* subject)
     {
         if (pattern)
         {
-            SetPattern(pattern);
+            setPattern(pattern);
         }
 
         if (subject)
         {
-            SetSubject(subject);
+            setSubject(subject);
         }
     }
 
-    std::string BaseRegex::GetErrorString(const BaseRegex& regex)
+    std::string BaseRegex::getErrorString(const BaseRegex& regex)
     {
-        auto str = GetErrorString(regex._errorCode);
+        auto str = getErrorString(regex._errorCode);
 
         if (!str.empty())
         {
@@ -59,7 +59,7 @@ namespace Core
         return {};
     }
 
-    std::string BaseRegex::GetErrorString(int errorCode)
+    std::string BaseRegex::getErrorString(int errorCode)
     {
         char buffer[256]{};
         pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer), sizeof(buffer));
@@ -71,7 +71,7 @@ namespace Core
         return {};
     }
 
-    bool BaseRegex::Compile()
+    bool BaseRegex::compile()
     {
         if (_pattern.empty()) [[unlikely]]
         {
@@ -79,7 +79,7 @@ namespace Core
             return false;
         }
 
-        _FreeRegex();
+        _freeRegex();
         _regex = pcre2_compile(reinterpret_cast<PCRE2_SPTR8>(_pattern.c_str()), // The regex pattern
                                _limit,                                          // Pattern is null-terminated
                                _compileOptions,                                 // Default options
@@ -90,16 +90,16 @@ namespace Core
 
         if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
         {
-            Assert(GetErrorString().c_str());
+            Assert(getErrorString().c_str());
             return false;
         }
 
-        OnRegexCompiled();
+        onRegexCompiled();
 
         return true;
     }
 
-    void BaseRegex::_Clear()
+    void BaseRegex::_clear()
     {
         _pattern.clear();
         _compileOptions = 0;
@@ -111,10 +111,10 @@ namespace Core
         _subject = nullptr;
         _offset = 0;
 
-        _FreeRegex();
+        _freeRegex();
     }
 
-    void BaseRegex::_FreeRegex()
+    void BaseRegex::_freeRegex()
     {
         if (_regex)
         {
@@ -125,18 +125,18 @@ namespace Core
 
     BaseRegexMatch::~BaseRegexMatch()
     {
-        BaseRegexMatch::_Clear();
+        BaseRegexMatch::_clear();
     }
 
-    void BaseRegexMatch::Clear()
+    void BaseRegexMatch::clear()
     {
-        BaseRegex::Clear();
-        BaseRegexMatch::_Clear();
+        BaseRegex::clear();
+        BaseRegexMatch::_clear();
     }
 
-    BaseRegexMatch::MatchedData BaseRegexMatch::Match() const
+    BaseRegexMatch::MatchedData BaseRegexMatch::match() const
     {
-        if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+        if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
             Assert("Regex wasn't compiled or match data was failed!");
             return {};
@@ -181,9 +181,9 @@ namespace Core
         return {};
     }
 
-    BaseRegexMatch::MatchedDataVector BaseRegexMatch::MatchAll() const
+    BaseRegexMatch::MatchedDataVector BaseRegexMatch::matchAll() const
     {
-        if (!IsCompiled() || _matchData == nullptr) [[unlikely]]
+        if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
             Assert("Regex wasn't compiled or match data was failed!");
             return {};
@@ -232,16 +232,16 @@ namespace Core
         return matches;
     }
 
-    void BaseRegexMatch::OnRegexCompiled()
+    void BaseRegexMatch::onRegexCompiled()
     {
-        if (IsCompiled())
+        if (isCompiled())
         {
-            _FreeMatchData();
+            _freeMatchData();
             _matchData = pcre2_match_data_create_from_pattern(_regex, nullptr);
         }
     }
 
-    void BaseRegexMatch::_FreeMatchData()
+    void BaseRegexMatch::_freeMatchData()
     {
         if (_matchData)
         {
@@ -250,15 +250,15 @@ namespace Core
         }
     }
 
-    void BaseRegexMatch::_Clear()
+    void BaseRegexMatch::_clear()
     {
         _matchOptions = 0;
-        _FreeMatchData();
+        _freeMatchData();
     }
 
-    bool BaseRegexReplace::Replace()
+    bool BaseRegexReplace::replace()
     {
-        if (!IsCompiled()) [[unlikely]]
+        if (!isCompiled()) [[unlikely]]
         {
             Assert("Regex wasn't compiled!");
             return false;
@@ -300,18 +300,18 @@ namespace Core
             return true;
         }
 
-        Assert(GetErrorString(rc).c_str());
+        Assert(getErrorString(rc).c_str());
 
         return false;
     }
 
-    void BaseRegexReplace::SetOutputString(char* allocatedString, size_t size) noexcept
+    void BaseRegexReplace::setOutputString(char* allocatedString, size_t size) noexcept
     {
         _allocatedString = allocatedString;
         _allocatedSize = size;
     }
 
-    void BaseRegexReplace::SetReplaceAll(bool value)
+    void BaseRegexReplace::setReplaceAll(bool value)
     {
         if (value)
         {
@@ -323,13 +323,13 @@ namespace Core
         }
     }
 
-    void BaseRegexReplace::Clear()
+    void BaseRegexReplace::clear()
     {
-        BaseRegex::Clear();
-        BaseRegexReplace::_Clear();
+        BaseRegex::clear();
+        BaseRegexReplace::_clear();
     }
 
-    void BaseRegexReplace::_Clear()
+    void BaseRegexReplace::_clear()
     {
         _replaceOptions = 0;
         _replacement = nullptr;

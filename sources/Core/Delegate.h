@@ -57,13 +57,13 @@ namespace Core
             {
                 if (_owner)
                 {
-                    _owner->Unsubscribe(*this);
+                    _owner->unsubscribe(*this);
                 }
             }
 
             [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
 
-            [[nodiscard]] constexpr bool IsValid() const noexcept
+            [[nodiscard]] constexpr bool isValid() const noexcept
             {
                 if (*this == ID())
                 {
@@ -89,7 +89,7 @@ namespace Core
 
     public:
         template<class... TArgs>
-        void Trigger(TArgs&&... args)
+        void trigger(TArgs&&... args)
         {
             for (auto&& [id, callback] : _callbacks)
             {
@@ -97,27 +97,27 @@ namespace Core
             }
         }
 
-        [[nodiscard]] ID SubscribeAndGetID(CallbackT&& callback)
+        [[nodiscard]] ID subscribeAndGetID(CallbackT&& callback)
         {
             ID id(this, ++_generatedID);
             _callbacks.emplace(id, std::forward<CallbackT>(callback));
             return id;
         }
 
-        void Subscribe(CallbackT&& callback)
+        void subscribe(CallbackT&& callback)
         {
             ID id(nullptr, ++_generatedID);
             _callbacks.emplace(id, std::forward<CallbackT>(callback));
         }
 
-        void Unsubscribe(const ID& id) { _callbacks.erase(id); }
+        void unsubscribe(const ID& id) { _callbacks.erase(id); }
 
-        [[nodiscard]] typename CallbackContainerT::size_type GetSubscriptionsCount() const noexcept { return _callbacks.size(); }
-        [[nodiscard]] bool IsEmpty() const noexcept { return _callbacks.empty(); }
+        [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept { return _callbacks.size(); }
+        [[nodiscard]] bool isEmpty() const noexcept { return _callbacks.empty(); }
 
-        void Reset() { _callbacks.clear(); }
+        void reset() { _callbacks.clear(); }
 
-        [[nodiscard]] typename ID::IdT GetLastGeneratedID() const noexcept { return _generatedID; }
+        [[nodiscard]] typename ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
 
     private:
         CallbackContainerT _callbacks{};

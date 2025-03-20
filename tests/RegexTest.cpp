@@ -33,13 +33,13 @@ TEST(RegexTest, SimpleRegex)
     const std::string subject = "1234 Hello# world!";
 
     RegexMatch regex;
-    regex.SetPattern("([A-Za-z]+)(#|!)");
-    regex.SetSubject(subject.c_str());
-    regex.SetCompileOptions(PCRE2_MULTILINE);
+    regex.setPattern("([A-Za-z]+)(#|!)");
+    regex.setSubject(subject.c_str());
+    regex.setCompileOptions(PCRE2_MULTILINE);
 
-    ASSERT_TRUE(regex.Compile());
+    ASSERT_TRUE(regex.compile());
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_TRUE(match);
 
@@ -53,15 +53,15 @@ TEST(RegexTest, ObjectCopying)
     RegexMatch regex;
     {
         RegexMatch re;
-        re.SetPattern("([A-Za-z]+)(#|!)");
-        re.SetSubject(subject.c_str());
-        re.SetCompileOptions(PCRE2_MULTILINE);
+        re.setPattern("([A-Za-z]+)(#|!)");
+        re.setSubject(subject.c_str());
+        re.setCompileOptions(PCRE2_MULTILINE);
         regex = re;
     }
 
-    ASSERT_TRUE(regex.Compile());
+    ASSERT_TRUE(regex.compile());
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_TRUE(match);
 
@@ -75,15 +75,15 @@ TEST(RegexTest, ObjectMoving)
     RegexMatch regex;
     {
         RegexMatch re;
-        re.SetPattern("([A-Za-z]+)(#|!)");
-        re.SetSubject(subject.c_str());
-        re.SetCompileOptions(PCRE2_MULTILINE);
+        re.setPattern("([A-Za-z]+)(#|!)");
+        re.setSubject(subject.c_str());
+        re.setCompileOptions(PCRE2_MULTILINE);
         regex = std::move(re);
     }
 
-    ASSERT_TRUE(regex.Compile());
+    ASSERT_TRUE(regex.compile());
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_TRUE(match);
 
@@ -95,12 +95,12 @@ TEST(RegexTest, SimpleCreateUsingOnlyPattern)
     const std::string subject = "1234 Hello# world!";
 
     RegexMatch regex("([A-Za-z]+)(#|!)");
-    regex.SetSubject(subject.c_str());
-    regex.SetCompileOptions(PCRE2_MULTILINE);
+    regex.setSubject(subject.c_str());
+    regex.setCompileOptions(PCRE2_MULTILINE);
 
-    ASSERT_TRUE(regex.Compile());
+    ASSERT_TRUE(regex.compile());
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_TRUE(match);
 
@@ -110,11 +110,11 @@ TEST(RegexTest, SimpleCreateUsingOnlyPattern)
 TEST(RegexTest, SimpleCreate)
 {
     RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
-    regex.SetCompileOptions(PCRE2_MULTILINE);
+    regex.setCompileOptions(PCRE2_MULTILINE);
 
-    ASSERT_TRUE(regex.Compile());
+    ASSERT_TRUE(regex.compile());
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_TRUE(match);
 
@@ -125,9 +125,9 @@ TEST(RegexTest, SimpleCreate)
 TEST(RegexTest, DISABLED_WitoutCompile)
 {
     RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
-    regex.SetCompileOptions(PCRE2_MULTILINE);
+    regex.setCompileOptions(PCRE2_MULTILINE);
 
-    auto match = regex.Match();
+    auto match = regex.match();
 
     ASSERT_FALSE(match);
 }
@@ -135,10 +135,10 @@ TEST(RegexTest, DISABLED_WitoutCompile)
 TEST(RegexTest, MatchAll)
 {
     RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
-    regex.SetCompileOptions(PCRE2_MULTILINE);
-    regex.Compile();
+    regex.setCompileOptions(PCRE2_MULTILINE);
+    regex.compile();
 
-    auto match = regex.MatchAll();
+    auto match = regex.matchAll();
 
     ASSERT_FALSE(match.empty());
     ASSERT_EQ(match.size(), 2);
@@ -153,9 +153,9 @@ TEST(RegexTest, MatchAll)
 TEST(RegexTest, InvalidExpression)
 {
     RegexMatch regex("(A-Za-z]+)(#|!)", "1234 Hello# world!");
-    regex.Compile();
+    regex.compile();
 
-    auto match = regex.MatchAll();
+    auto match = regex.matchAll();
 
     ASSERT_TRUE(match.empty());
 }
@@ -163,18 +163,18 @@ TEST(RegexTest, InvalidExpression)
 TEST(RegexTest, InvalidExpression2)
 {
     RegexMatch regex("(A-Za-z]+)(#|!)", "1234 Hello# world!");
-    regex.Compile();
+    regex.compile();
 
-    ASSERT_FALSE(regex.Match());
+    ASSERT_FALSE(regex.match());
 }
 
 TEST(RegexTest, IterateOverMatches)
 {
     RegexMatch regex("[A-Za-z]+", "1234 Hello# world!");
-    regex.Compile();
+    regex.compile();
 
     std::vector<RegexMatch::MatchedData> matches;
-    regex.IterateOverMatches(
+    regex.iterateOverMatches(
         [&matches](auto m)
         {
             matches.push_back(m);
@@ -193,10 +193,10 @@ TEST(RegexTest, IterateOverMatches)
 TEST(RegexTest, IterateOverMatchesOneTime)
 {
     RegexMatch regex("[A-Za-z]+", "1234 Hello# world!");
-    regex.Compile();
+    regex.compile();
 
     std::vector<RegexMatch::MatchedData> matches;
-    regex.IterateOverMatches(
+    regex.iterateOverMatches(
         [&matches](auto m) -> bool
         {
             matches.push_back(m);
@@ -215,12 +215,12 @@ TEST(RegexTest, SimpleReplace)
     char buff[1024]{};
 
     RegexReplace regex("[0-9]+", "He3llo 123 world 456 how_are_you?");
-    regex.SetReplacementString("#");
-    regex.SetOutputString(buff, 1024);
-    regex.SetReplaceAll(true);
-    regex.Compile();
+    regex.setReplacementString("#");
+    regex.setOutputString(buff, 1024);
+    regex.setReplaceAll(true);
+    regex.compile();
 
-    ASSERT_TRUE(regex.Replace());
+    ASSERT_TRUE(regex.replace());
     EXPECT_STREQ("He#llo # world # how_are_you?", buff);
 }
 
@@ -232,23 +232,23 @@ TEST(RegexTest, MatchDataConverts)
     RegexMatch::MatchedData match{ 5, 6 };
 
     {
-        const auto stdString = match.ConvertTo(subject);
+        const auto stdString = match.convertBasedOn(subject);
         EXPECT_EQ("Hello#", stdString);
     }
 
     {
-        const auto stdString = match.ConvertTo<std::string>(view.data(), view.size());
+        const auto stdString = match.convertBasedOn<std::string>(view.data(), view.size());
         EXPECT_EQ("Hello#", stdString);
     }
 
     {
-        const auto vector = match.ConvertTo<std::vector<char>>(view.data(), view.size());
+        const auto vector = match.convertBasedOn<std::vector<char>>(view.data(), view.size());
         ASSERT_EQ(vector.size(), 6);
         EXPECT_EQ(0, memcmp("Hello#", vector.data(), 6));
     }
 
     {
-        const auto atom = match.ConvertTo<StringAtom>(view.data(), view.size());
+        const auto atom = match.convertBasedOn<StringAtom>(view.data(), view.size());
         EXPECT_EQ("Hello#", atom);
     }
 }

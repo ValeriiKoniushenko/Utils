@@ -33,7 +33,7 @@
     #include <stacktrace>
 #endif
 
-inline void Assert(bool condition, const char* message = nullptr)
+inline void Assert(const bool condition, const char* message = nullptr)
 {
     if (condition)
     {
@@ -67,7 +67,7 @@ inline void Assert(bool condition, const char* message = nullptr)
 #endif
 }
 
-inline bool Verify(bool condition, const char* message = nullptr)
+inline bool Verify(const bool condition, const char* message = nullptr)
 {
     Assert(condition, message);
     return condition;

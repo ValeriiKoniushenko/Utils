@@ -1340,15 +1340,15 @@ namespace Core
             }
 
             Core::RegexMatch regex(expr.data(), _string);
-            regex.SetOffset(offset);
+            regex.setOffset(offset);
             if (limit != 0)
             {
-                regex.SetLimit(limit);
+                regex.setLimit(limit);
             }
-            regex.SetMatchOptions(matchOptions);
-            if (regex.Compile()) [[likely]]
+            regex.setMatchOptions(matchOptions);
+            if (regex.compile()) [[likely]]
             {
-                return regex.Match();
+                return regex.match();
             }
 
             return {};
@@ -1370,15 +1370,15 @@ namespace Core
             }
 
             Core::RegexMatch regex(expr.data(), _string);
-            regex.SetOffset(offset);
+            regex.setOffset(offset);
             if (limit != 0)
             {
-                regex.SetLimit(limit);
+                regex.setLimit(limit);
             }
-            regex.SetMatchOptions(matchOptions);
-            if (regex.Compile()) [[likely]]
+            regex.setMatchOptions(matchOptions);
+            if (regex.compile()) [[likely]]
             {
-                return regex.MatchAll();
+                return regex.matchAll();
             }
 
             return {};
@@ -1395,7 +1395,7 @@ namespace Core
         {
             if (!IsEmpty())
             {
-                return RegexFind(std::move(expr), offset, limit, matchOptions).IsMatched();
+                return RegexFind(std::move(expr), offset, limit, matchOptions).isMatched();
             }
 
             return false;
@@ -1420,15 +1420,15 @@ namespace Core
             }
 
             Core::RegexMatch regex(expr.data(), _string);
-            regex.SetOffset(offset);
+            regex.setOffset(offset);
             if (limit != 0)
             {
-                regex.SetLimit(limit);
+                regex.setLimit(limit);
             }
-            regex.SetMatchOptions(matchOptions);
-            if (regex.Compile()) [[likely]]
+            regex.setMatchOptions(matchOptions);
+            if (regex.compile()) [[likely]]
             {
-                regex.IterateOverMatches(std::forward<decltype(callback)>(callback));
+                regex.iterateOverMatches(std::forward<decltype(callback)>(callback));
             }
         }
 
@@ -1453,21 +1453,21 @@ namespace Core
             }
 
             Core::RegexReplace regex(expr.data(), _string);
-            regex.SetOffset(offset);
+            regex.setOffset(offset);
             if (limit != 0)
             {
-                regex.SetLimit(limit);
+                regex.setLimit(limit);
             }
-            regex.SetReplaceOptions(replaceOptions);
+            regex.setReplaceOptions(replaceOptions);
 
-            if (regex.Compile()) [[likely]]
+            if (regex.compile()) [[likely]]
             {
                 Self output;
                 output.Reserve(_size * predictedScaleSize);
-                regex.SetOutputString(output._string, output._capacity - 1);
-                regex.SetReplacementString(newValue.data());
+                regex.setOutputString(output._string, output._capacity - 1);
+                regex.setReplacementString(newValue.data());
 
-                if (regex.Replace())
+                if (regex.replace())
                 {
                     // recal size
                     while (output._string[output._size])
