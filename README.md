@@ -10,11 +10,25 @@ The utilitary library for common solutions in your code. It has some count of al
 - Delegates
 - Run-time asserts
 
-___
+# Table of contents
+
+1. **[Getting started](#getting-started)**
+    1. [Build Requirements](#build-requirements)
+    2. [Installation](#installation)
+2. **[Road map](#road-map)**
+    1. [Common concepts](#common-concepts)
+    2. [Space coordinates](#working-with-space-coordinates)
+    3. [Math](#common-functions-to-work-with-math)
+    4. [Interfaces & patterns](#common-interfaces-%26-patterns)
+    5. [Enum-generator](#enum-generator)
+    6. [Atomic Strings](#atomic-strings)
+    7. [Delegates](#delegates)
+    8. [Asserts](#asserts)
+3. **[Feedback & Contacts](#feedback-%26-contacts)**
 
 # Getting started
 
-## Requirements
+## Build Requirements
 Needed settings\programs on your system are:
 - cmake 3.30 >=
 - clang 18.1.8 >= | gcc 14.2.1 >=
@@ -53,7 +67,7 @@ your hands.
 PS: to build Debug or Release version of the project set ```Debug``` or ```Release``` to ```-DCMAKE_BUILD_TYPE```.
 E.g: ```-DCMAKE_BUILD_TYPE="Release"```
 
----
+
 
 # Road map
 
@@ -80,7 +94,7 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 Include it to your file: ```#include "Utils/Concepts.h"```
 
-___
+
 
 ## Working with space coordinates
 
@@ -500,6 +514,9 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 Just include: ```#include "Core/Assert.h"```
 
-# 📞 Feedback & Contacts
+# Feedback & Contacts
 
-You can send me e-mail: Valerii.Koniushenko@gmail.com or try to find me in telegram: @markmoran24
+If you have some questions or propositions - contact me:
+
+- e-mail: Valerii.Koniushenko@gmail.com
+- Telegram: @markmoran24
