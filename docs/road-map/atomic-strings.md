@@ -3,6 +3,10 @@
 > - [🏠 Go Home](../index.md)
 > - [👈 Go Parent Page](index.md)
 
+> 1. [Intro](#intro)
+> 2. [Quick example](#quick-example)
+> 3. [Requirements](#requirements)
+
 ### Intro
 
 Have you ever wondered why sometimes we have absolutley the same strings, but we still compare it character
