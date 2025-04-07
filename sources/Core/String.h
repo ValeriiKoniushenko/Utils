@@ -1509,8 +1509,6 @@ namespace Core
         Self& operator+=(CharT ch) { return push_back(ch); }
         Self& operator+=(StdStringViewT str) { return push_back(str); }
 
-        Self& push_back(CharT ch) { return push_back(StdStringViewT(&ch, 1)); }
-
         Self& push_back(StdStringViewT str)
         {
             if (str.empty())
@@ -1522,15 +1520,49 @@ namespace Core
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
             {
-                reserve(finalSize);
+                // 32 is minimum size to optimize working with small strings
+                reserve(finalSize < 32 ? 32 : finalSize);
             }
 
-            for (IndexT i = oldSize, j = 0; i < finalSize && j < str.size(); ++i, ++j)
-            {
-                _string[i] = str[j];
-            }
+            memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str.data(), str.size() * sizeof(CharT));
+
             _string[finalSize] = 0;
             _size += str.size();
+
+            return *this;
+        }
+
+        Self& push_back(const CharT* str, const SizeT size)
+        {
+            if (str == nullptr || size == 0)
+            {
+                return *this;
+            }
+
+            const auto oldSize = _size;
+            const auto finalSize = _size + size;
+            if (finalSize >= _capacity)
+            {
+                // 32 is minimum size to optimize working with small strings
+                reserve(finalSize < 32 ? 32 : finalSize);
+            }
+
+            memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
+
+            _string[finalSize] = 0;
+            _size += size;
+
+            return *this;
+        }
+
+        Self& push_back(CharT ch)
+        {
+            if (_size + 1 >= _capacity)
+            {
+                reserve(_size + 1);
+            }
+
+            _string[_size++] = ch;
 
             return *this;
         }
@@ -1762,7 +1794,11 @@ namespace Core
             return strings;
         }
 
-        BaseString() = default;
+        BaseString()
+        {
+            // 32 is minimum size to optimize working with small strings
+            reserve(32);
+        }
 
         template<class IterT>
         BaseString(IterT first, IterT last)

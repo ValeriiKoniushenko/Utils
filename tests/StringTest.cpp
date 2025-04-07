@@ -292,8 +292,8 @@ TEST(StringTest, BaseString_char_OperationsWithEmptyString)
         StringAtom str;
         auto dynamic = str.getCopyAsDynamic();
         EXPECT_EQ(0, dynamic.size());
-        EXPECT_EQ(0, dynamic.capacity());
-        EXPECT_EQ(nullptr, dynamic.c_str());
+        EXPECT_NE(0, dynamic.capacity());
+        EXPECT_NE(nullptr, dynamic.c_str());
     }
 
     {

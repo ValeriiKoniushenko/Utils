@@ -104,11 +104,11 @@ static void BM_StringAtomPushingBack(benchmark::State& state)
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
+// BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 3)->Complexity();
 
 // BENCHMARK(BM_StringAtom_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
+// BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 3)->Complexity();
 
 BENCHMARK_MAIN();

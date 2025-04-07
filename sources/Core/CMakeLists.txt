@@ -4,6 +4,9 @@ file(
         "*.cpp"
 )
 
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+
 add_library(UtilsCore STATIC ${Sources})
 add_library(Utils::Core ALIAS UtilsCore)
 target_compile_features(UtilsCore PUBLIC ${CXX_STANDARD})
