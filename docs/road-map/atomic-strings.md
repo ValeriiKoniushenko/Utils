@@ -81,6 +81,25 @@ else
 // => Matched
 ```
 
+### Benchmark results
+
+| Benchmark                                  | Time (ns) | CPU (ns) | Iterations     |
+|-------------------------------------------|-----------|----------|----------------|
+| BM_StdStringComparison/2                  | 1.80      | 1.80     | 385,146,536    |
+| BM_StdStringComparison/8                  | 1.80      | 1.80     | 389,687,445    |
+| BM_StdStringComparison/64                 | 2.00      | 2.00     | 349,641,324    |
+| BM_StdStringComparison/512                | 4.04      | 4.03     | 173,257,057    |
+| BM_StdStringComparison/2048               | 15.0      | 14.9     | 47,864,830     |
+| BM_StdStringComparison_BigO               | 0.01 N    | 0.01 N   |                |
+| BM_StdStringComparison_RMS                | 27 %      | 27 %     |                |
+| BM_StringAtom_Static_Comparison/2         | 0.400     | 0.399    | 1,759,065,109  |
+| BM_StringAtom_Static_Comparison/8         | 0.399     | 0.398    | 1,751,357,249  |
+| BM_StringAtom_Static_Comparison/64        | 0.399     | 0.398    | 1,759,438,596  |
+| BM_StringAtom_Static_Comparison/512       | 0.399     | 0.398    | 1,754,651,687  |
+| BM_StringAtom_Static_Comparison/2048      | 0.399     | 0.398    | 1,757,571,927  |
+| BM_StringAtom_Static_Comparison_BigO      | 0.40 (1)  | 0.40 (1) |                |
+| BM_StringAtom_Static_Comparison_RMS       | 0 %       | 0 %      |                |
+
 ### Requirements
 
 #### CMake
