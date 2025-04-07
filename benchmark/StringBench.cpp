@@ -50,6 +50,21 @@ static void BM_StdStringPushingBack(benchmark::State& state)
     state.SetComplexityN(state.range(0));
 }
 
+static void BM_StdStringPushingBack_LongString(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        std::string str;
+
+        for (std::size_t i = 0; i < state.range(0); ++i)
+        {
+            str.append("Hello");
+        }
+        benchmark::DoNotOptimize(str);
+    }
+    state.SetComplexityN(state.range(0));
+}
+
 static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
 {
     Core::StringAtom str1;
@@ -104,11 +119,27 @@ static void BM_StringAtomPushingBack(benchmark::State& state)
     state.SetComplexityN(state.range(0));
 }
 
-// BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 3)->Complexity();
+static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        Core::StringAtom str;
+        for (std::size_t i = 0; i < state.range(0); ++i)
+        {
+            str.push_back("Hello");
+        }
+        benchmark::DoNotOptimize(str);
+    }
+    state.SetComplexityN(state.range(0));
+}
+
+BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
 
 // BENCHMARK(BM_StringAtom_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
-// BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 3)->Complexity();
+BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
 
 BENCHMARK_MAIN();
