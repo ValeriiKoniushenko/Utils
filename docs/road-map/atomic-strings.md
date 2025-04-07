@@ -27,6 +27,21 @@ if ("Hello" == "Hello"){}
 So, the implemetation of the new string brings you up second solution of the code example above! But it will
 be processed automatically.
 
+### Technical description
+
+Techinally, it is working only with addresses. So, when you are creating your atomic string - you will 
+register it in the global buffer of all atomic strings: ```class _StringPool```. But registration of the
+string will be procceded only once per one string-literal. So:
+```c++
+auto str1 = "Hello"_atom;
+auto str2 = "Hello"_atom;
+
+// the same addresses of "Hello"
+cout << (str1.data() == str2.data() ? "EQUAL" : "NO" ); // > EQUAL
+```
+
+So, in such case as above your strings will be only like a viewer of the real string literal "Hello".
+
 ### Quick example
 ```c++
 #include "Core/Strings.h"
