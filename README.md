@@ -12,19 +12,21 @@ The utilitary library for common solutions in your code. It has some count of al
 
 # Table of contents
 
-1. **[Getting started](#getting-started)**
-    1. [Build Requirements](#build-requirements)
-    2. [Installation](#installation)
-2. **[Road map](#road-map)**
-    1. [Common concepts](#common-concepts)
-    2. [Space coordinates](#working-with-space-coordinates)
-    3. [Math](#common-functions-to-work-with-math)
-    4. [Interfaces & patterns](#common-interfaces-%26-patterns)
-    5. [Enum-generator](#enum-generator)
-    6. [Atomic Strings](#atomic-strings)
-    7. [Delegates](#delegates)
-    8. [Asserts](#asserts)
-3. **[Feedback & Contacts](#feedback-%26-contacts)**
+[📑 Click me to open full doc](docs/index.md)
+
+> 1. **[Getting started](#getting-started)**
+>     1. [Build Requirements](#build-requirements)
+>     2. [Installation](#installation)
+> 2. **[Road map](#road-map)**
+>     1. [Common concepts](#common-concepts)
+>     2. [Space coordinates](#working-with-space-coordinates)
+>     3. [Math](#common-functions-to-work-with-math)
+>     4. [Interfaces & patterns](#common-interfaces-%26-patterns)
+>     5. [Enum-generator](#enum-generator)
+>     6. [Atomic Strings](#atomic-strings)
+>     7. [Delegates](#delegates)
+>     8. [Asserts](#asserts)
+> 3. **[Feedback & Contacts](#feedback-%26-contacts)**
 
 # Getting started
 
@@ -94,7 +96,7 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 Include it to your file: ```#include "Utils/Concepts.h"```
 
-
+[☝️ Go Top](#table-of-contents)
 
 ## Working with space coordinates
 
@@ -171,6 +173,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 - For ```GlobalPosition```: ```#include "Core/Position.h"```
 - For ```Size```: ```#include "Core/Size.h"```
 
+[☝️ Go Top](#table-of-contents)
+
 ## Common functions to work with Math
 
 ### Intro
@@ -218,6 +222,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 Just include it to your file: ```#include "Core/Math.h"```
 
+[☝️ Go Top](#table-of-contents)
+
 ## Common interfaces & patterns
 
 ### Intro
@@ -260,6 +266,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 - For singleton: ```#include "Core/Singleton.h"```
 - For interfaces: ```#include "Core/CommonInterfaces.h"```
+
+[☝️ Go Top](#table-of-contents)
 
 ## Enum-generator
 
@@ -318,6 +326,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 #### C++ side
 
 Just include: ```#include "Core/Enum.h"```
+
+[☝️ Go Top](#table-of-contents)
 
 ## Atomic strings
 
@@ -395,6 +405,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 - Main class: ```#include "Core/String.h"```
 - Strings' helpers: ```#include "Core/StringHelper.h"```
 
+[☝️ Go Top](#table-of-contents)
+
 ## Delegates
 
 ### Intro
@@ -456,6 +468,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 Just include: ```#include "Core/Delegate.h"```
 
+[☝️ Go Top](#table-of-contents)
+
 ## Asserts
 
 ### Intro
@@ -513,6 +527,8 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 #### C++ side
 
 Just include: ```#include "Core/Assert.h"```
+
+[☝️ Go Top](#table-of-contents)
 
 # Feedback & Contacts
 
