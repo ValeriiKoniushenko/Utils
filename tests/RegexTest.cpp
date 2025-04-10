@@ -122,6 +122,7 @@ TEST(RegexTest, SimpleCreate)
     EXPECT_EQ(6, match.size);
 }
 
+/*
 TEST(RegexTest, DISABLED_WitoutCompile)
 {
     RegexMatch regex("([A-Za-z]+)(#|!)", "1234 Hello# world!");
@@ -131,6 +132,7 @@ TEST(RegexTest, DISABLED_WitoutCompile)
 
     ASSERT_FALSE(match);
 }
+*/
 
 TEST(RegexTest, MatchAll)
 {

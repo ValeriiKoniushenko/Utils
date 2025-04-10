@@ -1819,7 +1819,7 @@ namespace Core
         {
             if (str)
             {
-                resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
+                this->resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
             }
         }
@@ -1945,7 +1945,6 @@ namespace Core
 
         Self& reserve(const SizeT newSize, bool isIgnoreMultiplier = false)
         {
-            const auto* oldString = _string;
             const auto oldCapacity = _capacity;
 
             const SizeT finalCapacity = newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + static_cast<SizeT>(1);
@@ -1989,12 +1988,12 @@ namespace Core
             }
             else if (newSize > _size || _policy == StringPolicy::Static)
             {
-                reserve(newSize, isIgnoreMultiplier);
+                this->reserve(newSize, isIgnoreMultiplier);
             }
             // for empty init
             else if (newSize == 0 && _policy == StringPolicy::None)
             {
-                reserve(1, isIgnoreMultiplier);
+                this->reserve(1, isIgnoreMultiplier);
             }
             _size = newSize;
 

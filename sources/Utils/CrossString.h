@@ -65,7 +65,7 @@ inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** ptr)
     return wcstok(str, delim, ptr);
 }
 
-inline void* memcpy_s(void* dest, uint64_t destsz, const void* src, uint64_t count)
+inline void* memcpy_s(void* dest, [[maybe_unused]] uint64_t destsz, const void* src, uint64_t count)
 {
     return memcpy(dest, src, count);
 }

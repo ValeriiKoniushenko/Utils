@@ -48,7 +48,7 @@ namespace Core
         [[nodiscard]] std::string getPattern() const { return _pattern; }
 
         void setCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
-        [[nodiscard]] uint32_t getCompileOptions(uint32_t options) const noexcept { return _compileOptions; }
+        [[nodiscard]] uint32_t getCompileOptions() const noexcept { return _compileOptions; }
 
         void setSubject(const char* subject) noexcept { _subject = subject; }
         [[nodiscard]] const char* getSubject() const noexcept { return _subject; }
@@ -159,7 +159,7 @@ namespace Core
         }
 
         void setMatchOptions(uint32_t options) noexcept { _matchOptions = options; }
-        [[nodiscard]] uint32_t getMatchOptions(uint32_t options) const noexcept { return _matchOptions; }
+        [[nodiscard]] uint32_t getMatchOptions() const noexcept { return _matchOptions; }
 
     protected:
         void onRegexCompiled() override;
@@ -235,7 +235,7 @@ namespace Core
         bool replace();
 
         void setReplaceOptions(uint32_t options) noexcept { _replaceOptions = options; }
-        [[nodiscard]] uint32_t GetReplaceOptions(uint32_t options) const noexcept { return _replaceOptions; }
+        [[nodiscard]] uint32_t GetReplaceOptions() const noexcept { return _replaceOptions; }
 
         void setReplacementString(const char* string) noexcept { _replacement = string; }
         [[nodiscard]] const char* getReplacementString() const noexcept { return _replacement; }
