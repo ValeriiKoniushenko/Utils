@@ -68,13 +68,26 @@ def ProcessGitSafeDir():
 
 def ProcessGitSubmodules():
     dependency_folder = "dependencies"
+    count = 0
     try:
         dependencies = os.listdir(dependency_folder)
+        count = len(dependencies)
+        if (count != 0):
+            for root, dirs, files in os.walk(dependency_folder):
+                for dir in dirs:
+                    count = len(dir)
+                    if count != 0:
+                        break
+
+                if count != 0:
+                        break
+                        
+                    
     except FileNotFoundError:
         printError("The folder '{dependency_folder}' does not exist.")
         return False
 
-    count = len(dependencies)
+
 
     if count == 0:
         while True:
