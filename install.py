@@ -68,28 +68,27 @@ def ProcessGitSafeDir():
 
 def ProcessGitSubmodules():
     dependency_folder = "dependencies"
-    count = 0
+    needProceed = True
     try:
         dependencies = os.listdir(dependency_folder)
         count = len(dependencies)
-        if (count != 0):
-            for root, dirs, files in os.walk(dependency_folder):
-                for dir in dirs:
-                    count = len(dir)
-                    if count != 0:
-                        break
 
-                if count != 0:
-                        break
-                        
+        if (count != 0):
+            countdownOfEmptyFolder = count
+            for root, dirs, _ in os.walk(dependency_folder):
+                for dir in dirs:
+                    if len(os.listdir(os.path.join(root, dir))) > 0:
+                        countdownOfEmptyFolder -= 1
+            
+            needProceed = countdownOfEmptyFolder > 0                        
                     
     except FileNotFoundError:
-        printError("The folder '{dependency_folder}' does not exist.")
+        printError(f"The folder '{dependency_folder}' does not exist.")
         return False
 
 
 
-    if count == 0:
+    if needProceed:
         while True:
             user_input = input("No dependencies found. Do you want to update git submodules? [Y/n]: ").strip().lower()
             if user_input in ["y", "yes", ""]:
