@@ -1480,6 +1480,7 @@ namespace Core
                 if (regex.replace())
                 {
                     // recal size
+                    output._size = 0;
                     while (output._string[output._size])
                     {
                         ++output._size;
