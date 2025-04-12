@@ -1336,7 +1336,7 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             if (isEmpty() || expr.empty())
             {
@@ -1350,6 +1350,8 @@ namespace Core
                 regex.setLimit(limit);
             }
             regex.setMatchOptions(matchOptions);
+            regex.setCompileOptions(compileOptions);
+
             if (regex.compile()) [[likely]]
             {
                 return regex.match();
@@ -1366,7 +1368,7 @@ namespace Core
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
-                                                                 uint32_t matchOptions = 0) const
+                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             if (isEmpty() || expr.empty())
             {
@@ -1380,6 +1382,8 @@ namespace Core
                 regex.setLimit(limit);
             }
             regex.setMatchOptions(matchOptions);
+            regex.setCompileOptions(compileOptions);
+
             if (regex.compile()) [[likely]]
             {
                 return regex.matchAll();
@@ -1395,11 +1399,11 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             if (!isEmpty())
             {
-                return regexFind(std::move(expr), offset, limit, matchOptions).isMatched();
+                return regexFind(std::move(expr), offset, limit, matchOptions, compileOptions).isMatched();
             }
 
             return false;
@@ -1416,7 +1420,7 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class FuncT, class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0) const
+        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             if (isEmpty() || expr.empty())
             {
@@ -1430,6 +1434,8 @@ namespace Core
                 regex.setLimit(limit);
             }
             regex.setMatchOptions(matchOptions);
+            regex.setCompileOptions(compileOptions);
+
             if (regex.compile()) [[likely]]
             {
                 regex.iterateOverMatches(std::forward<decltype(callback)>(callback));
