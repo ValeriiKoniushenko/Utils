@@ -121,7 +121,7 @@ namespace Core
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
             [[nodiscard]] T convertBasedOn(const char* origStr, uint64_t origSize) const
             {
-                if (offset + size >= origSize) [[unlikely]]
+                if (offset + size > origSize) [[unlikely]]
                 {
                     Assert();
                     return {};
