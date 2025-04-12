@@ -1403,7 +1403,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                return regexFind(std::move(expr), offset, limit, matchOptions, compileOptions).isMatched();
+                return regexFind(std::move(expr), offset, limit, matchOptions, compileOptions | PCRE2_ANCHORED).isMatched();
             }
 
             return false;
