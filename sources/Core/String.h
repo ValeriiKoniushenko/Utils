@@ -634,6 +634,7 @@ namespace Core
         [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
+        [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
         [[nodiscard]] SizeT length() const noexcept { return _size; }
         [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
