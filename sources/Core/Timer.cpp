@@ -25,17 +25,34 @@
 namespace Core
 {
 
-    void Repeater::update()
+    void Repeater::startOrUpdate()
     {
         if (_callback) [[likely]]
         {
-            const auto now = clock();
-            if (now - _lastCall >= _repeatTimeMs)
+            const auto now = std::chrono::system_clock::now();
+
+            if (!_startTime)
             {
-                _repeatTimeMs = now;
-                _callback(_repeatTimeMs);
+                _startTime = now;
+            }
+
+            const auto d = std::chrono::duration<double>(now - _lastCall).count();
+            if (d >= _repeatTime)
+            {
+                _callback(d);
+                _lastCall = now;
             }
         }
+    }
+
+    double Repeater::getTimeGap() const noexcept
+    {
+        if (!_startTime)
+        {
+            return 0;
+        }
+
+        return std::chrono::duration<double>(_lastCall - *_startTime).count();
     }
 
 } // namespace Core

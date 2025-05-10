@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <codecvt>
 #include <functional>
 
@@ -31,26 +32,29 @@ namespace Core
     class Repeater final
     {
     public:
-        using CallbackT = std::function<void(uint64_t)>;
+        using CallbackT = std::function<void(int)>;
 
     public:
-        constexpr Repeater() = default;
+        Repeater(double value = 0) { setRepeatTime(value); };
         ~Repeater() = default;
 
-        [[nodiscard]] uint64_t getRepeatTime() const noexcept { return _repeatTimeMs; }
-        void setRepeatTime(uint64_t ms) { _repeatTimeMs = ms; }
+        [[nodiscard]] double getRepeatTime() const noexcept { return _repeatTime; }
+        void setRepeatTime(double value) { _repeatTime = value; }
         void setCallback(CallbackT&& callback) { _callback = std::forward<CallbackT>(callback); };
         void reset()
         {
             _callback = nullptr;
-            _lastCall = 0;
+            _startTime.reset();
+            _lastCall = {};
         }
-        void update();
+        void startOrUpdate();
+        [[nodiscard]] double getTimeGap() const noexcept;
 
     private:
         CallbackT _callback;
-        uint64_t _repeatTimeMs = 1000;
-        uint64_t _lastCall = 0;
+        double _repeatTime = 1.0;
+        std::chrono::system_clock::time_point _lastCall;
+        std::optional<std::chrono::system_clock::time_point> _startTime;
     };
 
 } // namespace Core
