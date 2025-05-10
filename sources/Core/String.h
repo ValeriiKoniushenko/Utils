@@ -2259,16 +2259,16 @@ namespace Core
             const void* expr = nullptr;
             if constexpr (sizeof(CharT) == 1)
             {
-                expr = "\\{\\}";
+                expr = "{}";
             }
             else
             {
-                expr = L"\\{\\}";
+                expr = L"{}";
             }
 #ifdef UTILS__USE_STD_REGEX
             this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
 #else
-            this->regexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg));
+            this->replaceFirst(static_cast<const CharT*>(expr), String::MakeFrom(arg));
 #endif
         }
     };
