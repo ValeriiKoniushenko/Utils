@@ -1497,6 +1497,24 @@ namespace Core
             return false;
         }
 
+        /**
+         * @param expr regex pattern
+         * @param predictedScaleSize will scale future string allocation size based on
+         * the programmer prediction. If new string will be bigger than needed - it will
+         * pretend to UB. This function is using BaseString::Reserve - so final value will
+         * be multiplied to BaseString::_capacityMultiplier
+         * @param newValue new string for the replacement
+         * @param offset from the start of the string
+         * @param limit string size for searching of the matches
+         * @param replaceOptions corresponding to PCRE2 rules
+         */
+        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
+        bool regexReplaceAll(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+                             uint32_t replaceOptions = PCRE2_SUBSTITUTE_GLOBAL)
+        {
+            return regexReplace(std::move(expr), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions);
+        }
+
 #endif
 
         [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
