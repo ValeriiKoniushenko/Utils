@@ -1510,9 +1510,9 @@ namespace Core
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         bool regexReplaceAll(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
-                             uint32_t replaceOptions = PCRE2_SUBSTITUTE_GLOBAL)
+                             uint32_t replaceOptions = 0)
         {
-            return regexReplace(std::move(expr), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions);
+            return regexReplace(std::move(expr), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
 
 #endif
