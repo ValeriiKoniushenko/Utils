@@ -2364,10 +2364,10 @@ template<class CharType>
 
 inline Core::StringFormatter<char> operator""_f(const char* str, uint64_t size)
 {
-    return Core::StringFormatter<char>(str, size);
+    return { str, size };
 }
 
 inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, uint64_t size)
 {
-    return Core::StringFormatter<wchar_t>(str, size);
+    return { str, size };
 }
