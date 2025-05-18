@@ -18,5 +18,4 @@ def PrettyBaseString(val):
     else:
         return None
 
-# Auto-register when sourced
 gdb.pretty_printers.append(PrettyBaseString)
