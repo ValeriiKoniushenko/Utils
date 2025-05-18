@@ -1,3 +1,5 @@
+import re
+
 class BaseStringPrinter:
     def __init__(self, val):
         self.val = val
@@ -13,7 +15,7 @@ class BaseStringPrinter:
         return f'"{str_value}"'
 
 def PrettyBaseString(val):
-    if str(val.type) == 'Core::StringAtom':
+    if str(val.type) == 'Core::StringAtom' or re.match("Core::BaseString\<.*\>", str(val.type)):
         return BaseStringPrinter(val)
     else:
         return None
