@@ -27,21 +27,21 @@ namespace Core
 
     void Repeater::startOrUpdate()
     {
-        if (_callback) [[likely]]
+        const auto now = std::chrono::system_clock::now();
+
+        if (!_startTime)
         {
-            const auto now = std::chrono::system_clock::now();
+            _startTime = now;
+        }
 
-            if (!_startTime)
-            {
-                _startTime = now;
-            }
-
-            const auto d = std::chrono::duration<double>(now - _lastCall).count();
-            if (d >= _repeatTime)
+        const auto d = std::chrono::duration<double>(now - _lastCall).count();
+        if (d >= _repeatTime)
+        {
+            if (_callback) [[likely]]
             {
                 _callback(d);
-                _lastCall = now;
             }
+            _lastCall = now;
         }
     }
 
