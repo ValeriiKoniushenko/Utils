@@ -377,9 +377,11 @@ namespace Core
     };
 
     template<class CharType>
-    class _StringPool : public Singleton<_StringPool<CharType>, Utils::NotCopyableAndNotMoveable>
+    class _StringPool
     {
     public:
+        _StringPool() = delete;
+
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
         using StdStringViewT = typename Toolset::StdStringViewT;
@@ -390,7 +392,7 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] static StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
         {
             const auto currentHash = std::hash<StdStringViewT>{}({ string, size });
             if (auto&& it = _strings.find(currentHash); it != _strings.end())
@@ -407,7 +409,7 @@ namespace Core
         }
 
     private:
-        std::unordered_map<HashT, StringDataT> _strings;
+        inline static std::unordered_map<HashT, StringDataT> _strings;
     };
 
     class Iterator;
@@ -621,17 +623,17 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::add(newString, Toolset::Length(newString)) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
