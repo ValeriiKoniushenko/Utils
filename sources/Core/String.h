@@ -41,7 +41,7 @@
 #include <cwctype>
 #include <filesystem>
 #include <functional>
-#include <inttypes.h>
+#include <cinttypes>
 #include <optional>
 #include <regex>
 #include <type_traits>
@@ -74,20 +74,20 @@ namespace Core
     struct _StringToolset<char> : public Utils::Abstract
     {
         using CharT = char;
-        using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StdStringT [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(int ch) { return static_cast<bool>(isspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(strlen(string)); }
 
-        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
-        [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
-        [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
-        [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
-        [[nodiscard]] static uint64_t ToUInt64(const CharT* str) noexcept { return atoll(str); }
+        [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
+        [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
+        [[nodiscard, maybe_unused]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
+        [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
+        [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return atoll(str); }
 
-        static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
             {
@@ -95,7 +95,7 @@ namespace Core
             }
         }
 
-        static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%f", value); errorCode < 0)
             {
@@ -103,7 +103,7 @@ namespace Core
             }
         }
 
-        static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%lf", value); errorCode < 0)
             {
@@ -111,7 +111,7 @@ namespace Core
             }
         }
 
-        static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%s", value.generic_string().c_str()); errorCode < 0)
             {
@@ -119,7 +119,7 @@ namespace Core
             }
         }
 
-        static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
             {
@@ -127,7 +127,7 @@ namespace Core
             }
         }
 
-        static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRId64, value); errorCode < 0)
             {
@@ -135,12 +135,12 @@ namespace Core
             }
         }
 
-        [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
-        [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
-        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
+        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
 
-        [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
-        [[nodiscard]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
+        [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
+        [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
 
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
@@ -191,7 +191,8 @@ namespace Core
 
             return nullptr;
         }
-        static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
+
+        [[maybe_unused]] static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
         {
             return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
         }
@@ -201,20 +202,20 @@ namespace Core
     struct _StringToolset<wchar_t> : public Utils::Abstract
     {
         using CharT = wchar_t;
-        using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StdStringT [[maybe_unused]] [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
         using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
         [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
 
-        [[nodiscard]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
-        [[nodiscard]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
-        [[nodiscard]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
-        [[nodiscard]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
-        [[nodiscard]] static uint64_t ToUInt64(const CharT* str) noexcept { return _wtoll(str); }
+        [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
+        [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
+        [[nodiscard, maybe_unused]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
+        [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
+        [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return _wtoll(str); }
 
-        static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
             {
@@ -222,7 +223,7 @@ namespace Core
             }
         }
 
-        static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%f", value); errorCode < 0)
             {
@@ -230,7 +231,7 @@ namespace Core
             }
         }
 
-        static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lf", value); errorCode < 0)
             {
@@ -238,7 +239,7 @@ namespace Core
             }
         }
 
-        static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%s", value.wstring().c_str()); errorCode < 0)
             {
@@ -246,7 +247,7 @@ namespace Core
             }
         }
 
-        static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
             {
@@ -254,7 +255,7 @@ namespace Core
             }
         }
 
-        static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lld", value); errorCode < 0)
             {
@@ -262,12 +263,12 @@ namespace Core
             }
         }
 
-        [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
-        [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
-        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
+        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
 
-        [[nodiscard]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
-        [[nodiscard]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
+        [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
+        [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
 
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
@@ -318,7 +319,8 @@ namespace Core
 
             return nullptr;
         }
-        static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
+
+        [[maybe_unused]] static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
         {
             return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
         }
@@ -340,13 +342,13 @@ namespace Core
         using Settings = _StringSettings<CharType>;
         using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
 
-        StringData(SmartPointer&& ptr, typename Settings::SizeT newSize)
+        [[maybe_unused]] StringData(SmartPointer&& ptr, typename Settings::SizeT newSize)
             : str{ std::move(ptr) },
               size{ newSize }
         {
         }
 
-        StringData(const CharType* newString, typename Settings::SizeT newSize)
+        [[maybe_unused]] StringData(const CharType* newString, typename Settings::SizeT newSize)
         {
             str = SmartPointer(new CharType[newSize + static_cast<decltype(newSize)>(1)]);
             memcpy_s(str.get(), size * sizeof(CharType), newString, newSize * sizeof(CharType));
@@ -407,6 +409,7 @@ namespace Core
             return StringDataReadOnlyT{ addr, size };
         }
 
+        ~_StringPool() override = default;
     private:
         _StringPool() = default;
         friend Core::StrictSingleton<_StringPool<CharType>>;
@@ -605,22 +608,24 @@ namespace Core
         };
 
         using Iterator = BaseIterator<false>;
+        using ConstIterator = const BaseIterator<false>;
         using ReverseIterator = BaseIterator<true>;
+        using ConstReverseIterator = const BaseIterator<true>;
 
     public:
         [[nodiscard]] Iterator begin() noexcept { return Iterator{ _string, this }; }
-        [[nodiscard]] const Iterator begin() const noexcept { return Iterator{ _string, this }; }
-        [[nodiscard]] const Iterator cbegin() const noexcept { return Iterator{ _string, this }; }
+        [[nodiscard]] ConstIterator begin() const noexcept { return Iterator{ _string, this }; }
+        [[nodiscard]] ConstIterator cbegin() const noexcept { return Iterator{ _string, this }; }
         [[nodiscard]] Iterator end() noexcept { return Iterator{ _string + _size, this }; }
-        [[nodiscard]] const Iterator end() const noexcept { return Iterator{ _string + _size, this }; }
-        [[nodiscard]] const Iterator cend() const noexcept { return Iterator{ _string + _size, this }; }
+        [[nodiscard]] ConstIterator end() const noexcept { return Iterator{ _string + _size, this }; }
+        [[nodiscard]] ConstIterator cend() const noexcept { return Iterator{ _string + _size, this }; }
 
         [[nodiscard]] ReverseIterator rbegin() noexcept { return ReverseIterator{ _string + _size, this }; }
-        [[nodiscard]] const ReverseIterator rbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
-        [[nodiscard]] const ReverseIterator crbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] ConstReverseIterator rbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] ConstReverseIterator crbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
         [[nodiscard]] ReverseIterator rend() noexcept { return ReverseIterator{ _string, this }; }
-        [[nodiscard]] const ReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
-        [[nodiscard]] const ReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
+        [[nodiscard]] ConstReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
+        [[nodiscard]] ConstReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
 
         /**
          * @brief This function will use the provided string as a static string
@@ -1734,7 +1739,7 @@ namespace Core
 
         [[nodiscard]] bool isStatic() const noexcept { return _policy == StringPolicy::Static; }
         [[nodiscard]] bool isDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
-        [[nodiscard]] bool checkForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
+        [[nodiscard, maybe_unused]] bool checkForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
 
         [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const noexcept
         {
@@ -2111,7 +2116,7 @@ namespace Core
 
         static uint64_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
         {
-            if (!Verify(source, "Impossible to calculate count of lines in thext, because was passed NULL pointer to the string."))
+            if (!Verify(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
             {
                 return 0;
             }
@@ -2317,12 +2322,12 @@ inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t si
 
 inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size) noexcept
 {
-    return Core::BaseString<char>(str, size);
+    return {str, size};
 }
 
 inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size) noexcept
 {
-    return Core::BaseString<wchar_t>(str, size);
+    return {str, size};
 }
 
 template<class CharType>
