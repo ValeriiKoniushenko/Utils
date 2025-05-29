@@ -50,7 +50,7 @@
 
 namespace Core
 {
-    enum class StringPolicy
+    enum class StringPolicy : uint8_t
     {
         None,
         Static,
