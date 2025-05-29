@@ -377,11 +377,9 @@ namespace Core
     };
 
     template<class CharType>
-    class _StringPool
+    class _StringPool : public Core::StrictSingleton<_StringPool<CharType>>
     {
     public:
-        _StringPool() = delete;
-
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
         using StdStringViewT = typename Toolset::StdStringViewT;
@@ -392,10 +390,11 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] static StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
         {
-            const auto currentHash = std::hash<StdStringViewT>{}({ string, size });
-            if (auto&& it = _strings.find(currentHash); it != _strings.end())
+            const auto currentHash = std::hash<StdStringViewT>{}(StdStringViewT{ string, size });
+            auto it = _strings.find(currentHash);
+            if (it != _strings.end())
             {
                 return it->second.toReadOnly();
             }
@@ -409,7 +408,10 @@ namespace Core
         }
 
     private:
-        inline static std::unordered_map<HashT, StringDataT> _strings;
+        _StringPool() = default;
+        friend Core::StrictSingleton<_StringPool<CharType>>;
+
+        std::unordered_map<HashT, StringDataT> _strings = {};
     };
 
     class Iterator;
@@ -623,12 +625,12 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
