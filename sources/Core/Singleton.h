@@ -28,6 +28,13 @@
 #include <mutex>
 #include <type_traits>
 
+#define SINGLETONS_FRIEND(className)                                                                                                                 \
+    template<class, Utils::IsCopyableAndMoveableBehaviour, bool>                                                                                     \
+    friend class ::Core::BaseSingleton;                                                                                                              \
+                                                                                                                                                     \
+private:                                                                                                                                             \
+    className() = default;
+
 namespace Core
 {
 

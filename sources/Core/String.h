@@ -36,12 +36,12 @@
     #include "Regex.h"
 #endif
 
+#include <cinttypes>
 #include <codecvt>
 #include <cstring>
 #include <cwctype>
 #include <filesystem>
 #include <functional>
-#include <cinttypes>
 #include <optional>
 #include <regex>
 #include <type_traits>
@@ -135,9 +135,18 @@ namespace Core
             }
         }
 
-        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return strtok_s(string, delim, &context); };
-        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
-        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return strstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept
+        {
+            return strtok_s(string, delim, &context);
+        };
+        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept
+        {
+            return strstr(mainString, subString);
+        };
+        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
+        {
+            return strstr(mainString, subString);
+        };
 
         [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
         [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
@@ -263,9 +272,18 @@ namespace Core
             }
         }
 
-        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept { return wcstok_s(string, delim, &context); };
-        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
-        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept { return wcsstr(mainString, subString); };
+        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept
+        {
+            return wcstok_s(string, delim, &context);
+        };
+        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept
+        {
+            return wcsstr(mainString, subString);
+        };
+        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
+        {
+            return wcsstr(mainString, subString);
+        };
 
         [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
         [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
@@ -381,6 +399,7 @@ namespace Core
     template<class CharType>
     class _StringPool : public Core::StrictSingleton<_StringPool<CharType>>
     {
+        SINGLETONS_FRIEND(_StringPool)
     public:
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
@@ -409,11 +428,7 @@ namespace Core
             return StringDataReadOnlyT{ addr, size };
         }
 
-        ~_StringPool() override = default;
     private:
-        _StringPool() = default;
-        friend Core::StrictSingleton<_StringPool<CharType>>;
-
         std::unordered_map<HashT, StringDataT> _strings = {};
     };
 
@@ -1346,7 +1361,8 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                                        uint32_t compileOptions = 0) const
         {
             if (isEmpty() || expr.empty())
             {
@@ -1409,7 +1425,8 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                      uint32_t compileOptions = 0) const
         {
             if (!isEmpty())
             {
@@ -1430,7 +1447,8 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class FuncT, class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
         {
             if (isEmpty() || expr.empty())
             {
@@ -2322,12 +2340,12 @@ inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t si
 
 inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size) noexcept
 {
-    return {str, size};
+    return { str, size };
 }
 
 inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size) noexcept
 {
-    return {str, size};
+    return { str, size };
 }
 
 template<class CharType>
