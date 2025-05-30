@@ -655,7 +655,7 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
