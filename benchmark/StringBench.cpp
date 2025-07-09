@@ -22,6 +22,11 @@
 
 #include "Core/String.h"
 
+#ifdef _WIN32
+#undef max
+#undef min
+#endif
+
 #include <benchmark/benchmark.h>
 
 static void BM_StdStringComparison(benchmark::State& state)
