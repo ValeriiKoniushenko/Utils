@@ -2314,10 +2314,7 @@ namespace Core
             {
                 expr = L"{}";
             }
-#ifdef UTILS__USE_STD_REGEX
-            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
-#else
-    #if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
+#if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
             if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
             {
                 std::stringstream ss;
@@ -2325,7 +2322,11 @@ namespace Core
                    << std::endl;
                 Assert(ss.str().c_str());
             }
-    #endif
+#endif
+
+#ifdef UTILS__USE_STD_REGEX
+            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
+#else
             this->replaceFirst(static_cast<const CharT*>(expr), String::MakeFrom(arg));
 #endif
         }
