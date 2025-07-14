@@ -13,9 +13,9 @@ set(CXX_STANDARD)
 set(DEPENDENCIES_DIR dependencies)
 set(BENCHMARK_ENABLE_TESTING)
 
-InstallCXXStandardVersion()
-InstallDebugLevel()
-InstallBenchmarkDependenciesTesting()
+Utils_InstallCXXStandardVersion()
+Utils_InstallDebugLevel()
+Utils_InstallBenchmarkDependenciesTesting()
 
 
 # ========= Adding subdirectories =========
