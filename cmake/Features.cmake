@@ -3,6 +3,7 @@ include_guard()
 message(DEBUG "Utils' Feature.cmake was included" )
 
 function(Utils_InstallCXXStandardVersion)
+	message(DEBUG "Utils::Utils_InstallCXXStandardVersion - run" )
 	if(${REQUIRED_CXX_STANDARD} IN_LIST CMAKE_CXX_COMPILE_FEATURES)
 		set(CXX_STANDARD ${REQUIRED_CXX_STANDARD} PARENT_SCOPE)
 	else()
