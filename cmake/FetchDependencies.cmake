@@ -1,6 +1,6 @@
 include(FetchContent)
 
-message(DEBUG "Utils' FetchDependencies.cmake was included" )
+message(DEBUG "Utils::FetchDependencies.cmake was included" )
 
 FetchContent_Declare(Glm
         GIT_REPOSITORY https://github.com/g-truc/glm.git

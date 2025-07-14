@@ -1,6 +1,6 @@
 include_guard()
 
-message(DEBUG "Utils' Feature.cmake was included" )
+message(DEBUG "Utils::Feature.cmake was included" )
 
 function(Utils_InstallCXXStandardVersion)
 	message(DEBUG "Utils::Utils_InstallCXXStandardVersion - run" )

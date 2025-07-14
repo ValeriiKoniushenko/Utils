@@ -14,9 +14,7 @@ set(DEPENDENCIES_DIR dependencies)
 set(BENCHMARK_ENABLE_TESTING)
 
 Utils_InstallCXXStandardVersion()
-Utils_InstallDebugLevel()
 Utils_InstallBenchmarkDependenciesTesting()
-
 
 # ========= Adding subdirectories =========
 # Adding dependencies
@@ -26,3 +24,5 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
 add_subdirectory(benchmark)
 add_subdirectory(tests)
 add_subdirectory(sources)
+
+Utils_InstallDebugLevel()
