@@ -675,7 +675,18 @@ namespace Core
             {
                 return isEmpty() && other.isEmpty();
             }
-            return isStatic() && other.isStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
+
+            if (isStatic() && other.isStatic())
+            {
+                return _string == other._string;
+            }
+
+            if (_size == other._size)
+            {
+                return memcmp(_string, other._string, _size * sizeof(CharT)) == 0;
+            }
+
+            return Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
 
         [[nodiscard]] bool operator!=(const Self& other) const
