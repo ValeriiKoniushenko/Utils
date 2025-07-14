@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.30.0..)
 
 project(Utils VERSION 1.2.2 LANGUAGES CXX)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-
-include(Predefinitions)
-include(Features)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Predefinitions.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Features.cmake)
 
 # ========= Base setup & Predefinitions =========
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,7 +20,7 @@ InstallBenchmarkDependenciesTesting()
 
 # ========= Adding subdirectories =========
 # Adding dependencies
-include(FetchDependencies)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
 
 # Adding core
 add_subdirectory(benchmark)

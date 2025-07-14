@@ -48,6 +48,10 @@
 #include <unordered_map>
 #include <vector>
 
+#if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
+    #include <sstream>
+#endif
+
 namespace Core
 {
     enum class StringPolicy : uint8_t
@@ -2313,6 +2317,15 @@ namespace Core
 #ifdef UTILS__USE_STD_REGEX
             this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
 #else
+    #if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
+            if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
+            {
+                std::stringstream ss;
+                ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string
+                   << std::endl;
+                Assert(ss.str().c_str());
+            }
+    #endif
             this->replaceFirst(static_cast<const CharT*>(expr), String::MakeFrom(arg));
 #endif
         }

@@ -1,5 +1,7 @@
 include(FetchContent)
 
+message(DEBUG "Utils' FetchDependencies.cmake was included" )
+
 FetchContent_Declare(Glm
         GIT_REPOSITORY https://github.com/g-truc/glm.git
         GIT_TAG 1.0.1
