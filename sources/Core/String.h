@@ -673,11 +673,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                if (isEmpty() && other.isEmpty())
-                {
-                    return true;
-                }
-                return false;
+                return isEmpty() && other.isEmpty();
             }
             return isStatic() && other.isStatic() ? _string == other._string : Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
@@ -686,12 +682,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                if ((isEmpty() && !other.isEmpty()) || (!isEmpty() && other.isEmpty()))
-                {
-                    return true;
-                }
-
-                return false;
+                return (isEmpty() && !other.isEmpty()) || (!isEmpty() && other.isEmpty());
             }
             return isStatic() && other.isStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
         }
