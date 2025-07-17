@@ -29,6 +29,24 @@
 namespace Core
 {
 
+    template<class Type>
+    class Stopwatch final
+    {
+    private:
+        using clock = std::chrono::system_clock;
+        using duration = std::chrono::duration<Type>;
+
+    public:
+        void start() { _startTime = clock::now(); }
+        [[nodiscard]] Type stop() { return duration(clock::now() - _startTime).count(); }
+
+    private:
+        clock::time_point _startTime;
+    };
+
+    using FStopwatch = Stopwatch<float>;
+    using DStopwatch = Stopwatch<double>;
+
     class Repeater final
     {
     public:

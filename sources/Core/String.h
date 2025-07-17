@@ -691,11 +691,7 @@ namespace Core
 
         [[nodiscard]] bool operator!=(const Self& other) const
         {
-            if (isEmpty() || other.isEmpty())
-            {
-                return (isEmpty() && !other.isEmpty()) || (!isEmpty() && other.isEmpty());
-            }
-            return isStatic() && other.isStatic() ? _string != other._string : Toolset::Cmp(_string, other._string) != Comparison::Equal;
+            return !this->operator==(other);
         }
 
         [[nodiscard]] bool operator>(const Self& other) const

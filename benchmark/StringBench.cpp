@@ -162,12 +162,11 @@ static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
 BENCHMARK(BM_StringAtom_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
 BENCHMARK(BM_StdString_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
 
-// BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
-// BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
-// BENCHMARK(BM_StdStringPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
-//
-// BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
-// BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
-// BENCHMARK(BM_StringAtomPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StdStringPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack_LongString)->Range(2, 2 << 10)->Complexity();
 
 BENCHMARK_MAIN();
