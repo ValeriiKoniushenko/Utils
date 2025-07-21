@@ -33,6 +33,8 @@
     #include <stacktrace>
 #endif
 
+#ifdef UTILS_DEBUG
+
 inline void Assert(const bool condition, const char* message = nullptr)
 {
     if (condition)
@@ -50,7 +52,6 @@ inline void Assert(const bool condition, const char* message = nullptr)
          << std::stacktrace::current() << endl
 #endif
         ;
-#if defined(UTILS_DEBUG) && UTILS_DEBUG==1
     #if defined(__clang__)
         #if __has_builtin(__builtin_debugtrap)
             __builtin_debugtrap();
@@ -64,7 +65,6 @@ inline void Assert(const bool condition, const char* message = nullptr)
     #else
         static_assert(false, "Not implemented behaviour for your compiler.");
     #endif
-#endif
 }
 
 inline bool Verify(const bool condition, const char* message = nullptr)
@@ -75,5 +75,14 @@ inline bool Verify(const bool condition, const char* message = nullptr)
 
 inline void Assert(const char* message = nullptr)
 {
+    #ifdef UTILS_DEBUG
     Assert(false, message);
+    #endif
 }
+
+#else
+
+    #define Verify(cond, ...) cond
+    #define Assert(cond, ...) cond
+
+#endif

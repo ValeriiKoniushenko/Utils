@@ -27,6 +27,9 @@
 std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
 std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
 
+#ifdef UTILS_DEBUG
 void Assert(const Core::StringAtom& s);
 void Assert(bool value, const Core::StringAtom& s);
+
 [[nodiscard]] bool Verify(bool value, const Core::StringAtom& s);
+#endif

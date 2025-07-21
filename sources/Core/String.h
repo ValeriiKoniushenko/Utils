@@ -30,11 +30,7 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
-#ifdef UTILS__USE_STD_REGEX
-    #include <regex>
-#else
-    #include "Regex.h"
-#endif
+#include "Regex.h"
 
 #include <cinttypes>
 #include <codecvt>
@@ -462,10 +458,6 @@ namespace Core
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
         using StringPool = _StringPool<CharT>;
-#ifdef UTILS__USE_STD_REGEX
-        using StdRegex = std::basic_regex<CharT, std::regex_traits<CharT>>;
-        using StdRegexMatchResults = std::match_results<IteratorT>;
-#endif
 
         using value_type = CharT;
         using pointer = value_type*;
@@ -1065,11 +1057,8 @@ namespace Core
             {
                 expr = L"\\{\\}";
             }
-#ifdef UTILS__USE_STD_REGEX
-            (temp.RegexReplace(static_cast<const CharT*>(expr), MakeFrom(args), std::regex_constants::format_first_only), ...);
-#else
             (temp.regexReplace(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()), ...);
-#endif
+
             return temp;
         }
 
@@ -1270,92 +1259,6 @@ namespace Core
             return false;
         }
 
-#ifdef UTILS__USE_STD_REGEX
-        [[nodiscard, deprecated]] StdRegexMatchResults RegexFind(
-            StdStringViewT expr, int baseOffset = 0, std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-            std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (IsEmpty())
-            {
-                return {};
-            }
-
-            if (!Verify(!expr.empty(), "RegEx expr is empty"))
-            {
-                return {};
-            }
-
-            StdRegexMatchResults match;
-            std::regex_search(begin() + baseOffset, end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
-
-            return match;
-        }
-
-        [[deprecated]] void RegexIterate(StdStringViewT expr, std::function<bool(const StdRegexMatchResults&)>&& lambda, int baseOffset = 0,
-                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                         std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (IsEmpty())
-            {
-                return;
-            }
-
-            if (!Verify(!expr.empty(), "RegEx expr is empty"))
-            {
-                return;
-            }
-
-            StdRegex regexExpr(expr.data(), regexFlag);
-            auto first = std::regex_iterator<IteratorT>(begin() + baseOffset, end(), regexExpr, matchFlag);
-            auto last = std::regex_iterator<IteratorT>();
-            for (; first != last; ++first)
-            {
-                if (!std::invoke(lambda, *first))
-                {
-                    break;
-                }
-            }
-        }
-
-        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr,
-                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (!IsEmpty())
-            {
-                return std::regex_match(_string, StdRegex(expr.data(), regexFlag), matchFlag);
-            }
-
-            return false;
-        }
-
-        [[nodiscard, deprecated]] bool RegexMatch(StdStringViewT expr, std::match_results<Iterator<false>>& match,
-                                                  std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                                  std::regex::flag_type regexFlag = std::regex::ECMAScript) const
-        {
-            if (!IsEmpty())
-            {
-                return std::regex_match(begin(), end(), match, StdRegex(expr.data(), regexFlag), matchFlag);
-            }
-
-            return false;
-        }
-
-        [[deprecated]] bool RegexReplace(StdStringViewT expr, StdStringViewT newValue,
-                                         std::regex_constants::match_flag_type matchFlag = std::regex_constants::match_default,
-                                         std::regex::flag_type regexFlag = std::regex::ECMAScript)
-        {
-            const StdRegex regex(expr.data(), regexFlag);
-
-            BaseString temp;
-            std::regex_replace(std::back_inserter(temp), begin(), end(), regex, newValue.data(), matchFlag);
-            const auto wasReplaced = *this != temp;
-            *this = std::move(temp);
-            return wasReplaced;
-        }
-
-#else
-
         /**
          * @param expr regex pattern
          * @param offset from the start of the string
@@ -1543,8 +1446,6 @@ namespace Core
         {
             return regexReplace(std::move(expr), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-
-#endif
 
         [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
 
@@ -2322,11 +2223,7 @@ namespace Core
             }
 #endif
 
-#ifdef UTILS__USE_STD_REGEX
-            this->RegexReplace(static_cast<const CharT*>(expr), String::MakeFrom(arg), std::regex_constants::format_first_only);
-#else
             this->replaceFirst(static_cast<const CharT*>(expr), String::MakeFrom(arg));
-#endif
         }
     };
 
