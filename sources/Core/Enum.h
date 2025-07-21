@@ -33,16 +33,18 @@
 #define CreateEnum(Name, Type, ...)                                                                                                                  \
     struct Name                                                                                                                                      \
     {                                                                                                                                                \
-    private:                                                                                                                                         \
+    public:                                                                                                                                          \
         using SizeT = int32_t;                                                                                                                       \
         using KeyT = std::optional<Type>;                                                                                                            \
         using ValueT = std::string;                                                                                                                  \
+        using UnderlyingType = Type;                                                                                                                 \
                                                                                                                                                      \
     public:                                                                                                                                          \
         Name(Type value)                                                                                                                             \
             : _value(value)                                                                                                                          \
         {                                                                                                                                            \
         }                                                                                                                                            \
+                                                                                                                                                     \
         ~Name() = default;                                                                                                                           \
         Name(const Name&) = default;                                                                                                                 \
         Name(Name&&) = default;                                                                                                                      \
@@ -52,28 +54,34 @@
         {                                                                                                                                            \
             return _value == other._value;                                                                                                           \
         }                                                                                                                                            \
+                                                                                                                                                     \
         Name& operator=(Name other) noexcept                                                                                                         \
         {                                                                                                                                            \
             _value = other._value;                                                                                                                   \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
+                                                                                                                                                     \
         Name& operator=(Type value) noexcept                                                                                                         \
         {                                                                                                                                            \
             _value = value;                                                                                                                          \
             return *this;                                                                                                                            \
         }                                                                                                                                            \
+                                                                                                                                                     \
         bool operator!=(Name other) const noexcept                                                                                                   \
         {                                                                                                                                            \
             return _value != other._value;                                                                                                           \
         }                                                                                                                                            \
+                                                                                                                                                     \
         Type cast() const noexcept                                                                                                                   \
         {                                                                                                                                            \
             return _value;                                                                                                                           \
         }                                                                                                                                            \
+                                                                                                                                                     \
         operator Type() const noexcept                                                                                                               \
         {                                                                                                                                            \
             return _value;                                                                                                                           \
         }                                                                                                                                            \
+                                                                                                                                                     \
         ValueT toStr() const                                                                                                                         \
         {                                                                                                                                            \
             return Name::toStr(_value);                                                                                                              \
@@ -135,7 +143,7 @@
         {                                                                                                                                            \
             std::regex r("[A-Z]([\\w\\s =])*,");                                                                                                     \
             std::string temp = text + ",";                                                                                                           \
-                                                                                                                                                     \
+            bool error = false;                                                                                                                      \
             std::vector<std::string> tokens;                                                                                                         \
                                                                                                                                                      \
             for (std::sregex_iterator i = std::sregex_iterator(temp.begin(), temp.end(), r); i != std::sregex_iterator(); ++i)                       \
@@ -153,7 +161,7 @@
                 auto it = std::sregex_iterator(token.begin(), token.end(), r);                                                                       \
                 if (it == std::sregex_iterator())                                                                                                    \
                 {                                                                                                                                    \
-                    std::cerr << "Can't find a property inside an enum: '" << Name::getName() << "'" << std::endl;                                   \
+                    error = true;                                                                                                                    \
                     continue;                                                                                                                        \
                 }                                                                                                                                    \
                                                                                                                                                      \
@@ -171,7 +179,7 @@
                     if (it == std::sregex_iterator())                                                                                                \
                     {                                                                                                                                \
                         key.reset();                                                                                                                 \
-                        std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::getName() << "'" << std::endl;  \
+                        error = true;                                                                                                                \
                         isCouldntParseInThePast = true;                                                                                              \
                     }                                                                                                                                \
                     else                                                                                                                             \
@@ -182,13 +190,16 @@
                 }                                                                                                                                    \
                 else if (isCouldntParseInThePast)                                                                                                    \
                 {                                                                                                                                    \
-                    std::cerr << "Can't parse a property's('" << value << "') value inside the enum: '" << Name::getName() << "'" << std::endl;      \
+                    error = true;                                                                                                                    \
                 }                                                                                                                                    \
                                                                                                                                                      \
                 ++counter;                                                                                                                           \
                                                                                                                                                      \
                 data.emplace(key, value);                                                                                                            \
             }                                                                                                                                        \
+                                                                                                                                                     \
+            if (error)                                                                                                                               \
+                std::cerr << "Was met some errors while parsing of the enum: " << Name::getName() << std::endl;                                      \
                                                                                                                                                      \
             return data;                                                                                                                             \
         }();                                                                                                                                         \
