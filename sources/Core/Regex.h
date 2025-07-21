@@ -123,7 +123,7 @@ namespace Core
             {
                 if (offset + size > origSize) [[unlikely]]
                 {
-                    Assert();
+                    Assert(false);
                     return {};
                 }
 

@@ -82,7 +82,7 @@ inline void Assert(const char* message = nullptr)
 
 #else
 
-    #define Verify(cond, ...) cond
-    #define Assert(cond, ...) cond
+    #define Verify(cond, ...) (cond)
+    #define Assert(cond, ...) (cond)
 
 #endif
