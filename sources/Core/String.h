@@ -44,7 +44,7 @@
 #include <unordered_map>
 #include <vector>
 
-#if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
+#ifdef UTILS_DEBUG
     #include <sstream>
 #endif
 
@@ -2213,7 +2213,7 @@ namespace Core
             {
                 expr = L"{}";
             }
-#if defined(UTILS_DEBUG) && UTILS_DEBUG == 1
+#ifdef UTILS_DEBUG
             if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
             {
                 std::stringstream ss;
