@@ -47,6 +47,8 @@ namespace Core
             };
 
         public:
+            ID() = default;
+
             ID(Delegate<F>* owner, IdT newId)
                 : _owner{ owner },
                   _id{ newId }
@@ -80,8 +82,8 @@ namespace Core
             }
 
         private:
-            IdT _id = invalidID;
             Delegate<F>* _owner = nullptr;
+            IdT _id = invalidID;
         };
 
         using CallbackT = std::function<F>;
