@@ -42,11 +42,26 @@ TEST(PositionTests, SimpleCreation)
     }
 
     {
-        glm::vec3 ss (3);
+        glm::vec3 ss(3);
         GPos pos(3);
         EXPECT_EQ(3, pos.x);
         EXPECT_EQ(3, pos.y);
         EXPECT_EQ(3, pos.z);
     }
+}
+TEST(PositionTests, DoubleConvestionFromToGlm)
+{
+    {
+        GPos pos = glm::vec3(3, 1, 2);
+        EXPECT_EQ(3, pos.x);
+        EXPECT_EQ(1, pos.y);
+        EXPECT_EQ(2, pos.z);
+    }
 
+    {
+        glm::vec3 pos = GPos(3, 1, 2);
+        EXPECT_EQ(3, pos.x);
+        EXPECT_EQ(1, pos.y);
+        EXPECT_EQ(2, pos.z);
+    }
 }

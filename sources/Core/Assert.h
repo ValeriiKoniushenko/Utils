@@ -29,7 +29,7 @@
     #include <debugapi.h>
 #endif
 
-#ifdef __cpp_lib_stacktrace && !defined(DONT_USE_CPP_LIB_STACKTRACE)
+#if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
     #include <stacktrace>
 #endif
 
@@ -47,7 +47,7 @@ inline void Assert(const bool condition, const char* message = nullptr)
 
     cerr << "Assert was got: " << endl
          << "Message: " << (message ? message : "None") << endl
-#ifdef __cpp_lib_stacktrace && !defined(DONT_USE_CPP_LIB_STACKTRACE)
+#if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
          << "Stacktrace: " << endl
          << std::stacktrace::current() << endl
 #endif
