@@ -42,6 +42,26 @@ namespace Core
         using ObjectType = Size<ValueType, DimensionValue>;
         using GlmObjectType = glm::vec<DimensionValue, T, glm::highp>;
 
+        Size() = default;
+
+        constexpr explicit Size(T scalar)
+            : width{ scalar },
+              height{ scalar }
+        {
+        }
+
+        constexpr explicit Size(T w, T h)
+            : width{ w },
+              height{ h }
+        {
+        }
+
+        constexpr explicit Size(GlmObjectType value)
+            : width{ value.x },
+              height{ value.y }
+        {
+        }
+
         T width{};
         T height{};
 
@@ -69,25 +89,25 @@ namespace Core
 
         [[nodiscard]] constexpr ObjectType operator+(const ObjectType& value) const noexcept
         {
-            return { width + value.width, height + value.height };
+            return ObjectType{ width + value.width, height + value.height };
         }
 
-        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept { return { width + offset, height + offset }; }
+        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept { return ObjectType{ width + offset, height + offset }; }
 
         [[nodiscard]] constexpr ObjectType operator-(const ObjectType& value) const noexcept
         {
-            return { width - value.width, height - value.height };
+            return ObjectType{ width - value.width, height - value.height };
         }
 
         [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept { return { width - offset, height - offset }; }
 
-        [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const { return { width * value.width, height * value.height }; }
+        [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const { return ObjectType{ width * value.width, height * value.height }; }
 
-        [[nodiscard]] constexpr ObjectType operator*(T offset) const { return { width * offset, height * offset }; }
+        [[nodiscard]] constexpr ObjectType operator*(T offset) const { return ObjectType{ width * offset, height * offset }; }
 
-        [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const { return { width / value.width, height / value.height }; }
+        [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const { return ObjectType{ width / value.width, height / value.height }; }
 
-        [[nodiscard]] constexpr ObjectType operator/(T offset) const { return { width / offset, height / offset }; }
+        [[nodiscard]] constexpr ObjectType operator/(T offset) const { return ObjectType{ width / offset, height / offset }; }
 
         constexpr ObjectType& operator+=(const ObjectType& other) noexcept
         {
@@ -120,7 +140,7 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height) };
+            return CastType{ static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height) };
         }
 
         [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height }; }
@@ -131,7 +151,7 @@ namespace Core
             return { width, height };
         }
 
-        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept { return { vec.x, vec.y }; }
+        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept { return ObjectType{ vec.x, vec.y }; }
     };
 
     template<Utils::IsArithmetic T>
@@ -141,6 +161,29 @@ namespace Core
         using ValueType = T;
         using ObjectType = Size<ValueType, DimensionValue>;
         using GlmObjectType = glm::vec<DimensionValue, T, glm::highp>;
+
+        Size() = default;
+
+        constexpr explicit Size(T scalar)
+            : width{ scalar },
+              height{ scalar },
+              deep{ scalar }
+        {
+        }
+
+        constexpr explicit Size(T w, T h, T d)
+            : width{ w },
+              height{ h },
+              deep{ d }
+        {
+        }
+
+        constexpr explicit Size(GlmObjectType value)
+            : width{ value.x },
+              height{ value.y },
+              deep{ value.z }
+        {
+        }
 
         T width{};
         T height{};
@@ -231,7 +274,8 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height), static_cast<CastType::ValueType>(deep) };
+            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height),
+                     static_cast<CastType::ValueType>(deep) };
         }
 
         [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height, deep }; }
