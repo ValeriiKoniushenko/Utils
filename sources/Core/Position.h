@@ -35,17 +35,25 @@ namespace Core
     template<typename T, glm::qualifier Q>
     struct GlobalPosition<2, T, Q> : public glm::vec<2, T, Q>
     {
-        using Parent = glm::vec<2,T,Q>;
-        using glm::vec<2,T,Q>::vec;
+        using Parent = glm::vec<2, T, Q>;
+        using glm::vec<2, T, Q>::vec;
+
+        GlobalPosition(Parent value)
+            : Parent(value)
+        {
+        }
     };
 
     template<typename T, glm::qualifier Q>
     struct GlobalPosition<3, T, Q> : public glm::vec<3, T, Q>
     {
-        using Parent = glm::vec<3,T,Q>;
-        using glm::vec<3,T,Q>::vec;
+        using Parent = glm::vec<3, T, Q>;
+        using glm::vec<3, T, Q>::vec;
 
-        GlobalPosition(const Parent& value) : Parent(value){}
+        GlobalPosition(const Parent& value)
+            : Parent(value)
+        {
+        }
     };
 
     using GlobalPosition3F = GlobalPosition<3, float>;
