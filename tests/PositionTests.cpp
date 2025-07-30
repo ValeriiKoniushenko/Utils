@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 Valerii Koniushenko
+// Copyright (c) 2024 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,37 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "Core/Position.h"
 
-#include "glm/glm.hpp"
+#include <gtest/gtest.h>
 
-namespace Core
+using namespace Core;
+
+using GPos = GlobalPosition3F;
+
+TEST(PositionTests, SimpleCreation)
 {
-    template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-    struct GlobalPosition : public glm::vec<L, T, Q>
     {
-        static_assert("Incomplete type. You can use only 2(XY) or 3(XYZ).");
-    };
+        GPos pos;
+    }
 
-    template<typename T, glm::qualifier Q>
-    struct GlobalPosition<2, T, Q> : public glm::vec<2, T, Q>
     {
-        using glm::vec<2,T,Q>::vec;
-    };
+        GPos pos(3, 1, 2);
+        EXPECT_EQ(3, pos.x);
+        EXPECT_EQ(1, pos.y);
+        EXPECT_EQ(2, pos.z);
+    }
 
-    template<typename T, glm::qualifier Q>
-    struct GlobalPosition<3, T, Q> : public glm::vec<3, T, Q>
     {
-        using glm::vec<3,T,Q>::vec;
-    };
+        glm::vec3 ss (3);
+        GPos pos(3);
+        EXPECT_EQ(3, pos.x);
+        EXPECT_EQ(3, pos.y);
+        EXPECT_EQ(3, pos.z);
+    }
 
-    using GlobalPosition3F = GlobalPosition<3, float>;
-    using GlobalPosition2F = GlobalPosition<2, float>;
-
-    using GlobalPosition3D = GlobalPosition<3, double>;
-    using GlobalPosition2D = GlobalPosition<2, double>;
-
-    using GlobalPosition3I = GlobalPosition<3, int>;
-    using GlobalPosition2I = GlobalPosition<2, int>;
-
-} // namespace Core
+}
