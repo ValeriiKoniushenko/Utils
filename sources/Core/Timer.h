@@ -50,7 +50,7 @@ namespace Core
     class Repeater final
     {
     public:
-        using CallbackT = std::function<void(int)>;
+        using CallbackT = std::function<void(double)>;
 
     public:
         Repeater(double value = 0) { setRepeatTime(value); };
@@ -58,6 +58,10 @@ namespace Core
 
         [[nodiscard]] double getRepeatTime() const noexcept { return _repeatTime; }
         void setRepeatTime(double value) { _repeatTime = value; }
+
+        /**
+         * @brief will call the callback and pass one arg: delta time
+         */
         void setCallback(CallbackT&& callback) { _callback = std::forward<CallbackT>(callback); };
         void reset()
         {
