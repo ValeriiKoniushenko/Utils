@@ -31,7 +31,7 @@
 #include <unordered_map>
 
 #define CreateEnum(Name, Type, ...)                                                                                                                  \
-    struct Name                                                                                                                                      \
+    struct Name final                                                                                                                                \
     {                                                                                                                                                \
     public:                                                                                                                                          \
         using SizeT = int32_t;                                                                                                                       \
@@ -50,7 +50,7 @@
         Name(Name&&) = default;                                                                                                                      \
         Name& operator=(Name&&) = default;                                                                                                           \
                                                                                                                                                      \
-        bool operator==(Name other) const noexcept                                                                                                   \
+        [[nodiscard]] bool operator==(Name other) const noexcept                                                                                     \
         {                                                                                                                                            \
             return _value == other._value;                                                                                                           \
         }                                                                                                                                            \
@@ -67,22 +67,22 @@
             return *this;                                                                                                                            \
         }                                                                                                                                            \
                                                                                                                                                      \
-        bool operator!=(Name other) const noexcept                                                                                                   \
+        [[nodiscard]] bool operator!=(Name other) const noexcept                                                                                     \
         {                                                                                                                                            \
             return _value != other._value;                                                                                                           \
         }                                                                                                                                            \
                                                                                                                                                      \
-        Type cast() const noexcept                                                                                                                   \
+        [[nodiscard]] Type cast() const noexcept                                                                                                     \
         {                                                                                                                                            \
             return _value;                                                                                                                           \
         }                                                                                                                                            \
                                                                                                                                                      \
-        operator Type() const noexcept                                                                                                               \
+        [[nodiscard]] operator Type() const noexcept                                                                                                 \
         {                                                                                                                                            \
             return _value;                                                                                                                           \
         }                                                                                                                                            \
                                                                                                                                                      \
-        ValueT toStr() const                                                                                                                         \
+        [[nodiscard]] ValueT toStr() const                                                                                                           \
         {                                                                                                                                            \
             return Name::toStr(_value);                                                                                                              \
         }                                                                                                                                            \
@@ -99,13 +99,17 @@
             return static_cast<Name::SizeT>(match_count + 1);                                                                                        \
         }();                                                                                                                                         \
                                                                                                                                                      \
-        static ValueT toStr(Type key)                                                                                                                \
+        [[nodiscard]] static ValueT toStr(Type key)                                                                                                  \
         {                                                                                                                                            \
             auto it = map.find(KeyT(key));                                                                                                           \
             if (it == map.end())                                                                                                                     \
             {                                                                                                                                        \
-                std::cerr << "Impossible to find a way to convert a value '" << key << "' to string inside the enum: '" << Name::getName() << "'"    \
-                          << std::endl;                                                                                                              \
+                static const bool _ = [key]()                                                                                                        \
+                {                                                                                                                                    \
+                    std::cerr << "Impossible to find a way to convert a value '" << key << "' to string inside the enum: '" << Name::getName()       \
+                              << "'" << std::endl;                                                                                                   \
+                    return true;                                                                                                                     \
+                }();                                                                                                                                 \
                 return {};                                                                                                                           \
             }                                                                                                                                        \
                                                                                                                                                      \
@@ -114,16 +118,20 @@
                                                                                                                                                      \
         static KeyT fromStr(const ValueT& value)                                                                                                     \
         {                                                                                                                                            \
-            auto it = std::find_if(map.begin(), map.end(),                                                                                           \
-                                   [&value](auto pair)                                                                                               \
-                                   {                                                                                                                 \
-                                       return pair.second == value;                                                                                  \
-                                   });                                                                                                               \
+            auto it = std::ranges::find_if(map,                                                                                                      \
+                                           [&value](auto pair)                                                                                       \
+                                           {                                                                                                         \
+                                               return pair.second == value;                                                                          \
+                                           });                                                                                                       \
                                                                                                                                                      \
             if (it == map.end())                                                                                                                     \
             {                                                                                                                                        \
-                std::cerr << "Impossible to find a way to convert a string '" << value << "' to string inside the enum: '" << Name::getName() << "'" \
-                          << std::endl;                                                                                                              \
+                static const bool _ = [&value]()                                                                                                     \
+                {                                                                                                                                    \
+                    std::cerr << "Impossible to find a way to convert a string '" << value << "' to string inside the enum: '" << Name::getName()    \
+                              << "'" << std::endl;                                                                                                   \
+                    return true;                                                                                                                     \
+                }();                                                                                                                                 \
                 return {};                                                                                                                           \
             }                                                                                                                                        \
                                                                                                                                                      \
@@ -141,12 +149,11 @@
         inline static const ValueT text = #__VA_ARGS__;                                                                                              \
         inline static const ContainerT map = []()                                                                                                    \
         {                                                                                                                                            \
-            std::regex r("[A-Z]([\\w\\s =])*,");                                                                                                     \
+            std::regex tokenRegex("[A-Z]([\\w\\s =])*,");                                                                                            \
             std::string temp = text + ",";                                                                                                           \
-            bool error = false;                                                                                                                      \
             std::vector<std::string> tokens;                                                                                                         \
                                                                                                                                                      \
-            for (std::sregex_iterator i = std::sregex_iterator(temp.begin(), temp.end(), r); i != std::sregex_iterator(); ++i)                       \
+            for (std::sregex_iterator i = std::sregex_iterator(temp.begin(), temp.end(), tokenRegex); i != std::sregex_iterator(); ++i)              \
             {                                                                                                                                        \
                 tokens.emplace_back(std::smatch(*i).str());                                                                                          \
             }                                                                                                                                        \
@@ -155,51 +162,46 @@
             Type counter{};                                                                                                                          \
             bool isCouldntParseInThePast = false;                                                                                                    \
                                                                                                                                                      \
-            for (auto& token : tokens)                                                                                                               \
+            for (auto token : tokens)                                                                                                                \
             {                                                                                                                                        \
-                std::regex r("[A-Z]\\w*");                                                                                                           \
-                auto it = std::sregex_iterator(token.begin(), token.end(), r);                                                                       \
-                if (it == std::sregex_iterator())                                                                                                    \
+                std::regex subTokenRegex("^[A-Z]\\w*");                                                                                              \
+                auto iter = std::sregex_iterator(token.begin(), token.end(), subTokenRegex);                                                         \
+                if (iter == std::sregex_iterator())                                                                                                  \
                 {                                                                                                                                    \
-                    error = true;                                                                                                                    \
                     continue;                                                                                                                        \
                 }                                                                                                                                    \
                                                                                                                                                      \
-                const ValueT value = std::smatch(*it).str();                                                                                         \
+                const ValueT value = std::smatch(*iter).str();                                                                                       \
                 KeyT key;                                                                                                                            \
                 if (!isCouldntParseInThePast)                                                                                                        \
                 {                                                                                                                                    \
                     key = counter;                                                                                                                   \
                 }                                                                                                                                    \
                                                                                                                                                      \
-                if (token.find_first_of('=') != std::string::npos)                                                                                   \
+                if (auto pos = token.find_first_of('='); pos != std::string::npos)                                                                   \
                 {                                                                                                                                    \
-                    std::regex r("[0-9]+");                                                                                                          \
-                    auto it = std::sregex_iterator(token.begin(), token.end(), r);                                                                   \
-                    if (it == std::sregex_iterator())                                                                                                \
+                    ++pos;                                                                                                                           \
+                    for (; std::isspace(token[pos]) && pos < token.size(); ++pos)                                                                    \
+                    {                                                                                                                                \
+                    }                                                                                                                                \
+                    token = token.substr(pos);                                                                                                       \
+                                                                                                                                                     \
+                    std::regex valueRegex("^[0-9]+,?$");                                                                                             \
+                    if (!std::regex_match(token.begin(), token.end(), valueRegex))                                                                   \
                     {                                                                                                                                \
                         key.reset();                                                                                                                 \
-                        error = true;                                                                                                                \
                         isCouldntParseInThePast = true;                                                                                              \
                     }                                                                                                                                \
                     else                                                                                                                             \
                     {                                                                                                                                \
-                        key = counter = static_cast<Type>(atoll(std::smatch(*it).str().c_str()));                                                    \
+                        key = counter = static_cast<Type>(atoll(token.c_str()));                                                                     \
                         isCouldntParseInThePast = false;                                                                                             \
                     }                                                                                                                                \
                 }                                                                                                                                    \
-                else if (isCouldntParseInThePast)                                                                                                    \
-                {                                                                                                                                    \
-                    error = true;                                                                                                                    \
-                }                                                                                                                                    \
-                                                                                                                                                     \
                 ++counter;                                                                                                                           \
                                                                                                                                                      \
                 data.emplace(key, value);                                                                                                            \
             }                                                                                                                                        \
-                                                                                                                                                     \
-            if (error)                                                                                                                               \
-                std::cerr << "Was met some errors while parsing of the enum: " << Name::getName() << std::endl;                                      \
                                                                                                                                                      \
             return data;                                                                                                                             \
         }();                                                                                                                                         \

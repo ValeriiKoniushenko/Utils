@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <iostream>
 
 #ifdef _MSC_VER
@@ -52,19 +53,7 @@ inline void Assert(const bool condition, const char* message = nullptr)
          << std::stacktrace::current() << endl
 #endif
         ;
-    #if defined(__clang__)
-        #if __has_builtin(__builtin_debugtrap)
-            __builtin_debugtrap();
-        #else
-            #warning Not implemented for this compiler
-        #endif
-    #elif defined(_MSC_VER)
-        DebugBreak();
-    #elif defined(__GNUC__) || defined(__GNUG__)
-        __builtin_trap();
-    #else
-        static_assert(false, "Not implemented behaviour for your compiler.");
-    #endif
+    assert(condition);
 }
 
 inline bool Verify(const bool condition, const char* message = nullptr)
@@ -73,16 +62,14 @@ inline bool Verify(const bool condition, const char* message = nullptr)
     return condition;
 }
 
-inline void Assert(const char* message = nullptr)
+[[maybe_unused]] inline void Assert(const char* message = nullptr)
 {
-    #ifdef UTILS_DEBUG
     Assert(false, message);
-    #endif
 }
 
 #else
 
     #define Verify(cond, ...) (cond)
-    #define Assert(cond, ...) (void)(cond)
+    #define Assert(cond, ...) ((void)0)
 
 #endif

@@ -12,6 +12,8 @@ else ()
         "-Wall"
         "-Wextra"
         "-Werror"
+        "-Wno-error=unused-variable"
+        "-Wno-unused-variable"
         "$<$<CONFIG:DEBUG>:-g3>"
         "$<$<CONFIG:DEBUG>:-O0>"
         "$<$<CONFIG:DEBUG>:-fno-inline>"
