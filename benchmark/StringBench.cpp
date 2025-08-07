@@ -46,7 +46,7 @@ static void BM_StdStringPushingBack(benchmark::State& state)
     for (auto _ : state)
     {
         std::string str;
-        for (std::size_t i = 0; i < state.range(0); ++i)
+        for (int64_t i = 0; i < state.range(0); ++i)
         {
             str.push_back('a');
         }
@@ -61,7 +61,7 @@ static void BM_StdStringPushingBack_LongString(benchmark::State& state)
     {
         std::string str;
 
-        for (std::size_t i = 0; i < state.range(0); ++i)
+        for (int64_t i = 0; i < state.range(0); ++i)
         {
             str.append("Hello");
         }
@@ -73,13 +73,13 @@ static void BM_StdStringPushingBack_LongString(benchmark::State& state)
 static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
 {
     Core::StringAtom str1;
-    for (int i = 0; i < state.range(0); ++i)
+    for (int64_t i = 0; i < state.range(0); ++i)
     {
         str1.push_back('a');
     }
 
     Core::StringAtom str2;
-    for (int i = 0; i < state.range(0); ++i)
+    for (int64_t i = 0; i < state.range(0); ++i)
     {
         str2.push_back('a');
     }
@@ -94,13 +94,13 @@ static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
 static void BM_StdString_Dynamic_Comparison(benchmark::State& state)
 {
     std::string str1;
-    for (int i = 0; i < state.range(0); ++i)
+    for (int64_t i = 0; i < state.range(0); ++i)
     {
         str1.push_back('a');
     }
 
     std::string str2;
-    for (int i = 0; i < state.range(0); ++i)
+    for (int64_t i = 0; i < state.range(0); ++i)
     {
         str2.push_back('a');
     }
@@ -115,7 +115,7 @@ static void BM_StdString_Dynamic_Comparison(benchmark::State& state)
 static void BM_StringAtom_Static_Comparison(benchmark::State& state)
 {
     Core::StringAtom mainString;
-    for (int i = 0; i < state.range(0); ++i)
+    for (int64_t i = 0; i < state.range(0); ++i)
     {
         mainString.push_back('a');
     }
@@ -136,7 +136,7 @@ static void BM_StringAtomPushingBack(benchmark::State& state)
     for (auto _ : state)
     {
         Core::StringAtom str;
-        for (std::size_t i = 0; i < state.range(0); ++i)
+        for (int64_t i = 0; i < state.range(0); ++i)
         {
             str.push_back('a');
         }
@@ -150,7 +150,7 @@ static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
     for (auto _ : state)
     {
         Core::StringAtom str;
-        for (std::size_t i = 0; i < state.range(0); ++i)
+        for (int64_t i = 0; i < state.range(0); ++i)
         {
             str.push_back("Hello");
         }

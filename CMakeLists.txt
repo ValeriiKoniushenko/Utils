@@ -5,6 +5,22 @@ project(Utils VERSION 1.2.2 LANGUAGES CXX)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Predefinitions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Features.cmake)
 
+if (MSVC)
+    add_compile_options("/W4" "$<$<CONFIG:RELEASE>:/O2>")
+else ()
+    add_compile_options(
+        "-Wall"
+        "-Wextra"
+        "-Werror"
+        "$<$<CONFIG:DEBUG>:-g3>"
+        "$<$<CONFIG:DEBUG>:-O0>"
+        "$<$<CONFIG:DEBUG>:-fno-inline>"
+        "$<$<CONFIG:DEBUG>:-fno-omit-frame-pointer>"
+        "$<$<CONFIG:RELEASE>:-O3>"
+    )
+endif ()
+
+
 # ========= Base setup & Predefinitions =========
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(REQUIRED_CXX_STANDARD cxx_std_23) # read-only

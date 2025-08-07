@@ -5,7 +5,7 @@
 TEST(CoreTests, Size2Area)
 {
     {
-        constexpr Core::FSize2 fSize2;
+        constexpr Core::FSize2 _;
     }
     {
         constexpr float v = 5.5f;
@@ -166,7 +166,7 @@ TEST(CoreTests, Size2Appending)
     }
 
     {
-        const float v1 = 5.5f, v2 = 3.3f;
+        const float v1 = 5.5f;
         auto a= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v1, v1 };
         auto correct= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v1 + 1.f, v1 + 1.f };
         a += 1.f;

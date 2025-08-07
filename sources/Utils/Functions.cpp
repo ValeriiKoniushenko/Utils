@@ -54,7 +54,7 @@ namespace Utils
         file.read(out.data(), size);
         file.close();
 
-        return std::move(out);
+        return out;
     }
 
 } // namespace Utils

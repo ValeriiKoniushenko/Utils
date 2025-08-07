@@ -32,7 +32,7 @@ using RPos3 = RelativePosition3F;
 TEST(PositionTests3, SimpleCreation)
 {
     {
-        GPos3 pos;
+        GPos3 _;
     }
 
     {
@@ -43,7 +43,6 @@ TEST(PositionTests3, SimpleCreation)
     }
 
     {
-        glm::vec3 ss(3);
         GPos3 pos(3);
         EXPECT_EQ(3, pos.x);
         EXPECT_EQ(3, pos.y);
@@ -167,7 +166,7 @@ using RPos2 = RelativePosition2F;
 TEST(PositionTests2, SimpleCreation)
 {
     {
-        GPos2 pos;
+        GPos2 _;
     }
 
     {
@@ -177,7 +176,6 @@ TEST(PositionTests2, SimpleCreation)
     }
 
     {
-        glm::vec2 ss(3);
         GPos2 pos(3);
         EXPECT_EQ(3, pos.x);
         EXPECT_EQ(3, pos.y);

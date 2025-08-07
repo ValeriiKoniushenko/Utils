@@ -1234,8 +1234,6 @@ TEST(StringTest, BaseString_char_FindPrevLine)
     StringAtom str = "Hello\nWorld\n!";
     std::vector<StringAtom> tokens = { "Hello", "World", "!" };
 
-    const auto* end = str.c_str() + str.size();
-
     const auto* ptr = StringAtom::FindPrevLine(str.c_str());
     ASSERT_TRUE(ptr);
     const auto thirdLine = StringAtom(ptr, tokens[2].size());
@@ -2443,8 +2441,6 @@ TEST(StringTest, BaseString_wchar_t_FindPrevLine)
 
     WStringAtom str = L"Hello\nWorld\n!";
     std::vector<WStringAtom> tokens = { L"Hello", L"World", L"!" };
-
-    const auto* end = str.c_str() + str.size();
 
     const auto* ptr = WStringAtom::FindPrevLine(str.c_str());
     ASSERT_TRUE(ptr);

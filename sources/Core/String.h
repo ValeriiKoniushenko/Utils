@@ -1480,11 +1480,13 @@ namespace Core
                 reserve(finalSize < 32 ? 32 : finalSize);
             }
 
-            memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str.data(), str.size() * sizeof(CharT));
+            if (_string)[[likely]]
+            {
+                memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str.data(), str.size() * sizeof(CharT));
 
-            _string[finalSize] = 0;
-            _size += str.size();
-
+                _string[finalSize] = 0;
+                _size += str.size();
+            }
             return *this;
         }
 
@@ -1568,7 +1570,7 @@ namespace Core
             if (_size > 0)
             {
                 tryToMakeAsDynamic();
-                for (int64_t i = 1ll; i < _size; ++i)
+                for (SizeT i = 1ll; i < _size; ++i)
                 {
                     _string[i - 1ll] = _string[i];
                 }
