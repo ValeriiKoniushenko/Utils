@@ -119,6 +119,27 @@ TEST(PositionTests3, Math)
         EXPECT_EQ(5, pos.y);
         EXPECT_EQ(5, pos.z);
     }
+
+    {
+        GPos3 pos1(2);
+        GPos3 pos2(2);
+
+        GPos3 pos = GPos3(pos1 + pos2);
+
+        EXPECT_EQ(4, pos.x);
+        EXPECT_EQ(4, pos.y);
+        EXPECT_EQ(4, pos.z);
+    }
+
+    {
+        GPos3 pos1(2);
+
+        GPos3 pos = GPos3(glm::vec3(2) + pos1);
+
+        EXPECT_EQ(4, pos.x);
+        EXPECT_EQ(4, pos.y);
+        EXPECT_EQ(4, pos.z);
+    }
 }
 
 TEST(PositionTests3, RelativePositionsSimple)

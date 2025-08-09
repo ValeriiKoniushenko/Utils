@@ -540,9 +540,9 @@ namespace Core
                 return *this;
             }
 
-            Self operator+(int step) const noexcept override { return Self{ _data + (IsReversed ? -step : step), _owner }; }
+            [[nodiscard]] Self operator+(int step) const noexcept override { return Self{ _data + (IsReversed ? -step : step), _owner }; }
 
-            Self operator-(int step) const noexcept override { return Self{ _data - (IsReversed ? -step : step), _owner }; }
+            [[nodiscard]] Self operator-(int step) const noexcept override { return Self{ _data - (IsReversed ? -step : step), _owner }; }
 
             difference_type operator-(const Self& other) const noexcept
             {
@@ -1449,13 +1449,13 @@ namespace Core
 
         [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
 
-        Self operator+(CharT ch)
+        [[nodiscard]] Self operator+(CharT ch) const
         {
             auto tmp = *this;
             tmp += ch;
             return tmp;
         }
-        Self operator+(const Self& str)
+        [[nodiscard]] Self operator+(const Self& str) const
         {
             auto tmp = *this;
             tmp += str;
