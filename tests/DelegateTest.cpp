@@ -69,7 +69,7 @@ TEST(DelegateTest, SimpleTest3)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.subscribeAndGetID(
+        Core::Delegate<void()>::IDGuard id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
@@ -88,13 +88,13 @@ TEST(DelegateTest, SimpleTest4)
         bool wasInvoked1 = false;
         bool wasInvoked2 = false;
 
-        auto id1 = delegate.subscribeAndGetID(
+        Core::Delegate<void()>::IDGuard id1 = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked1 = true;
             });
 
-        auto id2 = delegate.subscribeAndGetID(
+        Core::Delegate<void()>::IDGuard id2 = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked2 = true;
@@ -114,7 +114,7 @@ TEST(DelegateTest, SimpleTest5)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.subscribeAndGetID(
+        Core::Delegate<void()>::IDGuard id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;
@@ -129,7 +129,7 @@ TEST(DelegateTest, SimpleTest5)
     {
         bool wasInvoked = false;
 
-        auto id = delegate.subscribeAndGetID(
+        Core::Delegate<void()>::IDGuard id = delegate.subscribeAndGetID(
             [&]()
             {
                 wasInvoked = true;

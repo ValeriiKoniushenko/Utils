@@ -55,13 +55,7 @@ namespace Core
             {
             }
 
-            ~ID() override
-            {
-                if (_owner)
-                {
-                    _owner->unsubscribe(*this);
-                }
-            }
+            ~ID() override = default;
 
             [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
 
@@ -81,10 +75,44 @@ namespace Core
                 return true;
             }
 
+            [[nodiscard]] Delegate<F>* getOwner() noexcept { return _owner; }
         private:
             Delegate<F>* _owner = nullptr;
             IdT _id = invalidID;
-        };
+        }; // class ID
+
+        class IDGuard final : Utils::NotCopyableButMoveable
+        {
+        public:
+            IDGuard() = default;
+            IDGuard(ID id)
+                : _id{ id }
+            {
+            }
+
+            ~IDGuard()
+            {
+                release();
+            }
+
+            IDGuard& operator=(ID id)
+            {
+                release();
+                _id = id;
+                return *this;
+            }
+
+            void release()
+            {
+                if (_id.getOwner())
+                {
+                    _id.getOwner()->unsubscribe(_id);
+                }
+            }
+
+        private:
+            ID _id;
+        }; // class IDGuard
 
         using CallbackT = std::function<F>;
         using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
