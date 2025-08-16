@@ -26,8 +26,8 @@
 #include <iostream>
 
 #ifdef _MSC_VER
-    #include <windows.h>
     #include <debugapi.h>
+    #include <windows.h>
 #endif
 
 #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
@@ -48,10 +48,10 @@ inline void Assert(const bool condition, const char* message = nullptr)
 
     cerr << "Assert was got: " << endl
          << "Message: " << (message ? message : "None") << endl
-#if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
+    #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
          << "Stacktrace: " << endl
          << std::stacktrace::current() << endl
-#endif
+    #endif
         ;
     assert(condition);
 }

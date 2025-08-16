@@ -86,20 +86,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] constexpr Global castToGlobal() const
-        {
-            return Global{ this->x, this->y };
-        }
+        [[nodiscard]] constexpr Global castToGlobal() const { return Global{ this->x, this->y }; }
 
-        [[nodiscard]] constexpr Global toGlobal(const Global& origin) const
-        {
-            return Global{ origin + castToGlobal() };
-        }
-        [[nodiscard]] constexpr RelativePosition toGlobal(const RelativePosition& origin) const
-        {
-            return RelativePosition{ origin + *this };
-        }
-
+        [[nodiscard]] constexpr Global toGlobal(const Global& origin) const { return Global{ origin + castToGlobal() }; }
+        [[nodiscard]] constexpr RelativePosition toGlobal(const RelativePosition& origin) const { return RelativePosition{ origin + *this }; }
     };
 
     template<typename T, glm::qualifier Q>
@@ -115,19 +105,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] constexpr Global castToGlobal() const
-        {
-            return Global{ this->x, this->y, this->z };
-        }
+        [[nodiscard]] constexpr Global castToGlobal() const { return Global{ this->x, this->y, this->z }; }
 
-        [[nodiscard]] constexpr Global toGlobal(const Global& origin) const
-        {
-            return Global{ origin + castToGlobal() };
-        }
-        [[nodiscard]] constexpr RelativePosition toGlobal(const RelativePosition& origin) const
-        {
-            return RelativePosition{ origin + *this };
-        }
+        [[nodiscard]] constexpr Global toGlobal(const Global& origin) const { return Global{ origin + castToGlobal() }; }
+        [[nodiscard]] constexpr RelativePosition toGlobal(const RelativePosition& origin) const { return RelativePosition{ origin + *this }; }
     };
 
     using RelativePosition3F = RelativePosition<3, float>;

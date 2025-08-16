@@ -76,6 +76,7 @@ namespace Core
             }
 
             [[nodiscard]] Delegate<F>* getOwner() noexcept { return _owner; }
+
         private:
             Delegate<F>* _owner = nullptr;
             IdT _id = invalidID;
@@ -90,10 +91,7 @@ namespace Core
             {
             }
 
-            ~IDGuard()
-            {
-                release();
-            }
+            ~IDGuard() { release(); }
 
             IDGuard& operator=(ID id)
             {

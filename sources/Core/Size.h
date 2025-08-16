@@ -101,11 +101,17 @@ namespace Core
 
         [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept { return { width - offset, height - offset }; }
 
-        [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const { return ObjectType{ width * value.width, height * value.height }; }
+        [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const
+        {
+            return ObjectType{ width * value.width, height * value.height };
+        }
 
         [[nodiscard]] constexpr ObjectType operator*(T offset) const { return ObjectType{ width * offset, height * offset }; }
 
-        [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const { return ObjectType{ width / value.width, height / value.height }; }
+        [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const
+        {
+            return ObjectType{ width / value.width, height / value.height };
+        }
 
         [[nodiscard]] constexpr ObjectType operator/(T offset) const { return ObjectType{ width / offset, height / offset }; }
 

@@ -25,12 +25,11 @@
 #include "Core/AbstractIterators.h"
 #include "Core/Assert.h"
 #include "Core/CommonEnums.h"
+#include "Regex.h"
 #include "Singleton.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
-
-#include "Regex.h"
 
 #include <cinttypes>
 #include <codecvt>
@@ -681,10 +680,7 @@ namespace Core
             return Toolset::Cmp(_string, other._string) == Comparison::Equal;
         }
 
-        [[nodiscard]] bool operator!=(const Self& other) const
-        {
-            return !this->operator==(other);
-        }
+        [[nodiscard]] bool operator!=(const Self& other) const { return !this->operator==(other); }
 
         [[nodiscard]] bool operator>(const Self& other) const
         {
@@ -1480,7 +1476,7 @@ namespace Core
                 reserve(finalSize < 32 ? 32 : finalSize);
             }
 
-            if (_string)[[likely]]
+            if (_string) [[likely]]
             {
                 memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str.data(), str.size() * sizeof(CharT));
 
