@@ -7,8 +7,6 @@ pipeline {
 
     stages {
         stage('Linux builds') {
-            agent { label 'Linux' }
-
             matrix {
                 axes {
                     axis {
@@ -22,6 +20,7 @@ pipeline {
                     }
                 }
 
+                agent { label 'Linux' }
 
                 stages {
                     stage('Configure & Build') {
@@ -102,8 +101,6 @@ pipeline {
         }
 
         stage('Windows builds') {
-            agent { label 'Windows' }
-
             matrix {
                 axes {
                     axis {
@@ -111,6 +108,8 @@ pipeline {
                         values 'Debug', 'Release'
                     }
                 }
+
+                agent { label 'Windows' }
 
                 stages {
                     stage('Configure & Build') {
