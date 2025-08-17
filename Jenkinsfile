@@ -25,7 +25,7 @@ pipeline {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
 
                                 sh """
-                                    rm -rf build
+                                    # rm -rf build
 
                                     cmake -S . -B build/${C_COMPILER}/${BUILD_TYPE} \
                                           -DCMAKE_C_COMPILER=${C_COMPILER}          \
@@ -45,7 +45,7 @@ pipeline {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
 
                                 sh """
-                                    build/${C_COMPILER}/${BUILD_TYPE}/tests/TestProject
+                                    build/${C_COMPILER}/${BUILD_TYPE}/tests/UtilsTests
                                 """
                             }
                         }
@@ -93,7 +93,7 @@ pipeline {
                     stage('Configure & Build') {
                         steps {
                             bat """
-                                IF EXIST build rmdir /S /Q build
+                                :: IF EXIST build rmdir /S /Q build
 
                                 cmake -S . -B build
 
@@ -105,7 +105,7 @@ pipeline {
                     stage('Run') {
                         steps {
                             bat """
-                                build\\tests\\%BUILD_TYPE%\\TestProject.exe
+                                build\\tests\\%BUILD_TYPE%\\UtilsTests.exe
                             """
                         }
                     }
