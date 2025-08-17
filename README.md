@@ -1,5 +1,19 @@
 # Utils
 
+**Builds**:
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Release)
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Release)
+
+**Unit Tests**:
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Release)
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Release)
+- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Release)
+
+---
+
+## Intro
+
 The utilitary library for common solutions in your code. It has some count of already implemented things as:
 - Common concepts(from C++20)
 - Common classes for working with a space coordinates
