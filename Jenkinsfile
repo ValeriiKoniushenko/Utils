@@ -244,7 +244,7 @@ pipeline {
 
                                 addEmbeddableBadgeConfiguration(
                                     id: "windowsBuild_${BUILD_TYPE}",
-                                    subject: "Build | MSVC | ${BUILD_TYPE}",
+                                    subject: "Win11 | MSVC | ${BUILD_TYPE}",
                                     status: (success ? "success" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
@@ -266,7 +266,7 @@ pipeline {
 
                                 addEmbeddableBadgeConfiguration(
                                     id: "windowsTests_${BUILD_TYPE}",
-                                    subject: "Win11 | Tests | ${BUILD_TYPE}",
+                                    subject: "Win11 | ${BUILD_TYPE}",
                                     status: (success ? "success" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
