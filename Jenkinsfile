@@ -270,8 +270,6 @@ pipeline {
 
     post {
         always {
-            agent { label 'Linux' }
-
             recordIssues(
                 enabledForFailure: true,
                 tools: [
