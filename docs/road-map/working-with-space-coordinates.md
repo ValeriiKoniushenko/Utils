@@ -10,7 +10,7 @@ Of course, it has basic set of tools to work with space coordinates.
 - ```Core::Rect<ArithmeticType>``` - use it to create you own Rectangle abstraction
 - ```Core::GlobalPosition<Len, Type, Precision>``` - the same glm::vec2 or vec3 but better
 - ```Core::Size<Dimension, ArithmeticType>``` - better than glm::vecX
-- ```Core::LocalPosition<Len, Type, Precision>``` - the friend of the GlobalPosition, but for now - **not implemented**.
+- ```Core::RelativePosition<Len, Type, Precision>``` - the friend of the GlobalPosition
 
 *More detailed view & examples you can find here: [link](docs/SpaceCoordinates.md)*
 
@@ -25,9 +25,11 @@ using namespace Core;
 using std::cout;
 using std::endl;
 
-FRect rect = { 0.f, 10.f, 10.f, 0.f };
+FRect rect = FRect{ 0.f, 10.f, 10.f, 0.f };
 
-FRect::GlobalPositionT innerPoint = { 3.f, 3.f };
+auto innerPoint = FRect::GlobalPositionT{ 3.f, 3.f };
+// or simpler: auto innerPoint = GlobalPosition2F{ 3.f, 3.f };
+
 if (rect.isContain(innerPoint))
     cout << "The rect contains this point"
 
@@ -48,8 +50,8 @@ using namespace Core;
 using std::cout;
 using std::endl;
 
-ISize2 a = { 5, 10 }; // ISize2 == int size 2D
-ISize2 b = { 2, 4 };
+ISize2 a = ISize2{ 5, 10 }; // ISize2 == int size 2D
+ISize2 b = ISize2{ 2, 4 };
 cout << "Area 'a' = " << a.area() << endl;
 cout << "Area 'b' = " << b.area() << endl;
 
@@ -67,7 +69,7 @@ if (a > b)
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side

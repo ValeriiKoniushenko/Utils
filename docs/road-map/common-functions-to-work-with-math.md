@@ -41,7 +41,7 @@ else
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side

@@ -5,11 +5,11 @@
 
 ### Intro
 
-Sometimes you don't want to interrupt user's programm especially in
-the enterprise\release version but want to say something to developer
-of just for debug. For these purposes you can use Assert functionality.
+Sometimes you don’t want to interrupt the user’s program - especially in enterprise or release
+versions - but you still want to notify the developer or use it for debugging. For these cases,
+you can use the Assert functionality.
 
-It has two main way to work with it:
+It has two main ways to work with it:
 
 - ```Assert([condition], [message])``` - thow an assert with/without a message
 - ```Verify([condition], [message])``` - the same, but will return true\false
@@ -17,7 +17,7 @@ It has two main way to work with it:
 Main benefits of it are:
 
 - Printing all messages to ```std::cerr```
-- Printing of the callstack\backstrace of an assert (if a compiler supports it)
+- Printing of the callstack\backtrace of an assert (if a compiler supports it)
 
 That's ease, let's look in the code.
 
@@ -32,7 +32,7 @@ using std::endl;
 if (1 < 2)
 {
     // Without params - just throw it.
-    Assert(); // Catch the Assert!
+    Assert(false); // Catch the Assert!
 }
 
 // The same, but with condition. 
@@ -52,7 +52,7 @@ if (Verify(1 < 2, "I'm in 'if' statement") {}
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side

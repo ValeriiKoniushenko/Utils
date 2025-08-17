@@ -5,8 +5,8 @@
 
 ### Intro
 
-Quite simple thing: just wrapper for common practacies in your code which you can use.
-Next concepts already implemented instead of you:
+A simple wrapper for common practices in your code that you can use.
+The following concepts are already implemented for you:
 
 - ```Utils::IsArithmetic```
 - ```Utils::IsFloating```
@@ -17,7 +17,7 @@ Next concepts already implemented instead of you:
 #### CMake
 
 Needed target for you is: ```Utils::Utils```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Utils)```
 
 #### C++ side

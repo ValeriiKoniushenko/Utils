@@ -1,6 +1,7 @@
 # Utils
 
-The utilitary library for common solutions in your code. It has some count of already implemented things as:
+A utility library providing common solutions for your code. It already includes several implemented 
+features, such as:
 
 - Common concepts(from C++20)
 - Common classes for working with a space coordinates

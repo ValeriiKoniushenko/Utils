@@ -5,9 +5,13 @@
 
 ### Intro
 
-Do you want to convert an enum's constant to string or vise versa? Or you want to
-know home many constants in your enum? I think it's not a problem. Use compile-time
-wrapper for it without loosing of optimization privelegious.
+Do you want to convert an enum constant to a string or vice versa?
+Or do you want to know how many constants are in your enum? That’s easy. Use a compile-time wrapper
+for this without losing any optimization benefits.
+
+However, there’s a small but important caveat due to C++ compiler and standard rules: if you try
+to assign a non-numeric value to an enum constant, you won’t be able to cast it to a string - or
+from a string - in the future.
 
 ### Quick example
 
@@ -32,9 +36,9 @@ color = Color::Blue;
 cout << color.toStr() << endl;
 cout << color.cast() << endl;
 cout << color.cast() << endl;
-cout << (color == Color::fromStr("Blue")) << endl;
+cout << (color.cast() == Color::fromStr("Blue")) << endl;
 cout << (Color::Green == Color::fromStr("Green")) << endl;
-cout << (1 == Color::fromStr("Green").cast()) << endl;
+cout << (1 == Color::fromStr("Green")) << endl;
 
 // Output:
 // > Red
@@ -52,7 +56,7 @@ cout << (1 == Color::fromStr("Green").cast()) << endl;
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side

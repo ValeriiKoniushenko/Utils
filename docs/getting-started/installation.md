@@ -3,24 +3,15 @@
 > - [🏠 Go Home](../index.md)
 > - [👈 Go Parent Page](index.md)
 
+**Blazing fast answer is:**
+```sh
+mkdir build && cd build && cmake ../ && cmake --build .
+```
+
 ### Step #1: Repository preparation
 
-#### Automatic
-
-Automation pre-installation will check needed dependencies, its version and many others.
-So, in general it's more safe way to prepare the cloned repo. But if you have some troubles
-with this point, just go below to the 'Manual' part.
-
-1. Clone this repository
-2. In the terminal run the script './install.py' using your python3: ```python install.py```
-
-#### Manual
-
-If you have some trouble with automation pre-installation you can try to do main steps by
-your hands.
-
-1. Clone this repository
-2. In the terminal run: ```git submodule update --init --force --remot```
+In general, it’s very easy. Everything that you need to do is clone this repository and run CMake.
+CMake will generate all the necessary files and fetch any required dependencies for you.
 
 ### Step #2: Building
 1. Open the terminal and make sure that your current path inside project root folder

@@ -17,7 +17,7 @@
 
 ## Intro
 
-The utilitary library for common solutions in your code. It has some count of already implemented things as:
+A utility library providing common solutions for your code. It already includes several implemented features, such as:
 - Common concepts(from C++20)
 - Common classes for working with a space coordinates
 - Common functions to work with Math
@@ -51,31 +51,21 @@ The utilitary library for common solutions in your code. It has some count of al
 Needed settings\programs on your system are:
 - cmake 3.30 >=
 - clang 18.1.8 >= | gcc 14.2.1 >=
-- Python 3.13.2 >=
 
 For better experience:
 - setup ```core.autocrlf=true``` for git environment
 
 ## Installation
 
+**Blazing fast answer is:**
+```sh
+mkdir build && cd build && cmake ../ && cmake --build .
+```
+
 ### Step #1: Repository preparation
 
-#### Automatic
-
-Automation pre-installation will check needed dependencies, its version and many others.
-So, in general it's more safe way to prepare the cloned repo. But if you have some troubles
-with this point, just go below to the 'Manual' part.
-
-1. Clone this repository
-2. In the terminal run the script './install.py' using your python3: ```python install.py```
-
-#### Manual
-
-If you have some trouble with automation pre-installation you can try to do main steps by
-your hands.
-
-1. Clone this repository
-2. In the terminal run: ```git submodule update --init --force --remot```
+In general, it’s very easy. Everything that you need to do is clone this repository and run CMake. 
+CMake will generate all the necessary files and fetch any required dependencies for you.
 
 ### Step #2: Building
 1. Open the terminal and make sure that your current path inside project root folder 
@@ -87,15 +77,14 @@ PS: to build Debug or Release version of the project set ```Debug``` or ```Relea
 E.g: ```-DCMAKE_BUILD_TYPE="Release"```
 
 
-
 # Road map
 
 ## Common concepts
 
 ### Intro
 
-Quite simple thing: just wrapper for common practacies in your code which you can use.
-Next concepts already implemented instead of you:
+A simple wrapper for common practices in your code that you can use. 
+The following concepts are already implemented for you:
 
 - ```Utils::IsArithmetic```
 - ```Utils::IsFloating```
@@ -106,7 +95,7 @@ Next concepts already implemented instead of you:
 #### CMake
 
 Needed target for you is: ```Utils::Utils```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Utils)```
 
 #### C++ side
@@ -124,7 +113,7 @@ Of course, it has basic set of tools to work with space coordinates.
 - ```Core::Rect<ArithmeticType>``` - use it to create you own Rectangle abstraction
 - ```Core::GlobalPosition<Len, Type, Precision>``` - the same glm::vec2 or vec3 but better
 - ```Core::Size<Dimension, ArithmeticType>``` - better than glm::vecX
-- ```Core::LocalPosition<Len, Type, Precision>``` - the friend of the GlobalPosition, but for now - **not implemented**.
+- ```Core::RelativePosition<Len, Type, Precision>``` - the friend of the GlobalPosition, but for now - **not implemented**.
 
 *More detailed view & examples you can find here: [link](docs/SpaceCoordinates.md)*
 
@@ -139,11 +128,13 @@ using namespace Core;
 using std::cout;
 using std::endl;
 
-FRect rect = { 0.f, 10.f, 10.f, 0.f };
+FRect rect = FRect{ 0.f, 10.f, 10.f, 0.f };
 
-FRect::GlobalPositionT innerPoint = { 3.f, 3.f };
+auto innerPoint = FRect::GlobalPositionT{ 3.f, 3.f };
+// or simpler: auto innerPoint = GlobalPosition2F{ 3.f, 3.f };
+
 if (rect.isContain(innerPoint))
-    cout << "The rect contains this point"
+    cout << "The rect contains this point";
 
 auto corner = rect.getLeftTop();
 cout << "LT: " << corner.x << ":" << corner.y;
@@ -162,8 +153,8 @@ using namespace Core;
 using std::cout;
 using std::endl;
 
-ISize2 a = { 5, 10 }; // ISize2 == int size 2D
-ISize2 b = { 2, 4 };
+ISize2 a = ISize2{ 5, 10 }; // ISize2 == int size 2D
+ISize2 b = ISize2{ 2, 4 };
 cout << "Area 'a' = " << a.area() << endl;
 cout << "Area 'b' = " << b.area() << endl;
 
@@ -181,7 +172,7 @@ if (a > b)
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -232,7 +223,7 @@ else
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -245,9 +236,8 @@ Just include it to your file: ```#include "Core/Math.h"```
 
 ### Intro
 
-Popular practice is to add a function 'swap' to your classes. Why we can't
-bring it out to the interface? Yes, we did it!
-Or working with our the ~~anti~~ best pattern: Singleton? We also have it.
+It’s common practice to add a ```swap``` function to your classes. Why not move it to the interface? We did!
+Or working with our favorite (or ~~anti~~ best) pattern: Singleton? We’ve got that too.
 
 ### Quick example
 
@@ -262,12 +252,30 @@ struct MyType : public Core::ISwappable<MyType>
 
 Working with singleton:
 
+Yes, you can use 'simple' version of it ```Singleton```. But better to use ```StrictSingleton``` - 
+it will provide more protection to your 'god-object'. Also, to restrict manual creation of your 
+god object - you must restrict several things with your class. In general, you don't have to worry
+and just put ```SINGLETONS_FRIEND(your_class)``` to the class body.
 ```c++
 #include "Core/Singleton.h"
 
-struct MyType : public Core::Singleton<MyType>
+// Unsafe & deprecated version. Can be accidentally copied.
+struct UnsafeGod : public Core::Singleton<UnsafeGod>
 {
     // Yes, it's ready to use!
+};
+
+// Safer version of  it. Now, you can't just copy\move it to some another object.
+struct SaferGod : public Core::StrictSingleton<SaferGod>
+{
+};
+
+// Safest version!
+struct SafestGod : public Core::StrictSingleton<SafestGod>
+{
+    SINGLETONS_FRIEND(SafestGod)
+public:
+    // ...
 };
 ```
 
@@ -276,7 +284,7 @@ struct MyType : public Core::Singleton<MyType>
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -290,9 +298,13 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 ### Intro
 
-Do you want to convert an enum's constant to string or vise versa? Or you want to
-know home many constants in your enum? I think it's not a problem. Use compile-time
-wrapper for it without loosing of optimization privelegious.
+Do you want to convert an enum constant to a string or vice versa? 
+Or do you want to know how many constants are in your enum? That’s easy. Use a compile-time wrapper 
+for this without losing any optimization benefits.
+
+However, there’s a small but important caveat due to C++ compiler and standard rules: if you try 
+to assign a non-numeric value to an enum constant, you won’t be able to cast it to a string - or 
+from a string - in the future.
 
 ### Quick example
 
@@ -317,9 +329,9 @@ color = Color::Blue;
 cout << color.toStr() << endl;
 cout << color.cast() << endl;
 cout << color.cast() << endl;
-cout << (color == Color::fromStr("Blue")) << endl;
+cout << (color.cast() == Color::fromStr("Blue")) << endl;
 cout << (Color::Green == Color::fromStr("Green")) << endl;
-cout << (1 == Color::fromStr("Green").cast()) << endl;
+cout << (1 == Color::fromStr("Green")) << endl;
 
 // Output:
 // > Red
@@ -337,7 +349,7 @@ cout << (1 == Color::fromStr("Green").cast()) << endl;
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -350,9 +362,9 @@ Just include: ```#include "Core/Enum.h"```
 
 ### Intro
 
-Have you ever wondered why sometimes we have absolutley the same strings, but we still compare it character
-to character? So, let's imagine that you can predict some behavior and you konw - next string X will be the same
-as next string Y. Let's not compair its characters, let's just compare their addresses!
+Have you ever wondered why, sometimes, we compare strings character by character even when they are
+exactly the same? Imagine you can predict the behavior and you know that string ```X``` will be identical
+to string ```Y```. Instead of comparing their characters, you can just compare their addresses!
 
 ```c++
 std::string A = "Hello";
@@ -365,8 +377,8 @@ if (A == B){}
 if ("Hello" == "Hello"){}
 ```
 
-So, the implemetation of the new string brings you up second solution of the code example above! But it will
-be processed automatically.
+So, the implementation of the new strings will bring you up second solution for code example above! 
+But it will be processed automatically.
 
 *More detailed view & examples you can find here: [link](docs/Strings.md)*
 
@@ -391,7 +403,7 @@ cout << (name == "Andrew") << endl; // => true
 // Don't worry about it, just use methods as you want.
 // From this code's line you will work with a variable 
 // 'name' as with dynamic-string.
-name.pushBack("!");
+name.push_back("!");
 
 // Now, an execution code is compare two strings(chars to chars). 
 // You'll get small de-optimization, but it's okay. 
@@ -399,7 +411,7 @@ name.pushBack("!");
 cout << (name == "Andrew!") << endl; // => true
 cout << name.data() << endl; // => Andrew!
 
-name.trim("!");
+name.trim('!');
 cout << name.data() << endl; // => Andrew
 
 if (name.regexMatch("\\w+\\!"))
@@ -409,12 +421,34 @@ else
 // => Matched
 ```
 
+### Benchmark results
+
+Comparing of '==' operations between: ```std::string``` & ```Core::StringAtom```
+
+| Benchmark                                  | Time (ns) | CPU (ns) | Iterations    |
+|-------------------------------------------|-----------|----------|---------------|
+| BM_StdStringComparison/2                  | 1.83      | 1.83     | 379,678,000   |
+| BM_StdStringComparison/8                  | 1.83      | 1.83     | 382,830,982   |
+| BM_StdStringComparison/64                 | 2.04      | 2.04     | 344,510,558   |
+| BM_StdStringComparison/512                | 4.25      | 4.25     | 165,402,730   |
+| BM_StdStringComparison/2048               | 19.0      | 19.0     | 36,727,706    |
+| BM_StdStringComparison_BigO               | 0.01 N    | 0.01 N   |               |
+| BM_StdStringComparison_RMS                | 23 %      | 23 %     |               |
+| BM_StringAtom_Static_Comparison/2         | 0.201     | 0.201    | 3'461'975'770 |
+| BM_StringAtom_Static_Comparison/8         | 0.201     | 0.201    | 3'477'984'307 |
+| BM_StringAtom_Static_Comparison/64        | 0.201     | 0.201    | 3'458'955'857 |
+| BM_StringAtom_Static_Comparison/512       | 0.201     | 0.201    | 3'474'828'775 |
+| BM_StringAtom_Static_Comparison/2048      | 0.201     | 0.201    | 3'462'340'161 |
+| BM_StringAtom_Static_Comparison_BigO      | 0.20 (1)  | 0.20 (1) |               |
+| BM_StringAtom_Static_Comparison_RMS       | 0 %       | 0 %      |               |
+
+
 ### Requirements
 
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -428,15 +462,14 @@ Just link it with your alredy existing target in your CMakeLists.txt:
 
 ### Intro
 
-I think you heard before about Event Oriented Programming. So, if yes - you can include Core/Delegate.h
-and use as you want.
+You’ve probably heard of Event-Oriented Programming. If so, you can include ```Core/Delegate.h``` 
+and use it as you like.
 
-If no - let's understand it in one minute!
-For example, let's take YouTube and video about 'cute cats'. If you really like a video's content
-you can subscribe to the channel. And when new video will be published you'll get notification about
-that. So, Delegates in the code - are the same.
+If not, let’s break it down in a minute! For example, imagine YouTube and a video about ‘cute cats.’ 
+If you like a channel’s content, you can subscribe. When a new video is published, you get a 
+notification. Delegates in code work in the same way.
 
-Let's look on the example below.
+Let’s look at an example below.
 
 *More detailed view & examples you can find here: [link](docs/Delegate.md)*
 
@@ -448,7 +481,7 @@ using std::cout;
 using std::endl;
 
 // At this line a delegate was created. So, it's just listener 
-// of some events and you can trigger subscribed function from 
+// of some events, and you can trigger subscribed function from 
 // any part of you block-scope.
 Core::Delegate<void()> cuteCatsChannel;
 
@@ -473,12 +506,28 @@ delegate.trigger();
 delegate.unsubscribe(id);
 ```
 
+Of course, you shouldn't 'unsubscribe' manually. You can use RAII object for that: ```IDGuard```
+```c++
+Core::Delegate<void()> cuteCatsChannel;
+
+Core::Delegate<void()>::IDGuard id = cuteCatsChannel.subscribeAndGetID(
+    [&]()
+    {
+        cout << "Wow, new video!" << endl; 
+    });
+
+delegate.trigger();
+
+// 'id' unsubscribe automatically
+```
+
+
 ### Requirements
 
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -491,11 +540,11 @@ Just include: ```#include "Core/Delegate.h"```
 
 ### Intro
 
-Sometimes you don't want to interrupt user's programm especially in
-the enterprise\release version but want to say something to developer
-of just for debug. For these purposes you can use Assert functionality.
+Sometimes you don’t want to interrupt the user’s program - especially in enterprise or release 
+versions - but you still want to notify the developer or use it for debugging. For these cases, 
+you can use the Assert functionality.
 
-It has two main way to work with it:
+It has two main ways to work with it:
 
 - ```Assert([condition], [message])``` - thow an assert with/without a message
 - ```Verify([condition], [message])``` - the same, but will return true\false
@@ -503,7 +552,7 @@ It has two main way to work with it:
 Main benefits of it are:
 
 - Printing all messages to ```std::cerr```
-- Printing of the callstack\backstrace of an assert (if a compiler supports it)
+- Printing of the callstack\backtrace of an assert (if a compiler supports it)
 
 That's ease, let's look in the code.
 
@@ -518,7 +567,7 @@ using std::endl;
 if (1 < 2)
 {
     // Without params - just throw it.
-    Assert(); // Catch the Assert!
+    Assert(false); // Catch the Assert!
 }
 
 // The same, but with condition. 
@@ -533,12 +582,21 @@ Assert(1 < 2, "Some message here");
 if (Verify(1 < 2, "I'm in 'if' statement") {}
 ```
 
+Also, if you want to force stop using of ```std::stacktrace``` you can add '#define'
+```DONT_USE_CPP_LIB_STACKTRACE``` - before including of ```"Core/Assert.h"```:
+```c++
+#define DONT_USE_CPP_LIB_STACKTRACE
+#include "Core/Assert.h"
+
+...
+```
+
 ### Requirements
 
 #### CMake
 
 Needed target for you is: ```Utils::Core```
-Just link it with your alredy existing target in your CMakeLists.txt:
+Just link it with your already existing target in your CMakeLists.txt:
 ```target_link_libraries(YourTarget PUBLIC Utils::Core)```
 
 #### C++ side
@@ -551,5 +609,5 @@ Just include: ```#include "Core/Assert.h"```
 
 If you have some questions or propositions - contact me:
 
-- e-mail: Valerii.Koniushenko@gmail.com
-- Telegram: @markmoran24
+- e-mail: <a href="mailto:Valerii.Koniushenko@gmail.com">Valerii.Koniushenko@gmail.com</a>
+- Telegram: [@valeriikoniushenko](https://t.me/valeriikoniushenko)
