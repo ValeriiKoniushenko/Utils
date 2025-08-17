@@ -9,7 +9,7 @@
 - ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Release)
 - ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Release)
 - ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Release)
-
+- ![Test coverage](https://img.shields.io/endpoint?url=https://jenkins.vakon.space/job/Utils/lastBuild/artifact/coverage-badge.json?wrapper=plain)
 ---
 
 ## Intro
