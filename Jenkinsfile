@@ -269,9 +269,9 @@ pipeline {
     }
 
     post {
-        agent { label 'Linux' }
-
         always {
+            agent { label 'Linux' }
+
             recordIssues(
                 enabledForFailure: true,
                 tools: [
