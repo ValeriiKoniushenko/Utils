@@ -128,7 +128,7 @@ pipeline {
                         }
                     }
 
-                    stage('Test coverage') {
+                    stage('Test Coverage') {
                         when {
                            expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
                         }
@@ -153,6 +153,8 @@ pipeline {
                                         -output-dir=coverage_report \
                                         --ignore-filename-regex="(build/.*)|(tests/.*)"
                                 """
+
+                                publishHTML([reportDir: 'coverage_report', reportFiles: 'index.html', reportName: 'LLVM Coverage'])
                             }
                         }
                     }
