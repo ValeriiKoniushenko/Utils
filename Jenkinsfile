@@ -88,29 +88,6 @@ pipeline {
                         }
                     }
 
-                    stage('Test coverage') {
-                        when {
-                            expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
-                        }
-
-                        steps {
-                            script {
-                                def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
-                                def BIN_PATH = "build/${C_COMPILER}/${BUILD_TYPE}/bin"
-
-                                sh """
-                                    llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
-
-                                    llvm-cov show ./${BIN_PATH}/UtilsTests \
-                                        -instr-profile=${BIN_PATH}/default.profdata \
-                                        -format=html \
-                                        -output-dir=${BIN_PATH}/coverage_report \
-                                        --ignore-filename-regex="(build/.*)|(tests/.*)"
-                                """
-                            }
-                        }
-                    }
-
                     stage('Package Artifacts') {
                         when {
                            expression { BUILD_TYPE == 'Release' }
@@ -197,6 +174,24 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        stage('Test coverage') {
+            steps {
+                script {
+                    def BIN_PATH = "build/clang/Debug/bin"
+
+                    sh """
+                        llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
+
+                        llvm-cov show ./${BIN_PATH}/UtilsTests \
+                            -instr-profile=${BIN_PATH}/default.profdata \
+                            -format=html \
+                            -output-dir=${BIN_PATH}/coverage_report \
+                            --ignore-filename-regex="(build/.*)|(tests/.*)"
+                    """
                 }
             }
         }
