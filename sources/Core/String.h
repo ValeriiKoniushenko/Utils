@@ -366,8 +366,8 @@ namespace Core
         }
 
         [[maybe_unused]] StringData(const CharType* newString, typename Settings::SizeT newSize)
+            : str{ SmartPointer(new CharType[newSize + static_cast<decltype(newSize)>(1)]) }
         {
-            str = SmartPointer(new CharType[newSize + static_cast<decltype(newSize)>(1)]);
             memcpy_s(str.get(), size * sizeof(CharType), newString, newSize * sizeof(CharType));
         }
 
@@ -1083,7 +1083,7 @@ namespace Core
             if (!isEmpty())
             {
                 SizeT offset = 0;
-                while (_string[offset] == ch && offset < _size)
+                while (offset < _size && _string[offset] == ch)
                 {
                     ++offset;
                 }
@@ -1101,8 +1101,8 @@ namespace Core
             if (!isEmpty())
             {
                 SizeT count = 0;
-                const CharT* end = _string + _size;
-                while (count < _size && *--end == ch)
+                const CharT* stringEnd = _string + _size;
+                while (count < _size && *--stringEnd == ch)
                 {
                     ++count;
                 }
@@ -1674,7 +1674,7 @@ namespace Core
 
             if (isIgnoreCase)
             {
-                for (IndexT index = 0; _string[index] && index < other.size(); ++index)
+                for (IndexT index = 0; index < other.size() && _string[index]; ++index)
                 {
                     if (_string[index + 1ull] == 0 && other.size() == index + 1ull)
                     {
@@ -1790,9 +1790,9 @@ namespace Core
         Self& operator=(const CharT* str)
         {
             clear();
-            const auto size = Toolset::Length(str);
-            resize(size);
-            memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
+            const auto strSize = Toolset::Length(str);
+            resize(strSize);
+            memcpy_s(_string, _size * sizeof(CharT), str, strSize * sizeof(CharT));
             return *this;
         }
 
@@ -2153,13 +2153,13 @@ namespace Core
             do
             {
                 nextLine = FindNextLine(oldString, nullptr, separator);
-                SizeT size = Settings::invalidSize;
+                SizeT strSize = Settings::invalidSize;
                 if (nextLine != nullptr)
                 {
-                    size = nextLine - oldString - GetLineSeparatorStringSize(separator);
+                    strSize = nextLine - oldString - GetLineSeparatorStringSize(separator);
                 }
 
-                Self temp(oldString, size);
+                Self temp(oldString, strSize);
                 temp.trim(static_cast<CharT>('\n'));
                 temp.trim(static_cast<CharT>('\r'));
                 temp.trim(static_cast<CharT>('\n'));

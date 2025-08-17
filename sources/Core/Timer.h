@@ -53,7 +53,7 @@ namespace Core
         using CallbackT = std::function<void(double)>;
 
     public:
-        Repeater(double value = 0) { setRepeatTime(value); };
+        explicit Repeater(double value = 0) { setRepeatTime(value); };
         ~Repeater() = default;
 
         [[nodiscard]] double getRepeatTime() const noexcept { return _repeatTime; }

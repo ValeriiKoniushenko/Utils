@@ -45,7 +45,7 @@ namespace Core
         explicit BaseRegex(const char* pattern, const char* subject = nullptr);
 
         void setPattern(const char* pattern) { _pattern = pattern; }
-        [[nodiscard]] std::string getPattern() const { return _pattern; }
+        [[nodiscard]] const std::string& getPattern() const { return _pattern; }
 
         void setCompileOptions(uint32_t options) noexcept { _compileOptions = options; }
         [[nodiscard]] uint32_t getCompileOptions() const noexcept { return _compileOptions; }

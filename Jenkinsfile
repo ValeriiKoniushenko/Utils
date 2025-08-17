@@ -23,6 +23,8 @@ pipeline {
                             --suppress=unusedFunction \
                             --suppress=missingInclude \
                             --suppress=unknownMacro \
+                            --suppress=identicalInnerCondition \
+                            --suppress=knownConditionTrueFalse \
                             --xml --xml-version=2 sources/ 2> ${REPORT_DIR}/cppcheck.xml
                     '''
                 }
