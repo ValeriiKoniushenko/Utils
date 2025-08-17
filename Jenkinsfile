@@ -23,6 +23,25 @@ pipeline {
                 agent { label 'Linux' }
 
                 stages {
+                    stage('Prepare') {
+                        steps {
+                            script {
+                                isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
+                            }
+                        }
+                    }
+
+                    stage('Full clear!') {
+                        when { expression { isTriggeredByCron } }
+                        steps {
+                            script {
+                                sh """
+                                    rm -rf build
+                                """
+                            }
+                        }
+                    }
+
                     stage('Configure & Build') {
                         steps {
                             script {
@@ -115,7 +134,7 @@ pipeline {
                     stage('Configure & Build') {
                         steps {
                             bat """
-                                IF EXIST build rmdir /S /Q build
+                                :: IF EXIST build rmdir /S /Q build
 
                                 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
