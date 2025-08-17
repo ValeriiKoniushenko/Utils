@@ -96,6 +96,13 @@ pipeline {
                                         }
                                     }
                                 }
+
+                                addEmbeddableBadgeConfiguration(
+                                    id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
+                                    subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
+                                    status: (success ? "success" : "failed"),
+                                    color: (success ? "green" : "red")
+                                )
                             }
                         }
                     }
