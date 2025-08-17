@@ -230,7 +230,7 @@ pipeline {
                                     }
                                 }
 
-                                publishEmbeddableBadgeConfiguration(
+                                addEmbeddableBadgeConfiguration(
                                     id: "windowsBuild_${BUILD_TYPE}",
                                     subject: "MSVC ${BUILD_TYPE}",
                                     status: (success ? "success" : "failed"),
