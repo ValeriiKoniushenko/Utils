@@ -131,6 +131,25 @@ pipeline {
                 agent { label 'Windows' }
 
                 stages {
+                    stage('Prepare') {
+                        steps {
+                            script {
+                                isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
+                            }
+                        }
+                    }
+
+                    stage('Full clear!') {
+                        when { expression { isTriggeredByCron } }
+                        steps {
+                            script {
+                                sh """
+                                    IF EXIST build rmdir /S /Q build
+                                """
+                            }
+                        }
+                    }
+
                     stage('Configure & Build') {
                         steps {
                             bat """
