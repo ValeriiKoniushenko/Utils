@@ -11,7 +11,7 @@ pipeline {
 
     stages {
         stage('Static Code Analysis') {
-            agent any
+            agent { label 'Linux' }
 
             steps {
                 script {
