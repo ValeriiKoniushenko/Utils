@@ -126,7 +126,7 @@ pipeline {
                                 addEmbeddableBadgeConfiguration(
                                     id: "linuxTests_${C_COMPILER}_${BUILD_TYPE}",
                                     subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
-                                    status: (success ? "success" : "failed"),
+                                    status: (success ? "passed" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
                             }
@@ -171,7 +171,7 @@ pipeline {
                                 def report = readFile("coverage_report/index.html")
 
                                 def coverage = 0.0
-                                def m = (report =~ /TOTAL\s+\d+\s+\d+\s+([\d\.]+)%/)
+                                def m = (report =~ /Totals\s*\<\/pre\>\<\/td\>\<td\s+class='[\w-]+'\>\<pre\>\s*([\d\.]+)%/)
                                 if (m.find()) {
                                     coverage = m.group(1).toDouble()
                                 }
@@ -296,7 +296,7 @@ pipeline {
                                 addEmbeddableBadgeConfiguration(
                                     id: "windowsTests_${BUILD_TYPE}",
                                     subject: "Win11 | ${BUILD_TYPE}",
-                                    status: (success ? "success" : "failed"),
+                                    status: (success ? "passed" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
                             }
