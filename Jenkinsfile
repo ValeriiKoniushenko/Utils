@@ -138,13 +138,6 @@ pipeline {
                                 def BIN_PATH = "build/clang/Debug/bin"
 
                                 sh """
-                                    pwd
-                                    ls -lhAt
-                                    ls -lhAt build
-                                    ls -lhAt build/clang
-                                    ls -lhAt build/clang/Debug
-                                    ls -lhAt ${BIN_PATH}
-
                                     llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
 
                                     llvm-cov show ./${BIN_PATH}/UtilsTests \
@@ -201,7 +194,7 @@ pipeline {
 
                                 if (isTriggeredByCron) {
                                     echo "Clean build preparation due to Cron task."
-                                    sh """
+                                    bat """
                                         IF EXIST build rmdir /S /Q build
                                     """
                                 }
