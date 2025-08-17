@@ -270,12 +270,14 @@ pipeline {
 
     post {
         always {
-            recordIssues(
-                enabledForFailure: true,
-                tools: [
-                    cppCheck(pattern: 'build_reports/cppcheck.xml')
-                ]
-            )
+            node('Linux') {
+                recordIssues(
+                    enabledForFailure: true,
+                    tools: [
+                        cppCheck(pattern: 'build_reports/cppcheck.xml')
+                    ]
+                )
+            }
         }
     }
 }
