@@ -232,7 +232,7 @@ pipeline {
 
                                 addEmbeddableBadgeConfiguration(
                                     id: "windowsBuild_${BUILD_TYPE}",
-                                    subject: "MSVC ${BUILD_TYPE}",
+                                    subject: "Build: Win11 | MSVC | ${BUILD_TYPE}",
                                     status: (success ? "success" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
@@ -242,9 +242,23 @@ pipeline {
 
                     stage('Run') {
                         steps {
-                            bat """
-                                build\\bin\\%BUILD_TYPE%\\UtilsTests.exe --gtest_output=xml:build\\bin\\%BUILD_TYPE%\\gtest_result.xml
-                            """
+                            script {
+                                def success = false
+                                try {
+                                    bat """
+                                        build\\bin\\%BUILD_TYPE%\\UtilsTests.exe --gtest_output=xml:build\\bin\\%BUILD_TYPE%\\gtest_result.xml
+                                    """
+                                    success = true
+                                } catch(err) {
+                                }
+
+                                addEmbeddableBadgeConfiguration(
+                                    id: "windowsTests_${BUILD_TYPE}",
+                                    subject: "Win11 | Tests | ${BUILD_TYPE}",
+                                    status: (success ? "success" : "failed"),
+                                    color: (success ? "green" : "red")
+                                )
+                            }
                         }
                     }
 
