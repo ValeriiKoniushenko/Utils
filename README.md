@@ -1,15 +1,15 @@
 # Utils
 
 **Builds**:
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Release)
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Release)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 
 **Unit Tests**:
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Release)
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Release)
-- ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Debug)  ![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Release)
-- ![Test coverage](https://img.shields.io/endpoint?url=https://jenkins.vakon.space/job/Utils/lastBuild/artifact/coverage-badge.json?wrapper=plain)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsTests_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](https://img.shields.io/endpoint?url=https://jenkins.vakon.space/job/Utils/lastBuild/artifact/coverage-badge.json?wrapper=plain)](https://jenkins.vakon.space/job/Utils/LLVM_20Coverage/)
 ---
 
 ## Intro
