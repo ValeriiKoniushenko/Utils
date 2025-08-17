@@ -89,6 +89,35 @@ pipeline {
                         }
                     }
 
+                    stage('Test coverage') {
+                        when {
+                           expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
+                        }
+
+                        steps {
+                            script {
+                                def BIN_PATH = "build/clang/Debug/bin"
+
+                                sh """
+                                    pwd
+                                    ls -lhAt
+                                    ls -lhAt build
+                                    ls -lhAt build/clang
+                                    ls -lhAt build/clang/Debug
+                                    ls -lhAt ${BIN_PATH}
+
+                                    llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
+
+                                    llvm-cov show ./${BIN_PATH}/UtilsTests \
+                                        -instr-profile=${BIN_PATH}/default.profdata \
+                                        -format=html \
+                                        -output-dir=coverage_report \
+                                        --ignore-filename-regex="(build/.*)|(tests/.*)"
+                                """
+                            }
+                        }
+                    }
+
                     stage('Package Artifacts') {
                         when {
                            expression { BUILD_TYPE == 'Release' }
@@ -108,33 +137,6 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
-
-        stage('Test coverage') {
-            agent { label 'Linux' }
-
-            steps {
-                script {
-                    def BIN_PATH = "build/clang/Debug/bin"
-
-                    sh """
-                        pwd
-                        ls -lhAt
-                        ls -lhAt build
-                        ls -lhAt build/clang
-                        ls -lhAt build/clang/Debug
-                        ls -lhAt ${BIN_PATH}
-
-                        llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
-
-                        llvm-cov show ./${BIN_PATH}/UtilsTests \
-                            -instr-profile=${BIN_PATH}/default.profdata \
-                            -format=html \
-                            -output-dir=coverage_report \
-                            --ignore-filename-regex="(build/.*)|(tests/.*)"
-                    """
                 }
             }
         }
