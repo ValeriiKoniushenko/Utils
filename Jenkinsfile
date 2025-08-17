@@ -82,7 +82,30 @@ pipeline {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
 
                                 sh """
-                                    build/${C_COMPILER}/${BUILD_TYPE}/tests/UtilsTests
+                                    build/${C_COMPILER}/${BUILD_TYPE}/bin/UtilsTests
+                                """
+                            }
+                        }
+                    }
+
+                    stage('Test coverage') {
+                        when {
+                            expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
+                        }
+
+                        steps {
+                            script {
+                                def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
+                                def BIN_PATH = "build/${C_COMPILER}/${BUILD_TYPE}/bin"
+
+                                sh """
+                                    llvm-profdata merge -output=${BIN_PATH}/default.profdata ${BIN_PATH}/default.profraw
+
+                                    llvm-cov show ./${BIN_PATH}/UtilsTests \
+                                        -instr-profile=${BIN_PATH}/default.profdata \
+                                        -format=html \
+                                        -output-dir=${BIN_PATH}/coverage_report \
+                                        --ignore-filename-regex="(build/.*)|(tests/.*)"
                                 """
                             }
                         }
@@ -100,11 +123,7 @@ pipeline {
                                 def ARCHIVE_NAME = "${env.JOB_NAME}-${C_COMPILER}.tar.gz"
 
                                 sh """
-                                    # Remove old archive if it exists
-                                    rm -f ${ARCHIVE_NAME}
 
-                                    # Create tar.gz from install folder
-                                    tar czf ${ARCHIVE_NAME} -C ${BUILD_PATH}/tests .
                                 """
                                 archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
                             }
@@ -156,7 +175,7 @@ pipeline {
                     stage('Run') {
                         steps {
                             bat """
-                                build\\tests\\%BUILD_TYPE%\\UtilsTests.exe
+                                build\\bin\\%BUILD_TYPE%\\UtilsTests.exe
                             """
                         }
                     }
@@ -172,7 +191,7 @@ pipeline {
 
                                 bat """
                                     if exist ${ARCHIVE_NAME} del /Q ${ARCHIVE_NAME}
-                                    powershell Compress-Archive -Path ${BUILD_PATH}\\tests\\%BUILD_TYPE%\\* -DestinationPath ${ARCHIVE_NAME}
+                                    powershell Compress-Archive -Path ${BUILD_PATH}\\bin\\%BUILD_TYPE%\\* -DestinationPath ${ARCHIVE_NAME}
                                 """
                                 archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
                             }
