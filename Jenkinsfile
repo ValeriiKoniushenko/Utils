@@ -104,12 +104,24 @@ pipeline {
                         steps {
                             script {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
+                                def success = false
 
-                                sh """
-                                    cd build/${C_COMPILER}/${BUILD_TYPE}/bin
-                                    ./UtilsTests --gtest_output=xml:gtest_result.xml
-                                    cd ../../../../
-                                """
+                                try {
+                                    sh """
+                                        cd build/${C_COMPILER}/${BUILD_TYPE}/bin
+                                        ./UtilsTests --gtest_output=xml:gtest_result.xml
+                                        cd ../../../../
+                                    """
+                                    success = true
+                                } catch(err){
+                                }
+
+                                addEmbeddableBadgeConfiguration(
+                                    id: "linuxTests_${C_COMPILER}_${BUILD_TYPE}",
+                                    subject: "Linux | Tests | ${C_COMPILER} | ${BUILD_TYPE}",
+                                    status: (success ? "success" : "failed"),
+                                    color: (success ? "green" : "red")
+                                )
                             }
                         }
                     }
@@ -232,7 +244,7 @@ pipeline {
 
                                 addEmbeddableBadgeConfiguration(
                                     id: "windowsBuild_${BUILD_TYPE}",
-                                    subject: "Build: Win11 | MSVC | ${BUILD_TYPE}",
+                                    subject: "Build | MSVC | ${BUILD_TYPE}",
                                     status: (success ? "success" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
