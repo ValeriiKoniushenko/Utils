@@ -65,6 +65,7 @@ pipeline {
 
                                             cmake --build ${buildDir} -- -j2
                                         """
+                                        success = true
                                     } catch(err) {
                                         echo "Build failed on attempt #${attempt}"
                                         if (attempt == maxAttempts) {
@@ -100,7 +101,8 @@ pipeline {
                                 def ARCHIVE_NAME = "${env.JOB_NAME}-${C_COMPILER}.tar.gz"
 
                                 sh """
-
+                                    rm -f ${ARCHIVE_NAME}
+                                    tar czf ${ARCHIVE_NAME} -C ${BUILD_PATH}/bin .
                                 """
                                 archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
                             }
@@ -139,13 +141,34 @@ pipeline {
 
                     stage('Configure & Build') {
                         steps {
-                            bat """
-                                :: IF EXIST build rmdir /S /Q build
+                            script {
+                                def attempt = 0
+                                def maxAttempts = 2
+                                def success = false
 
-                                cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+                                while (!success && attempt < maxAttempts) {
+                                    attempt++
 
-                                cmake --build build --config %BUILD_TYPE% -- /m:2
-                            """
+                                    if (attempt == 2) {
+                                        echo "Previous build was FAILED. Let's try clear rebuild"
+                                    }
+                                    try {
+                                        bat """
+                                            :: IF EXIST build rmdir /S /Q build
+
+                                            cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+                                            cmake --build build --config %BUILD_TYPE% -- /m:2
+                                        """
+                                        success = true
+                                    } catch(err) {
+                                        echo "Build failed on attempt #${attempt}"
+                                        if (attempt == maxAttempts) {
+                                            error "Build failed after ${maxAttempts} attempts"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -189,7 +212,7 @@ pipeline {
                         llvm-cov show ./${BIN_PATH}/UtilsTests \
                             -instr-profile=${BIN_PATH}/default.profdata \
                             -format=html \
-                            -output-dir=${BIN_PATH}/coverage_report \
+                            -output-dir=coverage_report \
                             --ignore-filename-regex="(build/.*)|(tests/.*)"
                     """
                 }
