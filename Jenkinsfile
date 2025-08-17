@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-        stage('static Code Analysis') {
+        stage('Static Code Analysis') {
             agent any
 
             steps {
@@ -106,7 +106,7 @@ pipeline {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
 
                                 sh """
-                                    build/${C_COMPILER}/${BUILD_TYPE}/bin/UtilsTests
+                                    build/${C_COMPILER}/${BUILD_TYPE}/bin/UtilsTests --gtest_output=xml:build/${C_COMPILER}/${BUILD_TYPE}/bin/gtest_result.xml
                                 """
                             }
                         }
@@ -225,7 +225,7 @@ pipeline {
                     stage('Run') {
                         steps {
                             bat """
-                                build\\bin\\%BUILD_TYPE%\\UtilsTests.exe
+                                build\\bin\\%BUILD_TYPE%\\UtilsTests.exe --gtest_output=xml:build\\bin\\%BUILD_TYPE%\\gtest_result.xml
                             """
                         }
                     }
