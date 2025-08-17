@@ -114,6 +114,20 @@ pipeline {
                         }
                     }
 
+                    stage('Gen Test Results') {
+                        when {
+                           expression { BUILD_TYPE == 'Debug' }
+                        }
+
+                        steps {
+                            script {
+                                def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
+
+                                junit "build/${C_COMPILER}/${BUILD_TYPE}/bin/gtest_result.xml"
+                            }
+                        }
+                    }
+
                     stage('Test coverage') {
                         when {
                            expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
