@@ -229,6 +229,13 @@ pipeline {
                                         }
                                     }
                                 }
+
+                                publishEmbeddableBadgeConfiguration(
+                                    id: "windowsBuild_${BUILD_TYPE}",
+                                    subject: "MSVC ${BUILD_TYPE}",
+                                    status: (success ? "success" : "failed"),
+                                    color: (success ? "green" : "red")
+                                )
                             }
                         }
                     }
