@@ -267,4 +267,17 @@ pipeline {
             }
         }
     }
+
+    post {
+        agent { label 'Linux' }
+
+        always {
+            recordIssues(
+                enabledForFailure: true,
+                tools: [
+                    cppCheck(pattern: 'build_reports/cppcheck.xml')
+                ]
+            )
+        }
+    }
 }
