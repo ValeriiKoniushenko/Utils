@@ -202,6 +202,8 @@ pipeline {
         }
 
         stage('Test coverage') {
+            agent { label 'Linux' }
+
             steps {
                 script {
                     def BIN_PATH = "build/clang/Debug/bin"
