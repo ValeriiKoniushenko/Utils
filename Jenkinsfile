@@ -27,17 +27,12 @@ pipeline {
                         steps {
                             script {
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
-                            }
-                        }
-                    }
-
-                    stage('Full clear!') {
-                        when { expression { isTriggeredByCron } }
-                        steps {
-                            script {
-                                sh """
-                                    rm -rf build
-                                """
+                                if (isTriggeredByCron) {
+                                    echo "Clean build preparation due to Cron task."
+                                    sh """
+                                        rm -rf build
+                                    """
+                                }
                             }
                         }
                     }
@@ -135,17 +130,13 @@ pipeline {
                         steps {
                             script {
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
-                            }
-                        }
-                    }
 
-                    stage('Full clear!') {
-                        when { expression { isTriggeredByCron } }
-                        steps {
-                            script {
-                                sh """
-                                    IF EXIST build rmdir /S /Q build
-                                """
+                                if (isTriggeredByCron) {
+                                    echo "Clean build preparation due to Cron task."
+                                    sh """
+                                        IF EXIST build rmdir /S /Q build
+                                    """
+                                }
                             }
                         }
                     }
