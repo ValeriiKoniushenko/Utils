@@ -106,7 +106,9 @@ pipeline {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
 
                                 sh """
-                                    build/${C_COMPILER}/${BUILD_TYPE}/bin/UtilsTests --gtest_output=xml:build/${C_COMPILER}/${BUILD_TYPE}/bin/gtest_result.xml
+                                    cd build/${C_COMPILER}/${BUILD_TYPE}/bin
+                                    ./UtilsTests --gtest_output=xml:gtest_result.xml
+                                    cd ../../../../
                                 """
                             }
                         }
