@@ -167,6 +167,22 @@ pipeline {
                                 """
 
                                 publishHTML([reportDir: 'coverage_report', reportFiles: 'index.html', reportName: 'LLVM Coverage'])
+
+                                def report = readFile("coverage_report/index.html")
+                                def match = report =~ /TOTAL\s+\d+\s+\d+\s+([\d\.]+)%/
+                                def coverage = match ? match[0][1].toDouble() : 0.0
+
+                                def color = coverage > 90 ? "green" :
+                                            coverage > 70 ? "yellow" : "red"
+
+                                def badgeJson = """{
+                                    "schemaVersion": 1,
+                                    "label": "coverage",
+                                    "message": "${coverage}%",
+                                    "color": "${color}"
+                                }"""
+                                writeFile(file: "coverage-badge.json", text: badgeJson)
+                                archiveArtifacts artifacts: "coverage-badge.json", fingerprint: true
                             }
                         }
                     }
