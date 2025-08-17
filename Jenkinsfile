@@ -1,11 +1,34 @@
 pipeline {
     agent none
 
+    environment {
+        REPORT_DIR = 'build_reports'
+    }
+
     triggers {
         cron('H 3 * * *')
     }
 
     stages {
+        stage('static Code Analysis') {
+            agent any
+
+            steps {
+                script {
+                    sh '''
+                        mkdir -p ${REPORT_DIR}
+
+                        cppcheck --enable=all \
+                            --suppress=missingIncludeSystem \
+                            --suppress=unusedFunction \
+                            --suppress=missingInclude \
+                            --suppress=unknownMacro \
+                            --xml --xml-version=2 sources/ 2> ${REPORT_DIR}/cppcheck.xml
+                    '''
+                }
+            }
+        }
+
         stage('Linux builds') {
             matrix {
                 axes {
@@ -183,8 +206,6 @@ pipeline {
                                     }
                                     try {
                                         bat """
-                                            :: IF EXIST build rmdir /S /Q build
-
                                             cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
                                             cmake --build build --config %BUILD_TYPE% -- /m:2
