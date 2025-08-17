@@ -95,7 +95,7 @@ pipeline {
                             bat """
                                 :: IF EXIST build rmdir /S /Q build
 
-                                cmake -S . -B build
+                                cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
                                 cmake --build build --config %BUILD_TYPE% -- /m:2
                             """
