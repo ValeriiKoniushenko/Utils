@@ -10,7 +10,7 @@
 ### Intro
 
 Have you ever wondered why, sometimes, we compare strings character by character even when they are 
-exactly the same? Imagine you can predict the behavior and you know that string ```X``` will be identical 
+exactly the same? Imagine you can predict the behavior, and you know that string ```X``` will be identical 
 to string ```Y```. Instead of comparing their characters, you can just compare their addresses!
 
 ```c++
@@ -83,24 +83,61 @@ else
 
 ### Benchmark results
 
+### Comparison Benchmarks
+
 Comparing of '==' operations between: ```std::string``` & ```Core::StringAtom```
 
-| Benchmark                                  | Time (ns) | CPU (ns) | Iterations    |
-|-------------------------------------------|-----------|----------|---------------|
-| BM_StdStringComparison/2                  | 1.83      | 1.83     | 379,678,000   |
-| BM_StdStringComparison/8                  | 1.83      | 1.83     | 382,830,982   |
-| BM_StdStringComparison/64                 | 2.04      | 2.04     | 344,510,558   |
-| BM_StdStringComparison/512                | 4.25      | 4.25     | 165,402,730   |
-| BM_StdStringComparison/2048               | 19.0      | 19.0     | 36,727,706    |
-| BM_StdStringComparison_BigO               | 0.01 N    | 0.01 N   |               |
-| BM_StdStringComparison_RMS                | 23 %      | 23 %     |               |
-| BM_StringAtom_Static_Comparison/2         | 0.201     | 0.201    | 3'461'975'770 |
-| BM_StringAtom_Static_Comparison/8         | 0.201     | 0.201    | 3'477'984'307 |
-| BM_StringAtom_Static_Comparison/64        | 0.201     | 0.201    | 3'458'955'857 |
-| BM_StringAtom_Static_Comparison/512       | 0.201     | 0.201    | 3'474'828'775 |
-| BM_StringAtom_Static_Comparison/2048      | 0.201     | 0.201    | 3'462'340'161 |
-| BM_StringAtom_Static_Comparison_BigO      | 0.20 (1)  | 0.20 (1) |               |
-| BM_StringAtom_Static_Comparison_RMS       | 0 %       | 0 %      |               |
+| Benchmark                        | Size   | Time (ns) | CPU (ns) | Iterations      |
+|----------------------------------| ------ | --------- | -------- | --------------- |
+| **std::string comparison**       | 2      | 1.83      | 1.83     | 383,319,634     |
+|                                  | 8      | 1.83      | 1.83     | 383,239,124     |
+|                                  | 64     | 2.04      | 2.04     | 343,161,424     |
+|                                  | 512    | 4.76      | 4.76     | 146,580,865     |
+|                                  | 2048   | 18.5      | 18.5     | 38,281,040      |
+| **BigO / RMS**                   |        | 0.01 N    | 0.01 N   | 23%             |
+| **StringAtom Static comparison** | 2      | 0.200     | 0.200    | 3,501,128,764   |
+|                                  | 8      | 0.200     | 0.200    | 3,502,440,483   |
+|                                  | 64     | 0.200     | 0.200    | 3,501,748,353   |
+|                                  | 512    | 0.200     | 0.200    | 3,504,884,407   |
+|                                  | 2048   | 0.200     | 0.200    | 3,504,967,204   |
+| **BigO / RMS**                   |        | 0.20 (1)  | 0.20 (1) | 0%              |
+
+
+### Pushing Back (Normal)
+
+| Benchmark                   | Size | Time (ns) | CPU (ns) | Iterations  |
+|-----------------------------| ---- | --------- | -------- | ----------- |
+| **std::string PushingBack** | 2    | 2.28      | 2.28     | 307,189,879 |
+|                             | 8    | 6.01      | 6.01     | 116,523,667 |
+|                             | 64   | 74.4      | 74.4     | 9,415,181   |
+|                             | 512  | 487       | 487      | 1,434,702   |
+|                             | 2048 | 1855      | 1855     | 376,831     |
+| **BigO / RMS**              |      | 0.91 N    | 0.91 N   | 3%          |
+| **StringAtom PushingBack**  | 2    | 9.79      | 9.79     | 71,666,968  |
+|                             | 8    | 12.3      | 12.3     | 56,693,206  |
+|                             | 64   | 41.4      | 41.4     | 16,900,629  |
+|                             | 512  | 312       | 312      | 2,238,073   |
+|                             | 2048 | 1258      | 1258     | 556,665     |
+| **BigO / RMS**              |      | 0.61 N    | 0.61 N   | 2%          |
+
+
+### Pushing Back (Long String Mode)
+
+| Benchmark                               | Size | Time (ns) | CPU (ns) | Iterations  |
+|-----------------------------------------| ---- | --------- | -------- | ----------- |
+| **std::string PushingBack\_LongString** | 2    | 2.49      | 2.49     | 281,601,512 |
+|                                         | 8    | 25.2      | 25.2     | 27,813,785  |
+|                                         | 64   | 102       | 102      | 6,862,563   |
+|                                         | 512  | 608       | 608      | 1,153,361   |
+|                                         | 2048 | 2343      | 2343     | 299,668     |
+| **BigO / RMS**                          |      | 1.15 N    | 1.15 N   | 3%          |
+| **StringAtom PushingBack\_LongString**  | 2    | 9.63      | 9.63     | 72,672,302  |
+|                                         | 8    | 14.5      | 14.5     | 48,225,141  |
+|                                         | 64   | 94.4      | 94.4     | 7,398,923   |
+|                                         | 512  | 621       | 621      | 1,126,125   |
+|                                         | 2048 | 2354      | 2354     | 297,275     |
+| **BigO / RMS**                          |      | 1.15 N    | 1.15 N   | 3%          |
+
 
 ### Requirements
 
