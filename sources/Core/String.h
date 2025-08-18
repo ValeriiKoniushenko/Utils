@@ -1901,23 +1901,20 @@ namespace Core
         {
             const auto oldCapacity = _capacity;
 
-            const SizeT finalCapacity = newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + static_cast<SizeT>(1);
+            constexpr auto one = static_cast<SizeT>(1);
+            const SizeT finalCapacity = newSize * (isIgnoreMultiplier ? one : _capacityMultiplier) + one;
             if (auto* newString = new CharT[finalCapacity]{})
             {
                 if (_string)
                 {
-                    const auto limit = (std::min)(finalCapacity, oldCapacity);
-                    for (IndexT i = 0; i < limit; ++i)
-                    {
-                        newString[i] = _string[i];
-                    }
+                    memcpy(newString, _string, (std::min)(finalCapacity, oldCapacity) * sizeof(CharT));
                 }
 
                 if (_policy == StringPolicy::Static)
                 {
                     _string = nullptr;
                 }
-                else if (_policy == StringPolicy::Dynamic)
+                else
                 {
                     delete[] _string;
                 }
