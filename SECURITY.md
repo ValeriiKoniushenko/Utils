@@ -1,32 +1,30 @@
 # Security Policy
 
-## Reporting Potential Security Issues
+## Reporting Security Vulnerabilities
 
-If you have encountered a potential security vulnerability in this project,
-please report it to us at <Valerii.Koniushenko@gmail.com>. We will work with you to
-verify the vulnerability and patch it.
+We take the security of this project seriously.  
+If you discover a security vulnerability, please report it responsibly by contacting:
 
-When reporting issues, please provide the following information:
+- e-mail: <a href="mailto:valeriikoniushenko@gmail.com">valeriikoniushenko@gmail.com</a>
+- telegram: [@valeriikoniushenko](https://t.me/valeriikoniushenko)
 
-- Component(s) affected
-- A description indicating how to reproduce the issue
-- A summary of the security vulnerability and impact
+When reporting, please include (as much as possible):
+- The affected component(s)
+- Steps to reproduce the issue
+- A clear description of the vulnerability and its potential impact
 
-We request that you contact us via the email address above and give the
-project contributors a chance to resolve the vulnerability and issue a new
-release prior to any public exposure; this helps protect the project's
-users, and provides them with a chance to upgrade and/or update in order to
-protect their applications.
+Please do **not** disclose the issue publicly until we have confirmed and addressed it.  
+Responsible disclosure gives us time to verify, fix, and release updates to protect all users.
 
-For sensitive email communications, please use
-[our PGP key](https://github.com/ValeriiKoniushenko/WindowsProfiler-lib/blob/develop/PGP-key.asc).
+## Our Commitment
 
-## Policy
+If a valid security issue is reported:
+- We will acknowledge receipt of the report within **5 business days**.
+- We will investigate and verify the issue promptly.
+- We will patch the current release branch and the most recent prior minor release branch.
+- Once a fix is available, we will issue a new security release and notify users.
 
-If we verify a reported security vulnerability, our policy is:
+## Scope
 
-- We will patch the current release branch, as well as the immediate prior minor
-  release branch.
-
-- After patching the release branches, we will immediately issue new security
-  fix releases for each patched release branch.
+This policy applies to all code and documentation in this repository.  
+Non-security bugs should be reported through the [issue tracker](./issues).  
