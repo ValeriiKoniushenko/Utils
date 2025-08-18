@@ -26,5 +26,4 @@ If a valid security issue is reported:
 
 ## Scope
 
-This policy applies to all code and documentation in this repository.  
-Non-security bugs should be reported through the [issue tracker](./issues).  
+This policy applies to all code and documentation in this repository.
