@@ -51,16 +51,7 @@ pipeline {
                 stages {
                     stage('Prepare') {
                         steps {
-                            script {
-                                def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
-                                
-                                addEmbeddableBadgeConfiguration(
-                                    id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
-                                    subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
-                                    status: "building...",
-                                    color: "yellow"
-                                )
-                                
+                            script {                                
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
                                 if (isTriggeredByCron) {
                                     echo "Clean build preparation due to Cron task."
@@ -243,13 +234,6 @@ pipeline {
                     stage('Prepare') {
                         steps {
                             script {
-                                addEmbeddableBadgeConfiguration(
-                                    id: "windowsBuild_${BUILD_TYPE}",
-                                    subject: "Win11 | MSVC | ${BUILD_TYPE}",
-                                    status: "building...",
-                                    color: "yellow"
-                                )
-
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
 
                                 if (isTriggeredByCron) {
