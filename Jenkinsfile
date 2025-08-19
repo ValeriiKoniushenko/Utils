@@ -56,8 +56,8 @@ pipeline {
                                 addEmbeddableBadgeConfiguration(
                                     id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
                                     subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
-                                    status: "building..."),
-                                    color: "yellow")
+                                    status: "building...",
+                                    color: "yellow"
                                 )
                                 
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
