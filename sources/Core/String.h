@@ -658,6 +658,7 @@ namespace Core
         [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
         [[nodiscard]] operator StdStringViewT() const noexcept { return toStdStringView(); }
+        [[nodiscard]] CharT& operator[](IndexT index) noexcept { return _string[index]; }
         [[nodiscard]] CharT operator[](IndexT index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
@@ -1244,15 +1245,11 @@ namespace Core
 
         [[nodiscard]] static bool IsContainChar(CharT ch, StdStringViewT set) noexcept
         {
-            for (const auto value : set)
-            {
-                if (value == ch)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return std::ranges::any_of(set,
+                                       [ch](auto value)
+                                       {
+                                           return value == ch;
+                                       });
         }
 
         /**
@@ -1954,9 +1951,11 @@ namespace Core
         [[nodiscard]] BaseString<char> toASCII() const
         {
             BaseString<char> temp;
-            for (auto ch : *this)
+            temp.resize(_size);
+
+            for (SizeT i = 0; i < _size; ++i)
             {
-                temp += static_cast<char>(ch);
+                temp[i] = static_cast<char>(_string[i]);
             }
             return temp;
         }

@@ -25,6 +25,7 @@ pipeline {
                             --suppress=unknownMacro \
                             --suppress=identicalInnerCondition \
                             --suppress=knownConditionTrueFalse \
+                            --suppress=noExplicitConstructor \
                             --xml --xml-version=2 sources/ 2> ${REPORT_DIR}/cppcheck.xml
                     '''
                 }

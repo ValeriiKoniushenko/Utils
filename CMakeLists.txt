@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30.0..)
 
-project(Utils VERSION 1.3.1 LANGUAGES CXX)
+project(Utils VERSION 1.3.2 LANGUAGES CXX)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Predefinitions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Features.cmake)

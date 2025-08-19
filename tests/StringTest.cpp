@@ -191,6 +191,43 @@ TEST(StringTest, BaseString_char_default__DefaultCopyAndMove)
     }
 }
 
+TEST(StringTest, BaseString_char_default__WorkingWithEmpty)
+{
+    using Core::StringAtom;
+
+    {
+        StringAtom str;
+        EXPECT_EQ("", str);
+    }
+
+    {
+        StringAtom str = "";
+        EXPECT_EQ("", str);
+    }
+
+    {
+        StringAtom str;
+        StringAtom str1 = str;
+
+        EXPECT_EQ("", str);
+        EXPECT_EQ("", str1);
+    }
+
+    {
+        StringAtom str;
+        StringAtom str1 = std::move(str);
+
+        EXPECT_EQ("", str1);
+    }
+
+    {
+        StringAtom str;
+
+        std::string str1 = (str + "Hello").data();
+        EXPECT_EQ("Hello", str1);
+    }
+}
+
 TEST(StringTest, BaseString_char_default__Comparision)
 {
     using Core::StringAtom;
