@@ -242,6 +242,13 @@ pipeline {
                     stage('Prepare') {
                         steps {
                             script {
+                                addEmbeddableBadgeConfiguration(
+                                    id: "windowsBuild_${BUILD_TYPE}",
+                                    subject: "Win11 | MSVC | ${BUILD_TYPE}",
+                                    status: "building...",
+                                    color: "yellow"
+                                )
+
                                 isTriggeredByCron = currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')
 
                                 if (isTriggeredByCron) {
