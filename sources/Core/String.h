@@ -1125,7 +1125,7 @@ namespace Core
                 tryToMakeAsDynamic();
                 for (IndexT i = 0; i < _size; ++i)
                 {
-                    _string[i] = Toolset::ToUpper(_string[i]);
+                    _string[i] = static_cast<CharT>(Toolset::ToUpper(_string[i]));
                 }
             }
 
@@ -1139,7 +1139,7 @@ namespace Core
                 tryToMakeAsDynamic();
                 for (IndexT i = 0; i < _size; ++i)
                 {
-                    _string[i] = Toolset::ToLower(_string[i]);
+                    _string[i] = static_cast<CharT>(Toolset::ToLower(_string[i]));
                 }
             }
 
@@ -1229,7 +1229,7 @@ namespace Core
                 // TODO: optimize this code
                 while (auto* found = find(mainValue, offset))
                 {
-                    offset = found - _string + newValue.size();
+                    offset = static_cast<int>(found - _string + newValue.size());
                     auto temp = Self(_string, found - _string);
                     temp += newValue;
                     temp += found + mainValue.size();
