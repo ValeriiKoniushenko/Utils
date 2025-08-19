@@ -31,6 +31,7 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <codecvt>
 #include <cstring>
