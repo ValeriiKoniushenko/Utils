@@ -13,7 +13,7 @@
 - [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxTests_clang_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 - [![](https://img.shields.io/endpoint?url=https://jenkins.vakon.space/job/Utils/lastBuild/artifact/coverage-badge.json?wrapper=plain)](https://jenkins.vakon.space/job/Utils/LLVM_20Coverage/)
 
-**Valgrind** [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linux_valgrind)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+[![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linux_valgrind)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 
 ---
 
