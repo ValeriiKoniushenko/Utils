@@ -71,22 +71,46 @@ TEST(CoreTests, RectPointCollision)
 {
     using PosT = Core::FRect::GlobalPositionT;
 
-    constexpr Core::FRect rect = { 0.f, 10.f, 10.f, 0.f };
+    {
+        constexpr Core::FRect rect = { 0.f, 10.f, 10.f, 0.f };
 
-    constexpr auto innerPoint = PosT{ 3.f, 3.f };
-    constexpr auto outerPoint = PosT{ -3.f, -3.f };
+        constexpr auto innerPoint = PosT{ 3.f, 3.f };
+        constexpr auto outerPoint = PosT{ -3.f, -3.f };
 
-    static_assert(rect.isContain(innerPoint));
-    static_assert(!rect.isContain(outerPoint));
+        static_assert(rect.isContain(innerPoint));
+        static_assert(!rect.isContain(outerPoint));
+    }
+
+    {
+        Core::FRect rect = { 0.f, 10.f, 10.f, 0.f };
+
+        const auto innerPoint = PosT{ 3.f, 3.f };
+        const auto outerPoint = PosT{ -3.f, -3.f };
+
+        ASSERT_TRUE(rect.isContain(innerPoint));
+        ASSERT_FALSE(rect.isContain(outerPoint));
+    }
 }
 
 TEST(CoreTests, RectRectCollision)
 {
-    constexpr Core::FRect rect1 = { 0.f, 10.f, 10.f, 0.f };
-    constexpr Core::FRect rect2 = { 5.f, 15.f, 15.f, 5.f };
-    constexpr Core::FRect rect3 = { -5.f, -15.f, -15.f, -5.f };
+    {
+        constexpr Core::FRect rect1 = { 0.f, 10.f, 10.f, 0.f };
+        constexpr Core::FRect rect2 = { 5.f, 15.f, 15.f, 5.f };
+        constexpr Core::FRect rect3 = { -5.f, -15.f, -15.f, -5.f };
 
-    static_assert(rect1.isContain(rect2));
-    static_assert(rect2.isContain(rect1));
-    static_assert(!rect2.isContain(rect3));
+        static_assert(rect1.isContain(rect2));
+        static_assert(rect2.isContain(rect1));
+        static_assert(!rect2.isContain(rect3));
+    }
+
+    {
+        constexpr Core::FRect rect1 = { 0.f, 10.f, 10.f, 0.f };
+        constexpr Core::FRect rect2 = { 5.f, 15.f, 15.f, 5.f };
+        constexpr Core::FRect rect3 = { -5.f, -15.f, -15.f, -5.f };
+
+        ASSERT_TRUE(rect1.isContain(rect2));
+        ASSERT_TRUE(rect2.isContain(rect1));
+        ASSERT_FALSE(rect2.isContain(rect3));
+    }
 }
