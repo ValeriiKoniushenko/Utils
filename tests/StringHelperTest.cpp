@@ -25,7 +25,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 
-TEST(StringHelperTest, write_to_stream)
+TEST(StringHelperTest, writeToStream)
 {
     {
         auto string = "Test string, ignore it"_atom;
@@ -48,7 +48,18 @@ TEST(StringHelperTest, write_to_stream)
     // Assert("Hello world"_dyn);
 }
 
-TEST(StringHelperTest, quick_format)
+TEST(StringHelperTest, defaultInputStream)
+{
+    std::istringstream fakeInput("42 hello world\n");
+    std::streambuf* oldCin = std::cin.rdbuf(fakeInput.rdbuf());  // redirect cin
+
+    Core::StringAtom str;
+    std::cin >> str >> str >> str;
+
+    EXPECT_EQ(str, "42helloworld");
+}
+
+TEST(StringHelperTest, quickFormat)
 {
     {
         Core::StringFormatter<char> formatter("Hello {}");
