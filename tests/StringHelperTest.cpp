@@ -27,6 +27,9 @@
 
 TEST(StringHelperTest, writeToStream)
 {
+    std::ostringstream captured;
+    std::streambuf* old = std::cout.rdbuf(captured.rdbuf()); // redirect
+
     {
         auto string = "Test string, ignore it"_atom;
         std::cout << string << std::endl;
@@ -46,6 +49,8 @@ TEST(StringHelperTest, writeToStream)
 
     // Assert("Hello world"_atom);
     // Assert("Hello world"_dyn);
+
+    std::cout.rdbuf(old);
 }
 
 TEST(StringHelperTest, defaultInputStream)
