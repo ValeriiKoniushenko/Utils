@@ -170,7 +170,7 @@ pipeline {
                                         -instr-profile=${BIN_PATH}/default.profdata \
                                         -format=html \
                                         -output-dir=coverage_report \
-                                        --ignore-filename-regex="(build/.*)|(tests/.*)|(.*Core/Assert.h)"
+                                        --ignore-filename-regex="(build/.*)|(tests/.*)|(.*Core/Assert.h)|(.*Core/Color.h)"
                                 """
 
                                 publishHTML([reportDir: 'coverage_report', reportFiles: 'index.html', reportName: 'LLVM Coverage'])
