@@ -214,6 +214,24 @@ pipeline {
                               build/clang/Debug/bin/UtilsTests
                             '''
                         }
+                        post {
+                            success {
+                                addEmbeddableBadgeConfiguration(
+                                    id: "linux_valgrind",
+                                    subject: "Valgrind",
+                                    status: "passed",
+                                    color: "green"
+                                )
+                            }
+                            failure {
+                                addEmbeddableBadgeConfiguration(
+                                    id: "linux_valgrind",
+                                    subject: "Valgrind",
+                                    status: "failed",
+                                    color: "red"
+                                )
+                            }
+                            }
                     }
 
                     stage('Package Artifacts') {
