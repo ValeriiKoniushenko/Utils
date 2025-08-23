@@ -24,28 +24,49 @@
 
 #include <gtest/gtest.h>
 
-using Core::Color4;
-using Core::NormColor4;
 using Core::Color3;
+using Core::Color4;
 using Core::NormColor3;
+using Core::NormColor4;
 
 TEST(Color4Test, ConstructFromParent)
 {
-    Color4 c(glm::u8vec4(10, 20, 30, 40));
-    EXPECT_EQ(c.x, 10);
-    EXPECT_EQ(c.y, 20);
-    EXPECT_EQ(c.z, 30);
-    EXPECT_EQ(c.w, 40);
+    {
+        Color4 c(glm::u8vec4(10, 20, 30, 40));
+        EXPECT_EQ(c.x, 10);
+        EXPECT_EQ(c.y, 20);
+        EXPECT_EQ(c.z, 30);
+        EXPECT_EQ(c.w, 40);
+    }
+
+    {
+        constexpr Color4 c(glm::u8vec4(10, 20, 30, 40));
+        EXPECT_EQ(c.x, 10);
+        EXPECT_EQ(c.y, 20);
+        EXPECT_EQ(c.z, 30);
+        EXPECT_EQ(c.w, 40);
+    }
 }
 
 TEST(Color4Test, FromNormColor4)
 {
-    NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
-    Color4 c = Color4::From(n);
-    EXPECT_EQ(c.x, 0);
-    EXPECT_EQ(c.y, 127); // ~0.5 * 255
-    EXPECT_EQ(c.z, 255);
-    EXPECT_EQ(c.w, 63); // ~0.25 * 255
+    {
+        NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
+        Color4 c = Color4::From(n);
+        EXPECT_EQ(c.x, 0);
+        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.z, 255);
+        EXPECT_EQ(c.w, 63);
+    }
+
+    {
+        constexpr NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
+        Color4 c = Color4::From(n);
+        EXPECT_EQ(c.x, 0);
+        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.z, 255);
+        EXPECT_EQ(c.w, 63);
+    }
 }
 
 TEST(Color4Test, FromNormColor4Mutate)
@@ -90,19 +111,38 @@ TEST(Color4RoundTrip, BackAndForth)
 // ---------- Color3 <-> NormColor3 ----------
 TEST(Color3Test, ConstructFromParent)
 {
-    Color3 c(glm::u8vec3(1, 2, 3));
-    EXPECT_EQ(c.x, 1);
-    EXPECT_EQ(c.y, 2);
-    EXPECT_EQ(c.z, 3);
+    {
+        Color3 c(glm::u8vec3(1, 2, 3));
+        EXPECT_EQ(c.x, 1);
+        EXPECT_EQ(c.y, 2);
+        EXPECT_EQ(c.z, 3);
+    }
+
+    {
+        constexpr Color3 c(glm::u8vec3(1, 2, 3));
+        EXPECT_EQ(c.x, 1);
+        EXPECT_EQ(c.y, 2);
+        EXPECT_EQ(c.z, 3);
+    }
 }
 
 TEST(Color3Test, FromNormColor3)
 {
-    NormColor3 n(glm::vec3(0.0f, 0.5f, 1.0f));
-    Color3 c = Color3::From(n);
-    EXPECT_EQ(c.x, 0);
-    EXPECT_EQ(c.y, 127);
-    EXPECT_EQ(c.z, 255);
+    {
+        NormColor3 n(glm::vec3(0.0f, 0.5f, 1.0f));
+        Color3 c = Color3::From(n);
+        EXPECT_EQ(c.x, 0);
+        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.z, 255);
+    }
+
+    {
+        constexpr NormColor3 n(glm::vec3(0.0f, 0.5f, 1.0f));
+        Color3 c = Color3::From(n);
+        EXPECT_EQ(c.x, 0);
+        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.z, 255);
+    }
 }
 
 TEST(Color3Test, FromNormColor3Mutate)
