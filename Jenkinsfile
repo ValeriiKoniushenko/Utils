@@ -132,6 +132,10 @@ pipeline {
                                     status: (success ? "passed" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
+
+                                if (!success){
+                                    error("Tests weren't passed!")
+                                }
                             }
                         }
                     }
@@ -340,6 +344,10 @@ pipeline {
                                     status: (success ? "passed" : "failed"),
                                     color: (success ? "green" : "red")
                                 )
+
+                                if (!success){
+                                    error("Tests weren't passed!")
+                                }
                             }
                         }
                     }
