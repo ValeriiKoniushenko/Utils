@@ -46,6 +46,39 @@ TEST(RegexTest, SimpleRegex)
     EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
 }
 
+TEST(RegexTest, SimpleRegexAfterClear)
+{
+    const std::string subject = "1234 Hello# world!";
+
+    RegexMatch regex;
+    regex.setPattern("([A-Za-z]+)(#|!)");
+    regex.setSubject(subject.c_str());
+    regex.setCompileOptions(PCRE2_MULTILINE);
+
+    ASSERT_TRUE(regex.compile());
+
+    auto match = regex.match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+
+    // ==================== AFTER CLEAR ====================
+    regex.clear();
+    regex.setPattern("([A-Za-z]+)(#|!)");
+    regex.setSubject(subject.c_str());
+    regex.setCompileOptions(PCRE2_MULTILINE);
+
+    ASSERT_TRUE(regex.compile());
+
+    match = regex.match();
+
+    ASSERT_TRUE(match);
+
+    EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+}
+
+
 TEST(RegexTest, ObjectCopying)
 {
     const std::string subject = "1234 Hello# world!";
@@ -212,7 +245,7 @@ TEST(RegexTest, IterateOverMatchesOneTime)
     EXPECT_EQ(5, matches[0].size);
 }
 
-TEST(RegexTest, SimpleReplace)
+TEST(RegexTest, SimpleReplaceAll)
 {
     char buff[1024]{};
 
@@ -224,6 +257,21 @@ TEST(RegexTest, SimpleReplace)
 
     ASSERT_TRUE(regex.replace());
     EXPECT_STREQ("He#llo # world # how_are_you?", buff);
+}
+
+TEST(RegexTest, SimpleReplaceOne)
+{
+    char buff[1024]{};
+
+    RegexReplace regex("[0-9]+", "He3llo 123 world 456 how_are_you?");
+    regex.setReplacementString("#");
+    regex.setOutputString(buff, 1024);
+    regex.setReplaceAll(true);
+    regex.setReplaceAll(false);
+    regex.compile();
+
+    ASSERT_TRUE(regex.replace());
+    EXPECT_STREQ("He#llo 123 world 456 how_are_you?", buff);
 }
 
 TEST(RegexTest, MatchDataConverts)
