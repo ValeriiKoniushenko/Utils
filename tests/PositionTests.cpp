@@ -145,33 +145,33 @@ TEST(PositionTests3, Math)
 TEST(PositionTests3, RelativePositionsSimple)
 {
     {
-        constexpr GPos3 orig(3);
-        constexpr RPos3 rel(-1);
+        GPos3 orig(3);
+        RPos3 rel(-1);
 
-        constexpr GPos3 final = rel.toGlobal(orig);
+        GPos3 final = rel.toGlobal(orig);
 
-        constexpr float commonResult = 2;
+        float commonResult = 2;
         EXPECT_EQ(commonResult, final.x);
         EXPECT_EQ(commonResult, final.y);
         EXPECT_EQ(commonResult, final.z);
     }
 
     {
-        constexpr GPos3 orig(3);
-        constexpr RPos3 rel1(-1);
-        constexpr RPos3 rel2(-1);
+        GPos3 orig(3);
+        RPos3 rel1(-1);
+        RPos3 rel2(-1);
 
         {
-            constexpr RPos3 final = rel2.toGlobal(rel1);
-            constexpr float commonResult = -2;
+            RPos3 final = rel2.toGlobal(rel1);
+            float commonResult = -2;
             EXPECT_EQ(commonResult, final.x);
             EXPECT_EQ(commonResult, final.y);
             EXPECT_EQ(commonResult, final.z);
         }
 
         {
-            constexpr GPos3 final = rel2.toGlobal(rel1).toGlobal(orig);
-            constexpr float commonResult = 1;
+            GPos3 final = rel2.toGlobal(rel1).toGlobal(orig);
+            float commonResult = 1;
             EXPECT_EQ(commonResult, final.x);
             EXPECT_EQ(commonResult, final.y);
             EXPECT_EQ(commonResult, final.z);
@@ -270,31 +270,31 @@ TEST(PositionTests2, Math)
 TEST(PositionTests2, RelativePositionsSimple)
 {
     {
-        constexpr GPos2 orig(3);
-        constexpr RPos2 rel(-1);
+        GPos2 orig(3);
+        RPos2 rel(-1);
 
-        constexpr GPos2 final = rel.toGlobal(orig);
+        GPos2 final = rel.toGlobal(orig);
 
-        constexpr float commonResult = 2;
+        float commonResult = 2;
         EXPECT_EQ(commonResult, final.x);
         EXPECT_EQ(commonResult, final.y);
     }
 
     {
-        constexpr GPos2 orig(3);
-        constexpr RPos2 rel1(-1);
-        constexpr RPos2 rel2(-1);
+        GPos2 orig(3);
+        RPos2 rel1(-1);
+        RPos2 rel2(-1);
 
         {
-            constexpr RPos2 final = rel2.toGlobal(rel1);
-            constexpr float commonResult = -2;
+            RPos2 final = rel2.toGlobal(rel1);
+            float commonResult = -2;
             EXPECT_EQ(commonResult, final.x);
             EXPECT_EQ(commonResult, final.y);
         }
 
         {
-            constexpr GPos2 final = rel2.toGlobal(rel1).toGlobal(orig);
-            constexpr float commonResult = 1;
+            GPos2 final = rel2.toGlobal(rel1).toGlobal(orig);
+            float commonResult = 1;
             EXPECT_EQ(commonResult, final.x);
             EXPECT_EQ(commonResult, final.y);
         }
