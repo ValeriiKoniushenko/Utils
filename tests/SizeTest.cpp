@@ -28,11 +28,15 @@ TEST(CoreTests, Size2LessGreater)
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(b < a);
         static_assert(a > b);
+        ASSERT_TRUE(b < a);
+        ASSERT_TRUE(a > b);
 
         constexpr auto a1 = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b1 = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         static_assert(b1 <= a1);
         static_assert(a1 >= b1);
+        ASSERT_TRUE(b1 <= a1);
+        ASSERT_TRUE(a1 >= b1);
     }
 
     {
@@ -41,11 +45,15 @@ TEST(CoreTests, Size2LessGreater)
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(b < a);
         static_assert(a > b);
+        ASSERT_TRUE(b < a);
+        ASSERT_TRUE(a > b);
 
         constexpr auto a1 = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b1 = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         static_assert(b1 <= a1);
         static_assert(a1 >= b1);
+        ASSERT_TRUE(b1 <= a1);
+        ASSERT_TRUE(a1 >= b1);
     }
 }
 
@@ -56,6 +64,7 @@ TEST(CoreTests, Size2Equal)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         static_assert(a == b);
+        ASSERT_TRUE(a == b);
     }
 
     {
@@ -63,6 +72,7 @@ TEST(CoreTests, Size2Equal)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         static_assert(a == b);
+        ASSERT_TRUE(a == b);
     }
 }
 
@@ -73,6 +83,7 @@ TEST(CoreTests, Size2NotEqual)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(a != b);
+        ASSERT_TRUE(a != b);
     }
 
     {
@@ -80,6 +91,7 @@ TEST(CoreTests, Size2NotEqual)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(a != b);
+        ASSERT_TRUE(a != b);
     }
 }
 
@@ -91,6 +103,7 @@ TEST(CoreTests, Size2Sum)
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         constexpr auto result = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 + v2, v1 + v2 };
         static_assert(a + b == result);
+        ASSERT_TRUE(a + b == result);
     }
 
     {
@@ -98,6 +111,7 @@ TEST(CoreTests, Size2Sum)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(a + b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 + v2, v1 + v2 });
+        ASSERT_TRUE((a + b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 + v2, v1 + v2 }));
     }
 }
 
@@ -109,6 +123,7 @@ TEST(CoreTests, Size2Substract)
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         constexpr auto result = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 - v2, v1 - v2 };
         static_assert(a - b == result);
+        ASSERT_TRUE(a - b == result);
     }
 
     {
@@ -116,6 +131,7 @@ TEST(CoreTests, Size2Substract)
         constexpr auto a = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1, v1 };
         constexpr auto b = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v2, v2 };
         static_assert(a - b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 - v2, v1 - v2 });
+        ASSERT_TRUE((a - b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 - v2, v1 - v2 }));
     }
 }
 
@@ -127,6 +143,7 @@ TEST(CoreTests, Size2Multiplication)
         constexpr auto b= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v2, v2 };
         constexpr auto result = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 * v2, v1 * v2 };
         static_assert(a * b == result);
+        ASSERT_TRUE(a * b == result);
     }
 
     {
@@ -134,6 +151,7 @@ TEST(CoreTests, Size2Multiplication)
         constexpr auto a= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v1, v1 };
         constexpr auto b= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v2, v2 };
         static_assert(a * b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 * v2, v1 * v2 });
+        ASSERT_TRUE((a * b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 * v2, v1 * v2 }));
     }
 }
 
@@ -145,6 +163,7 @@ TEST(CoreTests, Size2Dividing)
         constexpr auto b= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v2, v2 };
         constexpr auto result = Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 / v2, v1 / v2 };
         static_assert(a / b == result);
+        ASSERT_TRUE(a / b == result);
     }
 
     {
@@ -152,6 +171,7 @@ TEST(CoreTests, Size2Dividing)
         constexpr auto a= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v1, v1 };
         constexpr auto b= Core::Size<std::remove_const_t<decltype(v1)>, 2> { v2, v2 };
         static_assert(a / b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 / v2, v1 / v2 });
+        ASSERT_TRUE((a / b == Core::Size<std::remove_const_t<decltype(v1)>, 2>{ v1 / v2, v1 / v2 }));
     }
 }
 
