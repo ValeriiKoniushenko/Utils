@@ -211,7 +211,7 @@ pipeline {
                               --error-exitcode=42 \
                               --xml=yes \
                               --xml-file=valgrind-report.xml \
-                              build/clang/debug/bin/UtilsTests
+                              build/clang/Debug/bin/UtilsTests
                             '''
                         }
                     }
