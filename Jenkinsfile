@@ -196,6 +196,26 @@ pipeline {
                         }
                     }
 
+                    stage('Test with Valgrind') {
+                        when {
+                           expression { BUILD_TYPE == 'Debug' && COMPILER_PAIR == "clang:clang++" }
+                        }
+
+                        steps {
+                            sh '''
+                            valgrind \
+                              --tool=memcheck \
+                              --leak-check=full \
+                              --show-leak-kinds=all \
+                              --track-origins=yes \
+                              --error-exitcode=42 \
+                              --xml=yes \
+                              --xml-file=valgrind-report.xml \
+                              ./build/clang/debug/bin/UtilsTests
+                            '''
+                        }
+                    }
+
                     stage('Package Artifacts') {
                         when {
                            expression { BUILD_TYPE == 'Release' }
@@ -337,6 +357,8 @@ pipeline {
                         cppCheck(pattern: 'build_reports/cppcheck.xml')
                     ]
                 )
+
+                recordIssues enabledForFailure: true, tool: valgrind(pattern: 'valgrind-report.xml')
             }
         }
     }

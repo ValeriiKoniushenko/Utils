@@ -87,7 +87,8 @@ and more recently with desktop publishing software like Aldus PageMaker includin
     testFile.close();
 
     auto&& fileContent = Utils::GetFileContent(correctPath);
-    EXPECT_STREQ(text, fileContent.data());
+    ASSERT_EQ(strlen(text), fileContent.size());
+    ASSERT_EQ(0, memcmp(fileContent.data(), text, fileContent.size() * sizeof(*text)));
 
     std::filesystem::remove(correctPath);
 
