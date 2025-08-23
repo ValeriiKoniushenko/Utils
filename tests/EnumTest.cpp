@@ -46,7 +46,28 @@ CreateEnum(Num, int,
 );
 // clang-format on
 
-TEST(EnumTest, Color_Test)
+class EnumTest : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        oldCerr = std::cerr.rdbuf(capturedCerr.rdbuf()); // redirect
+        oldCout = std::cout.rdbuf(capturedCout.rdbuf()); // redirect
+    }
+    void TearDown() override
+    {
+        std::cerr.rdbuf(oldCerr);
+        std::cout.rdbuf(oldCout);
+    }
+
+private:
+    std::ostringstream capturedCout;
+    std::ostringstream capturedCerr;
+    std::streambuf* oldCerr = nullptr;
+    std::streambuf* oldCout = nullptr;
+};
+
+TEST_F(EnumTest, Color_Test)
 {
     Color color = Color::Red;
     EXPECT_EQ("Red", color.toStr());
@@ -59,7 +80,7 @@ TEST(EnumTest, Color_Test)
     EXPECT_EQ(Color::fromStr("Blue").value_or(999), 2);
 }
 
-TEST(EnumTest, Name_Test)
+TEST_F(EnumTest, Name_Test)
 {
     Name jim = Name::Jim;
     EXPECT_EQ("Jim", jim.toStr());
@@ -77,7 +98,7 @@ TEST(EnumTest, Name_Test)
     EXPECT_EQ(Name::fromStr("Blue").value_or(999), blue.cast());
 }
 
-TEST(EnumTest, Num_Test)
+TEST_F(EnumTest, Num_Test)
 {
     Num none = Num::None;
     EXPECT_EQ("None", none.toStr());
