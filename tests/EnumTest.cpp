@@ -78,6 +78,12 @@ TEST_F(EnumTest, Color_Test)
     EXPECT_EQ(2, color.cast());
     EXPECT_EQ(Color::fromStr("Blue").value_or(999), color.cast());
     EXPECT_EQ(Color::fromStr("Blue").value_or(999), 2);
+
+    Color color2 = Color::Red;
+    color = color2;
+    EXPECT_EQ(color, color2);
+    EXPECT_EQ("Red", color.toStr());
+    EXPECT_EQ(0, color.cast());
 }
 
 TEST_F(EnumTest, Name_Test)
