@@ -28,6 +28,7 @@ function(UtilsCoreAddCompileOptionsTo Target)
             "-Wno-error=unused-variable"
             "-Wno-unused-variable"
             "-Wno-unused-parameter"
+            "-Wno-deprecated-declarations"
             "-Werror=return-type"
 
             "$<$<CONFIG:DEBUG>:-g3>"

@@ -31,10 +31,12 @@
 namespace Core
 {
 
-    template<class F>
-    class Delegate : public Utils::CopyableAndMoveable
+    class AbstractDelegate : public Utils::CopyableAndMoveable
     {
     public:
+        /**
+         * @brief using identify & control of the attached Delegate
+         */
         class ID final : public Utils::CopyableAndMoveable
         {
         public:
@@ -49,7 +51,7 @@ namespace Core
         public:
             ID() = default;
 
-            ID(Delegate<F>* owner, IdT newId)
+            ID(AbstractDelegate* owner, IdT newId)
                 : _owner{ owner },
                   _id{ newId }
             {
@@ -59,30 +61,26 @@ namespace Core
 
             [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
 
-            [[nodiscard]] constexpr bool isValid() const noexcept
-            {
-                if (*this == ID())
-                {
-                    return false;
-                }
-                if (_owner)
-                {
-                    if (_owner->_callbacks[*this] == _owner->_callbacks.end())
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            [[nodiscard]] Delegate<F>* getOwner() noexcept { return _owner; }
+            [[nodiscard]] AbstractDelegate* getOwner() noexcept { return _owner; }
+            [[nodiscard]] bool isValid() { return _id != invalidID && _owner; }
 
         private:
-            Delegate<F>* _owner = nullptr;
+            AbstractDelegate* _owner = nullptr;
             IdT _id = invalidID;
         }; // class ID
 
-        class IDGuard final : Utils::NotCopyableButMoveable
+    public:
+        virtual void unsubscribe(const ID& id) = 0;
+    };
+
+    template<class F>
+    class Delegate : public AbstractDelegate
+    {
+    public:
+        /**
+         * @brief using to hold & release(corresponding to RAII) the delegate's subscriber
+         */
+        class [[deprecated("Use DelegateSubscriber instead")]] IDGuard final : Utils::NotCopyableButMoveable
         {
         public:
             IDGuard() = default;
@@ -138,7 +136,7 @@ namespace Core
             _callbacks.emplace(id, std::forward<CallbackT>(callback));
         }
 
-        void unsubscribe(const ID& id) { _callbacks.erase(id); }
+        void unsubscribe(const ID& id) override { _callbacks.erase(id); }
 
         [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept { return _callbacks.size(); }
         [[nodiscard]] bool isEmpty() const noexcept { return _callbacks.empty(); }
@@ -150,6 +148,45 @@ namespace Core
     private:
         CallbackContainerT _callbacks{};
         typename ID::IdT _generatedID = ID::invalidID;
+    };
+
+    /**
+     * @brief Use it to remove in the end of scope your subscription to a delegate.
+     * But, for now you must avoid situations where Delegate will be destroyed earlier
+     * then this object.
+     */
+    class DelegateSubscriber : public Utils::NotCopyableButMoveable
+    {
+    public:
+        using ID = AbstractDelegate::ID;
+
+        DelegateSubscriber() = default;
+        ~DelegateSubscriber() override { release(); }
+
+        DelegateSubscriber(const ID& id)
+            : _id{ id }
+        {
+        }
+
+        DelegateSubscriber& operator=(const ID& id)
+        {
+            release();
+            _id = id;
+            return *this;
+        }
+
+        void release()
+        {
+            if (_id.isValid())
+            {
+                _id.getOwner()->unsubscribe(_id);
+            }
+        }
+
+        [[nodiscard]] ID& getID() noexcept { return _id; }
+
+    private:
+        ID _id;
     };
 
 } // namespace Core

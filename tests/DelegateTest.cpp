@@ -160,3 +160,35 @@ TEST(DelegateTest, SubscribeWithoutIDGetting)
     EXPECT_EQ(1, delegate.getSubscriptionsCount());
     EXPECT_FALSE(delegate.isEmpty());
 }
+
+TEST(DelegateTest, UsingOfDelegateSubscriber)
+{
+    Core::Delegate<void()> delegate;
+    {
+        bool wasInvoked = false;
+        Core::DelegateSubscriber id = delegate.subscribeAndGetID(
+            [&]()
+            {
+                wasInvoked = true;
+            });
+        delegate.trigger();
+        EXPECT_TRUE(wasInvoked);
+    }
+    EXPECT_EQ(0, delegate.getSubscriptionsCount());
+    EXPECT_TRUE(delegate.isEmpty());
+}
+
+TEST(DelegateTest, OutOfScopeDelegate)
+{
+    /*Core::DelegateSubscriber id;
+
+    {
+        Core::Delegate<void()> delegate;
+        bool wasInvoked = false;
+        id = delegate.subscribeAndGetID(
+            [&]()
+            {
+                wasInvoked = true;
+            });
+    }*/
+}
