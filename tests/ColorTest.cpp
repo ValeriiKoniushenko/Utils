@@ -46,6 +46,31 @@ TEST(Color4Test, ConstructFromParent)
         EXPECT_EQ(c.z, 30);
         EXPECT_EQ(c.w, 40);
     }
+
+    {
+        Color4 c(255);
+        EXPECT_EQ(1.f, c.toNorm().x);
+        EXPECT_EQ(1.f, c.toNorm().y);
+        EXPECT_EQ(1.f, c.toNorm().z);
+        EXPECT_EQ(1.f, c.toNorm().w);
+    }
+
+    {
+        constexpr Color4 c(255);
+        EXPECT_EQ(1.f, c.toNorm().x);
+        EXPECT_EQ(1.f, c.toNorm().y);
+        EXPECT_EQ(1.f, c.toNorm().z);
+        EXPECT_EQ(1.f, c.toNorm().w);
+    }
+
+
+    {
+        constexpr Color4 c(255);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().x);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().y);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().z);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().w);
+    }
 }
 
 TEST(Color4Test, FromNormColor4)
@@ -123,6 +148,27 @@ TEST(Color3Test, ConstructFromParent)
         EXPECT_EQ(c.x, 1);
         EXPECT_EQ(c.y, 2);
         EXPECT_EQ(c.z, 3);
+    }
+
+    {
+        Color3 c(255);
+        EXPECT_EQ(1.f, c.toNorm().x);
+        EXPECT_EQ(1.f, c.toNorm().y);
+        EXPECT_EQ(1.f, c.toNorm().z);
+    }
+
+    {
+        constexpr Color3 c(255);
+        EXPECT_EQ(1.f, c.toNorm().x);
+        EXPECT_EQ(1.f, c.toNorm().y);
+        EXPECT_EQ(1.f, c.toNorm().z);
+    }
+
+    {
+        constexpr Color3 c(255);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().x);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().y);
+        EXPECT_EQ(1.f, c.toNorm().toGlm().z);
     }
 }
 

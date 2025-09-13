@@ -46,8 +46,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] static Color4 From(const NormColor4& other) noexcept;
-        void from(const NormColor4& other) noexcept;
+        [[nodiscard]] constexpr static Color4 From(const NormColor4& other) noexcept;
+        constexpr void from(const NormColor4& other) noexcept;
+        [[nodiscard]] constexpr NormColor4 toNorm() const noexcept;
+        [[nodiscard]] constexpr Parent toGlm() const noexcept { return Parent{ r, g, b, a }; }
     };
 
     /**
@@ -63,8 +65,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] static Color3 From(const NormColor3& other) noexcept;
-        void from(const NormColor3& other) noexcept;
+        [[nodiscard]] constexpr static Color3 From(const NormColor3& other) noexcept;
+        [[nodiscard]] constexpr NormColor3 toNorm() const noexcept;
+        constexpr void from(const NormColor3& other) noexcept;
+        [[nodiscard]] constexpr Parent toGlm() const noexcept { return Parent{ r, g, b }; }
     };
 
     /**
@@ -80,8 +84,10 @@ namespace Core
         {
         }
 
-        [[nodiscard]] static NormColor4 From(const Color4& other) noexcept;
-        void from(const Color4& other) noexcept;
+        [[nodiscard]] constexpr static NormColor4 From(const Color4& other) noexcept;
+        [[nodiscard]] constexpr Color4 toColor() const noexcept;
+        constexpr void from(const Color4& other) noexcept;
+        [[nodiscard]] constexpr Parent toGlm() const noexcept { return Parent{ r, g, b, a }; }
     };
 
     /**
@@ -97,8 +103,89 @@ namespace Core
         {
         }
 
-        [[nodiscard]] static NormColor3 From(const Color3& other) noexcept;
-        void from(const Color3& other) noexcept;
+        [[nodiscard]] constexpr static NormColor3 From(const Color3& other) noexcept;
+        [[nodiscard]] constexpr Color3 toColor() const noexcept;
+        constexpr void from(const Color3& other) noexcept;
+        [[nodiscard]] constexpr Parent toGlm() const noexcept { return Parent{ r, g, b }; }
     };
+
+    constexpr void Color4::from(const NormColor4& other) noexcept
+    {
+        *this = Color4::From(other);
+    }
+
+    constexpr NormColor4 Color4::toNorm() const noexcept
+    {
+        return NormColor4::From(*this);
+    }
+
+    constexpr Color4 Color4::From(const NormColor4& other) noexcept
+    {
+        Color4 out;
+        out.r = static_cast<uint8_t>(other.r * 255.f);
+        out.g = static_cast<uint8_t>(other.g * 255.f);
+        out.b = static_cast<uint8_t>(other.b * 255.f);
+        out.a = static_cast<uint8_t>(other.a * 255.f);
+        return out;
+    }
+
+    constexpr void Color3::from(const NormColor3& other) noexcept
+    {
+        *this = Color3::From(other);
+    }
+
+    constexpr Color3 Color3::From(const NormColor3& other) noexcept
+    {
+        Color3 out;
+        out.r = static_cast<uint8_t>(other.r * 255.f);
+        out.g = static_cast<uint8_t>(other.g * 255.f);
+        out.b = static_cast<uint8_t>(other.b * 255.f);
+        return out;
+    }
+
+    constexpr NormColor3 Color3::toNorm() const noexcept
+    {
+        return NormColor3::From(*this);
+    }
+
+    constexpr NormColor4 NormColor4::From(const Color4& other) noexcept
+    {
+        return { static_cast<float>(other.r) / 255.f, static_cast<float>(other.g) / 255.f, static_cast<float>(other.b) / 255.f,
+                 static_cast<float>(other.a) / 255.f };
+    }
+
+    constexpr Color4 NormColor4::toColor() const noexcept
+    {
+        return Color4::From(*this);
+    }
+
+    constexpr void NormColor4::from(const Color4& other) noexcept
+    {
+        *this = NormColor4::From(other);
+    }
+
+    constexpr NormColor3 NormColor3::From(const Color3& other) noexcept
+    {
+        return {
+            static_cast<float>(other.r) / 255.f,
+            static_cast<float>(other.g) / 255.f,
+            static_cast<float>(other.b) / 255.f,
+        };
+    }
+
+    constexpr Color3 NormColor3::toColor() const noexcept
+    {
+        return Color3::From(*this);
+    }
+
+    constexpr void NormColor3::from(const Color3& other) noexcept
+    {
+        *this = NormColor3::From(other);
+    }
+
+    using RGB = Color3;
+    using RGBA = Color4;
+    using RGBn = NormColor3;
+    using RGBAn = NormColor4;
 
 } // namespace Core

@@ -2300,5 +2300,4 @@ inline Core::StringFormatter<char> operator""_f(const char* str, uint64_t size)
 inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, uint64_t size)
 {
     return { str, size };
-
 }

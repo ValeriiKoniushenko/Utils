@@ -26,10 +26,10 @@
 #include <iostream>
 
 #ifdef _MSC_VER
-    // clang-format off
+// clang-format off
     #include <windows.h>
     #include <debugapi.h>
-    // clang-format on
+// clang-format on
 #endif
 
 #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)

@@ -153,7 +153,7 @@ namespace Core
     /**
      * @brief Use it to remove in the end of scope your subscription to a delegate.
      * But, for now you must avoid situations where Delegate will be destroyed earlier
-     * then this object.
+     * than this object.
      */
     class DelegateSubscriber : public Utils::NotCopyableButMoveable
     {
