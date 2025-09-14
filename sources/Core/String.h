@@ -1938,8 +1938,7 @@ namespace Core
         {
             const auto oldCapacity = _capacity;
 
-            constexpr auto one = static_cast<SizeT>(1);
-            const SizeT finalCapacity = newSize * (isIgnoreMultiplier ? one : _capacityMultiplier) + one;
+            const SizeT finalCapacity = std::max(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, SizeT(16));
             if (auto* newString = new CharT[finalCapacity]{})
             {
                 if (_string)

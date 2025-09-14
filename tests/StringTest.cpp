@@ -669,6 +669,7 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(7, str.size());
     }
 
+
     {
         auto str = "__MyLogin"_atom;
         str.trimStart(' ');
@@ -718,6 +719,7 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(7, str.size());
     }
 
+
     {
         auto str = "   "_atom;
         str.trim(' ');
@@ -725,6 +727,7 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(0, str.size());
         EXPECT_NE(0, str.capacity());
     }
+
 
     {
         auto str = "   "_atom;
