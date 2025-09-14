@@ -58,11 +58,11 @@ namespace Core
         Utils::CSV csv;
         csv.setSavePath("string_metrics.csv");
 
-        auto add = [&csv](std::string first, std::string second, const std::unordered_map<std::string, int64_t>& data)
+        auto add = [&csv](std::string first, const std::unordered_map<std::string, int64_t>& data)
         {
             static int i = 0;
 
-            csv.addToBottomOfColumn(i, { first, second });
+            csv.addToBottomOfColumn(i, first);
             for (auto&& [str, count] : data)
             {
                 csv.addToBottomOfColumn(i, { str, std::to_string(count) });
@@ -71,12 +71,10 @@ namespace Core
             i += 3;
         };
 
-        csv.addRow({ "String", "StaticStrings", "", "String", "StaticCmp", "", "String", "DynamicCmp", "", "String", "Changed2Dynamic" });
-
-        add("String", "StaticStrings", _atomRequests);
-        add("String", "StaticCmp", _atomCmpRequests);
-        add("String", "DynamicCmp", _dynamicCmpRequests);
-        add("String", "Changed2Dynamic", _changedPolicyToDynamic);
+        add("Pure static", _atomRequests);
+        add("Static compared", _atomCmpRequests);
+        add("Dynamic compared", _dynamicCmpRequests);
+        add("Converted to dynamic", _changedPolicyToDynamic);
 
         csv.save();
     }
