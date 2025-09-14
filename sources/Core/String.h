@@ -44,7 +44,7 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef UTILS_DEBUG
+#if defined(UTILS_DEBUG)
     #include <sstream>
 #endif
 
@@ -57,9 +57,32 @@ namespace Core
         Dynamic
     };
 
-    template<class CharType>
-    struct _StringSettings : public Utils::Abstract
+#if defined(UTILS_DEBUG)
+
+    class StringTracer : public StrictSingleton<StringTracer>
     {
+        SINGLETONS_FRIEND(StringTracer)
+    public:
+        ~StringTracer() override;
+
+        [[maybe_unused]] void AddAtomRequest(std::string str);
+        [[maybe_unused]] void AddAtomComparisonRequest(std::string str);
+        [[maybe_unused]] void AddDynamicComparisonRequest(std::string str);
+
+        [[maybe_unused]] void saveMetrics();
+
+    private:
+        std::unordered_map<std::string, int64_t> _atomRequests;
+        std::unordered_map<std::string, int64_t> _atomCmpRequests;
+        std::unordered_map<std::string, int64_t> _dynamicCmpRequests;
+    };
+#endif // defined(UTILS_DEBUG)
+
+    template<class CharType>
+    struct _StringSettings
+    {
+        _StringSettings() = delete;
+
         using CharT = CharType;
         using SizeT = uint64_t;
         using HashT = uint64_t;
@@ -71,8 +94,10 @@ namespace Core
     struct _StringToolset;
 
     template<>
-    struct _StringToolset<char> : public Utils::Abstract
+    struct _StringToolset<char>
     {
+        _StringToolset() = delete;
+
         using CharT = char;
         using StdStringT [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
@@ -208,8 +233,10 @@ namespace Core
     };
 
     template<>
-    struct _StringToolset<wchar_t> : public Utils::Abstract
+    struct _StringToolset<wchar_t>
     {
+        _StringToolset() = delete;
+
         using CharT = wchar_t;
         using StdStringT [[maybe_unused]] [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
@@ -397,9 +424,8 @@ namespace Core
     };
 
     template<class CharType>
-    class _StringPool : public Core::StrictSingleton<_StringPool<CharType>>
+    class _StringPool
     {
-        SINGLETONS_FRIEND(_StringPool)
     public:
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
@@ -411,8 +437,16 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
+        _StringPool() = delete;
+
+        [[nodiscard]] static StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
         {
+#if defined(UTILS_DEBUG)
+            if constexpr (sizeof(CharT) == 1)
+            {
+                StringTracer::instance().AddAtomRequest(std::string(string));
+            }
+#endif
             const auto currentHash = std::hash<StdStringViewT>{}(StdStringViewT{ string, size });
             auto it = _strings.find(currentHash);
             if (it != _strings.end())
@@ -429,7 +463,7 @@ namespace Core
         }
 
     private:
-        std::unordered_map<HashT, StringDataT> _strings = {};
+        inline static std::unordered_map<HashT, StringDataT> _strings = {};
     };
 
     class Iterator;
@@ -641,17 +675,17 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::add(newString, Toolset::Length(newString)) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
@@ -671,8 +705,21 @@ namespace Core
 
             if (isStatic() && other.isStatic())
             {
+#if defined(UTILS_DEBUG)
+                if constexpr (sizeof(CharT) == 1)
+                {
+                    StringTracer::instance().AddAtomComparisonRequest(std::string(other.c_str()));
+                }
+#endif
                 return _string == other._string;
             }
+
+#if defined(UTILS_DEBUG)
+            if constexpr (sizeof(CharT) == 1)
+            {
+                StringTracer::instance().AddDynamicComparisonRequest(std::string(other.c_str()));
+            }
+#endif
 
             if (_size == other._size)
             {
@@ -2207,7 +2254,7 @@ namespace Core
             {
                 expr = L"{}";
             }
-#ifdef UTILS_DEBUG
+#if defined(UTILS_DEBUG)
             if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
             {
                 std::stringstream ss;

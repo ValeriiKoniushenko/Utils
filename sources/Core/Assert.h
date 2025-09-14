@@ -36,7 +36,7 @@
     #include <stacktrace>
 #endif
 
-#ifdef UTILS_DEBUG
+#if defined(UTILS_DEBUG)
 
 inline void Assert(const bool condition, const char* message = nullptr)
 {

@@ -37,7 +37,7 @@ std::istream& operator>>(std::istream& stream, Core::StringAtom& s)
     return stream;
 }
 
-#ifdef UTILS_DEBUG
+#if defined(UTILS_DEBUG)
 void Assert(const Core::StringAtom& s)
 {
     Assert(s.c_str());

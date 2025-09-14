@@ -1,6 +1,12 @@
 include_guard()
 
 function(UtilsCoreAddCompileOptionsTo Target)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_definitions(${Target} PUBLIC
+            UTILS_DEBUG=1
+        )
+    endif ()
+
     if (MSVC)
         target_compile_options(${Target} PRIVATE
             "/W4"

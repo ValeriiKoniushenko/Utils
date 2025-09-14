@@ -30,5 +30,3 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
 add_subdirectory(benchmark)
 add_subdirectory(tests)
 add_subdirectory(sources)
-
-Utils_InstallDebugLevel()
