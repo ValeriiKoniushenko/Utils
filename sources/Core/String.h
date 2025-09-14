@@ -68,6 +68,7 @@ namespace Core
         [[maybe_unused]] void AddAtomRequest(std::string str);
         [[maybe_unused]] void AddAtomComparisonRequest(std::string str);
         [[maybe_unused]] void AddDynamicComparisonRequest(std::string str);
+        [[maybe_unused]] void AddChangedPolicyToDynamic(std::string str);
 
         [[maybe_unused]] void saveMetrics();
 
@@ -75,6 +76,7 @@ namespace Core
         std::unordered_map<std::string, int64_t> _atomRequests;
         std::unordered_map<std::string, int64_t> _atomCmpRequests;
         std::unordered_map<std::string, int64_t> _dynamicCmpRequests;
+        std::unordered_map<std::string, int64_t> _changedPolicyToDynamic;
     };
 #endif // defined(UTILS_DEBUG)
 
@@ -1516,7 +1518,7 @@ namespace Core
             const auto finalSize = _size + str.size();
             if (finalSize >= _capacity)
             {
-                // 32 is minimum size to optimize working with small strings
+                // 32 is the minimum size to optimize working with small strings
                 reserve(finalSize < 32 ? 32 : finalSize);
             }
 
@@ -1647,6 +1649,13 @@ namespace Core
 
                 if (_policy == StringPolicy::Static)
                 {
+#if defined(UTILS_DEBUG)
+                    if constexpr (sizeof(CharT) == 1)
+                    {
+                        StringTracer::instance().AddChangedPolicyToDynamic(std::string(_string));
+                    }
+#endif
+
                     _policy = StringPolicy::Dynamic;
                 }
                 else if (_policy == StringPolicy::Dynamic)
@@ -1887,6 +1896,13 @@ namespace Core
                 _string = other._string;
                 _size = other._size;
                 _policy = StringPolicy::Dynamic;
+#if defined(UTILS_DEBUG)
+                if constexpr (sizeof(CharT) == 1)
+                {
+                    StringTracer::instance().AddChangedPolicyToDynamic(std::string(_string));
+                }
+#endif
+
                 _capacity = other._capacity;
 
                 other._size = 0;
@@ -1956,6 +1972,12 @@ namespace Core
 
                 if (_policy == StringPolicy::Static)
                 {
+#if defined(UTILS_DEBUG)
+                    if constexpr (sizeof(CharT) == 1)
+                    {
+                        StringTracer::instance().AddChangedPolicyToDynamic(std::string(newString));
+                    }
+#endif
                     _string = nullptr;
                 }
                 else

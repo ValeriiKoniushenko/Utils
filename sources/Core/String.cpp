@@ -48,24 +48,35 @@ namespace Core
         _dynamicCmpRequests[std::move(str)]++;
     }
 
+    void StringTracer::AddChangedPolicyToDynamic(std::string str)
+    {
+        _changedPolicyToDynamic[std::move(str)]++;
+    }
+
     void StringTracer::saveMetrics()
     {
         Utils::CSV csv;
         csv.setSavePath("string_metrics.csv");
-        csv.addRow({ "String", "Atoms", "String", "AtomCmp", "String", "DynamicCmp" });
 
-        for (auto&& [str, count] : _atomRequests)
+        auto add = [&csv](std::string first, std::string second, const std::unordered_map<std::string, int64_t>& data)
         {
-            csv.addToBottomOfColumn(0, { str, std::to_string(count) });
-        }
-        for (auto&& [str, count] : _atomCmpRequests)
-        {
-            csv.addToBottomOfColumn(2, { str, std::to_string(count) });
-        }
-        for (auto&& [str, count] : _dynamicCmpRequests)
-        {
-            csv.addToBottomOfColumn(4, { str, std::to_string(count) });
-        }
+            static int i = 0;
+
+            csv.addToBottomOfColumn(i, { first, second });
+            for (auto&& [str, count] : data)
+            {
+                csv.addToBottomOfColumn(i, { str, std::to_string(count) });
+            }
+
+            i += 3;
+        };
+
+        csv.addRow({ "String", "StaticStrings", "", "String", "StaticCmp", "", "String", "DynamicCmp", "", "String", "Changed2Dynamic" });
+
+        add("String", "StaticStrings", _atomRequests);
+        add("String", "StaticCmp", _atomCmpRequests);
+        add("String", "DynamicCmp", _dynamicCmpRequests);
+        add("String", "Changed2Dynamic", _changedPolicyToDynamic);
 
         csv.save();
     }
