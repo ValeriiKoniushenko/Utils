@@ -41,7 +41,7 @@
 #include <regex>
 #include <type_traits>
 #include <unordered_map>
-#include <vector>
+#include <utility>
 
 #if defined(UTILS_DEBUG)
     #include <sstream>
@@ -379,7 +379,7 @@ namespace Core
         }
 
         [[maybe_unused]] StringData(const CharT* newString, uint64_t newSize)
-            : str{ SmartPointer(new CharT[newSize + static_cast<decltype(newSize)>(1)]) }
+            : str{ SmartPointer(new CharT[newSize + 1]) }
         {
             memcpy_s(str.get(), size * sizeof(CharT), newString, newSize * sizeof(CharT));
         }
@@ -435,7 +435,7 @@ namespace Core
                 return it->second.toReadOnly();
             }
 
-            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<uint64_t>(1));
+            auto&& ptr = std::make_unique<CharT[]>(size + 1);
             memcpy(ptr.get(), string, size * sizeof(CharT));
             auto* addr = ptr.get();
             _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
@@ -893,7 +893,7 @@ namespace Core
                 return {};
             }
 
-            return _string[_size - static_cast<uint64_t>(1)];
+            return _string[_size - 1];
         }
 
         [[nodiscard]] StdStringViewT toStdStringView() const
@@ -1592,7 +1592,7 @@ namespace Core
             }
 
             const auto* oldString = _string;
-            const auto capacity = _size + static_cast<uint64_t>(1);
+            const auto capacity = _size + 1;
 
             if ((_string = new CharT[capacity]))
             {
@@ -1770,7 +1770,7 @@ namespace Core
                 for (; first != last; ++first)
                 {
                     push_back(static_cast<CharT>(0));
-                    std::char_traits<CharT>::assign(_string[_size - static_cast<uint64_t>(1)], *first);
+                    std::char_traits<CharT>::assign(_string[_size - 1], *first);
                 }
             }
         }
@@ -1910,11 +1910,11 @@ namespace Core
             }
         }
 
-        Self& reserve(const uint64_t newSize, bool isIgnoreMultiplier = false)
+        Self& reserve(uint64_t newSize, bool isIgnoreMultiplier = false)
         {
             const auto oldCapacity = _capacity;
 
-            const uint64_t finalCapacity = std::max(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, uint64_t(16));
+            const uint64_t finalCapacity = std::max<uint64_t>(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, 16);
             if (auto* newString = new CharT[finalCapacity]{})
             {
                 if (_string)
@@ -2134,7 +2134,7 @@ namespace Core
         explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
               _size{ data.size },
-              _capacity{ data.size + static_cast<uint64_t>(1) },
+              _capacity{ data.size + 1 },
               _policy{ StringPolicy::Static }
         {
         }

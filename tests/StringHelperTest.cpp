@@ -56,7 +56,6 @@ TEST(StringHelperTest, writeToStream)
 TEST(StringHelperTest, defaultInputStream)
 {
     std::istringstream fakeInput("42 hello world\n");
-    std::streambuf* oldCin = std::cin.rdbuf(fakeInput.rdbuf());  // redirect cin
 
     Core::StringAtom str;
     std::cin >> str >> str >> str;
