@@ -57,17 +57,16 @@ namespace Core
     };
 
 #if defined(UTILS_DEBUG)
-
     class StringTracer : public StrictSingleton<StringTracer>
     {
         SINGLETONS_FRIEND(StringTracer)
     public:
         ~StringTracer() override;
 
-        [[maybe_unused]] void AddAtomRequest(std::string str);
-        [[maybe_unused]] void AddAtomComparisonRequest(std::string str);
-        [[maybe_unused]] void AddDynamicComparisonRequest(std::string str);
-        [[maybe_unused]] void AddChangedPolicyToDynamic(std::string str);
+        [[maybe_unused]] void addAtomRequest(std::string str);
+        [[maybe_unused]] void addAtomComparisonRequest(std::string str);
+        [[maybe_unused]] void addDynamicComparisonRequest(std::string str);
+        [[maybe_unused]] void addChangedPolicyToDynamic(std::string str);
 
         [[maybe_unused]] void saveMetrics();
 
@@ -80,18 +79,6 @@ namespace Core
 #endif // defined(UTILS_DEBUG)
 
     template<class CharType>
-    struct _StringSettings
-    {
-        _StringSettings() = delete;
-
-        using CharT = CharType;
-        using SizeT = uint64_t;
-        using HashT = uint64_t;
-        using IndexT = uint64_t;
-        constexpr static SizeT invalidSize = ~static_cast<SizeT>(0);
-    };
-
-    template<class CharType>
     struct _StringToolset;
 
     template<>
@@ -102,10 +89,9 @@ namespace Core
         using CharT = char;
         using StdStringT [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-        using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(int ch) { return static_cast<bool>(isspace(ch)); }
-        [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(strlen(string)); }
+        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept { return static_cast<uint64_t>(strlen(string)); }
 
         [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
         [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
@@ -113,7 +99,7 @@ namespace Core
         [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
         [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return atoll(str); }
 
-        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
             {
@@ -121,7 +107,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%f", value); errorCode < 0)
             {
@@ -129,7 +115,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%lf", value); errorCode < 0)
             {
@@ -137,7 +123,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%s", value.generic_string().c_str()); errorCode < 0)
             {
@@ -145,7 +131,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
             {
@@ -153,7 +139,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRId64, value); errorCode < 0)
             {
@@ -239,12 +225,11 @@ namespace Core
         _StringToolset() = delete;
 
         using CharT = wchar_t;
-        using StdStringT [[maybe_unused]] [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
+        using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
         using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-        using SizeT = typename _StringSettings<CharT>::SizeT;
 
         [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
-        [[nodiscard]] static SizeT Length(const CharT* string) noexcept { return static_cast<SizeT>(wcslen(string)); }
+        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept { return static_cast<uint64_t>(wcslen(string)); }
 
         [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
         [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
@@ -252,7 +237,7 @@ namespace Core
         [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
         [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return _wtoll(str); }
 
-        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
             {
@@ -260,7 +245,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%f", value); errorCode < 0)
             {
@@ -268,7 +253,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lf", value); errorCode < 0)
             {
@@ -276,7 +261,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%s", value.wstring().c_str()); errorCode < 0)
             {
@@ -284,7 +269,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
             {
@@ -292,7 +277,7 @@ namespace Core
             }
         }
 
-        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, SizeT bufferSize)
+        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, uint64_t bufferSize)
         {
             if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lld", value); errorCode < 0)
             {
@@ -372,35 +357,34 @@ namespace Core
         }
     };
 
-    template<class CharType>
+    template<class CharT>
     struct StringDataReadOnly
     {
-        using Settings = _StringSettings<CharType>;
+        constexpr static uint64_t invalidSize = ~static_cast<uint64_t>(0);
 
-        typename Settings::CharT* str;
-        typename Settings::SizeT size = Settings::invalidSize;
+        CharT* str = nullptr;
+        uint64_t size = invalidSize;
     };
 
-    template<class CharType>
+    template<class CharT>
     struct StringData
     {
-        using Toolset = _StringToolset<CharType>;
-        using Settings = _StringSettings<CharType>;
-        using SmartPointer = std::unique_ptr<typename Settings::CharT[]>;
+        using Toolset = _StringToolset<CharT>;
+        using SmartPointer = std::unique_ptr<CharT[]>;
 
-        [[maybe_unused]] StringData(SmartPointer&& ptr, typename Settings::SizeT newSize)
+        [[maybe_unused]] StringData(SmartPointer&& ptr, uint64_t newSize)
             : str{ std::move(ptr) },
               size{ newSize }
         {
         }
 
-        [[maybe_unused]] StringData(const CharType* newString, typename Settings::SizeT newSize)
-            : str{ SmartPointer(new CharType[newSize + static_cast<decltype(newSize)>(1)]) }
+        [[maybe_unused]] StringData(const CharT* newString, uint64_t newSize)
+            : str{ SmartPointer(new CharT[newSize + static_cast<decltype(newSize)>(1)]) }
         {
-            memcpy_s(str.get(), size * sizeof(CharType), newString, newSize * sizeof(CharType));
+            memcpy_s(str.get(), size * sizeof(CharT), newString, newSize * sizeof(CharT));
         }
 
-        [[nodiscard]] StringDataReadOnly<CharType> toReadOnly() noexcept { return StringDataReadOnly<CharType>{ str.get(), size }; }
+        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return StringDataReadOnly<CharT>{ str.get(), size }; }
 
         [[nodiscard]] bool operator<(const StringData& other) const
         {
@@ -421,7 +405,7 @@ namespace Core
         }
 
         SmartPointer str;
-        typename Settings::SizeT size = Settings::invalidSize;
+        uint64_t size = StringDataReadOnly<CharT>::invalidSize;
     };
 
     template<class CharType>
@@ -432,19 +416,16 @@ namespace Core
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
         using StdStringViewT = typename Toolset::StdStringViewT;
-        using Settings = _StringSettings<CharT>;
-        using HashT = typename Settings::HashT;
-        using SizeT = typename Settings::SizeT;
         using StringDataT = StringData<CharT>;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, uint64_t size)
         {
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
             {
-                StringTracer::instance().AddAtomRequest(std::string(string));
+                StringTracer::instance().addAtomRequest(std::string(string));
             }
 #endif
             const auto currentHash = std::hash<StdStringViewT>{}(StdStringViewT{ string, size });
@@ -454,7 +435,7 @@ namespace Core
                 return it->second.toReadOnly();
             }
 
-            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<typename Settings::SizeT>(1));
+            auto&& ptr = std::make_unique<CharT[]>(size + static_cast<uint64_t>(1));
             memcpy(ptr.get(), string, size * sizeof(CharT));
             auto* addr = ptr.get();
             _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
@@ -473,7 +454,7 @@ namespace Core
         }
 
     private:
-        std::unordered_map<HashT, StringDataT> _strings = {};
+        std::unordered_map<uint64_t, StringDataT> _strings = {};
     };
 
     class Iterator;
@@ -494,10 +475,6 @@ namespace Core
         using CharT = CharType;
         using Self = BaseString<CharT>;
         using Toolset = _StringToolset<CharT>;
-        using Settings = _StringSettings<CharT>;
-        using SizeT = typename Settings::SizeT;
-        using HashT = typename Settings::HashT;
-        using IndexT = typename Settings::IndexT;
         using StdStringT = typename Toolset::StdStringT;
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
@@ -690,21 +667,21 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, uint64_t size) { return Self{ StringPool::instance().add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
         [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
 
-        [[nodiscard]] SizeT size() const noexcept { return _size; }
-        [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
-        [[nodiscard]] SizeT length() const noexcept { return _size; }
+        [[nodiscard]] uint64_t size() const noexcept { return _size; }
+        [[nodiscard]] uint64_t byteSize() const noexcept { return _size * sizeof(CharT); }
+        [[nodiscard]] uint64_t length() const noexcept { return _size; }
         [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
         [[nodiscard]] operator StdStringViewT() const noexcept { return toStdStringView(); }
-        [[nodiscard]] CharT& operator[](IndexT index) noexcept { return _string[index]; }
-        [[nodiscard]] CharT operator[](IndexT index) const noexcept { return _string[index]; }
+        [[nodiscard]] CharT& operator[](uint64_t index) noexcept { return _string[index]; }
+        [[nodiscard]] CharT operator[](uint64_t index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
         {
@@ -718,7 +695,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                 if constexpr (sizeof(CharT) == 1)
                 {
-                    StringTracer::instance().AddAtomComparisonRequest(std::string(other.c_str()));
+                    StringTracer::instance().addAtomComparisonRequest(std::string(other.c_str()));
                 }
 #endif
                 return _string == other._string;
@@ -727,7 +704,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
             {
-                StringTracer::instance().AddDynamicComparisonRequest(std::string(other.c_str()));
+                StringTracer::instance().addDynamicComparisonRequest(std::string(other.c_str()));
             }
 #endif
 
@@ -916,7 +893,7 @@ namespace Core
                 return {};
             }
 
-            return _string[_size - static_cast<SizeT>(1)];
+            return _string[_size - static_cast<uint64_t>(1)];
         }
 
         [[nodiscard]] StdStringViewT toStdStringView() const
@@ -946,7 +923,7 @@ namespace Core
             return { _string };
         }
 
-        [[nodiscard]] CharT at(IndexT index) const noexcept
+        [[nodiscard]] CharT at(uint64_t index) const noexcept
         {
             if (!Verify(!isEmpty() && _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
@@ -1108,7 +1085,7 @@ namespace Core
             return temp;
         }
 
-        [[nodiscard]] HashT makeHash() const noexcept
+        [[nodiscard]] uint64_t makeHash() const noexcept
         {
             if (!isEmpty())
             {
@@ -1117,11 +1094,11 @@ namespace Core
             return {};
         }
 
-        Self& subStr(IndexT index, SizeT count = 0)
+        Self& subStr(uint64_t index, uint64_t count = 0)
         {
             if (!isEmpty())
             {
-                const SizeT finalCount = count == 0 ? _size - index : count - index;
+                const uint64_t finalCount = count == 0 ? _size - index : count - index;
                 *this = std::move(Self(_string + index, finalCount));
             }
 
@@ -1132,7 +1109,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                SizeT offset = 0;
+                uint64_t offset = 0;
                 while (offset < _size && _string[offset] == ch)
                 {
                     ++offset;
@@ -1150,7 +1127,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                SizeT count = 0;
+                uint64_t count = 0;
                 const CharT* stringEnd = _string + _size;
                 while (count < _size && *--stringEnd == ch)
                 {
@@ -1173,7 +1150,7 @@ namespace Core
             if (!isEmpty())
             {
                 tryToMakeAsDynamic();
-                for (IndexT i = 0; i < _size; ++i)
+                for (uint64_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(Toolset::ToUpper(_string[i]));
                 }
@@ -1187,7 +1164,7 @@ namespace Core
             if (!isEmpty())
             {
                 tryToMakeAsDynamic();
-                for (IndexT i = 0; i < _size; ++i)
+                for (uint64_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(Toolset::ToLower(_string[i]));
                 }
@@ -1196,7 +1173,7 @@ namespace Core
             return *this;
         }
 
-        Self& erase(IndexT index)
+        Self& erase(uint64_t index)
         {
             if (!isEmpty())
             {
@@ -1213,7 +1190,7 @@ namespace Core
             return *this;
         }
 
-        Self& erase(IndexT from, IndexT to)
+        Self& erase(uint64_t from, uint64_t to)
         {
             if (!isEmpty())
             {
@@ -1386,7 +1363,7 @@ namespace Core
         /**
          * @brief Will iterate over every match until the end.
          * @param expr regex pattern
-         * @param callback can take a few function's type:
+         * @param callback can take a few functions type:
          * - void(MatchedData) - will iterate until the end.
          * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
          * @param offset from the start of the string
@@ -1420,8 +1397,8 @@ namespace Core
         /**
          * @param expr regex pattern
          * @param predictedScaleSize will scale future string allocation size based on
-         * the programmer prediction. If new string will be bigger than needed - it will
-         * pretend to UB. This function is using BaseString::Reserve - so final value will
+         * the programmer prediction. If the new string is bigger than needed - it will
+         * pretend to UB. This function is using BaseString::Reserve - so the final value will
          * be multiplied to BaseString::_capacityMultiplier
          * @param newValue new string for the replacement
          * @param offset from the start of the string
@@ -1474,7 +1451,7 @@ namespace Core
         /**
          * @param expr regex pattern
          * @param predictedScaleSize will scale future string allocation size based on
-         * the programmer prediction. If new string will be bigger than needed - it will
+         * the programmer prediction. If the new string will be bigger than needed - it will
          * pretend to UB. This function is using BaseString::Reserve - so final value will
          * be multiplied to BaseString::_capacityMultiplier
          * @param newValue new string for the replacement
@@ -1511,7 +1488,7 @@ namespace Core
 
         Self& push_back(CharT ch) { return push_back(&ch, 1); }
 
-        Self& push_back(const CharT* str, SizeT size)
+        Self& push_back(const CharT* str, uint64_t size)
         {
             if (str == nullptr)
             {
@@ -1543,7 +1520,7 @@ namespace Core
 
         Self& push_front(StdStringViewT str) { return push_front(str.data(), str.size()); }
 
-        Self& push_front(const CharT* str, SizeT size)
+        Self& push_front(const CharT* str, uint64_t size)
         {
             if (str == nullptr)
             {
@@ -1588,7 +1565,7 @@ namespace Core
             if (_size > 0)
             {
                 tryToMakeAsDynamic();
-                for (SizeT i = 1; i < _size; ++i)
+                for (uint64_t i = 1; i < _size; ++i)
                 {
                     _string[i - 1] = _string[i];
                 }
@@ -1597,7 +1574,7 @@ namespace Core
             return *this;
         }
 
-        const Self& copyTo(CharT* dest, SizeT count, SizeT offset = 0) const
+        const Self& copyTo(CharT* dest, uint64_t count, uint64_t offset = 0) const
         {
             if (!isEmpty())
             {
@@ -1615,7 +1592,7 @@ namespace Core
             }
 
             const auto* oldString = _string;
-            const auto capacity = _size + static_cast<SizeT>(1);
+            const auto capacity = _size + static_cast<uint64_t>(1);
 
             if ((_string = new CharT[capacity]))
             {
@@ -1628,7 +1605,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                     if constexpr (sizeof(CharT) == 1)
                     {
-                        StringTracer::instance().AddChangedPolicyToDynamic(std::string(_string));
+                        StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
                     }
 #endif
 
@@ -1643,9 +1620,9 @@ namespace Core
             return *this;
         }
 
-        [[nodiscard]] SizeT capacity() const noexcept { return _capacity; }
+        [[nodiscard]] uint64_t capacity() const noexcept { return _capacity; }
 
-        Self& insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize)
+        Self& insert(Iterator iterator, const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
         {
             Assert(iterator._owner == this);
             if (iterator._owner == this)
@@ -1656,9 +1633,9 @@ namespace Core
             return *this;
         }
 
-        Self& insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize)
+        Self& insert(int64_t pos, const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
         {
-            if (size == Settings::invalidSize)
+            if (size == StringDataReadOnly<CharT>::invalidSize)
             {
                 size = Toolset::Length(str);
             }
@@ -1675,7 +1652,7 @@ namespace Core
                 _string[i + size] = _string[i];
             }
 
-            for (IndexT i = pos; i < pos + size; ++i, ++str)
+            for (uint64_t i = pos; i < pos + size; ++i, ++str)
             {
                 _string[i] = *str;
             }
@@ -1703,7 +1680,7 @@ namespace Core
 
             if (isIgnoreCase)
             {
-                for (IndexT index = 0; index < other.size() && _string[index]; ++index)
+                for (uint64_t index = 0; index < other.size() && _string[index]; ++index)
                 {
                     if (_string[index + 1] == 0 && other.size() == index + 1)
                     {
@@ -1793,16 +1770,16 @@ namespace Core
                 for (; first != last; ++first)
                 {
                     push_back(static_cast<CharT>(0));
-                    std::char_traits<CharT>::assign(_string[_size - static_cast<SizeT>(1)], *first);
+                    std::char_traits<CharT>::assign(_string[_size - static_cast<uint64_t>(1)], *first);
                 }
             }
         }
 
-        BaseString(const CharT* str, SizeT size = Settings::invalidSize)
+        BaseString(const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
         {
             if (str)
             {
-                this->resize(size == Settings::invalidSize ? Toolset::Length(str) : size);
+                this->resize(size == StringDataReadOnly<CharT>::invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
             }
         }
@@ -1814,7 +1791,7 @@ namespace Core
 
         BaseString(const Self& other) { *this = other; }
 
-        explicit BaseString(SizeT reserveCount) { reserve(reserveCount); }
+        explicit BaseString(uint64_t reserveCount) { reserve(reserveCount); }
 
         Self& operator=(const CharT* str)
         {
@@ -1875,7 +1852,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                 if constexpr (sizeof(CharT) == 1)
                 {
-                    StringTracer::instance().AddChangedPolicyToDynamic(std::string(_string));
+                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
                 }
 #endif
 
@@ -1933,11 +1910,11 @@ namespace Core
             }
         }
 
-        Self& reserve(const SizeT newSize, bool isIgnoreMultiplier = false)
+        Self& reserve(const uint64_t newSize, bool isIgnoreMultiplier = false)
         {
             const auto oldCapacity = _capacity;
 
-            const SizeT finalCapacity = std::max(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, SizeT(16));
+            const uint64_t finalCapacity = std::max(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, uint64_t(16));
             if (auto* newString = new CharT[finalCapacity]{})
             {
                 if (_string)
@@ -1950,7 +1927,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                     if constexpr (sizeof(CharT) == 1)
                     {
-                        StringTracer::instance().AddChangedPolicyToDynamic(std::string(newString));
+                        StringTracer::instance().addChangedPolicyToDynamic(std::string(newString));
                     }
 #endif
                     _string = nullptr;
@@ -1972,7 +1949,7 @@ namespace Core
             return *this;
         }
 
-        Self& resize(const SizeT newSize, bool isIgnoreMultiplier = false)
+        Self& resize(const uint64_t newSize, bool isIgnoreMultiplier = false)
         {
             if (_string && newSize < _size && _policy != StringPolicy::Static)
             {
@@ -1997,7 +1974,7 @@ namespace Core
             BaseString<char> temp;
             temp.resize(_size);
 
-            for (SizeT i = 0; i < _size; ++i)
+            for (uint64_t i = 0; i < _size; ++i)
             {
                 temp[i] = static_cast<char>(_string[i]);
             }
@@ -2157,7 +2134,7 @@ namespace Core
         explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
               _size{ data.size },
-              _capacity{ data.size + static_cast<SizeT>(1) },
+              _capacity{ data.size + static_cast<uint64_t>(1) },
               _policy{ StringPolicy::Static }
         {
         }
@@ -2172,10 +2149,10 @@ namespace Core
 
     protected:
         CharT* _string = nullptr;
-        SizeT _size = 0;
-        SizeT _capacity = 0;
+        uint64_t _size = 0;
+        uint64_t _capacity = 0;
         StringPolicy _policy = StringPolicy::None;
-        static constexpr SizeT _capacityMultiplier = 2;
+        static constexpr uint64_t _capacityMultiplier = 2;
 
     private:
         // ================== PIMPLs =======================
@@ -2193,7 +2170,7 @@ namespace Core
             do
             {
                 nextLine = FindNextLine(oldString, nullptr, separator);
-                SizeT strSize = Settings::invalidSize;
+                uint64_t strSize = StringDataReadOnly<CharT>::invalidSize;
                 if (nextLine != nullptr)
                 {
                     strSize = nextLine - oldString - GetLineSeparatorStringSize(separator);

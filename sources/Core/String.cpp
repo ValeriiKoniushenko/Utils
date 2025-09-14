@@ -33,22 +33,22 @@ namespace Core
         saveMetrics();
     }
 
-    void StringTracer::AddAtomRequest(std::string str)
+    void StringTracer::addAtomRequest(std::string str)
     {
         _atomRequests[std::move(str)]++;
     }
 
-    void StringTracer::AddAtomComparisonRequest(std::string str)
+    void StringTracer::addAtomComparisonRequest(std::string str)
     {
         _atomCmpRequests[std::move(str)]++;
     }
 
-    void StringTracer::AddDynamicComparisonRequest(std::string str)
+    void StringTracer::addDynamicComparisonRequest(std::string str)
     {
         _dynamicCmpRequests[std::move(str)]++;
     }
 
-    void StringTracer::AddChangedPolicyToDynamic(std::string str)
+    void StringTracer::addChangedPolicyToDynamic(std::string str)
     {
         _changedPolicyToDynamic[std::move(str)]++;
     }
