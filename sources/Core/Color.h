@@ -25,6 +25,8 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+#include <iostream>
+
 namespace Core
 {
 
@@ -259,3 +261,13 @@ namespace Core
     static constinit auto Color4_Silver = Color4(192, 192, 192, 255);
 
 } // namespace Core
+
+std::ostream& operator<<(std::ostream& os, const Core::Color3& color);
+std::ostream& operator<<(std::ostream& os, const Core::Color4& color);
+std::ostream& operator<<(std::ostream& os, const Core::NormColor3& normColor);
+std::ostream& operator<<(std::ostream& os, const Core::NormColor4& normColor);
+
+std::istream& operator>>(std::istream& is, Core::Color3& color);
+std::istream& operator>>(std::istream& is, Core::Color4& color);
+std::istream& operator>>(std::istream& is, Core::NormColor3& normColor);
+std::istream& operator>>(std::istream& is, Core::NormColor4& normColor);

@@ -22,7 +22,50 @@
 
 #include "Color.h"
 
-namespace Core
-{
+using namespace Core;
 
-} // namespace Core
+std::ostream& operator<<(std::ostream& os, const Color3& color)
+{
+    return os << color.x << " " << color.y << " " << color.z;
+}
+
+std::ostream& operator<<(std::ostream& os, const Color4& color)
+{
+    return os << color.x << " " << color.y << " " << color.z << " " << color.w;
+}
+
+std::ostream& operator<<(std::ostream& os, const NormColor3& normColor)
+{
+    return os << normColor.toColor();
+}
+
+std::ostream& operator<<(std::ostream& os, const NormColor4& normColor)
+{
+    return os << normColor.toColor();
+}
+
+std::istream& operator>>(std::istream& is, Color3& color)
+{
+    return is >> color.x >> color.y >> color.z;
+}
+
+std::istream& operator>>(std::istream& is, Color4& color)
+{
+    return is >> color.x >> color.y >> color.z >> color.w;
+}
+
+std::istream& operator>>(std::istream& is, NormColor3& normColor)
+{
+    Color3 tmp;
+    is >> tmp;
+    normColor = NormColor3::From(tmp);
+    return is;
+}
+
+std::istream& operator>>(std::istream& is, NormColor4& normColor)
+{
+    Color4 tmp;
+    is >> tmp;
+    normColor = NormColor4::From(tmp);
+    return is;
+}
