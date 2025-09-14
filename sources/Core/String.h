@@ -1569,7 +1569,7 @@ namespace Core
             }
 
             _size += size;
-            std::memcpy(_string, str, std::min(size, _size) * sizeof(CharT));
+            memcpy_s(_string, str, std::min(size, _size) * sizeof(CharT));
 
             return *this;
         }
