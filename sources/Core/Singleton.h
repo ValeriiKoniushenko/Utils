@@ -28,9 +28,14 @@
 #include <mutex>
 #include <type_traits>
 
-#define SINGLETONS_FRIEND(className)                                                                                                                 \
+#define _SINGLETONS_FRIEND(className)                                                                                                                \
     template<class, Utils::IsCopyableAndMoveableBehaviour, bool>                                                                                     \
-    friend class ::Core::BaseSingleton;                                                                                                              \
+    friend class ::Core::BaseSingleton;
+
+#define SINGLETONS_FRIEND_NO_CNSTR(className) _SINGLETONS_FRIEND(className)
+
+#define SINGLETONS_FRIEND(className)                                                                                                                 \
+    _SINGLETONS_FRIEND(className)                                                                                                                    \
                                                                                                                                                      \
 private:                                                                                                                                             \
     className() = default;

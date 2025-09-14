@@ -426,8 +426,9 @@ namespace Core
     };
 
     template<class CharType>
-    class _StringPool
+    class _StringPool : public StrictSingleton<_StringPool<CharType>>
     {
+        SINGLETONS_FRIEND_NO_CNSTR(_StringPool<CharType>)
     public:
         using CharT = CharType;
         using Toolset = _StringToolset<CharT>;
@@ -439,9 +440,7 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        _StringPool() = delete;
-
-        [[nodiscard]] static StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
+        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, typename Settings::SizeT size)
         {
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
@@ -464,8 +463,18 @@ namespace Core
             return StringDataReadOnlyT{ addr, size };
         }
 
+    protected:
+        _StringPool()
+        {
+#if defined(UTILS_STRING_POOL_SIZE) && UTILS_STRING_POOL_SIZE > 0
+            _strings.reserve(UTILS_STRING_POOL_SIZE);
+#else
+            _strings.reserve(3000);
+#endif // defined(UTILS_STRING_POOL_SIZE)
+        }
+
     private:
-        inline static std::unordered_map<HashT, StringDataT> _strings = {};
+        std::unordered_map<HashT, StringDataT> _strings = {};
     };
 
     class Iterator;
@@ -480,7 +489,7 @@ namespace Core
         std::is_same_v<BaseString<typename T::CharT>, T> || std::is_same_v<std::string_view, T> || std::is_same_v<std::string, T>;
 
     template<class CharType>
-    class BaseString : public Utils::CopyableAndMoveable
+    class BaseString
     {
     public:
         using CharT = CharType;
@@ -677,17 +686,17 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, SizeT size) { return Self{ StringPool::instance().add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
 
         [[nodiscard]] SizeT size() const noexcept { return _size; }
         [[nodiscard]] SizeT byteSize() const noexcept { return _size * sizeof(CharT); }
@@ -845,11 +854,7 @@ namespace Core
         {
             if (isEmpty() || other.empty())
             {
-                if (((_string && _string[0] == 0) || _string == nullptr) && other.empty())
-                {
-                    return true;
-                }
-                return false;
+                return ((_string && _string[0] == 0) || _string == nullptr) && other.empty();
             }
             return *this == other.data();
         }
@@ -858,8 +863,7 @@ namespace Core
         {
             if (isEmpty() || other.empty())
             {
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return _size > other.size();
             }
             return *this > other.data();
         }
@@ -868,8 +872,7 @@ namespace Core
         {
             if (isEmpty() || other.empty())
             {
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return _size >= other.size();
             }
             return *this >= other.data();
         }
@@ -878,8 +881,7 @@ namespace Core
         {
             if (isEmpty() || other.empty())
             {
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return _size < other.size();
             }
             return *this < other.data();
         }
@@ -888,8 +890,7 @@ namespace Core
         {
             if (isEmpty() || other.empty())
             {
-                Assert("Impossible to work with nullptr string.");
-                return {};
+                return _size <= other.size();
             }
             return *this <= other.data();
         }
@@ -1117,7 +1118,7 @@ namespace Core
             return {};
         }
 
-        Self& subStr(IndexT index, SizeT count = 0) noexcept
+        Self& subStr(IndexT index, SizeT count = 0)
         {
             if (!isEmpty())
             {
@@ -1128,7 +1129,7 @@ namespace Core
             return *this;
         }
 
-        Self& trimStart(CharT ch) noexcept
+        Self& trimStart(CharT ch)
         {
             if (!isEmpty())
             {
@@ -1146,7 +1147,7 @@ namespace Core
             return *this;
         }
 
-        Self& trimEnd(CharT ch) noexcept
+        Self& trimEnd(CharT ch)
         {
             if (!isEmpty())
             {
@@ -1166,9 +1167,9 @@ namespace Core
             return *this;
         }
 
-        Self& trim(CharT ch) noexcept { return trimStart(ch).trimEnd(ch); }
+        Self& trim(CharT ch) { return trimStart(ch).trimEnd(ch); }
 
-        Self& toUpperCase() noexcept
+        Self& toUpperCase()
         {
             if (!isEmpty())
             {
@@ -1182,7 +1183,7 @@ namespace Core
             return *this;
         }
 
-        Self& toLowerCase() noexcept
+        Self& toLowerCase()
         {
             if (!isEmpty())
             {
@@ -1507,43 +1508,27 @@ namespace Core
         Self& operator+=(CharT ch) { return push_back(ch); }
         Self& operator+=(StdStringViewT str) { return push_back(str); }
 
-        Self& push_back(StdStringViewT str)
+        Self& push_back(StdStringViewT str) { return push_back(str.data(), str.size()); }
+
+        Self& push_back(CharT ch) { return push_back(&ch, 1); }
+
+        Self& push_back(const CharT* str, SizeT size)
         {
-            if (str.empty())
+            if (str == nullptr)
             {
                 return *this;
             }
 
-            const auto oldSize = _size;
-            const auto finalSize = _size + str.size();
-            if (finalSize >= _capacity)
+            if (size == 0)
             {
-                // 32 is the minimum size to optimize working with small strings
-                reserve(finalSize < 32 ? 32 : finalSize);
-            }
-
-            if (_string) [[likely]]
-            {
-                memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str.data(), str.size() * sizeof(CharT));
-
-                _string[finalSize] = 0;
-                _size += str.size();
-            }
-            return *this;
-        }
-
-        Self& push_back(const CharT* str, const SizeT size)
-        {
-            if (str == nullptr || size == 0)
-            {
-                return *this;
+                size = Toolset::Length(str);
             }
 
             const auto oldSize = _size;
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                // 32 is minimum size to optimize working with small strings
+                // 32 is the minimum size to optimize working with small strings
                 reserve(finalSize < 32 ? 32 : finalSize);
             }
 
@@ -1555,29 +1540,24 @@ namespace Core
             return *this;
         }
 
-        Self& push_back(CharT ch)
+        Self& push_front(CharT ch) { return push_front(&ch, 1); }
+
+        Self& push_front(StdStringViewT str) { return push_front(str.data(), str.size()); }
+
+        Self& push_front(const CharT* str, SizeT size)
         {
-            if (_size + 1 >= _capacity)
-            {
-                reserve(_size + 1);
-            }
-
-            _string[_size++] = ch;
-
-            return *this;
-        }
-
-        Self& push_front(CharT ch) { return push_front(StdStringViewT(&ch, 1)); }
-
-        Self& push_front(StdStringViewT str)
-        {
-            if (str.empty())
+            if (str == nullptr)
             {
                 return *this;
             }
 
+            if (size == 0)
+            {
+                size = Toolset::Length(str);
+            }
+
             const auto oldSize = _size;
-            const auto finalSize = _size + str.size();
+            const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
                 reserve(finalSize);
@@ -1585,14 +1565,11 @@ namespace Core
 
             for (int64_t i = oldSize; i >= 0; --i)
             {
-                _string[i + str.size()] = _string[i];
+                _string[i + size] = _string[i];
             }
 
-            _size += str.size();
-            for (IndexT i = 0; i < str.size() && i < _size; ++i)
-            {
-                _string[i] = str[i];
-            }
+            _size += size;
+            std::memcpy(_string, str, std::min(size, _size) * sizeof(CharT));
 
             return *this;
         }
@@ -1612,9 +1589,9 @@ namespace Core
             if (_size > 0)
             {
                 tryToMakeAsDynamic();
-                for (SizeT i = 1ll; i < _size; ++i)
+                for (SizeT i = 1; i < _size; ++i)
                 {
-                    _string[i - 1ll] = _string[i];
+                    _string[i - 1] = _string[i];
                 }
                 _string[--_size] = 0;
             }
@@ -1631,7 +1608,7 @@ namespace Core
             return *this;
         }
 
-        Self& shrink_to_fit() noexcept
+        Self& shrink_to_fit()
         {
             if (isEmpty())
             {
@@ -1669,7 +1646,7 @@ namespace Core
 
         [[nodiscard]] SizeT capacity() const noexcept { return _capacity; }
 
-        Self& insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& insert(Iterator iterator, const CharT* str, SizeT size = Settings::invalidSize)
         {
             Assert(iterator._owner == this);
             if (iterator._owner == this)
@@ -1680,7 +1657,7 @@ namespace Core
             return *this;
         }
 
-        Self& insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize) noexcept
+        Self& insert(int64_t pos, const CharT* str, SizeT size = Settings::invalidSize)
         {
             if (size == Settings::invalidSize)
             {
@@ -1713,7 +1690,7 @@ namespace Core
         [[nodiscard]] bool isDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
         [[nodiscard, maybe_unused]] bool checkForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
 
-        [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const noexcept
+        [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const
         {
             if (isEmpty() || other.empty())
             {
@@ -1729,17 +1706,17 @@ namespace Core
             {
                 for (IndexT index = 0; index < other.size() && _string[index]; ++index)
                 {
-                    if (_string[index + 1ull] == 0 && other.size() == index + 1ull)
+                    if (_string[index + 1] == 0 && other.size() == index + 1)
                     {
                         return Comparison::Equal;
                     }
 
                     const auto diff = Toolset::ToUpper(_string[index]) - Toolset::ToUpper(other[index]);
-                    if (diff > 0 || _string[index + 1ull] == 0)
+                    if (diff > 0 || _string[index + 1] == 0)
                     {
                         return Comparison::Greater;
                     }
-                    if (diff < 0 || other.size() == index + 1ull)
+                    if (diff < 0 || other.size() == index + 1)
                     {
                         return Comparison::Less;
                     }
@@ -1803,7 +1780,7 @@ namespace Core
 
         BaseString()
         {
-            // 32 is minimum size to optimize working with small strings
+            // 32 is the minimum size to optimize working with small strings
             reserve(32);
         }
 
@@ -1812,8 +1789,8 @@ namespace Core
         {
             if (first != last)
             {
-                constexpr const SizeT defaultCapacity = 16;
-                reserve(defaultCapacity);
+                // 32 is the minimum size to optimize working with small strings
+                reserve(32);
                 for (; first != last; ++first)
                 {
                     push_back(static_cast<CharT>(0));
@@ -2029,7 +2006,7 @@ namespace Core
             return temp;
         }
 
-        ~BaseString() override { clear(); }
+        ~BaseString() { clear(); }
 
         // ============= Utils ===============
         static constexpr const CharT* GetLineSeparatorString(LineSeparator separator)
@@ -2200,7 +2177,7 @@ namespace Core
         SizeT _size = 0;
         SizeT _capacity = 0;
         StringPolicy _policy = StringPolicy::None;
-        static constexpr SizeT _capacityMultiplier = 2ull;
+        static constexpr SizeT _capacityMultiplier = 2;
 
     private:
         // ================== PIMPLs =======================
