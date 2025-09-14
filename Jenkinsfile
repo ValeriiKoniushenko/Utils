@@ -78,11 +78,12 @@ pipeline {
 
                                     if (attempt == 2) {
                                         echo "Previous build was FAILED. Let's try clear rebuild"
+                                        sh """
+                                        rm -rf build
+                                        """
                                     }
                                     try {
                                         sh """
-                                            # rm -rf build
-
                                             cmake -S . -B ${buildDir} \
                                                   -DCMAKE_C_COMPILER=${C_COMPILER}          \
                                                   -DCMAKE_CXX_COMPILER=${CPP_COMPILER}      \
@@ -300,6 +301,9 @@ pipeline {
 
                                     if (attempt == 2) {
                                         echo "Previous build was FAILED. Let's try clear rebuild"
+                                        bat """
+                                        IF EXIST build rmdir /S /Q build
+                                        """
                                     }
                                     try {
                                         bat """

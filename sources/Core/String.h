@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <codecvt>
 #include <cstring>
 #include <cwctype>
 #include <filesystem>
@@ -1569,7 +1568,7 @@ namespace Core
             }
 
             _size += size;
-            memcpy_s(_string, str, std::min(size, _size) * sizeof(CharT));
+            memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
 
             return *this;
         }
