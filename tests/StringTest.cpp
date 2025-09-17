@@ -367,40 +367,43 @@ TEST_F(StringTestF, BaseString_char_default__Comparision)
             EXPECT_TRUE(str2 > str1);
         }
 
+        std::basic_string<T> hello = Str<T>("Hello");
+        std::basic_string<T> hello1 = Str<T>("Hello1");
+
         {
-            EXPECT_EQ(BaseString<T>::Intern(Str<T>("Hello")), BaseString<T>::Intern(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) == BaseString<T>::Intern(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) == std::basic_string<T>(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) == std::basic_string_view<T>(Str<T>("Hello")).data());
+            EXPECT_EQ(BaseString<T>::Intern(hello.data()), BaseString<T>::Intern(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == BaseString<T>::Intern(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == std::basic_string<T>(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == std::basic_string_view<T>(hello.data()).data());
         }
 
         {
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) < Str<T>("Hello1"));
-            EXPECT_FALSE(BaseString<T>::Intern(Str<T>("Hello")) > Str<T>("Hello1"));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) >= Str<T>("Hello"));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= Str<T>("Hello"));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= Str<T>("Hello1"));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello1")) >= Str<T>("Hello"));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) < hello1.data());
+            EXPECT_FALSE(BaseString<T>::Intern(hello.data()) > hello1.data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= hello.data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= hello.data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= hello1.data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= hello.data());
 
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) < BaseString<T>::Intern(Str<T>("Hello1")));
-            EXPECT_FALSE(BaseString<T>::Intern(Str<T>("Hello")) > BaseString<T>::Intern(Str<T>("Hello1")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) != BaseString<T>::Intern(Str<T>("Hello1")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= BaseString<T>::Intern(Str<T>("Hello1")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello1")) >= BaseString<T>::Intern(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) >= BaseString<T>::Intern(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= BaseString<T>::Intern(Str<T>("Hello")));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) < BaseString<T>::Intern(hello1.data()));
+            EXPECT_FALSE(BaseString<T>::Intern(hello.data()) > BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) != BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= BaseString<T>::Intern(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= BaseString<T>::Intern(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= BaseString<T>::Intern(hello.data()));
 
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) != std::basic_string<T>(Str<T>("Hello1")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) >= std::basic_string<T>(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= std::basic_string<T>(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello1")) >= std::basic_string<T>(Str<T>("Hello")));
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= std::basic_string<T>(Str<T>("Hello1")));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) != std::basic_string<T>(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= std::basic_string<T>(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string<T>(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= std::basic_string<T>(hello.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string<T>(hello1.data()));
 
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) != std::basic_string_view<T>(Str<T>("Hello1")).data());
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) >= std::basic_string_view<T>(Str<T>("Hello")).data());
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= std::basic_string_view<T>(Str<T>("Hello")).data());
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello1")) >= std::basic_string<T>(Str<T>("Hello")).data());
-            EXPECT_TRUE(BaseString<T>::Intern(Str<T>("Hello")) <= std::basic_string_view<T>(Str<T>("Hello1")).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) != std::basic_string_view<T>(hello1.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= std::basic_string_view<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string_view<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= std::basic_string<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string_view<T>(hello1.data()).data());
         }
     };
 
@@ -548,7 +551,7 @@ TEST_F(StringTestF, BaseString_char_default__Converts)
 
         {
             const BaseString<T> str = BaseString<T>::Intern(Str<T>("123.1234"));
-            EXPECT_EQ(123.1234f, str.template convertTo<float>());
+            EXPECT_FLOAT_EQ(123.1234f, str.template convertTo<float>());
         }
 
         {
@@ -558,7 +561,7 @@ TEST_F(StringTestF, BaseString_char_default__Converts)
 
         {
             const BaseString<T> str = BaseString<T>::Intern(Str<T>("f1231234567"));
-            EXPECT_EQ(0, str.template convertTo<long long>());
+            EXPECT_THROW((void)str.template convertTo<long long>(), std::invalid_argument);
         }
 
         {

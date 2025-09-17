@@ -1120,36 +1120,9 @@ namespace Core
         }
 
         template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, uint64_t> && std::is_unsigned_v<T>, T> convertTo() const noexcept
+        [[nodiscard]] T convertTo() const
         {
-            if (!isEmpty())
-            {
-                return static_cast<T>(Toolset::ToUInt64(_string));
-            }
-            Assert("Impossible to work with nullptr string.");
-            return {};
-        }
-
-        template<class T>
-        [[nodiscard]] std::enable_if_t<Utils::is_non_narrowing_convertible_v<T, int64_t> && std::is_signed_v<T>, T> convertTo() const noexcept
-        {
-            if (!isEmpty())
-            {
-                return static_cast<T>(Toolset::ToInt64(_string));
-            }
-            Assert("Impossible to work with nullptr string.");
-            return {};
-        }
-
-        template<class T>
-        [[nodiscard]] std::enable_if_t<std::is_floating_point_v<T>, T> convertTo() const noexcept
-        {
-            if (!isEmpty())
-            {
-                return static_cast<T>(Toolset::ToDouble(_string));
-            }
-            Assert("Impossible to work with nullptr string.");
-            return {};
+            return FromCStringTo<T>(_string);
         }
 
         template<IsFormattableType... T>
