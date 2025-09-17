@@ -27,89 +27,6 @@
 #include <gtest/gtest.h>
 #include <unordered_set>
 
-template<class T, class CharT>
-[[nodiscard]] T FromCStringTo(const CharT* str)
-{
-    if (!str)
-    {
-        return {};
-    }
-
-    // =========== FLOATING POINT =============
-    if constexpr (std::is_floating_point_v<T>)
-    {
-        // char
-        if constexpr (sizeof(CharT) == 1)
-        {
-            return std::is_same_v<T, float> ? std::stof(str) : std::stod(str);
-        }
-        // wchar_t
-        else
-        {
-            CharT* end = nullptr;
-            const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
-            if (end == str)
-            {
-                throw std::invalid_argument("Can't convert wide string to the floating type");
-            }
-            return r;
-        }
-    }
-    // =========== INTEGRAL =============
-    else if constexpr (std::is_integral_v<T>)
-    {
-        // >>> non-narrow int32 <<<
-        if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
-        {
-            // char
-            if constexpr (sizeof(CharT) == 1)
-            {
-                return static_cast<T>(std::is_signed_v<T> ? std::stoi(str) : std::stoul(str));
-            }
-            // wchar_t
-            else
-            {
-                CharT* end = nullptr;
-                const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10) : std::wcstoul(str, &end, 10));
-                if (end == str)
-                {
-                    throw std::invalid_argument("Can't convert wide string to the [u]int32");
-                }
-                return r;
-            }
-        }
-        // >>> non-narrow int64 <<<
-        else if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint64_t>)
-        {
-            // char
-            if constexpr (sizeof(CharT) == 1)
-            {
-                return static_cast<T>(std::is_signed_v<T> ? std::stoll(str) : std::stoull(str));
-            }
-            // wchar_t
-            else
-            {
-                CharT* end = nullptr;
-                const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10) : std::wcstoull(str, &end, 10));
-                if (end == str)
-                {
-                    throw std::invalid_argument("Can't convert wide string to the [u]int64");
-                }
-                return r;
-            }
-        }
-        else
-        {
-            static_assert(false, "Can't determine integer type");
-        }
-    }
-    else
-    {
-        static_assert(false, "Unsupported type. Can't convert from string to your T");
-    }
-    return {};
-}
-
 class StringTestF : public ::testing::Test
 {
 public:
@@ -129,6 +46,7 @@ TEST_F(StringTestF, ConverterFromString)
 {
     auto test = [](auto lit)
     {
+        using namespace Core;
         // floating point
         EXPECT_EQ(123.f, FromCStringTo<float>(lit("123.f")));
         EXPECT_EQ(123., FromCStringTo<double>(lit("123.")));
