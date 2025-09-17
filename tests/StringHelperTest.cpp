@@ -47,9 +47,6 @@ TEST(StringHelperTest, writeToStream)
         EXPECT_EQ(ss.str(), "Test string, ignore it"_atom);
     }
 
-    // Assert("Hello world"_atom);
-    // Assert("Hello world"_dyn);
-
     std::cout.rdbuf(old);
 }
 

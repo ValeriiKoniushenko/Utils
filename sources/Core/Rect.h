@@ -65,7 +65,7 @@ namespace Core
         {
 #ifdef CORE_DEBUG
             updateDebugData();
-            requireValid();
+            (void)requireValid();
 #endif
             _left = leftTop.x;
             _top = leftTop.y;

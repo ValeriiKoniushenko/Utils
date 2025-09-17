@@ -27,6 +27,53 @@
 #include <gtest/gtest.h>
 #include <unordered_set>
 
+template<class T, class CharT>
+[[nodiscard]] T FromCStringTo(const CharT* str)
+{
+    if (!str)
+    {
+        return {};
+    }
+
+    if constexpr (std::is_floating_point_v<T>)
+    {
+        // char
+        if constexpr (sizeof(CharT) == 1)
+        {
+            return std::is_same_v<T, float> ? std::stof(str) : std::stod(str);
+        }
+        // wchar_t
+        else
+        {
+            CharT* end = nullptr;
+            const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
+            if (end == str)
+            {
+                throw std::invalid_argument("Can't convert wide string to the specified type");
+            }
+            return r;
+        }
+    }
+    else
+    {
+        static_assert(false, "Unsupported type. Can't convert from string to your T");
+    }
+    return {};
+}
+
+TEST(StringTest, ConverterFromString)
+{
+    // floating point
+    ASSERT_EQ(123.f, FromCStringTo<float>("123.f"));
+    ASSERT_EQ(123., FromCStringTo<double>("123."));
+
+    ASSERT_EQ(123.f, FromCStringTo<float>(L"123.f"));
+    ASSERT_EQ(123., FromCStringTo<double>(L"123."));
+
+    ASSERT_THROW((void)FromCStringTo<double>("ss123."), std::invalid_argument);
+    ASSERT_THROW((void)FromCStringTo<double>(L"ss123."), std::invalid_argument);
+}
+
 TEST(StringTest, BaseString_char_Assigning)
 {
     using Core::StringAtom;
@@ -669,7 +716,6 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(7, str.size());
     }
 
-
     {
         auto str = "__MyLogin"_atom;
         str.trimStart(' ');
@@ -719,7 +765,6 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(7, str.size());
     }
 
-
     {
         auto str = "   "_atom;
         str.trim(' ');
@@ -727,7 +772,6 @@ TEST(StringTest, BaseString_char_default_Trim)
         EXPECT_EQ(0, str.size());
         EXPECT_NE(0, str.capacity());
     }
-
 
     {
         auto str = "   "_atom;
