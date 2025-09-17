@@ -82,14 +82,7 @@ TEST_F(StringTestF, ConverterFromString)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, ConverterToString)
-{
-    auto test = [this]<class T>()
-    {
-    };
-}
-
-TEST_F(StringTestF, BaseString_char_Assigning)
+TEST_F(StringTestF, Assigning)
 {
     auto test = [this]<class T>()
     {
@@ -149,7 +142,7 @@ TEST_F(StringTestF, BaseString_char_Assigning)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Creation)
+TEST_F(StringTestF, Creation)
 {
     auto test = [this]<class T>()
     {
@@ -202,7 +195,7 @@ TEST_F(StringTestF, BaseString_char_default__Creation)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__DefaultCopyAndMove)
+TEST_F(StringTestF, DefaultCopyAndMove)
 {
     auto test = [this]<class T>()
     {
@@ -270,7 +263,7 @@ TEST_F(StringTestF, BaseString_char_default__DefaultCopyAndMove)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__WorkingWithEmpty)
+TEST_F(StringTestF, WorkingWithEmpty)
 {
     auto test = [this]<class T>()
     {
@@ -311,7 +304,7 @@ TEST_F(StringTestF, BaseString_char_default__WorkingWithEmpty)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Comparision)
+TEST_F(StringTestF, Comparision)
 {
     auto test = [this]<class T>()
     {
@@ -411,7 +404,7 @@ TEST_F(StringTestF, BaseString_char_default__Comparision)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_OperationsWithEmptyString)
+TEST_F(StringTestF, OperationsWithEmptyString)
 {
     auto test = [this]<class T>()
     {
@@ -480,7 +473,7 @@ TEST_F(StringTestF, BaseString_char_OperationsWithEmptyString)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__InStdSet)
+TEST_F(StringTestF, InStdSet)
 {
     auto test = [this]<class T>()
     {
@@ -510,7 +503,7 @@ TEST_F(StringTestF, BaseString_char_default__InStdSet)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__InStdUnorderedSet)
+TEST_F(StringTestF, InStdUnorderedSet)
 {
     auto test = [this]<class T>()
     {
@@ -540,7 +533,7 @@ TEST_F(StringTestF, BaseString_char_default__InStdUnorderedSet)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Converts)
+TEST_F(StringTestF, Converts)
 {
     auto test = [this]<class T>()
     {
@@ -574,7 +567,7 @@ TEST_F(StringTestF, BaseString_char_default__Converts)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__UtilsFunctions)
+TEST_F(StringTestF, UtilsFunctions)
 {
     auto test = [this]<class T>()
     {
@@ -593,7 +586,7 @@ TEST_F(StringTestF, BaseString_char_default__UtilsFunctions)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Iterator)
+TEST_F(StringTestF, Iterator)
 {
     auto test = [this]<class T>()
     {
@@ -682,7 +675,7 @@ TEST_F(StringTestF, BaseString_char_default__Iterator)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Modifications_RangeBasedFor)
+TEST_F(StringTestF, Modifications_RangeBasedFor)
 {
     auto test = [this]<class T>()
     {
@@ -702,7 +695,7 @@ TEST_F(StringTestF, BaseString_char_default_Modifications_RangeBasedFor)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Modifications_SubStr)
+TEST_F(StringTestF, Modifications_SubStr)
 {
     auto test = [this]<class T>()
     {
@@ -732,7 +725,7 @@ TEST_F(StringTestF, BaseString_char_default_Modifications_SubStr)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Find)
+TEST_F(StringTestF, Find)
 {
     auto test = [this]<class T>()
     {
@@ -772,7 +765,7 @@ TEST_F(StringTestF, BaseString_char_default_Find)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Cmp)
+TEST_F(StringTestF, Cmp)
 {
     auto test = [this]<class T>()
     {
@@ -792,7 +785,7 @@ TEST_F(StringTestF, BaseString_char_default_Cmp)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Trim)
+TEST_F(StringTestF, Trim)
 {
     auto test = [this]<class T>()
     {
@@ -873,7 +866,7 @@ TEST_F(StringTestF, BaseString_char_default_Trim)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_ToLower)
+TEST_F(StringTestF, ToLower)
 {
     auto test = [this]<class T>()
     {
@@ -889,7 +882,7 @@ TEST_F(StringTestF, BaseString_char_default_ToLower)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_ToUpper)
+TEST_F(StringTestF, ToUpper)
 {
     auto test = [this]<class T>()
     {
@@ -905,7 +898,7 @@ TEST_F(StringTestF, BaseString_char_default_ToUpper)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_PushBack)
+TEST_F(StringTestF, PushBack)
 {
     auto test = [this]<class T>()
     {
@@ -947,7 +940,7 @@ TEST_F(StringTestF, BaseString_char_default_PushBack)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_PushFront)
+TEST_F(StringTestF, PushFront)
 {
     auto test = [this]<class T>()
     {
@@ -989,7 +982,7 @@ TEST_F(StringTestF, BaseString_char_default_PushFront)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Insert)
+TEST_F(StringTestF, Insert)
 {
     auto test = [this]<class T>()
     {
@@ -1054,7 +1047,7 @@ TEST_F(StringTestF, BaseString_char_default_Insert)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_PopBack)
+TEST_F(StringTestF, PopBack)
 {
     auto test = [this]<class T>()
     {
@@ -1083,7 +1076,7 @@ TEST_F(StringTestF, BaseString_char_default_PopBack)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_PopFront)
+TEST_F(StringTestF, PopFront)
 {
     auto test = [this]<class T>()
     {
@@ -1112,7 +1105,7 @@ TEST_F(StringTestF, BaseString_char_default_PopFront)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_ShrinkToFit)
+TEST_F(StringTestF, ShrinkToFit)
 {
     auto test = [this]<class T>()
     {
@@ -1149,7 +1142,7 @@ TEST_F(StringTestF, BaseString_char_default_ShrinkToFit)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Replace)
+TEST_F(StringTestF, Replace)
 {
     auto test = [this]<class T>()
     {
@@ -1174,7 +1167,7 @@ TEST_F(StringTestF, BaseString_char_default_Replace)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default_Copy)
+TEST_F(StringTestF, Copy)
 {
     auto test = [this]<class T>()
     {
@@ -1190,7 +1183,7 @@ TEST_F(StringTestF, BaseString_char_default_Copy)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow)
+TEST_F(StringTestF, AdvanceWorkFlow)
 {
     auto test = [this]<class T>()
     {
@@ -1236,7 +1229,7 @@ TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow2)
+TEST_F(StringTestF, AdvanceWorkFlow2)
 {
     auto test = [this]<class T>()
     {
@@ -1257,7 +1250,7 @@ TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow2)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow3)
+TEST_F(StringTestF, AdvanceWorkFlow3)
 {
     auto test = [this]<class T>()
     {
@@ -1277,21 +1270,32 @@ TEST_F(StringTestF, BaseString_char_AdvanceWorkFlow3)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__From)
+TEST_F(StringTestF, MakeFrom)
 {
     auto test = [this]<class T>()
     {
         EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123));
-        EXPECT_EQ(Str<T>("123.000000"), BaseString<T>::MakeFrom(123.f));
-        EXPECT_EQ(Str<T>("123.000000"), BaseString<T>::MakeFrom(123.));
+        EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123.f));
+        EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123.));
+        EXPECT_EQ(Str<T>("123.123"), BaseString<T>::MakeFrom(123.123));
         EXPECT_EQ(Str<T>("412312334234"), BaseString<T>::MakeFrom(412312334234ull));
     };
+
+    // should just compile
+    (void)StringAtom::MakeFrom("Hello"_atom);
+    (void)StringAtom::MakeFrom("Hello"_dyn);
+    (void)StringAtom::MakeFrom(std::string("Hello"));
+    (void)StringAtom::MakeFrom(std::string_view("Hello"));
+    (void)StringAtom::MakeFrom(static_cast<short>(123));
+    (void)StringAtom::MakeFrom(static_cast<char>(123));
+    (void)StringAtom::MakeFrom(static_cast<uint64_t>(123));
+    (void)StringAtom::MakeFrom(static_cast<int64_t>(123));
 
     test.template operator()<char>();
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Format)
+TEST_F(StringTestF, Format)
 {
     auto test = [this]<class T>()
     {
@@ -1305,7 +1309,7 @@ TEST_F(StringTestF, BaseString_char_default__Format)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__LinesCount)
+TEST_F(StringTestF, LinesCount)
 {
     auto test = [this]<class T>()
     {
@@ -1319,7 +1323,7 @@ How are you?)"));
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__iterate_over_lines)
+TEST_F(StringTestF, IterateOverLines)
 {
     auto test = [this]<class T>()
     {
@@ -1349,7 +1353,7 @@ TEST_F(StringTestF, BaseString_char_default__iterate_over_lines)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Erase)
+TEST_F(StringTestF, Erase)
 {
     auto test = [this]<class T>()
     {
@@ -1382,7 +1386,7 @@ TEST_F(StringTestF, BaseString_char_default__Erase)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_default__Misc)
+TEST_F(StringTestF, Misc)
 {
     auto test = [this]<class T>()
     {
@@ -1402,7 +1406,7 @@ TEST_F(StringTestF, BaseString_char_default__Misc)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_addition)
+TEST_F(StringTestF, Adding)
 {
     auto test = [this]<class T>()
     {
@@ -1419,7 +1423,7 @@ TEST_F(StringTestF, BaseString_char_addition)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_simple_copy)
+TEST_F(StringTestF, SimpleCopy)
 {
     auto test = [this]<class T>()
     {
@@ -1438,7 +1442,7 @@ TEST_F(StringTestF, BaseString_char_simple_copy)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_working_with_std_filesystem_path)
+TEST_F(StringTestF, WorkingWithStdFilesystemPath)
 {
     auto test = [this]<class T>()
     {
@@ -1473,7 +1477,7 @@ TEST_F(StringTestF, BaseString_char_working_with_std_filesystem_path)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_foreachbyline)
+TEST_F(StringTestF, ForEachByLine)
 {
     auto test = [this]<class T>()
     {
@@ -1497,7 +1501,7 @@ TEST_F(StringTestF, BaseString_char_foreachbyline)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_FindNextLine)
+TEST_F(StringTestF, FindNextLine)
 {
     auto test = [this]<class T>()
     {
@@ -1531,7 +1535,7 @@ TEST_F(StringTestF, BaseString_char_FindNextLine)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_ReverseStrStr)
+TEST_F(StringTestF, ReverseStrStr)
 {
     auto test = [this]<class T>()
     {
@@ -1559,7 +1563,7 @@ TEST_F(StringTestF, BaseString_char_ReverseStrStr)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_FindPrevLine)
+TEST_F(StringTestF, FindPrevLine)
 {
     auto test = [this]<class T>()
     {
@@ -1588,7 +1592,7 @@ TEST_F(StringTestF, BaseString_char_FindPrevLine)
     test.template operator()<wchar_t>();
 }
 
-TEST_F(StringTestF, BaseString_char_RegexMatch)
+TEST_F(StringTestF, RegexMatch)
 {
     auto test = [this]<class T>()
     {
@@ -1608,7 +1612,7 @@ TEST_F(StringTestF, BaseString_char_RegexMatch)
     // test.template operator()<wchar_t>(); - regex only for char
 }
 
-TEST_F(StringTestF, BaseString_char_RegexFind)
+TEST_F(StringTestF, RegexFind)
 {
     auto test = [this]<class T>()
     {
@@ -1657,7 +1661,7 @@ TEST_F(StringTestF, BaseString_char_RegexFind)
     // test.template operator()<wchar_t>(); - regex only for char
 }
 
-TEST_F(StringTestF, BaseString_char_RegexFindAll)
+TEST_F(StringTestF, RegexFindAll)
 {
     auto test = [this]<class T>()
     {
@@ -1674,7 +1678,7 @@ TEST_F(StringTestF, BaseString_char_RegexFindAll)
     // test.template operator()<wchar_t>(); - regex only for char
 }
 
-TEST_F(StringTestF, BaseString_char_RegexIterate)
+TEST_F(StringTestF, RegexIterate)
 {
     auto test = [this]<class T>()
     {
@@ -1770,7 +1774,7 @@ TEST_F(StringTestF, BaseString_char_RegexIterate)
     // test.template operator()<wchar_t>(); - regex only for char
 }
 
-TEST_F(StringTestF, BaseString_char_default__RegexReplace)
+TEST_F(StringTestF, RegexReplace)
 {
     auto test = [this]<class T>()
     {

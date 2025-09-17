@@ -32,6 +32,7 @@
 #include "Utils/TypeTraits.h"
 
 #include <algorithm>
+#include <charconv>
 #include <cinttypes>
 #include <cstring>
 #include <cwctype>
@@ -985,14 +986,7 @@ namespace Core
         {
             if (isEmpty())
             {
-                if constexpr (sizeof(CharT) == 1)
-                {
-                    return { "" };
-                }
-                else
-                {
-                    return { L"" };
-                }
+                return {};
             }
 
             return { _string, _size };
@@ -1022,7 +1016,7 @@ namespace Core
 
         [[nodiscard]] const CharT* data() const noexcept { return _string; }
 
-        [[nodiscard]] CharT* data() noexcept
+        [[nodiscard]] CharT* data()
         {
             tryToMakeAsDynamic();
             return _string;
@@ -1064,60 +1058,57 @@ namespace Core
             return splittedStrings;
         }
 
-        template<class T, class = typename std::enable_if_t<std::is_integral_v<T>>>
-        static Self MakeFrom(T value)
+        template<class T>
+        static Self MakeFrom(const T& value)
         {
-            // TODO: optimize it using static array
-            Self temp;
-            temp.reserve(32);
-
-            if constexpr (std::is_unsigned_v<T>)
+            if constexpr (std::is_same_v<T, Self>)
             {
-                Toolset::FromUInt64(value, temp.data(), temp.capacity());
+                return Self{ value.c_str(), value.size() };
+            }
+            else if constexpr (std::is_same_v<T, std::basic_string<CharT>>)
+            {
+                return Self{ value.c_str(), value.size() };
+            }
+            else if constexpr (std::is_same_v<T, std::basic_string_view<CharT>>)
+            {
+                return Self{ value.data(), value.size() };
+            }
+            else if constexpr (std::is_same_v<T, std::filesystem::path>)
+            {
+                auto temp = value.template generic_string<CharT>();
+                return Self{ temp.c_str(), temp.size() };
             }
             else
             {
-                Toolset::FromInt64(value, temp.data(), temp.capacity());
+                constexpr std::size_t bufferSize = 4096;
+                static char buffer[bufferSize]{};
+                Self temp;
+
+                if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
+                {
+                    Assert(false, std::make_error_code(result.ec).message().c_str());
+                    return temp;
+                }
+
+                if constexpr (sizeof(CharT) == 1)
+                {
+                    temp = buffer;
+                }
+                else
+                {
+                    for (std::size_t i = 0; buffer[i] != '\0'; ++i)
+                    {
+                        temp.push_back(buffer[i]);
+                    }
+                }
+
+                return temp;
             }
 
-            temp._size = Toolset::Length(temp.data());
-            temp.shrink_to_fit();
-
-            return temp;
+            return {};
         }
-
-        static Self MakeFrom(const Self& value) { return Self{ value }; }
-
-        static Self MakeFrom(StdStringT value) { return Self{ value }; }
-
-        static Self MakeFrom(const CharT* value) { return Self(value); }
-
-        static Self MakeFrom(float value)
-        {
-            Self temp;
-            temp.reserve(16);
-            Toolset::FromFloat(value, temp.data(), temp.capacity());
-            temp._size = Toolset::Length(temp.data());
-            return temp;
-        }
-
-        static Self MakeFrom(double value)
-        {
-            Self temp;
-            temp.reserve(32);
-            Toolset::FromDouble(value, temp.data(), temp.capacity());
-            temp._size = Toolset::Length(temp.data());
-            return temp;
-        }
-
-        static Self MakeFrom(const std::filesystem::path& value)
-        {
-            Self temp;
-            temp.reserve(1024);
-            Toolset::FromStdFilesystemPath(value, temp.data(), temp.capacity());
-            temp._size = Toolset::Length(temp.data());
-            return temp;
-        }
+        static Self MakeFrom(const CharT* value) { return { value }; }
+        static Self MakeFrom(CharT* value) { return { value }; }
 
         template<class T>
         [[nodiscard]] T convertTo() const
