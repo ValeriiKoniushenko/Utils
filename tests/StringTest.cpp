@@ -1325,9 +1325,9 @@ TEST_F(StringTestF, BaseString_char_default__iterate_over_lines)
         std::vector<bool> linesValidator;
         int i = 0;
         str.forEachByLine(
-            [&](auto str)
+            [&](auto arg)
             {
-                linesValidator.push_back(str == lines[i++]);
+                linesValidator.push_back(arg == lines[i++]);
                 return true;
             },
             BaseString<T>::LineSeparator::LF);
