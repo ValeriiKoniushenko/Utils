@@ -1332,6 +1332,7 @@ namespace Core
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
+         * @param compileOptions perl compile options
          */
         template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
         [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
