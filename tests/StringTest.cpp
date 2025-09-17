@@ -50,7 +50,7 @@ template<class T, class CharT>
             const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
             if (end == str)
             {
-                throw std::invalid_argument("Can't convert wide string to the specified type");
+                throw std::invalid_argument("Can't convert wide string to the floating type");
             }
             return r;
         }
@@ -59,30 +59,49 @@ template<class T, class CharT>
     else if constexpr (std::is_integral_v<T>)
     {
         // >>> non-narrow int32 <<<
-        // char
-        if constexpr (sizeof(CharT) == 1)
+        if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
         {
-            if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
+            // char
+            if constexpr (sizeof(CharT) == 1)
             {
                 return static_cast<T>(std::is_signed_v<T> ? std::stoi(str) : std::stoul(str));
             }
-        }
-        // wchar_t
-        else
-        {
-            if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
+            // wchar_t
+            else
             {
                 CharT* end = nullptr;
                 const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10) : std::wcstoul(str, &end, 10));
                 if (end == str)
                 {
-                    throw std::invalid_argument("Can't convert wide string to the specified type");
+                    throw std::invalid_argument("Can't convert wide string to the [u]int32");
                 }
                 return r;
             }
         }
-
         // >>> non-narrow int64 <<<
+        else if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint64_t>)
+        {
+            // char
+            if constexpr (sizeof(CharT) == 1)
+            {
+                return static_cast<T>(std::is_signed_v<T> ? std::stoll(str) : std::stoull(str));
+            }
+            // wchar_t
+            else
+            {
+                CharT* end = nullptr;
+                const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10) : std::wcstoull(str, &end, 10));
+                if (end == str)
+                {
+                    throw std::invalid_argument("Can't convert wide string to the [u]int64");
+                }
+                return r;
+            }
+        }
+        else
+        {
+            static_assert(false, "Can't determine integer type");
+        }
     }
     else
     {
@@ -117,6 +136,7 @@ TEST_F(StringTestF, ConverterFromString)
         EXPECT_THROW((void)FromCStringTo<double>(lit("ss123.")), std::invalid_argument);
 
         // integral
+        // int32 or lower
         EXPECT_EQ(2'123'456'789, FromCStringTo<int>(lit("2123456789")));
         EXPECT_EQ(123, FromCStringTo<short>(lit("123")));
         EXPECT_EQ(123, FromCStringTo<char>(lit("123")));
@@ -126,6 +146,13 @@ TEST_F(StringTestF, ConverterFromString)
         EXPECT_EQ(3'123'456'789, FromCStringTo<unsigned int>(lit("3123456789")));
         EXPECT_EQ(123, FromCStringTo<unsigned short>(lit("123")));
         EXPECT_EQ(123, FromCStringTo<unsigned char>(lit("123")));
+        // int64
+        EXPECT_EQ(123, FromCStringTo<long long>(lit("123")));
+        EXPECT_EQ(112'123'456'789, FromCStringTo<long long>(lit("112123456789")));
+        EXPECT_EQ(-112'123'456'789, FromCStringTo<long long>(lit("-112123456789")));
+        EXPECT_EQ(112'123'456'789, FromCStringTo<unsigned long long>(lit("112123456789")));
+        EXPECT_EQ(112'123'456'789, FromCStringTo<int64_t>(lit("112123456789")));
+        EXPECT_EQ(112'123'456'789, FromCStringTo<uint64_t>(lit("112123456789")));
     };
 
     test(asChar);
