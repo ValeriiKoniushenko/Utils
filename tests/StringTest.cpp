@@ -1295,12 +1295,14 @@ TEST_F(StringTestF, BaseString_char_default__Format)
 {
     auto test = [this]<class T>()
     {
-        const auto str = BaseString<T>::Format(Str<T>(R"(Hello {}! I have {}$. If u want we can go to {}.)"), Str<T>("Jenny"), 300, Str<T>("caffee"));
-        EXPECT_EQ(Str<T>("Hello Jenny! I have 300$. If u want we can go to caffee."), str);
+        std::basic_string<T> jenny = Str<T>("Jenny");
+        std::basic_string<T> coffee = Str<T>("coffee");
+        const auto str = BaseString<T>::Format(Str<T>(R"(Hello {}! I have {}$. If u want we can go to {}.)"), jenny.data(), 300, coffee.data());
+        EXPECT_EQ(Str<T>("Hello Jenny! I have 300$. If u want we can go to coffee."), str);
     };
 
     test.template operator()<char>();
-    // test.template operator()<wchar_t>(); - regex only for char
+    test.template operator()<wchar_t>();
 }
 
 TEST_F(StringTestF, BaseString_char_default__LinesCount)

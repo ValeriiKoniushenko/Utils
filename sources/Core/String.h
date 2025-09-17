@@ -1132,13 +1132,13 @@ namespace Core
             const void* expr = nullptr;
             if constexpr (sizeof(CharT) == 1)
             {
-                expr = "\\{\\}";
+                expr = "{}";
             }
             else
             {
-                expr = L"\\{\\}";
+                expr = L"{}";
             }
-            (temp.regexReplace(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()), ...);
+            (temp.replaceFirst(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()), ...);
 
             return temp;
         }
