@@ -57,6 +57,11 @@ namespace Core
         Dynamic
     };
 
+    class Iterator;
+
+    template<class CharType>
+    class BaseString;
+
 #if defined(UTILS_DEBUG)
     class StringTracer : public StrictSingleton<StringTracer>
     {
@@ -79,184 +84,112 @@ namespace Core
     };
 #endif // defined(UTILS_DEBUG)
 
-    // ======================= MISC FUNCTIONS =======================
-
-    template<class T, class CharT>
-    [[nodiscard]] T FromCStringTo(const CharT* str)
+    template<class CharT>
+    struct StringToolset
     {
-        if (!str)
-        {
-            return {};
-        }
+        StringToolset() = delete;
 
-        // =========== FLOATING POINT =============
-        if constexpr (std::is_floating_point_v<T>)
+        using StdStringT = std::basic_string<CharT>;
+        using StdStringViewT = std::basic_string_view<CharT>;
+
+        [[nodiscard]] static bool IsSpace(int ch)
         {
-            // char
             if constexpr (sizeof(CharT) == 1)
             {
-                return std::is_same_v<T, float> ? std::stof(str) : std::stod(str);
-            }
-            // wchar_t
-            else
-            {
-                CharT* end = nullptr;
-                const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
-                if (end == str)
-                {
-                    throw std::invalid_argument("Can't convert wide string to the floating type");
-                }
-                return r;
-            }
-        }
-        // =========== INTEGRAL =============
-        else if constexpr (std::is_integral_v<T>)
-        {
-            // >>> non-narrow int32 <<<
-            if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
-            {
-                // char
-                if constexpr (sizeof(CharT) == 1)
-                {
-                    return static_cast<T>(std::is_signed_v<T> ? std::stoi(str) : std::stoul(str));
-                }
-                // wchar_t
-                else
-                {
-                    CharT* end = nullptr;
-                    const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10) : std::wcstoul(str, &end, 10));
-                    if (end == str)
-                    {
-                        throw std::invalid_argument("Can't convert wide string to the [u]int32");
-                    }
-                    return r;
-                }
-            }
-            // >>> non-narrow int64 <<<
-            else if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint64_t>)
-            {
-                // char
-                if constexpr (sizeof(CharT) == 1)
-                {
-                    return static_cast<T>(std::is_signed_v<T> ? std::stoll(str) : std::stoull(str));
-                }
-                // wchar_t
-                else
-                {
-                    CharT* end = nullptr;
-                    const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10) : std::wcstoull(str, &end, 10));
-                    if (end == str)
-                    {
-                        throw std::invalid_argument("Can't convert wide string to the [u]int64");
-                    }
-                    return r;
-                }
+                return static_cast<bool>(isspace(ch));
             }
             else
             {
-                static_assert(false, "Can't determine integer type");
+                return static_cast<bool>(std::iswspace(ch));
             }
         }
-        else
+        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept
         {
-            static_assert(false, "Unsupported type. Can't convert from string to your T");
-        }
-        return {};
-    }
-
-    template<class CharType>
-    struct _StringToolset;
-
-    template<>
-    struct _StringToolset<char>
-    {
-        _StringToolset() = delete;
-
-        using CharT = char;
-        using StdStringT [[maybe_unused]] = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-
-        [[nodiscard]] static bool IsSpace(int ch) { return static_cast<bool>(isspace(ch)); }
-        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept { return static_cast<uint64_t>(strlen(string)); }
-
-        [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return atoi(str); }
-        [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(atof(str)); }
-        [[nodiscard, maybe_unused]] static double ToDouble(const CharT* str) noexcept { return atof(str); }
-        [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return atoll(str); }
-        [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return atoll(str); }
-
-        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%d", value); errorCode < 0)
+            if constexpr (sizeof(CharT) == 1)
             {
-                Assert("Impossible to convert 'int32_t' value to string.");
+                return static_cast<uint64_t>(strlen(string));
             }
-        }
-
-        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%f", value); errorCode < 0)
+            else
             {
-                Assert("Impossible to convert 'float' value to string.");
+                return static_cast<uint64_t>(wcslen(string));
             }
         }
 
-        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, uint64_t bufferSize)
+        [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delimiter, CharT*& context) noexcept
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%lf", value); errorCode < 0)
+            if constexpr (sizeof(CharT) == 1)
             {
-                Assert("Impossible to convert 'double' value to string.");
+                return strtok_s(string, delimiter, &context);
             }
-        }
-
-        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%s", value.generic_string().c_str()); errorCode < 0)
+            else
             {
-                Assert("Impossible to convert 'std::filesystem::path' value to string.");
+                return wcstok_s(string, delimiter, &context);
             }
         }
 
-        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, uint64_t bufferSize)
+        [[nodiscard]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept
         {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRIu64, value); errorCode < 0)
+            if constexpr (sizeof(CharT) == 1)
             {
-                Assert("Impossible to convert 'uint64_t' value to string.");
+                return strstr(mainString, subString);
             }
-        }
-
-        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = snprintf(buffer, bufferSize, "%" PRId64, value); errorCode < 0)
+            else
             {
-                Assert("Impossible to convert 'int64_t' value to string.");
+                return wcsstr(mainString, subString);
+            }
+        }
+        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
+        {
+            if constexpr (sizeof(CharT) == 1)
+            {
+                return strstr(mainString, subString);
+            }
+            else
+            {
+                return wcsstr(mainString, subString);
             }
         }
 
-        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept
+        [[nodiscard]] static int ToUpper(const CharT ch) noexcept
         {
-            return strtok_s(string, delim, &context);
+            if constexpr (sizeof(CharT) == 1)
+            {
+                return toupper(ch);
+            }
+            else
+            {
+                return towupper(ch);
+            }
         };
-        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept
+        [[nodiscard]] static int ToLower(const CharT ch) noexcept
         {
-            return strstr(mainString, subString);
+            if constexpr (sizeof(CharT) == 1)
+            {
+                return tolower(ch);
+            }
+            else
+            {
+                return towlower(ch);
+            }
         };
-        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
-        {
-            return strstr(mainString, subString);
-        };
-
-        [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return toupper(ch); };
-        [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return tolower(ch); };
 
         [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
         {
-            const int result = strcmp(str1, str2);
+            int result = 0;
+            if constexpr (sizeof(CharT) == 1)
+            {
+                result = strcmp(str1, str2);
+            }
+            else
+            {
+                result = wcscmp(str1, str2);
+            }
+
             if (result == 0)
             {
                 return Comparison::Equal;
             }
-            if (result > 0)
+            else if (result > 0)
             {
                 return Comparison::Greater;
             }
@@ -276,7 +209,7 @@ namespace Core
                 return string;
             }
 
-            if (*substr == 0) // 0 is '\0'
+            if (*substr == 0)
             {
                 return string;
             }
@@ -298,148 +231,92 @@ namespace Core
 
             return nullptr;
         }
-
-        [[maybe_unused]] static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
+        static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
         {
             return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
         }
-    };
 
-    template<>
-    struct _StringToolset<wchar_t>
-    {
-        _StringToolset() = delete;
-
-        using CharT = wchar_t;
-        using StdStringT = std::basic_string<CharT, std::char_traits<CharT>, std::allocator<CharT>>;
-        using StdStringViewT = std::basic_string_view<CharT, std::char_traits<CharT>>;
-
-        [[nodiscard]] static bool IsSpace(wint_t ch) { return static_cast<bool>(std::iswspace(ch)); }
-        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept { return static_cast<uint64_t>(wcslen(string)); }
-
-        [[nodiscard, maybe_unused]] static int ToInt(const CharT* str) noexcept { return _wtoi(str); }
-        [[nodiscard, maybe_unused]] static float ToFloat(const CharT* str) noexcept { return static_cast<float>(_wtof(str)); }
-        [[nodiscard, maybe_unused]] static double ToDouble(const CharT* str) noexcept { return _wtof(str); }
-        [[nodiscard, maybe_unused]] static int64_t ToInt64(const CharT* str) noexcept { return _wtoll(str); }
-        [[nodiscard, maybe_unused]] static uint64_t ToUInt64(const CharT* str) noexcept { return _wtoll(str); }
-
-        [[maybe_unused]] static void FromInt32(int32_t value, CharT* buffer, uint64_t bufferSize)
+        template<class T>
+        [[nodiscard]] static T FromCStringTo(const CharT* str)
         {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%d", value); errorCode < 0)
+            if (!str)
             {
-                Assert("Impossible to convert 'int32_t' value to string.");
-            }
-        }
-
-        [[maybe_unused]] static void FromFloat(float value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%f", value); errorCode < 0)
-            {
-                Assert("Impossible to convert 'float' value to string.");
-            }
-        }
-
-        [[maybe_unused]] static void FromDouble(double value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lf", value); errorCode < 0)
-            {
-                Assert("Impossible to convert 'double' value to string.");
-            }
-        }
-
-        [[maybe_unused]] static void FromStdFilesystemPath(const std::filesystem::path& value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%s", value.wstring().c_str()); errorCode < 0)
-            {
-                Assert("Impossible to convert 'std::filesystem::path' value to string.");
-            }
-        }
-
-        [[maybe_unused]] static void FromUInt64(uint64_t value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%llu", value); errorCode < 0)
-            {
-                Assert("Impossible to convert 'uint64_t' value to string.");
-            }
-        }
-
-        [[maybe_unused]] static void FromInt64(int64_t value, CharT* buffer, uint64_t bufferSize)
-        {
-            if (const auto errorCode = _snwprintf_s(buffer, bufferSize, bufferSize, L"%lld", value); errorCode < 0)
-            {
-                Assert("Impossible to convert 'int64_t' value to string.");
-            }
-        }
-
-        [[nodiscard, maybe_unused]] static CharT* StrTok(CharT* string, const CharT* delim, CharT*& context) noexcept
-        {
-            return wcstok_s(string, delim, &context);
-        };
-        [[nodiscard, maybe_unused]] static CharT* StrStr(CharT* mainString, const CharT* subString) noexcept
-        {
-            return wcsstr(mainString, subString);
-        };
-        [[nodiscard, maybe_unused]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
-        {
-            return wcsstr(mainString, subString);
-        };
-
-        [[nodiscard, maybe_unused]] static int ToUpper(const CharT ch) noexcept { return static_cast<int>(towupper(ch)); };
-        [[nodiscard, maybe_unused]] static int ToLower(const CharT ch) noexcept { return static_cast<int>(towlower(ch)); };
-
-        [[nodiscard]] static Comparison Cmp(const CharT* str1, const CharT* str2) noexcept
-        {
-            const auto result = wcscmp(str1, str2);
-            if (result == 0)
-            {
-                return Comparison::Equal;
-            }
-            if (result > 0)
-            {
-                return Comparison::Greater;
+                return {};
             }
 
-            return Comparison::Less;
-        }
-
-        static const CharT* ReverseStrStr(const CharT* string, const CharT* substr, const CharT* end = nullptr)
-        {
-            if (!string)
+            // =========== FLOATING POINT =============
+            if constexpr (std::is_floating_point_v<T>)
             {
-                return nullptr;
-            }
-
-            if (!substr)
-            {
-                return string;
-            }
-
-            if (*substr == 0) // 0 is '\0'
-            {
-                return string;
-            }
-            const auto lenStr = Length(string);
-            const auto limitOffset = end ? (string + lenStr) - end : 0;
-            const auto lenSubstr = Length(substr);
-            if (lenSubstr > lenStr)
-            {
-                return nullptr;
-            }
-
-            for (const CharT* p = string + lenStr - lenSubstr - limitOffset; p >= string; --p)
-            {
-                if (memcmp(p, substr, lenSubstr * sizeof(CharT)) == 0 || p == string)
+                // char
+                if constexpr (sizeof(CharT) == 1)
                 {
-                    return p;
+                    return std::is_same_v<T, float> ? std::stof(str) : std::stod(str);
+                }
+                // wchar_t
+                else
+                {
+                    CharT* end = nullptr;
+                    const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
+                    if (end == str)
+                    {
+                        throw std::invalid_argument("Can't convert wide string to the floating type");
+                    }
+                    return r;
                 }
             }
-
-            return nullptr;
-        }
-
-        [[maybe_unused]] static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
-        {
-            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
+            // =========== INTEGRAL =============
+            else if constexpr (std::is_integral_v<T>)
+            {
+                // >>> non-narrow int32 <<<
+                if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
+                {
+                    // char
+                    if constexpr (sizeof(CharT) == 1)
+                    {
+                        return static_cast<T>(std::is_signed_v<T> ? std::stoi(str) : std::stoul(str));
+                    }
+                    // wchar_t
+                    else
+                    {
+                        CharT* end = nullptr;
+                        const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10) : std::wcstoul(str, &end, 10));
+                        if (end == str)
+                        {
+                            throw std::invalid_argument("Can't convert wide string to the [u]int32");
+                        }
+                        return r;
+                    }
+                }
+                // >>> non-narrow int64 <<<
+                else if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint64_t>)
+                {
+                    // char
+                    if constexpr (sizeof(CharT) == 1)
+                    {
+                        return static_cast<T>(std::is_signed_v<T> ? std::stoll(str) : std::stoull(str));
+                    }
+                    // wchar_t
+                    else
+                    {
+                        CharT* end = nullptr;
+                        const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10) : std::wcstoull(str, &end, 10));
+                        if (end == str)
+                        {
+                            throw std::invalid_argument("Can't convert wide string to the [u]int64");
+                        }
+                        return r;
+                    }
+                }
+                else
+                {
+                    static_assert(false, "Can't determine integer type");
+                }
+            }
+            else
+            {
+                static_assert(false, "Unsupported type. Can't convert from string to your T");
+            }
+            return {};
         }
     };
 
@@ -455,16 +332,16 @@ namespace Core
     template<class CharT>
     struct StringData
     {
-        using Toolset = _StringToolset<CharT>;
+        using Toolset = StringToolset<CharT>;
         using SmartPointer = std::unique_ptr<CharT[]>;
 
-        [[maybe_unused]] StringData(SmartPointer&& ptr, uint64_t newSize)
+        StringData(SmartPointer&& ptr, uint64_t newSize)
             : str{ std::move(ptr) },
               size{ newSize }
         {
         }
 
-        [[maybe_unused]] StringData(const CharT* newString, uint64_t newSize)
+        StringData(const CharT* newString, uint64_t newSize)
             : str{ SmartPointer(new CharT[newSize + 1]) }
         {
             memcpy_s(str.get(), size * sizeof(CharT), newString, newSize * sizeof(CharT));
@@ -500,7 +377,7 @@ namespace Core
         SINGLETONS_FRIEND_NO_CNSTR(_StringPool<CharType>)
     public:
         using CharT = CharType;
-        using Toolset = _StringToolset<CharT>;
+        using Toolset = StringToolset<CharT>;
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataT = StringData<CharT>;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
@@ -543,24 +420,13 @@ namespace Core
         std::unordered_map<uint64_t, StringDataT> _strings = {};
     };
 
-    class Iterator;
-    template<class CharType>
-    class BaseString;
-
-    template<class T>
-    concept IsFormattableType =
-        std::is_same_v<std::decay_t<T>, int> || std::is_same_v<std::decay_t<T>, double> || std::is_same_v<std::decay_t<T>, float> ||
-        std::is_same_v<std::decay_t<T>, uint64_t> || std::is_same_v<std::decay_t<T>, const char*> || std::is_same_v<std::decay_t<T>, char*> ||
-        std::is_same_v<std::decay_t<T>, const wchar_t*> || std::is_same_v<std::decay_t<T>, wchar_t*> ||
-        std::is_same_v<BaseString<typename T::CharT>, T> || std::is_same_v<std::string_view, T> || std::is_same_v<std::string, T>;
-
     template<class CharType>
     class BaseString
     {
     public:
         using CharT = CharType;
         using Self = BaseString<CharT>;
-        using Toolset = _StringToolset<CharT>;
+        using Toolset = StringToolset<CharT>;
         using StdStringT = typename Toolset::StdStringT;
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
@@ -1002,13 +868,19 @@ namespace Core
             return { _string };
         }
 
-        [[nodiscard]] CharT at(uint64_t index) const noexcept
+        [[nodiscard]] CharT at(uint64_t index) const
         {
-            if (!Verify(!isEmpty() && _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!Verify(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
 
+            return _string[index];
+        }
+
+        [[nodiscard]] CharT& at(uint64_t index)
+        {
+            Assert(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
             return _string[index];
         }
 
@@ -1058,10 +930,30 @@ namespace Core
             return splittedStrings;
         }
 
-        template<class T>
-        static Self MakeFrom(const T& value)
+        template<class _T>
+        static Self MakeFrom(const _T& value)
         {
-            if constexpr (std::is_same_v<T, Self>)
+            using T = std::remove_reference_t<std::remove_cv_t<_T>>;
+
+            if constexpr (std::is_same_v<T, char>)
+            {
+                Self temp;
+                temp.resize(1);
+                temp.at(0) = value;
+                return temp;
+            }
+            else if constexpr (std::is_same_v<T, bool>)
+            {
+                if constexpr (sizeof(CharT) == 1)
+                {
+                    return value ? Self{ "true" } : Self{ "false" };
+                }
+                else
+                {
+                    return value ? Self{ L"true" } : Self{ L"false" };
+                }
+            }
+            else if constexpr (std::is_same_v<T, Self>)
             {
                 return Self{ value.c_str(), value.size() };
             }
@@ -1082,6 +974,7 @@ namespace Core
             {
                 constexpr std::size_t bufferSize = 4096;
                 static char buffer[bufferSize]{};
+                buffer[0] = 0;
                 Self temp;
 
                 if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
@@ -1113,10 +1006,10 @@ namespace Core
         template<class T>
         [[nodiscard]] T convertTo() const
         {
-            return FromCStringTo<T>(_string);
+            return Toolset::template FromCStringTo<T>(_string);
         }
 
-        template<IsFormattableType... T>
+        template<class... T>
         [[nodiscard]] static Self Format(StdStringViewT str, const T&... args)
         {
             Self temp(str);
@@ -1829,8 +1722,21 @@ namespace Core
         {
             if (str)
             {
-                this->resize(size == StringDataReadOnly<CharT>::invalidSize ? Toolset::Length(str) : size);
+                resize(size == StringDataReadOnly<CharT>::invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
+            }
+        }
+
+        BaseString(const char* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
+            requires(sizeof(CharT) > 1)
+        {
+            if (str)
+            {
+                resize(size == StringDataReadOnly<CharT>::invalidSize ? StringToolset<char>::Length(str) : size);
+                for (uint64_t i = 0; i < _size; ++i)
+                {
+                    _string[i] = static_cast<CharT>(str[i]);
+                }
             }
         }
 
@@ -2124,7 +2030,7 @@ namespace Core
 
         static const CharT* FindNextLine(const CharT* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
         {
-            const auto* result = _StringToolset<CharT>::StrStr(string, GetLineSeparatorString(separator));
+            const auto* result = StringToolset<CharT>::StrStr(string, GetLineSeparatorString(separator));
             if (result != nullptr)
             {
                 if (end != nullptr && result >= end)
@@ -2149,7 +2055,7 @@ namespace Core
                 return nullptr;
             }
 
-            const auto* result = _StringToolset<CharT>::ReverseStrStr(begin, GetLineSeparatorString(separator), end);
+            const auto* result = StringToolset<CharT>::ReverseStrStr(begin, GetLineSeparatorString(separator), end);
             if (result != nullptr && result != begin)
             {
                 result += GetLineSeparatorStringSize(separator);
@@ -2159,7 +2065,7 @@ namespace Core
         }
 
         /**
-         * @brief Can take a functions of next types:
+         * @brief Can take functions of next types:
          * bool(String) - this function will work until it gets 'false' in return
          * void(String) - will iterate without stopping through all main string
          */
@@ -2170,7 +2076,7 @@ namespace Core
         }
 
         /**
-         * @brief Can take a functions of next types:
+         * @brief Can take functions of next types:
          * bool(String) - this function will work until it gets 'false' in return
          * void(String) - will iterate without stopping through all main string
          */
@@ -2258,7 +2164,7 @@ namespace Core
         using String = BaseString<CharT>;
         using BaseString<CharT>::BaseString;
 
-        template<IsFormattableType T>
+        template<class T>
         Self& operator<<(const T& value)
         {
             FormatFirst(value);
@@ -2266,7 +2172,7 @@ namespace Core
         }
 
     protected:
-        template<IsFormattableType T>
+        template<class T>
         void FormatFirst(const T& arg)
         {
             const void* expr = nullptr;
@@ -2302,52 +2208,52 @@ struct std::hash<Core::BaseString<CharType>>
     size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.makeHash(); }
 };
 
-inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size) noexcept
+inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size)
 {
     return Core::BaseString<char>::Intern(str, size);
 }
 
-inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t size) noexcept
+inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t size)
 {
     return Core::BaseString<wchar_t>::Intern(str, size);
 }
 
-inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size) noexcept
+inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size)
 {
     return { str, size };
 }
 
-inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size) noexcept
+inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size)
 {
     return { str, size };
 }
 
 template<class CharType>
-[[nodiscard]] bool operator>(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator>(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator>=(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator>=(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator<(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator<(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator<=(typename Core::_StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator<=(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
 }
 
 template<class CharType>
-[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::_StringToolset<CharType>::StdStringViewT str1,
+[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::StringToolset<CharType>::StdStringViewT str1,
                                                    const Core::BaseString<CharType>& str2)
 {
     auto temp = Core::BaseString<CharType>(str1);

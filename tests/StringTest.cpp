@@ -48,34 +48,70 @@ public:
     }
 };
 
+TEST_F(StringTestF, ConverterToString)
+{
+    auto test = [this]<class T>()
+    {
+        using String = BaseString<T>;
+
+        EXPECT_EQ(String("1"), String::MakeFrom('1'));
+        EXPECT_EQ(String("123"), String::MakeFrom(123));
+        EXPECT_EQ(String("123"), String::MakeFrom(123ll));
+        EXPECT_EQ(String("123"), String::MakeFrom(123u));
+        EXPECT_EQ(String("123"), String::MakeFrom(123ull));
+        EXPECT_EQ(String("123"), String::MakeFrom(123.));
+        EXPECT_EQ(String("123"), String::MakeFrom(123.f));
+        EXPECT_EQ(String("123.123"), String::MakeFrom(123.123));
+        EXPECT_EQ(String("123.123"), String::MakeFrom(123.123f));
+        EXPECT_EQ(String("123456789111"), String::MakeFrom(123'456'789'111));
+        EXPECT_EQ(String("true"), String::MakeFrom(true));
+        EXPECT_EQ(String("false"), String::MakeFrom(false));
+
+        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world"))));
+        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).c_str()));
+        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).data()));
+
+        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world"))));
+        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world")).data()));
+
+        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir"))));
+        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>()));
+        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>().c_str()));
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
 TEST_F(StringTestF, ConverterFromString)
 {
     auto test = [this]<class T>()
     {
+        using TS = StringToolset<T>;
         // floating point
-        EXPECT_EQ(123.f, FromCStringTo<float>(Str<T>("123.f")));
-        EXPECT_EQ(123., FromCStringTo<double>(Str<T>("123.")));
+        EXPECT_EQ(123.f, TS::template FromCStringTo<float>(Str<T>("123.f")));
+        EXPECT_EQ(123., TS::template FromCStringTo<double>(Str<T>("123.")));
 
-        EXPECT_THROW((void)FromCStringTo<double>(Str<T>("ss123.")), std::invalid_argument);
+        EXPECT_THROW((void)TS::template FromCStringTo<double>(Str<T>("ss123.")), std::invalid_argument);
 
         // integral
         // int32 or lower
-        EXPECT_EQ(2'123'456'789, FromCStringTo<int>(Str<T>("2123456789")));
-        EXPECT_EQ(123, FromCStringTo<short>(Str<T>("123")));
-        EXPECT_EQ(123, FromCStringTo<char>(Str<T>("123")));
-        EXPECT_EQ(-2'123'456'789, FromCStringTo<int>(Str<T>("-2123456789")));
-        EXPECT_EQ(-123, FromCStringTo<short>(Str<T>("-123")));
-        EXPECT_EQ(-123, FromCStringTo<char>(Str<T>("-123")));
-        EXPECT_EQ(3'123'456'789, FromCStringTo<unsigned int>(Str<T>("3123456789")));
-        EXPECT_EQ(123, FromCStringTo<unsigned short>(Str<T>("123")));
-        EXPECT_EQ(123, FromCStringTo<unsigned char>(Str<T>("123")));
+        EXPECT_EQ(2'123'456'789, TS::template FromCStringTo<int>(Str<T>("2123456789")));
+        EXPECT_EQ(123, TS::template FromCStringTo<short>(Str<T>("123")));
+        EXPECT_EQ(123, TS::template FromCStringTo<char>(Str<T>("123")));
+        EXPECT_EQ(-2'123'456'789, TS::template FromCStringTo<int>(Str<T>("-2123456789")));
+        EXPECT_EQ(-123, TS::template FromCStringTo<short>(Str<T>("-123")));
+        EXPECT_EQ(-123, TS::template FromCStringTo<char>(Str<T>("-123")));
+        EXPECT_EQ(3'123'456'789, TS::template FromCStringTo<unsigned int>(Str<T>("3123456789")));
+        EXPECT_EQ(123, TS::template FromCStringTo<unsigned short>(Str<T>("123")));
+        EXPECT_EQ(123, TS::template FromCStringTo<unsigned char>(Str<T>("123")));
         // int64
-        EXPECT_EQ(123, FromCStringTo<long long>(Str<T>("123")));
-        EXPECT_EQ(112'123'456'789, FromCStringTo<long long>(Str<T>("112123456789")));
-        EXPECT_EQ(-112'123'456'789, FromCStringTo<long long>(Str<T>("-112123456789")));
-        EXPECT_EQ(112'123'456'789, FromCStringTo<unsigned long long>(Str<T>("112123456789")));
-        EXPECT_EQ(112'123'456'789, FromCStringTo<int64_t>(Str<T>("112123456789")));
-        EXPECT_EQ(112'123'456'789, FromCStringTo<uint64_t>(Str<T>("112123456789")));
+        EXPECT_EQ(123, TS::template FromCStringTo<long long>(Str<T>("123")));
+        EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<long long>(Str<T>("112123456789")));
+        EXPECT_EQ(-112'123'456'789, TS::template FromCStringTo<long long>(Str<T>("-112123456789")));
+        EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<unsigned long long>(Str<T>("112123456789")));
+        EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<int64_t>(Str<T>("112123456789")));
+        EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<uint64_t>(Str<T>("112123456789")));
     };
 
     test.template operator()<char>();
@@ -1265,31 +1301,6 @@ TEST_F(StringTestF, AdvanceWorkFlow3)
             ASSERT_EQ(Str<T>("     HelloWorld"), str);
         }
     };
-
-    test.template operator()<char>();
-    test.template operator()<wchar_t>();
-}
-
-TEST_F(StringTestF, MakeFrom)
-{
-    auto test = [this]<class T>()
-    {
-        EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123));
-        EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123.f));
-        EXPECT_EQ(Str<T>("123"), BaseString<T>::MakeFrom(123.));
-        EXPECT_EQ(Str<T>("123.123"), BaseString<T>::MakeFrom(123.123));
-        EXPECT_EQ(Str<T>("412312334234"), BaseString<T>::MakeFrom(412312334234ull));
-    };
-
-    // should just compile
-    (void)StringAtom::MakeFrom("Hello"_atom);
-    (void)StringAtom::MakeFrom("Hello"_dyn);
-    (void)StringAtom::MakeFrom(std::string("Hello"));
-    (void)StringAtom::MakeFrom(std::string_view("Hello"));
-    (void)StringAtom::MakeFrom(static_cast<short>(123));
-    (void)StringAtom::MakeFrom(static_cast<char>(123));
-    (void)StringAtom::MakeFrom(static_cast<uint64_t>(123));
-    (void)StringAtom::MakeFrom(static_cast<int64_t>(123));
 
     test.template operator()<char>();
     test.template operator()<wchar_t>();
