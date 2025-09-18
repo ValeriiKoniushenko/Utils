@@ -801,6 +801,42 @@ TEST_F(StringTestF, Find)
     test.template operator()<wchar_t>();
 }
 
+TEST_F(StringTestF, FindIgnoreCase)
+{
+    auto test = [this]<class T>()
+    {
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello World!"));
+            const auto* found = str.findIgnoreCase(Str<T>("wor"));
+            ASSERT_TRUE(found);
+            EXPECT_EQ('W', *found);
+        }
+
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello world!"));
+            const auto* found = str.findIgnoreCase(std::basic_string<T>(Str<T>(" ")));
+            ASSERT_TRUE(found);
+            EXPECT_EQ(' ', *found);
+        }
+
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello world!"));
+            const auto* found = str.findIgnoreCase(BaseString<T>::Intern(Str<T>(" ")));
+            ASSERT_TRUE(found);
+            EXPECT_EQ(' ', *found);
+        }
+
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you, wOrLd?"));
+            const auto strings = str.findAllIgnoreCase(Str<T>("world"));
+            ASSERT_FALSE(strings.empty());
+        }
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
 TEST_F(StringTestF, Cmp)
 {
     auto test = [this]<class T>()

@@ -150,6 +150,49 @@ namespace Core
                 return wcsstr(mainString, subString);
             }
         }
+        [[nodiscard]] static const CharT* StrIStr(const CharT* mainString, const CharT* subString)
+        {
+            const CharT* p1 = mainString;
+            const CharT* p2 = subString;
+            const CharT* r = *p2 == 0 ? mainString : nullptr;
+
+            while (*p1 != 0 && *p2 != 0)
+            {
+                if (ToLower(*p1) == ToLower(*p2))
+                {
+                    if (r == nullptr)
+                    {
+                        r = p1;
+                    }
+                    ++p2;
+                }
+                else
+                {
+                    p2 = subString;
+                    if (r != nullptr)
+                    {
+                        p1 = r + 1;
+                    }
+
+                    if (ToLower(*p1) == ToLower(*p2))
+                    {
+                        r = p1;
+                        ++p2;
+                    }
+                    else
+                    {
+                        r = nullptr;
+                    }
+                }
+                ++p1;
+            }
+
+            return *p2 == 0 ? r : nullptr;
+        }
+        [[nodiscard]] static CharT* StrIStr(CharT* mainString, const CharT* subString)
+        {
+            return const_cast<CharT*>(StrIStr(static_cast<const CharT*>(mainString), subString));
+        }
 
         [[nodiscard]] static int ToUpper(const CharT ch) noexcept
         {
@@ -373,9 +416,9 @@ namespace Core
     };
 
     template<class CharType>
-    class _StringPool : public StrictSingleton<_StringPool<CharType>>
+    class StringPool : public StrictSingleton<StringPool<CharType>>
     {
-        SINGLETONS_FRIEND_NO_CNSTR(_StringPool<CharType>)
+        SINGLETONS_FRIEND_NO_CNSTR(StringPool<CharType>)
     public:
         using CharT = CharType;
         using Toolset = StringToolset<CharT>;
@@ -408,7 +451,7 @@ namespace Core
         }
 
     protected:
-        _StringPool()
+        StringPool()
         {
 #if defined(UTILS_STRING_POOL_SIZE) && UTILS_STRING_POOL_SIZE > 0
             _strings.reserve(UTILS_STRING_POOL_SIZE);
@@ -431,7 +474,6 @@ namespace Core
         using StdStringT = typename Toolset::StdStringT;
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
-        using StringPool = _StringPool<CharT>;
 
         using value_type = CharT;
         using pointer = value_type*;
@@ -544,7 +586,7 @@ namespace Core
                 return result == Comparison::Equal || result == Comparison::Less;
             }
 
-            void swap(Self& other) override
+            void swap(Self& other) noexcept override
             {
                 auto temp = *this;
                 *this = other;
@@ -615,17 +657,20 @@ namespace Core
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString) { return Self{ StringPool::instance().add(newString, Toolset::Length(newString)) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString)
+        {
+            return Self{ StringPool<CharT>::instance().add(newString, Toolset::Length(newString)) };
+        }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, uint64_t size) { return Self{ StringPool::instance().add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, uint64_t size) { return Self{ StringPool<CharT>::instance().add(newString, size) }; }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool::instance().add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool<CharT>::instance().add(string.data(), string.size()) }; }
 
         [[nodiscard]] uint64_t size() const noexcept { return _size; }
         [[nodiscard]] uint64_t byteSize() const noexcept { return _size * sizeof(CharT); }
@@ -1750,6 +1795,19 @@ namespace Core
             }
             return Toolset::StrStr(_string + baseOffset, other.data());
         }
+        [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
+        {
+            if (isEmpty())
+            {
+                return nullptr;
+            }
+
+            if (other.empty())
+            {
+                return _string;
+            }
+            return Toolset::StrIStr(_string + baseOffset, other.data());
+        }
 
         [[nodiscard]] const CharT* reverseFind(StdStringViewT other, uint64_t baseOffset = 0, uint64_t limitOffset = 0) const noexcept
         {
@@ -1779,6 +1837,27 @@ namespace Core
             do
             {
                 if ((foundStr = Toolset::StrStr(foundStr, other.data())))
+                {
+                    strings.push_back(foundStr);
+                    ++foundStr;
+                }
+            } while (foundStr);
+
+            return strings;
+        }
+        [[nodiscard]] std::vector<const CharT*> findAllIgnoreCase(StdStringViewT other) const noexcept
+        {
+            if (isEmpty() || other.empty())
+            {
+                return {};
+            }
+
+            std::vector<const CharT*> strings;
+
+            CharT* foundStr = _string;
+            do
+            {
+                if ((foundStr = Toolset::StrIStr(foundStr, other.data())))
                 {
                     strings.push_back(foundStr);
                     ++foundStr;

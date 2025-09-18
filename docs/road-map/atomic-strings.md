@@ -30,7 +30,7 @@ it will be handled automatically.
 ### Technical description
 
 Technically, it works only with addresses. When you create an atomic string, it is registered in 
-the global buffer of all atomic strings ```class _StringPool```. However, each string literal 
+the global buffer of all atomic strings ```class StringPool```. However, each string literal 
 is registered only once. So:
 
 ```c++
