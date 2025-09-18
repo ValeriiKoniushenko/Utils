@@ -1696,7 +1696,7 @@ TEST_F(StringTestF, RegexIterate)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
             BaseString<T> buffer;
-            str.regexIterate(Str<T>("\\w+"),
+            str.regexIterate("\\w+",
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
                                  buffer.push_back(match.convertBasedOn(str));
@@ -1708,7 +1708,7 @@ TEST_F(StringTestF, RegexIterate)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
             BaseString<T> buffer;
-            str.regexIterate(std::basic_string<T>(Str<T>("\\w+")),
+            str.regexIterate(std::basic_string<char>("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
                                  buffer.push_back(match.convertBasedOn(str));
@@ -1720,7 +1720,33 @@ TEST_F(StringTestF, RegexIterate)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
             BaseString<T> buffer;
-            std::basic_string<T> expr(Str<T>("\\w+"));
+            std::basic_string<char> expr("\\w+");
+            str.regexIterate(expr.c_str(),
+                             [&buffer, &str](const RegexMatch::MatchedData& match)
+                             {
+                                 buffer.push_back(match.convertBasedOn(str));
+                                 return true;
+                             });
+            EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
+        }
+
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
+            BaseString<T> buffer;
+            std::basic_string_view<char> expr("\\w+");
+            str.regexIterate(expr.data(),
+                             [&buffer, &str](const RegexMatch::MatchedData& match)
+                             {
+                                 buffer.push_back(match.convertBasedOn(str));
+                                 return true;
+                             });
+            EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
+        }
+
+        {
+            const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
+            BaseString<T> buffer;
+            const auto expr = BaseString<char>::Intern("\\w+");
             str.regexIterate(expr,
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
@@ -1733,8 +1759,7 @@ TEST_F(StringTestF, RegexIterate)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
             BaseString<T> buffer;
-            std::basic_string_view<T> expr(Str<T>("\\w+"));
-            str.regexIterate(expr,
+            str.regexIterate(BaseString<char>::Intern("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
                                  buffer.push_back(match.convertBasedOn(str));
@@ -1746,32 +1771,7 @@ TEST_F(StringTestF, RegexIterate)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
             BaseString<T> buffer;
-            const auto expr = BaseString<T>::Intern(Str<T>("\\w+"));
-            str.regexIterate(expr,
-                             [&buffer, &str](const RegexMatch::MatchedData& match)
-                             {
-                                 buffer.push_back(match.convertBasedOn(str));
-                                 return true;
-                             });
-            EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
-        }
-
-        {
-            const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
-            BaseString<T> buffer;
-            str.regexIterate(BaseString<T>::Intern(Str<T>("\\w+")),
-                             [&buffer, &str](const RegexMatch::MatchedData& match)
-                             {
-                                 buffer.push_back(match.convertBasedOn(str));
-                                 return true;
-                             });
-            EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
-        }
-
-        {
-            const auto str = BaseString<T>::Intern(Str<T>("Hello world! How are you?"));
-            BaseString<T> buffer;
-            str.regexIterate(std::basic_string_view<T>(Str<T>("\\w+")),
+            str.regexIterate(std::basic_string_view<char>("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
                                  buffer.push_back(match.convertBasedOn(str));

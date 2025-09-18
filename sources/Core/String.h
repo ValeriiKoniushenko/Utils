@@ -27,6 +27,7 @@
 #include "Core/CommonEnums.h"
 #include "Regex.h"
 #include "Singleton.h"
+#include "String.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
@@ -1227,16 +1228,15 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions perl compile options
          */
-        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedData regexFind(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
                                                         uint32_t compileOptions = 0) const
         {
-            if (isEmpty() || expr.empty())
+            if (isEmpty() || !expr)
             {
                 return {};
             }
 
-            Core::RegexMatch regex(expr.data(), _string);
+            Core::RegexMatch regex(expr, _string);
             regex.setOffset(offset);
             if (limit != 0)
             {
@@ -1252,23 +1252,38 @@ namespace Core
 
             return {};
         }
+        [[nodiscard]] RegexMatch::MatchedData regexFind(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFind(expr.data(), offset, limit, matchOptions, compileOptions);
+        }
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
+        }
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
+        }
 
         /**
          * @param expr regex pattern
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
+         * @param compileOptions PCRE regex compile options
          */
-        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0,
-                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                                                 uint32_t compileOptions = 0) const
         {
-            if (isEmpty() || expr.empty())
+            if (isEmpty() || !expr)
             {
                 return {};
             }
 
-            Core::RegexMatch regex(expr.data(), _string);
+            RegexMatch regex(expr, _string);
             regex.setOffset(offset);
             if (limit != 0)
             {
@@ -1284,23 +1299,53 @@ namespace Core
 
             return {};
         }
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFindAll(expr.data(), offset, limit, matchOptions, 0);
+        }
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
+        }
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        {
+            return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
+        }
 
         /**
          * @param expr regex pattern
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
+         * @param compileOptions PCRE2 regex compile options
          */
-        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        [[nodiscard]] bool regexMatch(StdStringViewT expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             if (!isEmpty())
             {
-                return regexFind(std::move(expr), offset, limit, matchOptions | PCRE2_ANCHORED, compileOptions).isMatched();
+                return regexFind(expr, offset, limit, matchOptions | PCRE2_ANCHORED, compileOptions).isMatched();
             }
 
             return false;
+        }
+        [[nodiscard]] bool regexMatch(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                      uint32_t compileOptions = 0) const
+        {
+            return regexMatch(expr.data(), offset, limit, matchOptions, compileOptions);
+        }
+        [[nodiscard]] bool regexMatch(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                      uint32_t compileOptions = 0) const
+        {
+            return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
+        }
+        [[nodiscard]] bool regexMatch(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                                      uint32_t compileOptions = 0) const
+        {
+            return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
 
         /**
@@ -1313,16 +1358,16 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param matchOptions corresponding to PCRE2 rules
          */
-        template<class FuncT, class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        void regexIterate(StdStringViewT expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        template<class FuncT>
+        void regexIterate(const char* expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
                           uint32_t compileOptions = 0) const
         {
-            if (isEmpty() || expr.empty())
+            if (isEmpty() || !expr)
             {
                 return;
             }
 
-            Core::RegexMatch regex(expr.data(), _string);
+            Core::RegexMatch regex(expr, _string);
             regex.setOffset(offset);
             if (limit != 0)
             {
@@ -1336,6 +1381,24 @@ namespace Core
                 regex.iterateOverMatches(std::forward<decltype(callback)>(callback));
             }
         }
+        template<class FuncT>
+        void regexIterate(std::basic_string_view<char> expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
+        {
+            regexIterate(expr.data(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
+        }
+        template<class FuncT>
+        void regexIterate(const std::basic_string<char>& expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
+        {
+            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
+        }
+        template<class FuncT>
+        void regexIterate(const BaseString<char>& expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
+        {
+            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
+        }
 
         /**
          * @param expr regex pattern
@@ -1348,16 +1411,15 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        bool regexReplace(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+        bool regexReplace(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
                           uint32_t replaceOptions = 0)
         {
-            if (isEmpty() || expr.empty())
+            if (isEmpty() || !expr)
             {
                 return false;
             }
 
-            Core::RegexReplace regex(expr.data(), _string);
+            Core::RegexReplace regex(expr, _string);
             regex.setOffset(offset);
             if (limit != 0)
             {
@@ -1390,23 +1452,52 @@ namespace Core
 
             return false;
         }
+        bool regexReplace(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
+                          uint64_t limit = 0, uint32_t replaceOptions = 0)
+        {
+            return regexReplace(expr.data(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+        }
+        bool regexReplace(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
+                          uint64_t limit = 0, uint32_t replaceOptions = 0)
+        {
+            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+        }
+        bool regexReplace(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+                          uint32_t replaceOptions = 0)
+        {
+            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+        }
 
         /**
          * @param expr regex pattern
          * @param predictedScaleSize will scale future string allocation size based on
-         * the programmer prediction. If the new string will be bigger than needed - it will
-         * pretend to UB. This function is using BaseString::Reserve - so final value will
+         * the programmer prediction. If the new string is bigger than needed - it will
+         * pretend to UB. This function is using BaseString::Reserve - so the final value will
          * be multiplied to BaseString::_capacityMultiplier
          * @param newValue new string for the replacement
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        template<class _T = CharType, class = std::enable_if_t<std::is_same_v<_T, char>>>
-        bool regexReplaceAll(StdStringViewT expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+        bool regexReplaceAll(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
                              uint32_t replaceOptions = 0)
         {
-            return regexReplace(std::move(expr), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+            return regexReplace(expr, std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+        }
+        bool regexReplaceAll(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
+                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        {
+            return regexReplaceAll(expr.data(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+        }
+        bool regexReplaceAll(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
+                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        {
+            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+        }
+        bool regexReplaceAll(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
+                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        {
+            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
 
         [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
