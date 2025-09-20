@@ -1020,7 +1020,7 @@ namespace Core
             {
                 constexpr std::size_t bufferSize = 4096;
                 static char buffer[bufferSize]{};
-                buffer[0] = 0;
+                memset(buffer, 0, bufferSize * sizeof(*buffer));
                 Self temp;
 
                 if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
