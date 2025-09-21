@@ -60,5 +60,20 @@ pipeline {
                 }
             }
         }
+
+        stage('Package Artifacts') {
+            steps {
+                script {
+                    def BUILD_PATH = "build/${C_COMPILER}/${BUILD_TYPE}"
+                    def ARCHIVE_NAME = "${C_COMPILER}-${BUILD_TYPE}.tar.gz"
+
+                    sh """
+                        rm -f ${ARCHIVE_NAME}
+                        tar czf ${ARCHIVE_NAME} ${BUILD_PATH}/bin/*
+                    """
+                    archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
+                }
+            }
+        }
     }
 }
