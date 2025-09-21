@@ -47,7 +47,7 @@ pipeline {
                                     if (attempt == 2) {
                                         echo "Previous build was FAILED. Let's try clear rebuild"
                                         sh """
-                                        rm -rf build
+                                        # rm -rf build
                                         """
                                     }
                                     try {
@@ -64,17 +64,17 @@ pipeline {
                                     } catch(err) {
                                         echo "Build failed on attempt #${attempt}"
                                         if (attempt == maxAttempts) {
-                                            error "Build failed after ${maxAttempts} attempts"
+                                            currentBuild.result = 'FAILURE'
                                         }
+                                    } finally {
+                                        addEmbeddableBadgeConfiguration(
+                                            id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
+                                            subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
+                                            status: (success ? "success" : "failed"),
+                                            color: (success ? "green" : "red")
+                                        )
                                     }
                                 }
-
-                                addEmbeddableBadgeConfiguration(
-                                    id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
-                                    subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
-                                    status: (success ? "success" : "failed"),
-                                    color: (success ? "green" : "red")
-                                )
                             }
                         }
                     }
