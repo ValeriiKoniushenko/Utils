@@ -65,11 +65,11 @@ pipeline {
             steps {
                 script {
                     def BUILD_PATH = "build/${C_COMPILER}/${BUILD_TYPE}"
-                    def ARCHIVE_NAME = "${env.JOB_NAME}-${C_COMPILER}.tar.gz"
+                    def ARCHIVE_NAME = "${env.JOB_NAME}.tar.gz"
 
                     sh """
                         rm -f ${ARCHIVE_NAME}
-                        tar czf ${ARCHIVE_NAME} -C ${BUILD_PATH}/bin .
+                        tar czf ${ARCHIVE_NAME} ${BUILD_PATH}/bin/*
                     """
                     archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
                 }
