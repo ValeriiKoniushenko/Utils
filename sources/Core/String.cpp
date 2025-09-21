@@ -46,7 +46,6 @@ namespace Core
     void StringTracer::addDynamicComparisonRequest(std::string str)
     {
         _dynamicCmpRequests[std::move(str)]++;
-        ;
     }
 
     void StringTracer::addChangedPolicyToDynamic(std::string str)

@@ -2,9 +2,9 @@ pipeline {
     agent { label 'Linux' }
 
     environment {
-        C_COMPILER = 'gcc'
-        CPP_COMPILER = 'g++'
-        BUILD_TYPE = 'Debug'
+        C_COMPILER = 'clang'
+        CPP_COMPILER = 'clang++'
+        BUILD_TYPE = 'Release'
     }
 
     stages {

@@ -4,7 +4,7 @@ pipeline {
     environment {
         C_COMPILER = 'gcc'
         CPP_COMPILER = 'g++'
-        BUILD_TYPE = 'Debug'
+        BUILD_TYPE = 'Release'
     }
 
     stages {

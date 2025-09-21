@@ -90,7 +90,7 @@ pipeline {
                                                   -DCMAKE_BUILD_TYPE=${BUILD_TYPE}          \
                                                   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-                                            cmake --build ${buildDir} -- -j2
+                                            cmake --build ${buildDir} -- -j4
                                         """
                                         success = true
                                     } catch(err) {
