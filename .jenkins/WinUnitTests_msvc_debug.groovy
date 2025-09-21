@@ -18,7 +18,7 @@ pipeline {
 
                     bat """
                         dir
-                        powershell Expand-Archive -Path ${ARCHIVE_NAME} -DestinationPath . -Force
+                        powershell Expand-Archive -Path ${ARCHIVE_NAME} -DestinationPath extracted -Force
                         build\\bin\\%BUILD_TYPE%\\UtilsTests.exe --gtest_output=xml:build\\bin\\%BUILD_TYPE%\\gtest_result.xml
                     """
                 }
