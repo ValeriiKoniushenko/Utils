@@ -64,7 +64,7 @@ pipeline {
                                     } catch(err) {
                                         echo "Build failed on attempt #${attempt}"
                                         if (attempt == maxAttempts) {
-                                            currentBuild.result = 'FAILURE'
+                                            error "Build failed after ${maxAttempts} attempts"
                                         }
                                     } finally {
                                         addEmbeddableBadgeConfiguration(
