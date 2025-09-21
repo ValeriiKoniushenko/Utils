@@ -68,7 +68,6 @@ pipeline {
                     def ARCHIVE_NAME = "${C_COMPILER}-${BUILD_TYPE}.tar.gz"
 
                     sh """
-                        pwd
                         rm -f ${ARCHIVE_NAME}
                         tar czf ${ARCHIVE_NAME} ${BUILD_PATH}/bin/*
                     """
