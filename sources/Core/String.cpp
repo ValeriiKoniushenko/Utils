@@ -35,7 +35,7 @@ namespace Core
 
     void StringTracer::addAtomRequest(std::string str)
     {
-        _atomRequests[std::move(str)]++;
+        _atomRequests[std::move(str)]++
     }
 
     void StringTracer::addAtomComparisonRequest(std::string str)
