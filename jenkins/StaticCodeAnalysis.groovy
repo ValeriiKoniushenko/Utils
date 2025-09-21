@@ -26,7 +26,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             recordIssues(
