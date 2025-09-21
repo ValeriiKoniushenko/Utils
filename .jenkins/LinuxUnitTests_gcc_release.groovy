@@ -17,6 +17,8 @@ pipeline {
                         fingerprintArtifacts: true
                     )
                     sh """
+                        tar -xzvf ${C_COMPILER}-${BUILD_TYPE}.tar.gz
+
                         cd build/${C_COMPILER}/${BUILD_TYPE}/bin
                         ./UtilsTests --gtest_output=xml:gtest_result.xml
                         cd ../../../../
