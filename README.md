@@ -2,9 +2,11 @@
 
 [![Jenkins](https://img.shields.io/badge/jenkins-%232C5263.svg?style=for-the-badge&logo=jenkins&logoColor=white)](https://jenkins.vakon.space/job/Utils/)
 
+[![GCC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxBuild%2520GCC%2520Debug%2F&label=GCC%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild%20GCC%20Debug/)
+
 **Builds**:
 - [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
-- [![](http://jenkins.vakon.space/job/Utils/job/LinuxBuild%20GCC%20Debug/lastBuild/badge/icon)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![DDDD](https://jenkins.vakon.space/job/Utils/job/LinuxBuild%20GCC%20Debug/10/badge/icon)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild%20GCC%20Debug/10/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 - [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 
 **Unit Tests**:
