@@ -65,7 +65,7 @@ pipeline {
             steps {
                 script {
                     def BUILD_PATH = "build/${C_COMPILER}/${BUILD_TYPE}"
-                    def ARCHIVE_NAME = "${env.JOB_NAME}.tar.gz"
+                    def ARCHIVE_NAME = "${C_COMPILER}-${BUILD_TYPE}.tar.gz"
 
                     sh """
                         pwd
