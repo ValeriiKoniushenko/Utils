@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Configure & Build') {
+        stage('Build') {
             steps {
                 script {
                     def buildDir = "build/${C_COMPILER}/${BUILD_TYPE}"
@@ -57,6 +57,21 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        stage('Package Artifacts') {
+            steps {
+                script {
+                    def BUILD_PATH = "build/${C_COMPILER}/${BUILD_TYPE}"
+                    def ARCHIVE_NAME = "${env.JOB_NAME}-${C_COMPILER}.tar.gz"
+
+                    sh """
+                        rm -f ${ARCHIVE_NAME}
+                        tar czf ${ARCHIVE_NAME} -C ${BUILD_PATH}/bin .
+                    """
+                    archiveArtifacts artifacts: "${ARCHIVE_NAME}", fingerprint: true
                 }
             }
         }

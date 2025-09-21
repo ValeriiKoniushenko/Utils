@@ -63,7 +63,7 @@ pipeline {
                         }
                     }
 
-                    stage('Configure & Build') {
+                    stage('Build') {
                         steps {
                             script {
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
@@ -289,7 +289,7 @@ pipeline {
                         }
                     }
 
-                    stage('Configure & Build') {
+                    stage('Build') {
                         steps {
                             script {
                                 def attempt = 0

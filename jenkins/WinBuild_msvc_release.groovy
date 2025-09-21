@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Configure & Build') {
+        stage('Build') {
             steps {
                 script {
                     def attempt = 0

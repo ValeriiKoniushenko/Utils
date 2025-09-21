@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Configure & Build') {
+        stage('Build') {
             steps {
                 script {
                     def buildDir = "build/${C_COMPILER}/${BUILD_TYPE}"
