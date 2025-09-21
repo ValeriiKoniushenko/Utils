@@ -34,7 +34,15 @@ pipeline {
                     stage('Configure & Build') {
                         steps {
                             script {
+
                                 def (C_COMPILER, CPP_COMPILER) = COMPILER_PAIR.split(':')
+
+                                addEmbeddableBadgeConfiguration(
+                                    id: "linuxBuild_${C_COMPILER}_${BUILD_TYPE}",
+                                    subject: "Linux | ${C_COMPILER} | ${BUILD_TYPE}",
+                                    status: "building",
+                                    color: "blue"
+                                )
 
                                 def buildDir = "build/${C_COMPILER}/${BUILD_TYPE}"
                                 def attempt = 0
