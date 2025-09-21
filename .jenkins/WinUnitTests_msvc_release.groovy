@@ -2,7 +2,7 @@ pipeline {
     agent { label 'Windows' }
 
     environment {
-        BUILD_TYPE = 'Debug'
+        BUILD_TYPE = 'Release'
     }
 
     stages {
@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     copyArtifacts(
-                        projectName: 'WinBuild_MSVC_Debug',
+                        projectName: 'WinBuild_MSVC_Release',
                         selector: lastCompleted(),
                         fingerprintArtifacts: true
                     )
