@@ -11,6 +11,11 @@ pipeline {
         stage('Run') {
             steps {
                 script {
+                    copyArtifacts(
+                        projectName: 'LinuxBuild_GCC_Release',
+                        selector: lastCompleted(),
+                        fingerprintArtifacts: true
+                    )
                     sh """
                         cd build/${C_COMPILER}/${BUILD_TYPE}/bin
                         ./UtilsTests --gtest_output=xml:gtest_result.xml
