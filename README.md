@@ -4,7 +4,7 @@
 
 **Builds**:
 - [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=windowsBuild_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
-- [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+- [![](http://jenkins.vakon.space/job/Utils/job/LinuxBuild%20GCC%20Debug/lastBuild/badge/icon)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_gcc_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 - [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Debug)](https://jenkins.vakon.space/job/Utils/lastBuild/)  [![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linuxBuild_clang_Release)](https://jenkins.vakon.space/job/Utils/lastBuild/)
 
 **Unit Tests**:
