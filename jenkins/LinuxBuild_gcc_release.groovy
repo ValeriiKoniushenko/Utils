@@ -68,6 +68,7 @@ pipeline {
                     def ARCHIVE_NAME = "${env.JOB_NAME}.tar.gz"
 
                     sh """
+                        pwd
                         rm -f ${ARCHIVE_NAME}
                         tar czf ${ARCHIVE_NAME} ${BUILD_PATH}/bin/*
                     """
