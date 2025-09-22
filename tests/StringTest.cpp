@@ -835,8 +835,6 @@ TEST_F(StringTestF, FindIgnoreCase)
 
     int i[4] = {1,2,3,4};
 
-    std::cout << i[5] << std::endl;
-
     test.template operator()<char>();
     test.template operator()<wchar_t>();
 }

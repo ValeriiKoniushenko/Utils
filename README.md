@@ -12,7 +12,7 @@
 - [![GCC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_GCC_Debug%2F&label=GCC%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_GCC_Debug/) [![GCC Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_GCC_Release%2F&label=GCC%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_GCC_Release/)
 - [![Clang Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_Clang_Debug%2F&label=Clang%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_Clang_Debug/) [![Clang Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_Clang_Release%2F&label=Clang%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_Clang_Release/)
 
-[![](http://jenkins.vakon.space/job/Utils/lastBuild/badge/icon?config=linux_valgrind)](https://jenkins.vakon.space/job/Utils/lastBuild/)
+[![Clang Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FValgrind%2F&label=Valgrind)](https://jenkins.vakon.space/job/Utils/job/Valgrind/)
 
 ---
 
