@@ -20,7 +20,7 @@
 
 A utility library providing common solutions for your code. It already includes several implemented features, such as:
 - Common concepts(from C++20)
-- Common classes for working with a space coordinates
+- Common classes for working with space coordinates
 - Common functions to work with Math
 - Common interfaces\patterns
 - Enum-generator
@@ -507,11 +507,11 @@ delegate.trigger();
 delegate.unsubscribe(id);
 ```
 
-Of course, you shouldn't 'unsubscribe' manually. You can use RAII object for that: ```IDGuard```
+Of course, you shouldn't 'unsubscribe' manually. You can use RAII object for that: ```DelegateSubscriber```
 ```c++
 Core::Delegate<void()> cuteCatsChannel;
 
-Core::Delegate<void()>::IDGuard id = cuteCatsChannel.subscribeAndGetID(
+DelegateSubscriber id = cuteCatsChannel.subscribeAndGetID(
     [&]()
     {
         cout << "Wow, new video!" << endl; 
