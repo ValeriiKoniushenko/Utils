@@ -36,7 +36,7 @@ pipeline {
                         if (attempt == 2) {
                             echo "Previous build was FAILED. Let's try clear rebuild"
                             sh """
-                            # rm -rf build
+                            rm -rf build
                             """
                         }
                         try {
