@@ -22,6 +22,8 @@
 
 #include "Color.h"
 
+#include <algorithm>
+
 using namespace Core;
 
 std::ostream& operator<<(std::ostream& os, const Color3& color)
