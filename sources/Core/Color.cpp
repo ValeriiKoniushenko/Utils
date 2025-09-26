@@ -26,12 +26,12 @@ using namespace Core;
 
 std::ostream& operator<<(std::ostream& os, const Color3& color)
 {
-    return os << color.x << " " << color.y << " " << color.z;
+    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << static_cast<int>(color.z);
 }
 
 std::ostream& operator<<(std::ostream& os, const Color4& color)
 {
-    return os << color.x << " " << color.y << " " << color.z << " " << color.w;
+    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << (color.z) << " " << static_cast<int>(color.w);
 }
 
 std::ostream& operator<<(std::ostream& os, const NormColor3& normColor)
@@ -46,12 +46,25 @@ std::ostream& operator<<(std::ostream& os, const NormColor4& normColor)
 
 std::istream& operator>>(std::istream& is, Color3& color)
 {
-    return is >> color.x >> color.y >> color.z;
+    int r = 0, g = 0, b = 0;
+    is >> r >> g >> b;
+    color.x = static_cast<decltype(color.x)>(std::clamp(r, 0, 255));
+    color.y = static_cast<decltype(color.y)>(std::clamp(g, 0, 255));
+    color.z = static_cast<decltype(color.z)>(std::clamp(b, 0, 255));
+
+    return is;
 }
 
 std::istream& operator>>(std::istream& is, Color4& color)
 {
-    return is >> color.x >> color.y >> color.z >> color.w;
+    int r = 0, g = 0, b = 0, a = 0;
+    is >> r >> g >> b >> a;
+    color.x = static_cast<decltype(color.x)>(std::clamp(r, 0, 255));
+    color.y = static_cast<decltype(color.y)>(std::clamp(g, 0, 255));
+    color.z = static_cast<decltype(color.z)>(std::clamp(b, 0, 255));
+    color.w = static_cast<decltype(color.w)>(std::clamp(a, 0, 255));
+
+    return is;
 }
 
 std::istream& operator>>(std::istream& is, NormColor3& normColor)
