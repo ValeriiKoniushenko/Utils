@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "Assert.h"
 #include "CommonEnums.h"
 #include "Delegate.h"
 #include "Enum.h"

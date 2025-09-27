@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 #include "StringHelper.h"
 
-#include "Assert.h"
+#include <iostream>
 
 std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s)
 {
@@ -36,20 +36,3 @@ std::istream& operator>>(std::istream& stream, Core::StringAtom& s)
     s += temp;
     return stream;
 }
-
-#if defined(UTILS_DEBUG)
-void Assert(const Core::StringAtom& s)
-{
-    Assert(s.c_str());
-}
-
-void Assert(bool value, const Core::StringAtom& s)
-{
-    Assert(value, s.c_str());
-}
-
-bool Verify(bool value, const Core::StringAtom& s)
-{
-    return Verify(value, s.c_str());
-}
-#endif

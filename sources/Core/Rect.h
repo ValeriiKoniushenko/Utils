@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include "Assert.h"
 #include "Position.h"
 #include "Size.h"
 #include "Utils/Concepts.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
+#include "libassert/assert.hpp"
 
 namespace Core
 {
@@ -124,7 +124,7 @@ namespace Core
                 return true;
             }
 
-            Assert(false);
+            ASSERT(false);
 
             return false;
         }

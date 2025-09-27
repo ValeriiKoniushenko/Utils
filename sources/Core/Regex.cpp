@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2024 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,7 @@ namespace Core
     {
         if (_pattern.empty()) [[unlikely]]
         {
-            Assert("The pattern is empty.");
+            ASSERT("The pattern is empty.");
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace Core
 
         if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
         {
-            Assert(getErrorString().c_str());
+            ASSERT(getErrorString().c_str());
             return false;
         }
 
@@ -138,13 +138,13 @@ namespace Core
     {
         if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
-            Assert("Regex wasn't compiled or match data was failed!");
+            ASSERT("Regex wasn't compiled or match data was failed!");
             return {};
         }
 
         if (!_subject) [[unlikely]]
         {
-            Assert("The subject is nullptr.");
+            ASSERT("The subject is nullptr.");
             return {};
         }
 
@@ -164,7 +164,7 @@ namespace Core
             const auto* ovector = pcre2_get_ovector_pointer(_matchData);
             if (!ovector) [[unlikely]]
             {
-                Assert(false);
+                ASSERT(false);
                 return {};
             }
 
@@ -177,7 +177,7 @@ namespace Core
             return {};
         }
 
-        Assert(false);
+        ASSERT(false);
         return {};
     }
 
@@ -185,13 +185,13 @@ namespace Core
     {
         if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
-            Assert("Regex wasn't compiled or match data was failed!");
+            ASSERT("Regex wasn't compiled or match data was failed!");
             return {};
         }
 
         if (!_subject) [[unlikely]]
         {
-            Assert("The subject is nullptr.");
+            ASSERT("The subject is nullptr.");
             return {};
         }
 
@@ -218,7 +218,7 @@ namespace Core
                 const auto* ovector = pcre2_get_ovector_pointer(_matchData);
                 if (!ovector) [[unlikely]]
                 {
-                    Assert(false);
+                    ASSERT(false);
                     return matches;
                 }
 
@@ -260,25 +260,25 @@ namespace Core
     {
         if (!isCompiled()) [[unlikely]]
         {
-            Assert("Regex wasn't compiled!");
+            ASSERT("Regex wasn't compiled!");
             return false;
         }
 
         if (!_subject) [[unlikely]]
         {
-            Assert("The subject is nullptr.");
+            ASSERT("The subject is nullptr.");
             return false;
         }
 
         if (!_replacement) [[unlikely]]
         {
-            Assert("The replacement string is nullptr.");
+            ASSERT("The replacement string is nullptr.");
             return false;
         }
 
         if (!_allocatedString) [[unlikely]]
         {
-            Assert("The output string is nullptr.");
+            ASSERT("The output string is nullptr.");
             return false;
         }
 
@@ -300,7 +300,7 @@ namespace Core
             return true;
         }
 
-        Assert(getErrorString(rc).c_str());
+        ASSERT(getErrorString(rc).c_str());
 
         return false;
     }

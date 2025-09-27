@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023-2024 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,3 @@
 
 std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
 std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
-
-#if defined(UTILS_DEBUG)
-void Assert(const Core::StringAtom& s);
-void Assert(bool value, const Core::StringAtom& s);
-
-[[nodiscard]] bool Verify(bool value, const Core::StringAtom& s);
-#endif

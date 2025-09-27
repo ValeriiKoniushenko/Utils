@@ -1,29 +1,28 @@
-//  MIT License
+// MIT License
 //
-//  Copyright (c) 2019-2025 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
-//  The above copyright notice and this permission notice shall be included in all
-//  copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//  SOFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 #pragma once
 
 #include "Core/AbstractIterators.h"
-#include "Core/Assert.h"
 #include "Core/CommonEnums.h"
 #include "Regex.h"
 #include "Singleton.h"
@@ -31,6 +30,7 @@
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
+#include "libassert/assert.hpp"
 
 #include <algorithm>
 #include <charconv>
@@ -604,7 +604,7 @@ namespace Core
             {
                 if (!_data || !other._data)
                 {
-                    Assert("Impossible to compare two iterators. Some iterator is invalid");
+                    ASSERT("Impossible to compare two iterators. Some iterator is invalid");
                     return Comparison::None;
                 }
 
@@ -623,7 +623,7 @@ namespace Core
                     return Comparison::Less;
                 }
 
-                Assert("Impossible to compare two iterators. Was get some error");
+                ASSERT("Impossible to compare two iterators. Was get some error");
                 return Comparison::None;
             }
 
@@ -720,7 +720,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Greater;
@@ -730,7 +730,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other._string);
@@ -741,7 +741,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Less;
@@ -751,7 +751,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other._string);
@@ -776,7 +776,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other) != Comparison::Equal;
@@ -786,7 +786,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other) == Comparison::Greater;
@@ -796,7 +796,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other);
@@ -807,7 +807,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other) == Comparison::Less;
@@ -817,7 +817,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other);
@@ -876,7 +876,7 @@ namespace Core
         {
             if (isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -887,7 +887,7 @@ namespace Core
         {
             if (isEmpty())
             {
-                Assert("Impossible to work with nullptr string.");
+                ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -916,7 +916,7 @@ namespace Core
 
         [[nodiscard]] CharT at(uint64_t index) const
         {
-            if (!Verify(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!ASSERT_VAL(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
@@ -926,7 +926,7 @@ namespace Core
 
         [[nodiscard]] CharT& at(uint64_t index)
         {
-            Assert(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
+            ASSERT(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
             return _string[index];
         }
 
@@ -1025,7 +1025,7 @@ namespace Core
 
                 if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
                 {
-                    Assert(false, std::make_error_code(result.ec).message().c_str());
+                    ASSERT(false, std::make_error_code(result.ec).message().c_str());
                     return temp;
                 }
 
@@ -1165,7 +1165,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!Verify(index < _size, "Invalid index"))
+                if (!ASSERT_VAL(index < _size, "Invalid index"))
                 {
                     return *this;
                 }
@@ -1182,7 +1182,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!Verify(from < _size && to < _size, "Invalid index"))
+                if (!ASSERT_VAL(from < _size && to < _size, "Invalid index"))
                 {
                     return *this;
                 }
@@ -1199,7 +1199,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (Verify(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
+                if (ASSERT_VAL(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
                 {
                     return erase(iterator._data - _string);
                 }
@@ -1211,8 +1211,8 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
-                    Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
+                if (ASSERT_VAL(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
+                    ASSERT_VAL(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
                     return erase(from._data - _string, to._data - _string);
                 }
@@ -1703,7 +1703,7 @@ namespace Core
 
         Self& insert(Iterator iterator, const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
         {
-            Assert(iterator._owner == this);
+            ASSERT(iterator._owner == this);
             if (iterator._owner == this)
             {
                 return insert(iterator._data - _string, str, size);
@@ -2031,7 +2031,7 @@ namespace Core
                 }
                 else
                 {
-                    Assert("Invalid StringPolicy type. Impossible to delete.");
+                    ASSERT("Invalid StringPolicy type. Impossible to delete.");
                 }
             }
         }
@@ -2134,7 +2134,7 @@ namespace Core
                 }
                 else
                 {
-                    Assert(false);
+                    ASSERT(false);
                     sep = "\n";
                 }
             }
@@ -2158,7 +2158,7 @@ namespace Core
                 }
                 else
                 {
-                    Assert(false);
+                    ASSERT(false);
                     sep = L"\n";
                 }
             }
@@ -2178,7 +2178,7 @@ namespace Core
 
         static uint64_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
         {
-            if (!Verify(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
+            if (!ASSERT_VAL(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
             {
                 return 0;
             }
@@ -2360,7 +2360,7 @@ namespace Core
                 std::stringstream ss;
                 ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string
                    << std::endl;
-                Assert(ss.str().c_str());
+                ASSERT(ss.str().c_str());
             }
 #endif
 

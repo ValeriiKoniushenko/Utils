@@ -47,3 +47,10 @@ set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(PCRE2)
+
+FetchContent_Declare(
+    libassert
+    GIT_REPOSITORY https://github.com/jeremy-rifkin/libassert.git
+    GIT_TAG        v2.2.1
+)
+FetchContent_MakeAvailable(libassert)
