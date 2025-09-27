@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2024 Valerii Koniushenko
+// Copyright (c) 2018-2025 Valerii Koniushenko
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -224,6 +224,13 @@ TEST_F(StringTestF, Creation)
             BaseString<T> str1 = BaseString<T>::Intern(Str<T>("Hello"));
             BaseString<T> str2 = BaseString<T>::Intern(std::basic_string<T>(Str<T>("World")));
             EXPECT_NE(str1, str2);
+        }
+
+        {
+            BaseString<T> str;
+            EXPECT_EQ(str, Str<T>(""));
+            EXPECT_NE(str, Str<T>(" "));
+            EXPECT_NE(str, Str<T>("smth"));
         }
     };
 

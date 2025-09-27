@@ -762,25 +762,12 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                if (((_string && _string[0] == 0) || _string == nullptr) && ((other && other[0] == 0) || other == nullptr))
-                {
-                    return true;
-                }
-
-                return {};
+                return ((_string && _string[0] == 0) || _string == nullptr) && ((other && other[0] == 0) || other == nullptr);
             }
             return Toolset::Cmp(_string, other) == Comparison::Equal;
         }
 
-        [[nodiscard]] bool operator!=(const CharT* other) const
-        {
-            if (isEmpty() || !other)
-            {
-                ASSERT("Impossible to work with nullptr string.");
-                return {};
-            }
-            return Toolset::Cmp(_string, other) != Comparison::Equal;
-        }
+        [[nodiscard]] bool operator!=(const CharT* other) const { return !operator==(other); }
 
         [[nodiscard]] bool operator>(const CharT* other) const
         {
@@ -2448,3 +2435,6 @@ inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, uint64_t 
 {
     return { str, size };
 }
+
+std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s);
+std::istream& operator>>(std::istream& stream, Core::StringAtom& s);
