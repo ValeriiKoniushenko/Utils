@@ -482,6 +482,8 @@ namespace Core
         template<bool IsConst>
         using AdaptiveRawPtr = std::conditional_t<IsConst, const Self, Self>*;
 
+        constexpr static uint64_t invalidSize = StringDataReadOnlyT::invalidSize;
+
         enum LineSeparator : uint8_t
         {
             CR,
@@ -1688,7 +1690,7 @@ namespace Core
 
         [[nodiscard]] uint64_t capacity() const noexcept { return _capacity; }
 
-        Self& insert(Iterator iterator, const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
+        Self& insert(Iterator iterator, const CharT* str, uint64_t size = invalidSize)
         {
             ASSERT(iterator._owner == this);
             if (iterator._owner == this)
@@ -1699,9 +1701,9 @@ namespace Core
             return *this;
         }
 
-        Self& insert(int64_t pos, const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
+        Self& insert(int64_t pos, const CharT* str, uint64_t size = invalidSize)
         {
-            if (size == StringDataReadOnly<CharT>::invalidSize)
+            if (size == invalidSize)
             {
                 size = Toolset::Length(str);
             }
@@ -1875,21 +1877,21 @@ namespace Core
             }
         }
 
-        BaseString(const CharT* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
+        BaseString(const CharT* str, uint64_t size = invalidSize)
         {
             if (str)
             {
-                resize(size == StringDataReadOnly<CharT>::invalidSize ? Toolset::Length(str) : size);
+                resize(size == invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
             }
         }
 
-        BaseString(const char* str, uint64_t size = StringDataReadOnly<CharT>::invalidSize)
+        BaseString(const char* str, uint64_t size = invalidSize)
             requires(sizeof(CharT) > 1)
         {
             if (str)
             {
-                resize(size == StringDataReadOnly<CharT>::invalidSize ? StringToolset<char>::Length(str) : size);
+                resize(size == invalidSize ? StringToolset<char>::Length(str) : size);
                 for (uint64_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(str[i]);
@@ -2283,7 +2285,7 @@ namespace Core
             do
             {
                 nextLine = FindNextLine(oldString, nullptr, separator);
-                uint64_t strSize = StringDataReadOnly<CharT>::invalidSize;
+                uint64_t strSize = invalidSize;
                 if (nextLine != nullptr)
                 {
                     strSize = nextLine - oldString - GetLineSeparatorStringSize(separator);
