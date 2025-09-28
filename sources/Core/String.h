@@ -606,7 +606,7 @@ namespace Core
             {
                 if (!_data || !other._data)
                 {
-                    ASSERT("Impossible to compare two iterators. Some iterator is invalid");
+                    DEBUG_ASSERT("Impossible to compare two iterators. Some iterator is invalid");
                     return Comparison::None;
                 }
 
@@ -625,7 +625,7 @@ namespace Core
                     return Comparison::Less;
                 }
 
-                ASSERT("Impossible to compare two iterators. Was get some error");
+                DEBUG_ASSERT("Impossible to compare two iterators. Was get some error");
                 return Comparison::None;
             }
 
@@ -722,7 +722,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Greater;
@@ -732,7 +732,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other._string);
@@ -743,7 +743,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other._string) == Comparison::Less;
@@ -753,7 +753,7 @@ namespace Core
         {
             if (isEmpty() || other.isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other._string);
@@ -775,7 +775,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other) == Comparison::Greater;
@@ -785,7 +785,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other);
@@ -796,7 +796,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             return Toolset::Cmp(_string, other) == Comparison::Less;
@@ -806,7 +806,7 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
             const auto result = Toolset::Cmp(_string, other);
@@ -865,7 +865,7 @@ namespace Core
         {
             if (isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -876,7 +876,7 @@ namespace Core
         {
             if (isEmpty())
             {
-                ASSERT("Impossible to work with nullptr string.");
+                DEBUG_ASSERT("Impossible to work with nullptr string.");
                 return {};
             }
 
@@ -905,7 +905,7 @@ namespace Core
 
         [[nodiscard]] CharT at(uint64_t index) const
         {
-            if (!ASSERT_VAL(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!DEBUG_ASSERT_VAL(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
@@ -915,7 +915,7 @@ namespace Core
 
         [[nodiscard]] CharT& at(uint64_t index)
         {
-            ASSERT(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
+            DEBUG_ASSERT(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
             return _string[index];
         }
 
@@ -1014,7 +1014,7 @@ namespace Core
 
                 if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
                 {
-                    ASSERT(false, std::make_error_code(result.ec).message().c_str());
+                    DEBUG_ASSERT(false, std::make_error_code(result.ec).message().c_str());
                     return temp;
                 }
 
@@ -1154,7 +1154,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!ASSERT_VAL(index < _size, "Invalid index"))
+                if (!DEBUG_ASSERT_VAL(index < _size, "Invalid index"))
                 {
                     return *this;
                 }
@@ -1171,7 +1171,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!ASSERT_VAL(from < _size && to < _size, "Invalid index"))
+                if (!DEBUG_ASSERT_VAL(from < _size && to < _size, "Invalid index"))
                 {
                     return *this;
                 }
@@ -1188,7 +1188,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (ASSERT_VAL(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
+                if (DEBUG_ASSERT_VAL(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
                 {
                     return erase(iterator._data - _string);
                 }
@@ -1200,8 +1200,8 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (ASSERT_VAL(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
-                    ASSERT_VAL(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
+                if (DEBUG_ASSERT_VAL(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
+                    DEBUG_ASSERT_VAL(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
                     return erase(from._data - _string, to._data - _string);
                 }
@@ -1692,7 +1692,7 @@ namespace Core
 
         Self& insert(Iterator iterator, const CharT* str, uint64_t size = invalidSize)
         {
-            ASSERT(iterator._owner == this);
+            DEBUG_ASSERT(iterator._owner == this);
             if (iterator._owner == this)
             {
                 return insert(iterator._data - _string, str, size);
@@ -2020,7 +2020,7 @@ namespace Core
                 }
                 else
                 {
-                    ASSERT("Invalid StringPolicy type. Impossible to delete.");
+                    DEBUG_ASSERT("Invalid StringPolicy type. Impossible to delete.");
                 }
             }
         }
@@ -2123,7 +2123,7 @@ namespace Core
                 }
                 else
                 {
-                    ASSERT(false);
+                    DEBUG_ASSERT(false);
                     sep = "\n";
                 }
             }
@@ -2147,7 +2147,7 @@ namespace Core
                 }
                 else
                 {
-                    ASSERT(false);
+                    DEBUG_ASSERT(false);
                     sep = L"\n";
                 }
             }
@@ -2167,7 +2167,7 @@ namespace Core
 
         static uint64_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
         {
-            if (!ASSERT_VAL(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
+            if (!DEBUG_ASSERT_VAL(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
             {
                 return 0;
             }
@@ -2349,7 +2349,7 @@ namespace Core
                 std::stringstream ss;
                 ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string
                    << std::endl;
-                ASSERT(ss.str().c_str());
+                DEBUG_ASSERT(ss.str().c_str());
             }
 #endif
 

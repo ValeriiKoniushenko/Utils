@@ -123,7 +123,7 @@ namespace Core
             {
                 if (offset + size > origSize) [[unlikely]]
                 {
-                    ASSERT(false);
+                    DEBUG_ASSERT(false);
                     return {};
                 }
 
@@ -179,7 +179,7 @@ namespace Core
         {
             if (!isCompiled() || _matchData == nullptr) [[unlikely]]
             {
-                ASSERT("Regex wasn't compiled or match data was failed!");
+                DEBUG_ASSERT("Regex wasn't compiled or match data was failed!");
                 return;
             }
 
@@ -202,7 +202,7 @@ namespace Core
                     const auto* ovector = pcre2_get_ovector_pointer(_matchData);
                     if (!ovector) [[unlikely]]
                     {
-                        ASSERT(false);
+                        DEBUG_ASSERT(false);
                         return;
                     }
 

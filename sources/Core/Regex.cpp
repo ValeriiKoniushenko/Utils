@@ -75,7 +75,7 @@ namespace Core
     {
         if (_pattern.empty()) [[unlikely]]
         {
-            ASSERT("The pattern is empty.");
+            DEBUG_ASSERT("The pattern is empty.");
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace Core
 
         if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
         {
-            ASSERT(getErrorString().c_str());
+            DEBUG_ASSERT(getErrorString().c_str());
             return false;
         }
 
@@ -138,13 +138,13 @@ namespace Core
     {
         if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
-            ASSERT("Regex wasn't compiled or match data was failed!");
+            DEBUG_ASSERT("Regex wasn't compiled or match data was failed!");
             return {};
         }
 
         if (!_subject) [[unlikely]]
         {
-            ASSERT("The subject is nullptr.");
+            DEBUG_ASSERT("The subject is nullptr.");
             return {};
         }
 
@@ -164,7 +164,7 @@ namespace Core
             const auto* ovector = pcre2_get_ovector_pointer(_matchData);
             if (!ovector) [[unlikely]]
             {
-                ASSERT(false);
+                DEBUG_ASSERT(false);
                 return {};
             }
 
@@ -177,7 +177,7 @@ namespace Core
             return {};
         }
 
-        ASSERT(false);
+        DEBUG_ASSERT(false);
         return {};
     }
 
@@ -185,13 +185,13 @@ namespace Core
     {
         if (!isCompiled() || _matchData == nullptr) [[unlikely]]
         {
-            ASSERT("Regex wasn't compiled or match data was failed!");
+            DEBUG_ASSERT("Regex wasn't compiled or match data was failed!");
             return {};
         }
 
         if (!_subject) [[unlikely]]
         {
-            ASSERT("The subject is nullptr.");
+            DEBUG_ASSERT("The subject is nullptr.");
             return {};
         }
 
@@ -218,7 +218,7 @@ namespace Core
                 const auto* ovector = pcre2_get_ovector_pointer(_matchData);
                 if (!ovector) [[unlikely]]
                 {
-                    ASSERT(false);
+                    DEBUG_ASSERT(false);
                     return matches;
                 }
 
@@ -260,25 +260,25 @@ namespace Core
     {
         if (!isCompiled()) [[unlikely]]
         {
-            ASSERT("Regex wasn't compiled!");
+            DEBUG_ASSERT("Regex wasn't compiled!");
             return false;
         }
 
         if (!_subject) [[unlikely]]
         {
-            ASSERT("The subject is nullptr.");
+            DEBUG_ASSERT("The subject is nullptr.");
             return false;
         }
 
         if (!_replacement) [[unlikely]]
         {
-            ASSERT("The replacement string is nullptr.");
+            DEBUG_ASSERT("The replacement string is nullptr.");
             return false;
         }
 
         if (!_allocatedString) [[unlikely]]
         {
-            ASSERT("The output string is nullptr.");
+            DEBUG_ASSERT("The output string is nullptr.");
             return false;
         }
 
@@ -300,7 +300,7 @@ namespace Core
             return true;
         }
 
-        ASSERT(getErrorString(rc).c_str());
+        DEBUG_ASSERT(getErrorString(rc).c_str());
 
         return false;
     }

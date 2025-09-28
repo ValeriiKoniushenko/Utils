@@ -124,7 +124,7 @@ namespace Core
                 return true;
             }
 
-            ASSERT(false);
+            DEBUG_ASSERT(false);
 
             return false;
         }

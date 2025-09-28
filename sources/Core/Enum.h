@@ -50,10 +50,7 @@
         Name(Name&&) = default;                                                                                                                      \
         Name& operator=(Name&&) = default;                                                                                                           \
                                                                                                                                                      \
-        [[nodiscard]] bool operator==(Name other) const noexcept                                                                                     \
-        {                                                                                                                                            \
-            return _value == other._value;                                                                                                           \
-        }                                                                                                                                            \
+        [[nodiscard]] bool operator==(Name other) const noexcept { return _value == other._value; }                                                  \
                                                                                                                                                      \
         Name& operator=(Name other) noexcept                                                                                                         \
         {                                                                                                                                            \
@@ -67,25 +64,13 @@
             return *this;                                                                                                                            \
         }                                                                                                                                            \
                                                                                                                                                      \
-        [[nodiscard]] bool operator!=(Name other) const noexcept                                                                                     \
-        {                                                                                                                                            \
-            return _value != other._value;                                                                                                           \
-        }                                                                                                                                            \
+        [[nodiscard]] bool operator!=(Name other) const noexcept { return _value != other._value; }                                                  \
                                                                                                                                                      \
-        [[nodiscard]] Type cast() const noexcept                                                                                                     \
-        {                                                                                                                                            \
-            return _value;                                                                                                                           \
-        }                                                                                                                                            \
+        [[nodiscard]] Type cast() const noexcept { return _value; }                                                                                  \
                                                                                                                                                      \
-        [[nodiscard]] operator Type() const noexcept                                                                                                 \
-        {                                                                                                                                            \
-            return _value;                                                                                                                           \
-        }                                                                                                                                            \
+        [[nodiscard]] operator Type() const noexcept { return _value; }                                                                              \
                                                                                                                                                      \
-        [[nodiscard]] ValueT toStr() const                                                                                                           \
-        {                                                                                                                                            \
-            return Name::toStr(_value);                                                                                                              \
-        }                                                                                                                                            \
+        [[nodiscard]] ValueT toStr() const { return Name::toStr(_value); }                                                                           \
                                                                                                                                                      \
         enum : Type                                                                                                                                  \
         {                                                                                                                                            \
@@ -138,10 +123,7 @@
             return it->first;                                                                                                                        \
         }                                                                                                                                            \
                                                                                                                                                      \
-        [[nodiscard]] static constexpr std::string getName() noexcept                                                                                \
-        {                                                                                                                                            \
-            return #Name;                                                                                                                            \
-        }                                                                                                                                            \
+        [[nodiscard]] static constexpr std::string getName() noexcept { return #Name; }                                                              \
                                                                                                                                                      \
     private:                                                                                                                                         \
         Type _value{};                                                                                                                               \
