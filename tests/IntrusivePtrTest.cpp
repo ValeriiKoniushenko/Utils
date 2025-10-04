@@ -54,18 +54,18 @@ TEST(IntrusivePtrTests, SimpleCreation)
 {
     {
         const TestObject f;
-        ASSERT_EQ(f.getRefCount(), 0);
+        ASSERT_EQ(f.getHardRefCount(), 0);
     }
 
     {
         TestObject f;
-        ASSERT_EQ(f.getRefCount(), 0);
+        ASSERT_EQ(f.getHardRefCount(), 0);
     }
 
     {
         IntrusivePtr ptr = new TestObject;
         ASSERT_TRUE(ptr.get());
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
         ptr->constMethod();
         ptr->nonConstMethod();
     }
@@ -73,28 +73,28 @@ TEST(IntrusivePtrTests, SimpleCreation)
     {
         IntrusivePtr<const TestObject> ptr = new TestObject;
         ASSERT_TRUE(ptr.get());
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
         ptr->constMethod();
     }
 
     {
         IntrusivePtr<const TestObject> ptr = new const TestObject;
         ASSERT_TRUE(ptr.get());
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
         ptr->constMethod();
     }
 
     {
         const IntrusivePtr ptr = new const TestObject;
         ASSERT_TRUE(ptr.get());
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
         ptr->constMethod();
     }
 
     {
         const IntrusivePtr ptr = new TestObject;
         ASSERT_TRUE(ptr.get());
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
         ptr->constMethod();
     }
 
@@ -104,7 +104,7 @@ TEST(IntrusivePtrTests, SimpleCreation)
 
         ptr = new const TestObject;
         ASSERT_TRUE(ptr);
-        ASSERT_EQ(ptr->getRefCount(), 1);
+        ASSERT_EQ(ptr->getHardRefCount(), 1);
 
         ptr.reset();
         ASSERT_FALSE(ptr);
@@ -121,12 +121,12 @@ TEST(IntrusivePtrTests, DefaultConstructedIsNull)
 TEST(IntrusivePtrTests, ConstructTakesOwnershipAndIncrements)
 {
     auto* raw = new TestObject();
-    ASSERT_EQ(raw->getRefCount(), 0u);
+    ASSERT_EQ(raw->getHardRefCount(), 0u);
 
     {
         IntrusivePtr<TestObject> p(raw);
         ASSERT_TRUE(p);
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
         ASSERT_EQ(raw->increments, 1);
     }
 }
@@ -136,14 +136,14 @@ TEST(IntrusivePtrTests, CopyIncrementsReference)
     auto* raw = new TestObject();
     {
         IntrusivePtr<TestObject> p1(raw);
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
 
         {
             IntrusivePtr<TestObject> p2 = p1;
-            ASSERT_EQ(raw->getRefCount(), 2u);
+            ASSERT_EQ(raw->getHardRefCount(), 2u);
             ASSERT_EQ(raw->increments, 2);
         }
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
     }
 }
 
@@ -152,12 +152,12 @@ TEST(IntrusivePtrTests, MoveTransfersOwnership)
     auto* raw = new TestObject();
     {
         IntrusivePtr<TestObject> p1(raw);
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
 
         IntrusivePtr<TestObject> p2 = std::move(p1);
         ASSERT_FALSE(p1);
         ASSERT_TRUE(p2);
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
     }
 }
 
@@ -168,10 +168,10 @@ TEST(IntrusivePtrTests, ResetReplacesPointer)
 
     {
         IntrusivePtr<TestObject> p(raw1);
-        ASSERT_EQ(raw1->getRefCount(), 1u);
+        ASSERT_EQ(raw1->getHardRefCount(), 1u);
 
         p.reset(raw2);
-        ASSERT_EQ(raw2->getRefCount(), 1u);
+        ASSERT_EQ(raw2->getHardRefCount(), 1u);
     }
 }
 
@@ -180,7 +180,7 @@ TEST(IntrusivePtrTests, ResetNullClearsPointer)
     auto* raw = new TestObject();
     {
         IntrusivePtr<TestObject> p(raw);
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
 
         p.reset();
         ASSERT_FALSE(p);
@@ -207,8 +207,8 @@ TEST(IntrusivePtrTests, SwapExchangesPointers)
         IntrusivePtr p1(raw1);
         IntrusivePtr p2(raw2);
 
-        ASSERT_EQ(raw1->getRefCount(), 1u);
-        ASSERT_EQ(raw2->getRefCount(), 1u);
+        ASSERT_EQ(raw1->getHardRefCount(), 1u);
+        ASSERT_EQ(raw2->getHardRefCount(), 1u);
 
         p1.swap(p2);
 
@@ -222,9 +222,9 @@ TEST(IntrusivePtrTests, SelfAssignmentSafe)
     auto* raw = new TestObject();
     {
         IntrusivePtr p(raw);
-        ASSERT_EQ(raw->getRefCount(), 1u);
-        p = p; // self assign
-        ASSERT_EQ(raw->getRefCount(), 1u);
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
+        p.operator=(p); // self assign
+        ASSERT_EQ(raw->getHardRefCount(), 1u);
     }
 }
 
@@ -233,8 +233,8 @@ TEST(IntrusivePtrTests, MoveAssignmentReleasesOld)
     {
         IntrusivePtr p1(new TestObject);
         IntrusivePtr p2(new TestObject);
-        ASSERT_EQ(p1->getRefCount(), 1u);
-        ASSERT_EQ(p2->getRefCount(), 1u);
+        ASSERT_EQ(p1->getHardRefCount(), 1u);
+        ASSERT_EQ(p2->getHardRefCount(), 1u);
 
         p1 = std::move(p2);
         ASSERT_TRUE(p1);
@@ -248,4 +248,42 @@ TEST(IntrusivePtrTests, CreateMethod)
     ASSERT_EQ(111, TestObject::Create(111)->value);
     ASSERT_EQ(111, TestObject::Create(111, 222)->value);
     ASSERT_EQ(223, TestObject::Create(111, 222)->increments);
+}
+
+class AnotherObject : public IntrusiveRefCounter<AnotherObject>
+{
+public:
+    AnotherObject()
+    {
+        int i = 1;
+        ///
+    }
+    ~AnotherObject() override
+    {
+        int i = 1;
+        ///
+    }
+
+    void constMethod() const {}
+    void nonConstMethod() {}
+};
+
+TEST(IntrusivePtrTests, WeakTest)
+{
+    auto ptr = AnotherObject::Create();
+    auto fund = [weak = WeakPtr(ptr)]()
+    {
+        if (auto obj = weak.tryLoad())
+        {
+            obj->constMethod();
+            obj->nonConstMethod();
+        }
+    };
+
+    fund();
+    fund();
+    ptr.reset();
+
+    fund();
+    fund();
 }
