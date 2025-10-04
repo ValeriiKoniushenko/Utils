@@ -231,11 +231,11 @@ namespace Core
     public:
         virtual ~IntrusiveRefCounter() = default;
 
-        // template<class... ArgsT>
-        // [[nodiscard]] static IntrusivePtr<T> Create(ArgsT&&... args)
-        // {
-        //     return IntrusivePtr<T>(new T(std::forward<ArgsT>(args)...));
-        // }
+        template<class... ArgsT>
+        [[nodiscard]] static IntrusivePtr<T> Create(ArgsT&&... args)
+        {
+            return IntrusivePtr<T>(new T(std::forward<ArgsT>(args)...));
+        }
 
         [[nodiscard]] CounterT getRefCount() const noexcept { return _refCount; }
 

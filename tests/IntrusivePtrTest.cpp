@@ -244,8 +244,8 @@ TEST(IntrusivePtrTests, MoveAssignmentReleasesOld)
 
 TEST(IntrusivePtrTests, CreateMethod)
 {
-    // ASSERT_EQ(0, TestObject::Create()->value);
-    // ASSERT_EQ(111, TestObject::Create(111)->value);
-    // ASSERT_EQ(111, TestObject::Create(111, 222)->value);
-    // ASSERT_EQ(222, TestObject::Create(111, 222)->increments);
+    ASSERT_EQ(0, TestObject::Create()->value);
+    ASSERT_EQ(111, TestObject::Create(111)->value);
+    ASSERT_EQ(111, TestObject::Create(111, 222)->value);
+    ASSERT_EQ(223, TestObject::Create(111, 222)->increments);
 }
