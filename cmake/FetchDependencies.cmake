@@ -23,6 +23,10 @@ FetchContent_Declare(GoogleTest
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(GoogleTest)
+target_compile_options(gtest PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/w>
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
+)
 
 
 
@@ -34,6 +38,10 @@ FetchContent_Declare(Benchmark
 )
 
 FetchContent_MakeAvailable(Benchmark)
+target_compile_options(benchmark PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/w>
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
+)
 
 
 

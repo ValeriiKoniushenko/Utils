@@ -71,12 +71,17 @@ namespace Utils
     {
     };
 
-    template<class CharT, size_t N>
+    template<class CharT, std::size_t N>
     struct is_string_literal<CharT (&)[N]> : std::true_type
     {
     };
 
     template<class CharT, class T>
     inline constexpr bool is_string_literal_v = is_string_literal<T>::value;
+
+    template<typename T>
+    struct always_false : std::false_type
+    {
+    };
 
 } // namespace Utils
