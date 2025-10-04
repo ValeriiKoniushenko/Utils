@@ -21,15 +21,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#pragma once
-
-#include "CommonEnums.h"
-#include "Delegate.h"
-#include "Enum.h"
-#include "Math.h"
-#include "Position.h"
-#include "Rect.h"
-#include "Singleton.h"
-#include "Size.h"
-#include "String.h"

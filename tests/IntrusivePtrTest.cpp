@@ -22,14 +22,8 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <gtest/gtest.h>
 
-#include "CommonEnums.h"
-#include "Delegate.h"
-#include "Enum.h"
-#include "Math.h"
-#include "Position.h"
-#include "Rect.h"
-#include "Singleton.h"
-#include "Size.h"
-#include "String.h"
+TEST(IntrusivePtr, SimpleCreation)
+{
+}
