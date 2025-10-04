@@ -50,9 +50,6 @@ namespace Core
     template<class T, IsPolicy Policy>
     class IntrusiveRefCounter;
 
-    template<class T>
-    concept IsIntrusiveConstructible = requires() { std::derived_from<T, IntrusiveRefCounter<T, typename T::PolicyT>>; };
-
     template<class T, IsPolicy Policy>
     void _IncrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
     {
@@ -100,7 +97,7 @@ namespace Core
     // | |    | |_ | |
     // \_|     \__||_|
 
-    template<IsIntrusiveConstructible T>
+    template<class T>
     class IntrusivePtr final
     {
     public:
