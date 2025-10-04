@@ -32,76 +32,73 @@
 
 namespace Core
 {
+    //
+    // ___  ___ _
+    // |  \/  |(_)
+    // | .  . | _  ___   ___
+    // | |\/| || |/ __| / __|
+    // | |  | || |\__ \| (__
+    // \_|  |_/|_||___/ \___|
+
     template<class T>
-    concept IsPolicy = requires() { typename T::CounterT; };
+    concept IsPolicy = requires() {
+        typename T::CounterT;
+        std::is_invocable_v<decltype(T::IncrementRef)>;
+        std::is_invocable_v<decltype(T::DecrementRef)>;
+    };
 
     template<class T, IsPolicy Policy>
     class IntrusiveRefCounter;
 
+    template<class T>
+    concept IsIntrusiveConstructible = requires() { std::derived_from<T, IntrusiveRefCounter<T, typename T::PolicyT>>; };
+
+    template<class T, IsPolicy Policy>
+    void _IncrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
+    {
+        Policy::IncrementRef(obj->_refCount);
+        obj->onIncrementRef(obj->_refCount);
+    }
+
+    template<class T, IsPolicy Policy>
+    void _DecrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
+    {
+        DEBUG_ASSERT(obj->_refCount > 0);
+        if (obj->_refCount > 0) [[likely]]
+        {
+            Policy::DecrementRef(obj->_refCount);
+            obj->onDecrementRef(obj->_refCount);
+            if (obj->_refCount == 0)
+            {
+                delete obj;
+            }
+        }
+    }
+
+    //
+    // ______         _  _
+    // | ___ \       | |(_)
+    // | |_/ /  ___  | | _   ___  _   _
+    // |  __/  / _ \ | || | / __|| | | |
+    // | |    | (_) || || || (__ | |_| |
+    // \_|     \___/ |_||_| \___| \__, |
+    //                             __/ |
+    //                            |___/
+
     struct DefaultPolicy_IntrusiveRefCounter
     {
         using CounterT = uint32_t;
-
-        template<class T>
-        static void IncrementRef(IntrusiveRefCounter<T, DefaultPolicy_IntrusiveRefCounter>* obj) noexcept
-        {
-            obj->onIncrementRef(++obj->_refCount);
-        }
-
-        template<class T>
-        static void DecrementRef(IntrusiveRefCounter<T, DefaultPolicy_IntrusiveRefCounter>* obj) noexcept
-        {
-            DEBUG_ASSERT(obj->_refCount > 0);
-            if (obj->_refCount > 0) [[likely]]
-            {
-                obj->onDecrementRef(--obj->_refCount);
-                if (obj->_refCount == 0)
-                {
-                    delete obj;
-                }
-            }
-        }
+        static void IncrementRef(CounterT& counter) noexcept { ++counter; }
+        static void DecrementRef(CounterT& counter) noexcept { --counter; }
     };
 
-    template<class T, IsPolicy Policy = DefaultPolicy_IntrusiveRefCounter>
-    class IntrusiveRefCounter
-    {
-    public:
-        using ValueT = T;
-        using PolicyT = Policy;
-        using CounterT = typename Policy::CounterT;
-
-    public:
-        virtual ~IntrusiveRefCounter() = default;
-
-        [[nodiscard]] CounterT getRefCount() const noexcept { return _refCount; }
-
-    protected:
-        constexpr IntrusiveRefCounter() = default;
-        IntrusiveRefCounter(const IntrusiveRefCounter&) = default;
-        IntrusiveRefCounter& operator=(const IntrusiveRefCounter&) = default;
-        IntrusiveRefCounter(IntrusiveRefCounter&& other) noexcept { *this = std::move(other); }
-        IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept
-        {
-            static_assert(Utils::always_false<T>::value,
-                          "You can't use move constructor due to logical limitations from the "
-                          "ref-counter side. Use copy instead, or move an IntrusivePtr with "
-                          "your object.");
-            return *this;
-        }
-
-        [[maybe_unused]] virtual void onIncrementRef(CounterT ref) {}
-        [[maybe_unused]] virtual void onDecrementRef(CounterT ref) {}
-
-    private:
-        mutable CounterT _refCount = 0;
-
-        friend void Policy::IncrementRef(IntrusiveRefCounter<T>*) noexcept;
-        friend void Policy::DecrementRef(IntrusiveRefCounter<T>*) noexcept;
-    };
-
-    template<class T>
-    concept IsIntrusiveConstructible = requires() { std::derived_from<T, IntrusiveRefCounter<T>>; };
+    //
+    // ______  _
+    // | ___ \| |
+    // | |_/ /| |_  _ __
+    // |  __/ | __|| '__|
+    // | |    | |_ | |
+    // \_|     \__||_|
 
     template<IsIntrusiveConstructible T>
     class IntrusivePtr final
@@ -119,7 +116,7 @@ namespace Core
         {
             if (_ptr && addRef)
             {
-                PolicyT::IncrementRef(const_cast<std::remove_const_t<T>*>(_ptr));
+                _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
         }
 
@@ -131,12 +128,12 @@ namespace Core
             {
                 if (_ptr)
                 {
-                    PolicyT::DecrementRef(const_cast<std::remove_const_t<T>*>(_ptr));
+                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
                 _ptr = other._ptr;
                 if (_ptr)
                 {
-                    PolicyT::IncrementRef(const_cast<std::remove_const_t<T>*>(_ptr));
+                    _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
             }
             return *this;
@@ -148,7 +145,7 @@ namespace Core
             {
                 if (_ptr)
                 {
-                    PolicyT::DecrementRef(const_cast<std::remove_const_t<T>*>(_ptr));
+                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
                 _ptr = other._ptr;
 
@@ -161,7 +158,7 @@ namespace Core
         {
             if (_ptr)
             {
-                PolicyT::DecrementRef(const_cast<std::remove_const_t<T>*>(_ptr));
+                _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
         }
 
@@ -217,6 +214,59 @@ namespace Core
 
     private:
         T* _ptr = nullptr;
+    };
+
+    //  _____                       _
+    // /  __ \                     | |
+    // | /  \/  ___   _   _  _ __  | |_   ___  _ __
+    // | |     / _ \ | | | || '_ \ | __| / _ \| '__|
+    // | \__/\| (_) || |_| || | | || |_ |  __/| |
+    //  \____/ \___/  \__,_||_| |_| \__| \___||_|
+
+    template<class T, IsPolicy Policy = DefaultPolicy_IntrusiveRefCounter>
+    class IntrusiveRefCounter
+    {
+    public:
+        using ValueT = T;
+        using PolicyT = Policy;
+        using CounterT = typename Policy::CounterT;
+
+    public:
+        virtual ~IntrusiveRefCounter() = default;
+
+        // template<class... ArgsT>
+        // [[nodiscard]] static IntrusivePtr<T> Create(ArgsT&&... args)
+        // {
+        //     return IntrusivePtr<T>(new T(std::forward<ArgsT>(args)...));
+        // }
+
+        [[nodiscard]] CounterT getRefCount() const noexcept { return _refCount; }
+
+    protected:
+        constexpr IntrusiveRefCounter() = default;
+        IntrusiveRefCounter(const IntrusiveRefCounter&) = default;
+        IntrusiveRefCounter& operator=(const IntrusiveRefCounter&) = default;
+        IntrusiveRefCounter(IntrusiveRefCounter&& other) noexcept { *this = std::move(other); }
+        IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept
+        {
+            static_assert(Utils::always_false<T>::value,
+                          "You can't use move constructor due to logical limitations from the "
+                          "ref-counter side. Use copy instead, or move an IntrusivePtr with "
+                          "your object.");
+            return *this;
+        }
+
+        [[maybe_unused]] virtual void onIncrementRef(CounterT ref) {}
+        [[maybe_unused]] virtual void onDecrementRef(CounterT ref) {}
+
+    private:
+        mutable CounterT _refCount = 0;
+
+        template<class _T, IsPolicy _P>
+        friend void _IncrementRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
+
+        template<class _T, IsPolicy _P>
+        friend void _DecrementRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
     };
 
 } // namespace Core

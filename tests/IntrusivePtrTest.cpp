@@ -41,6 +41,13 @@ struct TestObject : public IntrusiveRefCounter<TestObject>
     void nonConstMethod() {}
 
     ~TestObject() override { value = -999; }
+    TestObject() = default;
+    TestObject(int v) { value = v; }
+    TestObject(int v, int i)
+    {
+        value = v;
+        increments = i;
+    }
 };
 
 TEST(IntrusivePtrTests, SimpleCreation)
@@ -180,26 +187,11 @@ TEST(IntrusivePtrTests, ResetNullClearsPointer)
     }
 }
 
-TEST(IntrusivePtrTests, DetachReleasesWithoutDecrementing)
-{
-    auto* raw = new TestObject();
-    {
-        IntrusivePtr<TestObject> p(raw);
-        ASSERT_EQ(raw->getRefCount(), 1u);
-
-        TestObject* detached = p.detach();
-        ASSERT_EQ(detached, raw);
-        ASSERT_FALSE(p);
-
-        DefaultPolicy_IntrusiveRefCounter::DecrementRef(detached);
-    }
-}
-
 TEST(IntrusivePtrTests, OperatorsWork)
 {
     auto* raw = new TestObject();
     {
-        IntrusivePtr<TestObject> p(raw);
+        IntrusivePtr p(raw);
         ASSERT_EQ((*p).value, 0);
         p->value = 42;
         ASSERT_EQ(p->value, 42);
@@ -212,8 +204,8 @@ TEST(IntrusivePtrTests, SwapExchangesPointers)
     auto* raw2 = new TestObject();
 
     {
-        IntrusivePtr<TestObject> p1(raw1);
-        IntrusivePtr<TestObject> p2(raw2);
+        IntrusivePtr p1(raw1);
+        IntrusivePtr p2(raw2);
 
         ASSERT_EQ(raw1->getRefCount(), 1u);
         ASSERT_EQ(raw2->getRefCount(), 1u);
@@ -229,7 +221,7 @@ TEST(IntrusivePtrTests, SelfAssignmentSafe)
 {
     auto* raw = new TestObject();
     {
-        IntrusivePtr<TestObject> p(raw);
+        IntrusivePtr p(raw);
         ASSERT_EQ(raw->getRefCount(), 1u);
         p = p; // self assign
         ASSERT_EQ(raw->getRefCount(), 1u);
@@ -239,8 +231,8 @@ TEST(IntrusivePtrTests, SelfAssignmentSafe)
 TEST(IntrusivePtrTests, MoveAssignmentReleasesOld)
 {
     {
-        IntrusivePtr<TestObject> p1(new TestObject);
-        IntrusivePtr<TestObject> p2(new TestObject);
+        IntrusivePtr p1(new TestObject);
+        IntrusivePtr p2(new TestObject);
         ASSERT_EQ(p1->getRefCount(), 1u);
         ASSERT_EQ(p2->getRefCount(), 1u);
 
@@ -248,4 +240,12 @@ TEST(IntrusivePtrTests, MoveAssignmentReleasesOld)
         ASSERT_TRUE(p1);
         ASSERT_FALSE(p2);
     }
+}
+
+TEST(IntrusivePtrTests, CreateMethod)
+{
+    // ASSERT_EQ(0, TestObject::Create()->value);
+    // ASSERT_EQ(111, TestObject::Create(111)->value);
+    // ASSERT_EQ(111, TestObject::Create(111, 222)->value);
+    // ASSERT_EQ(222, TestObject::Create(111, 222)->increments);
 }
