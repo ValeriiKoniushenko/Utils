@@ -21,3 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#pragma once
+
+#include <cstdint>
+
+namespace Core
+{
+    struct DefaultPolicy_IntrusivePtrRefCounter
+    {
+        using CounterT = uint32_t;
+    };
+
+    template<class T>
+    concept IsPolicy = requires() {
+        { T::CounterT };
+    };
+
+    template<class T, IsPolicy Policy = DefaultPolicy_IntrusivePtrRefCounter>
+    class IntrusivePtrRefCounter
+    {
+    public:
+        using ValueT = T;
+        using CounterT = typename Policy::CounterT;
+
+    public:
+        IntrusivePtrRefCounter() noexcept
+            : _refCount(0)
+        {
+        }
+
+        IntrusivePtrRefCounter(const IntrusivePtrRefCounter&) noexcept
+            : _refCount(0)
+        {
+        }
+
+        IntrusivePtrRefCounter& operator=(const IntrusivePtrRefCounter&) noexcept { return *this; }
+
+        [[nodiscard]] uint32_t getRefCount() const noexcept { return _refCount; }
+
+    private:
+        CounterT _refCount = 0;
+    };
+
+} // namespace Core
