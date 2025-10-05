@@ -1073,18 +1073,16 @@ namespace Core
             return {};
         }
 
-        Self& subStr(uint64_t index, uint64_t count = 0)
+        void subStr(uint64_t index, uint64_t count = 0)
         {
             if (!isEmpty())
             {
                 const uint64_t finalCount = count == 0 ? _size - index : count - index;
                 *this = std::move(Self(_string + index, finalCount));
             }
-
-            return *this;
         }
 
-        Self& trimStart(CharT ch)
+        void trimStart(CharT ch)
         {
             if (!isEmpty())
             {
@@ -1098,11 +1096,9 @@ namespace Core
                     *this = std::move(Self(_string + offset, _size - offset));
                 }
             }
-
-            return *this;
         }
 
-        Self& trimEnd(CharT ch)
+        void trimEnd(CharT ch)
         {
             if (!isEmpty())
             {
@@ -1117,13 +1113,15 @@ namespace Core
                     resize(_size - count);
                 }
             }
-
-            return *this;
         }
 
-        Self& trim(CharT ch) { return trimStart(ch).trimEnd(ch); }
+        void trim(CharT ch)
+        {
+            trimStart(ch);
+            trimEnd(ch);
+        }
 
-        Self& toUpperCase()
+        void toUpperCase()
         {
             if (!isEmpty())
             {
@@ -1133,11 +1131,9 @@ namespace Core
                     _string[i] = static_cast<CharT>(Toolset::ToUpper(_string[i]));
                 }
             }
-
-            return *this;
         }
 
-        Self& toLowerCase()
+        void toLowerCase()
         {
             if (!isEmpty())
             {
@@ -1147,70 +1143,62 @@ namespace Core
                     _string[i] = static_cast<CharT>(Toolset::ToLower(_string[i]));
                 }
             }
-
-            return *this;
         }
 
-        Self& erase(uint64_t index)
+        void erase(uint64_t index)
         {
             if (!isEmpty())
             {
                 if (!DEBUG_ASSERT_VAL(index < _size, "Invalid index"))
                 {
-                    return *this;
+                    return;
                 }
 
                 Self temp(_string, index);
                 temp += _string + index + 1;
                 *this = std::move(temp);
             }
-
-            return *this;
         }
 
-        Self& erase(uint64_t from, uint64_t to)
+        void erase(uint64_t from, uint64_t to)
         {
             if (!isEmpty())
             {
                 if (!DEBUG_ASSERT_VAL(from < _size && to < _size, "Invalid index"))
                 {
-                    return *this;
+                    return;
                 }
 
                 Self temp(_string, from);
                 temp += _string + to + 1;
                 *this = std::move(temp);
             }
-
-            return *this;
         }
 
-        Self& erase(Iterator iterator)
+        void erase(Iterator iterator)
         {
             if (!isEmpty())
             {
                 if (DEBUG_ASSERT_VAL(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
                 {
-                    return erase(iterator._data - _string);
+                    erase(iterator._data - _string);
                 }
             }
-            return *this;
         }
 
-        Self& erase(Iterator from, Iterator to)
+        void erase(Iterator from, Iterator to)
         {
             if (!isEmpty())
             {
                 if (DEBUG_ASSERT_VAL(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
                     DEBUG_ASSERT_VAL(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
-                    return erase(from._data - _string, to._data - _string);
+                    erase(from._data - _string, to._data - _string);
                 }
             }
-            return *this;
         }
 
-        Self& replaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
+        void replaceFirst(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
             if (!isEmpty())
             {
@@ -1222,11 +1210,9 @@ namespace Core
                     *this = std::move(temp);
                 }
             }
-
-            return *this;
         }
 
-        Self& replaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
+        void replaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
             if (!isEmpty())
             {
@@ -1241,8 +1227,6 @@ namespace Core
                     *this = std::move(temp);
                 }
             }
-
-            return *this;
         }
 
         [[nodiscard]] static bool IsSpace(CharT ch) noexcept { return Toolset::IsSpace(ch); }
@@ -1551,17 +1535,21 @@ namespace Core
         }
 
         Self& operator+=(CharT ch) { return push_back(ch); }
-        Self& operator+=(StdStringViewT str) { return pushBack(str); }
-
-        Self& pushBack(StdStringViewT str) { return pushBack(str.data(), str.size()); }
-
-        Self& pushBack(CharT ch) { return pushBack(&ch, 1); }
-
-        Self& pushBack(const CharT* str, uint64_t size)
+        Self& operator+=(StdStringViewT str)
         {
-            if (str == nullptr)
+            pushBack(str);
+            return *this;
+        }
+
+        void pushBack(StdStringViewT str) { pushBack(str.data(), str.size()); }
+
+        void pushBack(CharT ch) { pushBack(&ch, 1); }
+
+        void pushBack(const CharT* str, uint64_t size)
+        {
+            if (str == nullptr) [[unlikely]]
             {
-                return *this;
+                return;
             }
 
             if (size == 0)
@@ -1579,19 +1567,17 @@ namespace Core
             memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
             _size += size;
             _string[_size] = 0;
-
-            return *this;
         }
 
-        Self& pushFront(CharT ch) { return pushFront(&ch, 1); }
+        void pushFront(CharT ch) { return pushFront(&ch, 1); }
 
-        Self& pushFront(StdStringViewT str) { return pushFront(str.data(), str.size()); }
+        void pushFront(StdStringViewT str) { return pushFront(str.data(), str.size()); }
 
-        Self& pushFront(const CharT* str, uint64_t size)
+        void pushFront(const CharT* str, uint64_t size)
         {
             if (str == nullptr)
             {
-                return *this;
+                return;
             }
 
             if (size == 0)
@@ -1614,21 +1600,18 @@ namespace Core
             _size += size;
             memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
             _string[_size] = 0;
-
-            return *this;
         }
 
-        Self& popBack()
+        void popBack()
         {
             if (_size > 0)
             {
                 tryToMakeAsDynamic();
                 _string[--_size] = 0;
             }
-            return *this;
         }
 
-        Self& popFront()
+        void popFront()
         {
             if (_size > 0)
             {
@@ -1639,24 +1622,22 @@ namespace Core
                 }
                 _string[--_size] = 0;
             }
-            return *this;
         }
 
-        const Self& copyTo(CharT* dest, uint64_t count, uint64_t offset = 0) const
+        void copyTo(CharT* dest, uint64_t count, uint64_t offset = 0) const
         {
             if (!isEmpty())
             {
                 memcpy_s(dest, count * sizeof(CharT), _string + offset, (std::min)(_size - offset, count) * sizeof(CharT));
                 dest[count] = 0;
             }
-            return *this;
         }
 
-        Self& shrinkToFit()
+        void shrinkToFit()
         {
             if (isEmpty())
             {
-                return *this;
+                return;
             }
 
             const auto* oldString = _string;
@@ -1684,24 +1665,20 @@ namespace Core
                     delete[] oldString;
                 }
             }
-
-            return *this;
         }
 
         [[nodiscard]] uint64_t capacity() const noexcept { return _capacity; }
 
-        Self& insert(Iterator iterator, const CharT* str, uint64_t size = invalidSize)
+        void insert(Iterator iterator, const CharT* str, uint64_t size = invalidSize)
         {
             DEBUG_ASSERT(iterator._owner == this);
             if (iterator._owner == this)
             {
                 return insert(iterator._data - _string, str, size);
             }
-
-            return *this;
         }
 
-        Self& insert(int64_t pos, const CharT* str, uint64_t size = invalidSize)
+        void insert(int64_t pos, const CharT* str, uint64_t size = invalidSize)
         {
             if (size == invalidSize)
             {
@@ -1726,8 +1703,6 @@ namespace Core
             }
             _string[finalSize] = 0;
             _size += size;
-
-            return *this;
         }
 
         [[nodiscard]] bool isStatic() const noexcept { return _policy == StringPolicy::Static; }
@@ -1856,11 +1831,7 @@ namespace Core
             return strings;
         }
 
-        BaseString()
-        {
-            // 32 is the minimum size to optimize working with small strings
-            reserve(32);
-        }
+        BaseString() { reserve(minAllocationSize); }
 
         template<class IterT>
         BaseString(IterT first, IterT last)
@@ -2029,7 +2000,7 @@ namespace Core
             }
         }
 
-        Self& reserve(uint64_t newCapacity)
+        void reserve(uint64_t newCapacity)
         {
             const auto oldCapacity = _capacity;
 
@@ -2069,11 +2040,9 @@ namespace Core
                 }
                 _string[_size] = 0;
             }
-
-            return *this;
         }
 
-        Self& resize(const uint64_t newSize, bool isIgnoreMultiplier = false)
+        void resize(const uint64_t newSize, bool isIgnoreMultiplier = false)
         {
             if (_string && newSize + 1u < _size && _policy != StringPolicy::Static)
             {
@@ -2090,8 +2059,6 @@ namespace Core
                 this->reserve(minAllocationSize);
             }
             _size = newSize;
-
-            return *this;
         }
 
         [[nodiscard]] BaseString<char> toASCII() const

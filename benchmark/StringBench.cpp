@@ -208,8 +208,8 @@ static void BM_StdString_Append(benchmark::State& state) {
 static void BM_StringAtom_Substr(benchmark::State& state) {
     Core::StringAtom str(std::string(state.range(0), 'a').c_str());
     for (auto _ : state) {
-        auto sub = str.subStr(0, state.range(0) / 2);
-        benchmark::DoNotOptimize(sub);
+        str.subStr(0, state.range(0) / 2);
+        benchmark::DoNotOptimize(str);
     }
     state.SetComplexityN(state.range(0));
 }
