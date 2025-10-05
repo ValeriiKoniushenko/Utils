@@ -37,7 +37,7 @@ namespace Core
     {
     public:
         /**
-         * @brief using identify & control of the attached Delegate
+         * @brief using to identify & control of the attached Delegate
          */
         class ID final : public Utils::CopyableAndMoveable
         {
@@ -79,39 +79,6 @@ namespace Core
     class Delegate : public AbstractDelegate
     {
     public:
-        /**
-         * @brief using to hold & release(corresponding to RAII) the delegate's subscriber
-         */
-        class [[deprecated("Use DelegateSubscriber instead")]] IDGuard final : Utils::NotCopyableButMoveable
-        {
-        public:
-            IDGuard() = default;
-            IDGuard(ID id)
-                : _id{ id }
-            {
-            }
-
-            ~IDGuard() { release(); }
-
-            IDGuard& operator=(ID id)
-            {
-                release();
-                _id = id;
-                return *this;
-            }
-
-            void release()
-            {
-                if (_id.getOwner())
-                {
-                    _id.getOwner()->unsubscribe(_id);
-                }
-            }
-
-        private:
-            ID _id;
-        }; // class IDGuard
-
         using CallbackT = std::function<F>;
         using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
 
@@ -153,7 +120,7 @@ namespace Core
     };
 
     /**
-     * @brief Use it to remove in the end of scope your subscription to a delegate.
+     * @brief Use it to remove at the end of the scope your subscription to a delegate.
      * But, for now you must avoid situations where Delegate will be destroyed earlier
      * than this object.
      */

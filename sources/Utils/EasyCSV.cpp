@@ -98,7 +98,7 @@ namespace Utils
         std::ofstream file(_savePath);
         if (!file.is_open())
         {
-            std::cerr << "Impossible to open a file: " << _savePath.generic_string() << std::endl;
+            std::cerr << "Impossible to open a file: " << _savePath.generic_string() << '\n';
             return;
         }
 
@@ -118,7 +118,7 @@ namespace Utils
                 }
                 file << cell << delimiter;
             }
-            file << std::endl;
+            file << '\n';
         }
     }
 

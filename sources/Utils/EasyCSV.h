@@ -31,11 +31,15 @@
 namespace Utils
 {
 
-    class CSV : Utils::CopyableAndMoveable
+    class CSV
     {
     public:
         CSV() = default;
-        ~CSV() override = default;
+        ~CSV() = default;
+        CSV(const CSV&) = default;
+        CSV(CSV&&) = default;
+        CSV& operator=(const CSV&) = default;
+        CSV& operator=(CSV&&) = default;
 
         void setSavePath(const std::filesystem::path& path);
         [[nodiscard]] const std::filesystem::path& getSavePath() const noexcept { return _savePath; }

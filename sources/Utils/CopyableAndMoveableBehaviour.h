@@ -31,7 +31,12 @@ namespace Utils
     class CopyableAndMoveableBehaviour
     {
     public:
+        CopyableAndMoveableBehaviour() = default;
         virtual ~CopyableAndMoveableBehaviour() = default;
+        CopyableAndMoveableBehaviour(CopyableAndMoveableBehaviour&&) = default;
+        CopyableAndMoveableBehaviour& operator=(CopyableAndMoveableBehaviour&&) = default;
+        CopyableAndMoveableBehaviour(const CopyableAndMoveableBehaviour&) = default;
+        CopyableAndMoveableBehaviour& operator=(const CopyableAndMoveableBehaviour&) = default;
     };
 
     class CopyableAndMoveable : public CopyableAndMoveableBehaviour

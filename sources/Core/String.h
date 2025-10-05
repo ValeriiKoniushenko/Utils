@@ -28,7 +28,6 @@
 #include "Core/CommonEnums.h"
 #include "Regex.h"
 #include "Singleton.h"
-#include "String.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
@@ -235,7 +234,8 @@ namespace Core
             {
                 return Comparison::Equal;
             }
-            else if (result > 0)
+
+            if (result > 0)
             {
                 return Comparison::Greater;
             }
@@ -279,7 +279,7 @@ namespace Core
         }
         static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
         {
-            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, static_cast<const CharT*>(end)));
+            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, end));
         }
 
         template<class T>
@@ -314,7 +314,7 @@ namespace Core
             else if constexpr (std::is_integral_v<T>)
             {
                 // >>> non-narrow int32 <<<
-                if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint32_t>)
+                if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>, uint32_t>)
                 {
                     // char
                     if constexpr (sizeof(CharT) == 1)
@@ -334,7 +334,7 @@ namespace Core
                     }
                 }
                 // >>> non-narrow int64 <<<
-                else if constexpr (Utils::is_non_narrowing_convertible_v<std::make_unsigned_t<T>, uint64_t>)
+                else if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>, uint64_t>)
                 {
                     // char
                     if constexpr (sizeof(CharT) == 1)
@@ -485,8 +485,9 @@ namespace Core
         using AdaptiveRawPtr = std::conditional_t<IsConst, const Self, Self>*;
 
         constexpr static uint64_t invalidSize = StringDataReadOnlyT::invalidSize;
+        constexpr static std::size_t minAllocationSize = 32u;
 
-        enum LineSeparator : uint8_t
+        enum class LineSeparator : uint8_t
         {
             CR,
             LF,
@@ -1009,12 +1010,11 @@ namespace Core
             }
             else
             {
-                constexpr std::size_t bufferSize = 4096;
-                static char buffer[bufferSize]{};
-                memset(buffer, 0, bufferSize * sizeof(*buffer));
+                static std::array<char, 4096> buffer{};
+                memset(buffer.data(), 0, buffer.size() * sizeof(buffer[0]));
                 Self temp;
 
-                if (auto result = std::to_chars(buffer, buffer + bufferSize, value); result.ec != std::errc())
+                if (auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value); result.ec != std::errc())
                 {
                     DEBUG_ASSERT(false, std::make_error_code(result.ec).message().c_str());
                     return temp;
@@ -1022,11 +1022,11 @@ namespace Core
 
                 if constexpr (sizeof(CharT) == 1)
                 {
-                    temp = buffer;
+                    temp = buffer.data();
                 }
                 else
                 {
-                    for (std::size_t i = 0; buffer[i] != '\0'; ++i)
+                    for (std::size_t i = 0; i < buffer.size() && buffer[i] != '\0'; ++i)
                     {
                         temp.push_back(buffer[i]);
                     }
@@ -1107,8 +1107,7 @@ namespace Core
             if (!isEmpty())
             {
                 uint64_t count = 0;
-                const CharT* stringEnd = _string + _size;
-                while (count < _size && *--stringEnd == ch)
+                while (count < _size && _string[_size - count - 1u] == ch)
                 {
                     ++count;
                 }
@@ -1574,14 +1573,12 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                // 32 is the minimum size to optimize working with small strings
-                reserve(finalSize < 32 ? 32 : finalSize);
+                reserve(finalSize * 2u);
             }
 
             memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
-
-            _string[finalSize] = 0;
             _size += size;
+            _string[_size] = 0;
 
             return *this;
         }
@@ -1606,7 +1603,7 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                reserve(finalSize);
+                reserve(finalSize * 2u);
             }
 
             for (int64_t i = oldSize; i >= 0; --i)
@@ -1616,6 +1613,7 @@ namespace Core
 
             _size += size;
             memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
+            _string[_size] = 0;
 
             return *this;
         }
@@ -1885,6 +1883,7 @@ namespace Core
             {
                 resize(size == invalidSize ? Toolset::Length(str) : size);
                 memcpy_s(_string, _size * sizeof(CharT), str, _size * sizeof(CharT));
+                _string[_size] = 0;
             }
         }
 
@@ -1916,6 +1915,7 @@ namespace Core
             const auto strSize = Toolset::Length(str);
             resize(strSize);
             memcpy_s(_string, _size * sizeof(CharT), str, strSize * sizeof(CharT));
+            _string[_size] = 0;
             return *this;
         }
 
@@ -1924,6 +1924,7 @@ namespace Core
             clear();
             resize(other.size());
             memcpy_s(_string, _size * sizeof(CharT), other.data(), other.size() * sizeof(CharT));
+            _string[_size] = 0;
             return *this;
         }
 
@@ -1939,6 +1940,7 @@ namespace Core
                 clear();
                 resize(other._size, true);
                 memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
+                _string[_size] = 0;
             }
             else if (other._policy == StringPolicy::Static)
             {
@@ -2027,16 +2029,21 @@ namespace Core
             }
         }
 
-        Self& reserve(uint64_t newSize, bool isIgnoreMultiplier = false)
+        Self& reserve(uint64_t newCapacity)
         {
             const auto oldCapacity = _capacity;
 
-            const uint64_t finalCapacity = std::max<uint64_t>(newSize * (isIgnoreMultiplier ? 1 : _capacityMultiplier) + 1, 16);
-            if (auto* newString = new CharT[finalCapacity]{})
+            if (newCapacity < minAllocationSize)
             {
+                newCapacity = minAllocationSize;
+            }
+
+            if (auto* newString = new CharT[newCapacity])
+            {
+                newString[0] = 0;
                 if (_string)
                 {
-                    memcpy(newString, _string, (std::min)(finalCapacity, oldCapacity) * sizeof(CharT));
+                    memcpy(newString, _string, (std::min)(newCapacity, oldCapacity) * sizeof(CharT));
                 }
 
                 if (_policy == StringPolicy::Static)
@@ -2054,13 +2061,13 @@ namespace Core
                     delete[] _string;
                 }
                 _string = newString;
-                _capacity = finalCapacity;
+                _capacity = newCapacity;
                 _policy = StringPolicy::Dynamic;
-                if (newSize < oldCapacity)
+                if (newCapacity < oldCapacity)
                 {
-                    _size = newSize;
-                    _string[_size] = 0;
+                    _size = newCapacity - 1;
                 }
+                _string[_size] = 0;
             }
 
             return *this;
@@ -2068,18 +2075,19 @@ namespace Core
 
         Self& resize(const uint64_t newSize, bool isIgnoreMultiplier = false)
         {
-            if (_string && newSize < _size && _policy != StringPolicy::Static)
+            if (_string && newSize + 1u < _size && _policy != StringPolicy::Static)
             {
                 _string[newSize] = 0;
             }
             else if (newSize > _size || _policy == StringPolicy::Static)
             {
-                this->reserve(newSize, isIgnoreMultiplier);
+                this->reserve(newSize * 2u);
+                _string[newSize] = 0;
             }
             // for empty init
             else if (newSize == 0 && _policy == StringPolicy::None)
             {
-                this->reserve(1, isIgnoreMultiplier);
+                this->reserve(minAllocationSize);
             }
             _size = newSize;
 
@@ -2095,6 +2103,7 @@ namespace Core
             {
                 temp[i] = static_cast<char>(_string[i]);
             }
+            _string[_size] = 0;
             return temp;
         }
 
@@ -2349,8 +2358,7 @@ namespace Core
             if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
             {
                 std::stringstream ss;
-                ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string
-                   << std::endl;
+                ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string << '\n';
                 DEBUG_ASSERT(ss.str().c_str());
             }
 #endif

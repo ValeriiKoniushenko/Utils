@@ -46,7 +46,7 @@ namespace Core
 
     std::string BaseRegex::getErrorString(const BaseRegex& regex)
     {
-        auto str = getErrorString(regex._errorCode);
+        const auto str = getErrorString(regex._errorCode);
 
         if (!str.empty())
         {
@@ -63,11 +63,11 @@ namespace Core
 
     std::string BaseRegex::getErrorString(int errorCode)
     {
-        char buffer[256]{};
-        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer), sizeof(buffer));
+        std::array<char, 256> buffer{};
+        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer.data()), sizeof(buffer));
         if (buffer[0] != '\0')
         {
-            return { buffer };
+            return { buffer.data() };
         }
 
         return {};
@@ -174,7 +174,8 @@ namespace Core
 
             return md;
         }
-        else if (result == PCRE2_ERROR_NOMATCH)
+
+        if (result == PCRE2_ERROR_NOMATCH)
         {
             return {};
         }
@@ -284,17 +285,17 @@ namespace Core
             return false;
         }
 
-        int rc = pcre2_substitute(_regex,                                            // Compiled regex
-                                  reinterpret_cast<PCRE2_SPTR8>(_subject),           // Subject string
-                                  _limit,                                            // Subject is null-terminated
-                                  0,                                                 // Start at offset 0
-                                  _replaceOptions,                                   // Options
-                                  nullptr,                                           // Default match context
-                                  nullptr,                                           // Default substitute context
-                                  reinterpret_cast<PCRE2_SPTR8>(_replacement),       // Replacement string
-                                  PCRE2_ZERO_TERMINATED,                             // Replacement is null-terminated
-                                  reinterpret_cast<PCRE2_UCHAR8*>(_allocatedString), // Output buffer
-                                  &_allocatedSize                                    // Length of the output buffer
+        const int rc = pcre2_substitute(_regex,                                            // Compiled regex
+                                        reinterpret_cast<PCRE2_SPTR8>(_subject),           // Subject string
+                                        _limit,                                            // Subject is null-terminated
+                                        0,                                                 // Start at offset 0
+                                        _replaceOptions,                                   // Options
+                                        nullptr,                                           // Default match context
+                                        nullptr,                                           // Default substitute context
+                                        reinterpret_cast<PCRE2_SPTR8>(_replacement),       // Replacement string
+                                        PCRE2_ZERO_TERMINATED,                             // Replacement is null-terminated
+                                        reinterpret_cast<PCRE2_UCHAR8*>(_allocatedString), // Output buffer
+                                        &_allocatedSize                                    // Length of the output buffer
         );
 
         if (rc >= 0)

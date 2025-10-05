@@ -62,7 +62,7 @@ namespace Core
         Utils::CSV csv;
         csv.setSavePath("string_metrics.csv");
 
-        auto add = [&csv](std::string first, const std::unordered_map<std::string, int64_t>& data)
+        auto add = [&csv](const char* first, const std::unordered_map<std::string, int64_t>& data)
         {
             static int i = 0;
 

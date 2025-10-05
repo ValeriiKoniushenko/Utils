@@ -36,12 +36,12 @@ namespace Utils
     [[nodiscard]] bool IsReadable(const std::filesystem::path& p) noexcept;
 
     template<typename T, typename = void>
-    struct __has_value_type : std::false_type
+    struct HasValueType : std::false_type
     {
     };
 
     template<typename T>
-    struct __has_value_type<T, decltype(T::value_type, void())> : std::true_type
+    struct HasValueType<T, decltype(T::value_type, void())> : std::true_type
     {
     };
 
@@ -50,7 +50,7 @@ namespace Utils
     template<
         class T,
         bool ignoreAssert = false,
-        class CharTypeT = std::conditional_t<__has_value_type<T>::value, typename T::value_type, char>
+        class CharTypeT = std::conditional_t<HasValueType<T>::value, typename T::value_type, char>
     >
     // clang-format on
     [[nodiscard]] T GetTextFileContentAs(const std::filesystem::path& path)
@@ -82,7 +82,7 @@ namespace Utils
     // clang-format off
     template<
         class T,
-        class CharTypeT = std::conditional_t<__has_value_type<T>::value, typename T::value_type, char>
+        class CharTypeT = std::conditional_t<HasValueType<T>::value, typename T::value_type, char>
     >
     // clang-format on
     [[nodiscard]] T TryToGetTextFileContentAs(const std::filesystem::path& path)

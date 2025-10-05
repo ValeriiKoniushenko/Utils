@@ -56,6 +56,10 @@ namespace Core
 
     public:
         explicit Repeater(double value = 0) { setRepeatTime(value); };
+        Repeater(const Repeater&) = delete;
+        Repeater(Repeater&&) = default;
+        Repeater& operator=(const Repeater&) = default;
+        Repeater& operator=(Repeater&&) = default;
         ~Repeater() = default;
 
         [[nodiscard]] double getRepeatTime() const noexcept { return _repeatTime; }
@@ -64,7 +68,7 @@ namespace Core
         /**
          * @brief will call the callback and pass one arg: delta time
          */
-        void setCallback(CallbackT&& callback) { _callback = std::forward<CallbackT>(callback); };
+        void setCallback(const CallbackT& callback) { _callback = callback; };
         void reset()
         {
             _callback = nullptr;

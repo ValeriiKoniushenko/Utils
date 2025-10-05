@@ -23,11 +23,12 @@
  */
 
 #pragma once
+#include <cstdint>
 
 namespace Core
 {
 
-    enum class Comparison
+    enum class Comparison : uint8_t
     {
         None,
         Greater,

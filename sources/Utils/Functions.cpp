@@ -32,12 +32,9 @@ namespace Utils
         using namespace std::filesystem;
 
         std::error_code ec; // For noexcept overload usage.
-        auto perms = status(p, ec).permissions();
-        if ((perms & perms::owner_read) != perms::none && (perms & perms::group_read) != perms::none && (perms & perms::others_read) != perms::none)
-        {
-            return true;
-        }
-        return false;
+        const auto perms = status(p, ec).permissions();
+        return (perms & perms::owner_read) != perms::none && (perms & perms::group_read) != perms::none &&
+               (perms & perms::others_read) != perms::none;
     }
 
     std::vector<char> GetFileContent(const std::filesystem::path& path)

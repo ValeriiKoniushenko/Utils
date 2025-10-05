@@ -631,6 +631,62 @@ TEST_F(StringTestF, UtilsFunctions)
     test.template operator()<wchar_t>();
 }
 
+TEST_F(StringTestF, SequentalPushBack)
+{
+    auto test = [this]<class T>()
+    {
+        BaseString<T> str;
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        ASSERT_EQ(0, str.size());
+
+        str.push_back(Str<T>("Hello"));
+        ASSERT_EQ(5, str.size());
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        EXPECT_EQ(Str<T>("Hello"), str);
+
+        str.push_back(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        ASSERT_EQ(25, str.size());
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        EXPECT_EQ(Str<T>("HelloHelloWorldHowAreYou!"), str);
+
+        str.push_back(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        ASSERT_EQ(45, str.size());
+        ASSERT_EQ(45 * 2, str.capacity());
+        EXPECT_EQ(Str<T>("HelloHelloWorldHowAreYou!HelloWorldHowAreYou!"), str);
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, SequentalPushFront)
+{
+    auto test = [this]<class T>()
+    {
+        BaseString<T> str;
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        ASSERT_EQ(0, str.size());
+
+        str.push_front(Str<T>("Hello"));
+        ASSERT_EQ(5, str.size());
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        EXPECT_EQ(Str<T>("Hello"), str);
+
+        str.push_front(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        ASSERT_EQ(25, str.size());
+        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        EXPECT_EQ(Str<T>("HelloWorldHowAreYou!Hello"), str);
+
+        str.push_front(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        ASSERT_EQ(45, str.size());
+        ASSERT_EQ(45 * 2, str.capacity());
+        EXPECT_EQ(Str<T>("HelloWorldHowAreYou!HelloWorldHowAreYou!Hello"), str);
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
 TEST_F(StringTestF, Iterator)
 {
     auto test = [this]<class T>()
@@ -1199,7 +1255,7 @@ TEST_F(StringTestF, ShrinkToFit)
 
             str.reserve(100);
             EXPECT_EQ(12, str.size());
-            EXPECT_EQ(201, str.capacity());
+            EXPECT_EQ(100, str.capacity());
 
             str.shrink_to_fit();
             EXPECT_EQ(12, str.size());
@@ -1213,7 +1269,7 @@ TEST_F(StringTestF, ShrinkToFit)
 
             str.reserve(100);
             EXPECT_EQ(12, str.size());
-            EXPECT_EQ(201, str.capacity());
+            EXPECT_EQ(100, str.capacity());
 
             str.shrink_to_fit();
             EXPECT_EQ(12, str.size());

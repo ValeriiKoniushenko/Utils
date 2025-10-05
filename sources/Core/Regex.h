@@ -42,6 +42,10 @@ namespace Core
     {
     public:
         BaseRegex() = default;
+        BaseRegex(const BaseRegex&) = default;
+        BaseRegex(BaseRegex&&) = default;
+        BaseRegex& operator=(const BaseRegex&) = default;
+        BaseRegex& operator=(BaseRegex&&) = default;
         ~BaseRegex() override;
 
         explicit BaseRegex(const char* pattern, const char* subject = nullptr);
@@ -111,7 +115,7 @@ namespace Core
             uint64_t offset = invalid;
             uint64_t size = invalid;
 
-            [[nodiscard]] bool isMatched() const noexcept { return !(size == invalid && offset == invalid); }
+            [[nodiscard]] bool isMatched() const noexcept { return size != invalid || offset != invalid; }
             [[nodiscard]] explicit operator bool() const noexcept { return isMatched(); }
 
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
@@ -142,6 +146,10 @@ namespace Core
     public:
         BaseRegexMatch() = default;
         ~BaseRegexMatch() override;
+        BaseRegexMatch(const BaseRegexMatch&) = default;
+        BaseRegexMatch(BaseRegexMatch&&) = default;
+        BaseRegexMatch& operator=(const BaseRegexMatch&) = default;
+        BaseRegexMatch& operator=(BaseRegexMatch&&) = default;
 
         void clear() override;
 
@@ -150,7 +158,7 @@ namespace Core
 
         /**
          * @brief Will iterate over every match until the end.
-         * @param callback can take a few function's type:
+         * @param callback can take a few functions type:
          * - void(MatchedData) - will iterate until the end.
          * - bool(MatchedData) - will iterate until 'true' is returned from the callback.
          */
@@ -212,11 +220,11 @@ namespace Core
 
                     if constexpr (std::is_void_v<decltype(callback(md))>)
                     {
-                        std::invoke(callback, md);
+                        std::invoke(std::forward<decltype(callback)>(callback), md);
                     }
                     else
                     {
-                        if (!std::invoke(callback, md))
+                        if (!std::invoke(std::forward<decltype(callback)>(callback), md))
                         {
                             return;
                         }

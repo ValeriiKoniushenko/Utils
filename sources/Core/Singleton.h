@@ -57,7 +57,7 @@ namespace Core
             {
                 if constexpr (IsTreadSafe)
                 {
-                    std::lock_guard lg(_mutex);
+                    const std::scoped_lock lg(_mutex);
                     if (!object)
                     {
                         object = std::unique_ptr<T>(new T);

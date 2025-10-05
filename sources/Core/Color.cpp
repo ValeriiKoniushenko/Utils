@@ -25,6 +25,7 @@
 #include "Color.h"
 
 #include <algorithm>
+#include <iostream>
 
 using namespace Core;
 
@@ -35,7 +36,8 @@ std::ostream& operator<<(std::ostream& os, const Color3& color)
 
 std::ostream& operator<<(std::ostream& os, const Color4& color)
 {
-    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << (color.z) << " " << static_cast<int>(color.w);
+    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << static_cast<int>(color.z) << " "
+              << static_cast<int>(color.w);
 }
 
 std::ostream& operator<<(std::ostream& os, const NormColor3& normColor)
@@ -50,7 +52,9 @@ std::ostream& operator<<(std::ostream& os, const NormColor4& normColor)
 
 std::istream& operator>>(std::istream& is, Color3& color)
 {
-    int r = 0, g = 0, b = 0;
+    int r = 0;
+    int g = 0;
+    int b = 0;
     is >> r >> g >> b;
     color.x = static_cast<decltype(color.x)>(std::clamp(r, 0, 255));
     color.y = static_cast<decltype(color.y)>(std::clamp(g, 0, 255));
@@ -61,7 +65,10 @@ std::istream& operator>>(std::istream& is, Color3& color)
 
 std::istream& operator>>(std::istream& is, Color4& color)
 {
-    int r = 0, g = 0, b = 0, a = 0;
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int a = 0;
     is >> r >> g >> b >> a;
     color.x = static_cast<decltype(color.x)>(std::clamp(r, 0, 255));
     color.y = static_cast<decltype(color.y)>(std::clamp(g, 0, 255));

@@ -94,7 +94,7 @@
                 static const bool _ = [key]()                                                                                                        \
                 {                                                                                                                                    \
                     std::cerr << "Impossible to find a way to convert a value '" << key << "' to string inside the enum: '" << Name::getName()       \
-                              << "'" << std::endl;                                                                                                   \
+                              << "'" << '\n';                                                                                                        \
                     return true;                                                                                                                     \
                 }();                                                                                                                                 \
                 return {};                                                                                                                           \
@@ -116,7 +116,7 @@
                 static const bool _ = [&value]()                                                                                                     \
                 {                                                                                                                                    \
                     std::cerr << "Impossible to find a way to convert a string '" << value << "' to string inside the enum: '" << Name::getName()    \
-                              << "'" << std::endl;                                                                                                   \
+                              << "'" << '\n';                                                                                                        \
                     return true;                                                                                                                     \
                 }();                                                                                                                                 \
                 return {};                                                                                                                           \

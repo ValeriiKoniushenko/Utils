@@ -36,28 +36,11 @@ inline char* strtok_s(char* s, const char* delim, char** context)
     return strtok_r(s, delim, context);
 }
 
-inline int _wtoi(const wchar_t* str)
-{
-    return static_cast<int>(wcstol(str, 0, 10));
-}
-
-inline float _wtof(const wchar_t* str)
-{
-    wchar_t* endptr = nullptr;
-    return static_cast<float>(wcstof(str, &endptr));
-}
-
-inline uint64_t _wtoll(const wchar_t* str)
-{
-    wchar_t* endptr = nullptr;
-    return static_cast<uint64_t>(wcstoll(str, &endptr, 10));
-}
-
 inline int _snwprintf_s(wchar_t* s, uint64_t n, uint64_t, const wchar_t* format, ...)
 {
     va_list args;
     va_start(args, format);
-    auto result = vswprintf(s, n, format, args);
+    const auto result = vswprintf(s, n, format, args);
     va_end(args);
     return result;
 }

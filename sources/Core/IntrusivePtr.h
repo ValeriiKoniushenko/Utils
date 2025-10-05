@@ -434,7 +434,7 @@ namespace Core
         IntrusiveRefCounter(IntrusiveRefCounter&& other) noexcept { *this = std::move(other); }
         IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept
         {
-            static_assert(Utils::always_false<T>::value,
+            static_assert(Utils::AlwaysFalse<T>::value,
                           "You can't use move constructor due to logical limitations from the "
                           "ref-counter side. Use copy instead, or move an IntrusivePtr with "
                           "your object.");
