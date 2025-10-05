@@ -176,12 +176,15 @@ static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
 // -------------------------------
 // APPEND (concatenate another string)
 // -------------------------------
-static void BM_StringAtom_Append(benchmark::State& state) {
+static void BM_StringAtom_Append(benchmark::State& state)
+{
     Core::StringAtom base("hello");
     Core::StringAtom toAdd(" world");
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         Core::StringAtom str = base;
-        for (int64_t i = 0; i < state.range(0); ++i) {
+        for (int64_t i = 0; i < state.range(0); ++i)
+        {
             str += toAdd;
         }
         benchmark::DoNotOptimize(str);
@@ -189,12 +192,15 @@ static void BM_StringAtom_Append(benchmark::State& state) {
     state.SetComplexityN(state.range(0));
 }
 
-static void BM_StdString_Append(benchmark::State& state) {
+static void BM_StdString_Append(benchmark::State& state)
+{
     std::string base("hello");
     std::string toAdd(" world");
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         std::string str = base;
-        for (int64_t i = 0; i < state.range(0); ++i) {
+        for (int64_t i = 0; i < state.range(0); ++i)
+        {
             str += toAdd;
         }
         benchmark::DoNotOptimize(str);
@@ -205,18 +211,22 @@ static void BM_StdString_Append(benchmark::State& state) {
 // -------------------------------
 // SUBSTRING
 // -------------------------------
-static void BM_StringAtom_Substr(benchmark::State& state) {
+static void BM_StringAtom_Substr(benchmark::State& state)
+{
     Core::StringAtom str(std::string(state.range(0), 'a').c_str());
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         str.subStr(0, state.range(0) / 2);
         benchmark::DoNotOptimize(str);
     }
     state.SetComplexityN(state.range(0));
 }
 
-static void BM_StdString_Substr(benchmark::State& state) {
+static void BM_StdString_Substr(benchmark::State& state)
+{
     std::string str(state.range(0), 'a');
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         auto sub = str.substr(0, state.range(0) / 2);
         benchmark::DoNotOptimize(sub);
     }
@@ -226,20 +236,24 @@ static void BM_StdString_Substr(benchmark::State& state) {
 // -------------------------------
 // FIND (linear search)
 // -------------------------------
-static void BM_StringAtom_Find(benchmark::State& state) {
+static void BM_StringAtom_Find(benchmark::State& state)
+{
     Core::StringAtom str(std::string(state.range(0), 'a').c_str());
     str.pushBack('b'); // ensure something to find
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         auto pos = str.find("b");
         benchmark::DoNotOptimize(pos);
     }
     state.SetComplexityN(state.range(0));
 }
 
-static void BM_StdString_Find(benchmark::State& state) {
+static void BM_StdString_Find(benchmark::State& state)
+{
     std::string str(state.range(0), 'a');
     str.push_back('b');
-    for (auto _ : state) {
+    for (auto _ : state)
+    {
         auto pos = str.find('b');
         benchmark::DoNotOptimize(pos);
     }
@@ -266,6 +280,5 @@ BENCHMARK(BM_StdString_Substr)->Range(8, 1 << 16)->Complexity();
 
 BENCHMARK(BM_StringAtom_Find)->Range(8, 1 << 16)->Complexity();
 BENCHMARK(BM_StdString_Find)->Range(8, 1 << 16)->Complexity();
-
 
 BENCHMARK_MAIN();
