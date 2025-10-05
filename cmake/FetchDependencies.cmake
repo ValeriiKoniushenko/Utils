@@ -2,6 +2,13 @@ include(FetchContent)
 
 message(DEBUG "Utils::FetchDependencies.cmake was included" )
 
+function(Core_SuppressAllSubmoduleWarnings Target)
+    target_compile_options(${Target} PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/w>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
+    )
+endfunction()
+
 FetchContent_Declare(Glm
         GIT_REPOSITORY https://github.com/g-truc/glm.git
         GIT_TAG 1.0.1
@@ -11,7 +18,7 @@ FetchContent_Declare(Glm
 set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(Glm)
-
+Core_SuppressAllSubmoduleWarnings(glm)
 
 
 FetchContent_Declare(GoogleTest
@@ -23,10 +30,7 @@ FetchContent_Declare(GoogleTest
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(GoogleTest)
-target_compile_options(gtest PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/w>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
-)
+Core_SuppressAllSubmoduleWarnings(gtest)
 
 
 
@@ -38,10 +42,7 @@ FetchContent_Declare(Benchmark
 )
 
 FetchContent_MakeAvailable(Benchmark)
-target_compile_options(benchmark PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/w>
-    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
-)
+Core_SuppressAllSubmoduleWarnings(benchmark)
 
 
 
@@ -55,6 +56,7 @@ set(PCRE2_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(PCRE2)
+Core_SuppressAllSubmoduleWarnings(pcre2-8-static)
 
 FetchContent_Declare(
     libassert
@@ -62,3 +64,4 @@ FetchContent_Declare(
     GIT_TAG        v2.2.1
 )
 FetchContent_MakeAvailable(libassert)
+Core_SuppressAllSubmoduleWarnings(libassert-lib)

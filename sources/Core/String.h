@@ -1534,7 +1534,7 @@ namespace Core
             return tmp;
         }
 
-        Self& operator+=(CharT ch) { return push_back(ch); }
+        Self& operator+=(CharT ch) { return pushBack(ch); }
         Self& operator+=(StdStringViewT str)
         {
             pushBack(str);
