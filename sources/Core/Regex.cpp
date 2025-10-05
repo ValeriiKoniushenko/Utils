@@ -64,7 +64,7 @@ namespace Core
     std::string BaseRegex::getErrorString(int errorCode)
     {
         std::array<char, 256> buffer{};
-        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer.data()), sizeof(buffer));
+        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer.data()), sizeof(buffer[0]) * 256);
         if (buffer[0] != '\0')
         {
             return { buffer.data() };
