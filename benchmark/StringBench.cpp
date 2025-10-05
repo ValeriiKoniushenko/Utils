@@ -1,24 +1,26 @@
-// MIT License
-//
-// Copyright (c) 1024 Valerii Koniushenko
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+/*
+ * MIT License
+ *
+ * Copyright (c) 2018-2025 Valerii Koniushenko
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "Core/String.h"
 
@@ -49,7 +51,7 @@ static void BM_StringAtom_Static_Comparison(benchmark::State& state)
     Core::StringAtom mainString;
     for (int64_t i = 0; i < state.range(0); ++i)
     {
-        mainString.push_back('a');
+        mainString.pushBack('a');
     }
 
     auto str1 = Core::StringAtom::Intern(mainString);
@@ -92,13 +94,13 @@ static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
     Core::StringAtom str1;
     for (int64_t i = 0; i < state.range(0); ++i)
     {
-        str1.push_back('a');
+        str1.pushBack('a');
     }
 
     Core::StringAtom str2;
     for (int64_t i = 0; i < state.range(0); ++i)
     {
-        str2.push_back('a');
+        str2.pushBack('a');
     }
 
     for (auto _ : state)
@@ -118,7 +120,7 @@ static void BM_StringAtomPushingBack(benchmark::State& state)
         Core::StringAtom str;
         for (int64_t i = 0; i < state.range(0); ++i)
         {
-            str.push_back('a');
+            str.pushBack('a');
         }
         benchmark::DoNotOptimize(str);
     }
@@ -164,7 +166,7 @@ static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
         Core::StringAtom str;
         for (int64_t i = 0; i < state.range(0); ++i)
         {
-            str.push_back("Hello");
+            str.pushBack("Hello");
         }
         benchmark::DoNotOptimize(str);
     }
@@ -226,7 +228,7 @@ static void BM_StdString_Substr(benchmark::State& state) {
 // -------------------------------
 static void BM_StringAtom_Find(benchmark::State& state) {
     Core::StringAtom str(std::string(state.range(0), 'a').c_str());
-    str.push_back('b'); // ensure something to find
+    str.pushBack('b'); // ensure something to find
     for (auto _ : state) {
         auto pos = str.find("b");
         benchmark::DoNotOptimize(pos);

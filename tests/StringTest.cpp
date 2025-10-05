@@ -481,14 +481,14 @@ TEST_F(StringTestF, OperationsWithEmptyString)
 
         {
             BaseString<T> str;
-            str.push_back(Str<T>("Hello"));
+            str.pushBack(Str<T>("Hello"));
             EXPECT_EQ(5, str.size());
             EXPECT_GE(str.capacity(), 5);
         }
 
         {
             BaseString<T> str;
-            str.push_front(Str<T>("Hello"));
+            str.pushFront(Str<T>("Hello"));
             EXPECT_EQ(5, str.size());
             EXPECT_GE(str.capacity(), 5);
         }
@@ -509,7 +509,7 @@ TEST_F(StringTestF, OperationsWithEmptyString)
                 BaseString<T> str;
                 EXPECT_FALSE(str.regexMatch(Str<T>("Hello")));
 
-                str.shrink_to_fit();
+                str.shrinkToFit();
             }
         }
     };
@@ -639,17 +639,17 @@ TEST_F(StringTestF, SequentalPushBack)
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         ASSERT_EQ(0, str.size());
 
-        str.push_back(Str<T>("Hello"));
+        str.pushBack(Str<T>("Hello"));
         ASSERT_EQ(5, str.size());
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         EXPECT_EQ(Str<T>("Hello"), str);
 
-        str.push_back(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        str.pushBack(Str<T>("HelloWorldHowAreYou!")); // 20chars
         ASSERT_EQ(25, str.size());
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         EXPECT_EQ(Str<T>("HelloHelloWorldHowAreYou!"), str);
 
-        str.push_back(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        str.pushBack(Str<T>("HelloWorldHowAreYou!")); // 20chars
         ASSERT_EQ(45, str.size());
         ASSERT_EQ(45 * 2, str.capacity());
         EXPECT_EQ(Str<T>("HelloHelloWorldHowAreYou!HelloWorldHowAreYou!"), str);
@@ -667,17 +667,17 @@ TEST_F(StringTestF, SequentalPushFront)
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         ASSERT_EQ(0, str.size());
 
-        str.push_front(Str<T>("Hello"));
+        str.pushFront(Str<T>("Hello"));
         ASSERT_EQ(5, str.size());
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         EXPECT_EQ(Str<T>("Hello"), str);
 
-        str.push_front(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        str.pushFront(Str<T>("HelloWorldHowAreYou!")); // 20chars
         ASSERT_EQ(25, str.size());
         ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
         EXPECT_EQ(Str<T>("HelloWorldHowAreYou!Hello"), str);
 
-        str.push_front(Str<T>("HelloWorldHowAreYou!")); // 20chars
+        str.pushFront(Str<T>("HelloWorldHowAreYou!")); // 20chars
         ASSERT_EQ(45, str.size());
         ASSERT_EQ(45 * 2, str.capacity());
         EXPECT_EQ(Str<T>("HelloWorldHowAreYou!HelloWorldHowAreYou!Hello"), str);
@@ -1043,7 +1043,7 @@ TEST_F(StringTestF, PushBack)
     {
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_back('!');
+            str.pushBack('!');
             EXPECT_EQ(Str<T>("Hello World!"), str);
             EXPECT_EQ(12, str.size());
         }
@@ -1052,7 +1052,7 @@ TEST_F(StringTestF, PushBack)
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
             std::basic_string<T> text = Str<T>(
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum");
-            str.push_back(text.data());
+            str.pushBack(text.data());
             EXPECT_EQ(
                 Str<T>(
                     "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum"),
@@ -1062,14 +1062,14 @@ TEST_F(StringTestF, PushBack)
 
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_back(std::basic_string<T>(Str<T>("!!!")));
+            str.pushBack(std::basic_string<T>(Str<T>("!!!")));
             EXPECT_EQ(Str<T>("Hello World!!!"), str);
             EXPECT_EQ(14, str.size());
         }
 
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_back(std::basic_string<T>(Str<T>("!!!")));
+            str.pushBack(std::basic_string<T>(Str<T>("!!!")));
             EXPECT_EQ(Str<T>("Hello World!!!"), str);
             EXPECT_EQ(14, str.size());
         }
@@ -1085,7 +1085,7 @@ TEST_F(StringTestF, PushFront)
     {
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_front('!');
+            str.pushFront('!');
             EXPECT_EQ(Str<T>("!Hello World"), str);
             EXPECT_EQ(12, str.size());
         }
@@ -1094,7 +1094,7 @@ TEST_F(StringTestF, PushFront)
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
             std::basic_string<T> text = Str<T>(
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum");
-            str.push_front(text.data());
+            str.pushFront(text.data());
             EXPECT_EQ(
                 Str<T>(
                     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World"),
@@ -1104,14 +1104,14 @@ TEST_F(StringTestF, PushFront)
 
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_front(std::basic_string<T>(Str<T>("!!!")));
+            str.pushFront(std::basic_string<T>(Str<T>("!!!")));
             EXPECT_EQ(Str<T>("!!!Hello World"), str);
             EXPECT_EQ(14, str.size());
         }
 
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
-            str.push_front(std::basic_string<T>(Str<T>("!!!")));
+            str.pushFront(std::basic_string<T>(Str<T>("!!!")));
             EXPECT_EQ(Str<T>("!!!Hello World"), str);
             EXPECT_EQ(14, str.size());
         }
@@ -1194,7 +1194,7 @@ TEST_F(StringTestF, PopBack)
             auto str = BaseString<T>::Intern(Str<T>("Hello World!"));
             EXPECT_EQ(12, str.size());
 
-            str.pop_back();
+            str.popBack();
 
             EXPECT_EQ(Str<T>("Hello World"), str);
             EXPECT_EQ(11, str.size());
@@ -1204,7 +1204,7 @@ TEST_F(StringTestF, PopBack)
             auto str = BaseString<T>::Intern(Str<T>("Hello World!"));
             EXPECT_EQ(12, str.size());
 
-            str.pop_back();
+            str.popBack();
 
             EXPECT_EQ(Str<T>("Hello World"), str);
             EXPECT_EQ(11, str.size());
@@ -1223,7 +1223,7 @@ TEST_F(StringTestF, PopFront)
             auto str = BaseString<T>::Intern(Str<T>("Hello World!"));
             EXPECT_EQ(12, str.size());
             std::basic_string<T> s;
-            str.pop_front();
+            str.popFront();
 
             EXPECT_EQ(Str<T>("ello World!"), str);
             EXPECT_EQ(11, str.size());
@@ -1233,7 +1233,7 @@ TEST_F(StringTestF, PopFront)
             auto str = BaseString<T>::Intern(Str<T>("Hello World!"));
             EXPECT_EQ(12, str.size());
             std::basic_string<T> s;
-            str.pop_front();
+            str.popFront();
 
             EXPECT_EQ(Str<T>("ello World!"), str);
             EXPECT_EQ(11, str.size());
@@ -1257,7 +1257,7 @@ TEST_F(StringTestF, ShrinkToFit)
             EXPECT_EQ(12, str.size());
             EXPECT_EQ(100, str.capacity());
 
-            str.shrink_to_fit();
+            str.shrinkToFit();
             EXPECT_EQ(12, str.size());
             EXPECT_EQ(12 + 1, str.capacity());
         }
@@ -1271,7 +1271,7 @@ TEST_F(StringTestF, ShrinkToFit)
             EXPECT_EQ(12, str.size());
             EXPECT_EQ(100, str.capacity());
 
-            str.shrink_to_fit();
+            str.shrinkToFit();
             EXPECT_EQ(12, str.size());
             EXPECT_EQ(12 + 1, str.capacity());
         }
@@ -1377,9 +1377,9 @@ TEST_F(StringTestF, AdvanceWorkFlow2)
         ASSERT_TRUE(!str);
         if (!str)
         {
-            str.push_back(Str<T>("Hello"));
+            str.pushBack(Str<T>("Hello"));
             ASSERT_FALSE(str.isEmpty());
-            str.push_back(Str<T>("World"));
+            str.pushBack(Str<T>("World"));
             ASSERT_FALSE(str.isEmpty());
             ASSERT_EQ(Str<T>("HelloWorld"), str);
         }
@@ -1397,9 +1397,9 @@ TEST_F(StringTestF, AdvanceWorkFlow3)
         str.resize(5);
         if (!str)
         {
-            str.push_back(Str<T>("Hello"));
+            str.pushBack(Str<T>("Hello"));
             ASSERT_FALSE(str.isEmpty());
-            str.push_back(Str<T>("World"));
+            str.pushBack(Str<T>("World"));
             ASSERT_FALSE(str.isEmpty());
             ASSERT_EQ(Str<T>("     HelloWorld"), str);
         }
@@ -1543,7 +1543,7 @@ TEST_F(StringTestF, SimpleCopy)
     {
         BaseString<T> str = Str<T>("Hello world!");
         const auto baseCapacity = str.capacity();
-        str.shrink_to_fit();
+        str.shrinkToFit();
         const auto shrinkedCapacity = str.capacity();
         EXPECT_LE(shrinkedCapacity, baseCapacity);
 
@@ -1802,7 +1802,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate("\\w+",
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1814,7 +1814,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(std::basic_string<char>("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1827,7 +1827,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(expr.c_str(),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1840,7 +1840,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(expr.data(),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1853,7 +1853,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(expr,
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1865,7 +1865,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(BaseString<char>::Intern("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);
@@ -1877,7 +1877,7 @@ TEST_F(StringTestF, RegexIterate)
             str.regexIterate(std::basic_string_view<char>("\\w+"),
                              [&buffer, &str](const RegexMatch::MatchedData& match)
                              {
-                                 buffer.push_back(match.convertBasedOn(str));
+                                 buffer.pushBack(match.convertBasedOn(str));
                                  return true;
                              });
             EXPECT_EQ(Str<T>("HelloworldHowareyou"), buffer);

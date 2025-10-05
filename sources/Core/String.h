@@ -1028,7 +1028,7 @@ namespace Core
                 {
                     for (std::size_t i = 0; i < buffer.size() && buffer[i] != '\0'; ++i)
                     {
-                        temp.push_back(buffer[i]);
+                        temp.pushBack(buffer[i]);
                     }
                 }
 
@@ -1551,13 +1551,13 @@ namespace Core
         }
 
         Self& operator+=(CharT ch) { return push_back(ch); }
-        Self& operator+=(StdStringViewT str) { return push_back(str); }
+        Self& operator+=(StdStringViewT str) { return pushBack(str); }
 
-        Self& push_back(StdStringViewT str) { return push_back(str.data(), str.size()); }
+        Self& pushBack(StdStringViewT str) { return pushBack(str.data(), str.size()); }
 
-        Self& push_back(CharT ch) { return push_back(&ch, 1); }
+        Self& pushBack(CharT ch) { return pushBack(&ch, 1); }
 
-        Self& push_back(const CharT* str, uint64_t size)
+        Self& pushBack(const CharT* str, uint64_t size)
         {
             if (str == nullptr)
             {
@@ -1583,11 +1583,11 @@ namespace Core
             return *this;
         }
 
-        Self& push_front(CharT ch) { return push_front(&ch, 1); }
+        Self& pushFront(CharT ch) { return pushFront(&ch, 1); }
 
-        Self& push_front(StdStringViewT str) { return push_front(str.data(), str.size()); }
+        Self& pushFront(StdStringViewT str) { return pushFront(str.data(), str.size()); }
 
-        Self& push_front(const CharT* str, uint64_t size)
+        Self& pushFront(const CharT* str, uint64_t size)
         {
             if (str == nullptr)
             {
@@ -1618,7 +1618,7 @@ namespace Core
             return *this;
         }
 
-        Self& pop_back()
+        Self& popBack()
         {
             if (_size > 0)
             {
@@ -1628,7 +1628,7 @@ namespace Core
             return *this;
         }
 
-        Self& pop_front()
+        Self& popFront()
         {
             if (_size > 0)
             {
@@ -1652,7 +1652,7 @@ namespace Core
             return *this;
         }
 
-        Self& shrink_to_fit()
+        Self& shrinkToFit()
         {
             if (isEmpty())
             {
@@ -1871,7 +1871,7 @@ namespace Core
                 reserve(32);
                 for (; first != last; ++first)
                 {
-                    push_back(static_cast<CharT>(0));
+                    pushBack(static_cast<CharT>(0));
                     std::char_traits<CharT>::assign(_string[_size - 1], *first);
                 }
             }
