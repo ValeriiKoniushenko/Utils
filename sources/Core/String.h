@@ -94,6 +94,31 @@ namespace Core
         using StdStringT = std::basic_string<CharT>;
         using StdStringViewT = std::basic_string_view<CharT>;
 
+        constexpr static uint32_t fnv1aPrime = 16777619u;
+        constexpr static uint32_t fnv1aOffsetBias = 2166136261u;
+
+        [[nodiscard]] static uint32_t Hash(const CharT* str)
+        {
+            const auto length = Length(str) + 1u;
+            uint32_t hash = fnv1aOffsetBias;
+            for (size_t i = 0; i < length; ++i)
+            {
+                hash ^= *str++;
+                hash *= fnv1aPrime;
+            }
+            return hash;
+        }
+        [[nodiscard]] static uint32_t Hash(const CharT* str, std::size_t length)
+        {
+            uint32_t hash = fnv1aOffsetBias;
+            for (size_t i = 0; i < length; ++i)
+            {
+                hash ^= *str++;
+                hash *= fnv1aPrime;
+            }
+            return hash;
+        }
+
         [[nodiscard]] static bool IsSpace(int ch)
         {
             if constexpr (sizeof(CharT) == 1)
@@ -105,15 +130,15 @@ namespace Core
                 return static_cast<bool>(std::iswspace(ch));
             }
         }
-        [[nodiscard]] static uint64_t Length(const CharT* string) noexcept
+        [[nodiscard]] static std::size_t Length(const CharT* string) noexcept
         {
             if constexpr (sizeof(CharT) == 1)
             {
-                return static_cast<uint64_t>(strlen(string));
+                return static_cast<std::size_t>(strlen(string));
             }
             else
             {
-                return static_cast<uint64_t>(wcslen(string));
+                return static_cast<std::size_t>(wcslen(string));
             }
         }
 
@@ -334,7 +359,7 @@ namespace Core
                     }
                 }
                 // >>> non-narrow int64 <<<
-                else if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>, uint64_t>)
+                else if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>, std::size_t>)
                 {
                     // char
                     if constexpr (sizeof(CharT) == 1)
@@ -369,52 +394,38 @@ namespace Core
     template<class CharT>
     struct StringDataReadOnly
     {
-        constexpr static uint64_t invalidSize = ~static_cast<uint64_t>(0);
+        constexpr static std::size_t invalidSize = ~static_cast<std::size_t>(0);
 
         CharT* str = nullptr;
-        uint64_t size = invalidSize;
+        std::size_t size = invalidSize;
     };
 
     template<class CharT>
     struct StringData
     {
         using Toolset = StringToolset<CharT>;
-        using SmartPointer = std::unique_ptr<CharT[]>;
 
-        StringData(SmartPointer&& ptr, uint64_t newSize)
-            : str{ std::move(ptr) },
+        StringData(CharT* ptr, std::size_t newSize)
+            : str{ ptr },
               size{ newSize }
         {
         }
 
-        StringData(const CharT* newString, uint64_t newSize)
-            : str{ SmartPointer(new CharT[newSize + 1]) }
+        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return { str, size }; }
+
+        [[nodiscard]] bool operator<(const StringData& other) const { return Toolset::Cmp(str, other.str) == Comparison::Less; }
+
+        [[nodiscard]] bool operator==(const StringData& other) const { return Toolset::Cmp(str, other.str) == Comparison::Equal; }
+
+        void clear()
         {
-            memcpy_s(str.get(), size * sizeof(CharT), newString, newSize * sizeof(CharT));
+            delete[] str;
+            str = nullptr;
+            size = StringDataReadOnly<CharT>::invalidSize;
         }
 
-        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return StringDataReadOnly<CharT>{ str.get(), size }; }
-
-        [[nodiscard]] bool operator<(const StringData& other) const
-        {
-            if (str)
-            {
-                return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less;
-            }
-            return false;
-        }
-
-        [[nodiscard]] bool operator==(const StringData& other) const
-        {
-            if (str)
-            {
-                return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal;
-            }
-            return false;
-        }
-
-        SmartPointer str;
-        uint64_t size = StringDataReadOnly<CharT>::invalidSize;
+        CharT* str = nullptr;
+        std::size_t size = StringDataReadOnly<CharT>::invalidSize;
     };
 
     template<class CharType>
@@ -429,7 +440,7 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, uint64_t size)
+        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, std::size_t size)
         {
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
@@ -437,20 +448,30 @@ namespace Core
                 StringTracer::instance().addAtomRequest(std::string(string));
             }
 #endif
-            const auto currentHash = std::hash<StdStringViewT>{}(StdStringViewT{ string, size });
+            const auto currentHash = Toolset::Hash(string, size);
             auto it = _strings.find(currentHash);
             if (it != _strings.end())
             {
                 return it->second.toReadOnly();
             }
 
-            auto&& ptr = std::make_unique<CharT[]>(size + 1);
-            memcpy(ptr.get(), string, size * sizeof(CharT));
-            auto* addr = ptr.get();
-            _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
+            auto* ptr = new CharT[size + 1];
+            memcpy(ptr, string, (size + 1) * sizeof(CharT));
+            _strings.emplace(currentHash, StringDataT{ ptr, size });
 
-            return StringDataReadOnlyT{ addr, size };
+            return StringDataReadOnlyT{ ptr, size };
         }
+
+        void clear()
+        {
+            for (auto& pair : _strings)
+            {
+                pair.second.clear();
+            }
+            _strings.clear();
+        }
+
+        std::unordered_map<std::size_t, StringDataT>& _raw() { return _strings; }
 
     protected:
         StringPool()
@@ -463,7 +484,7 @@ namespace Core
         }
 
     private:
-        std::unordered_map<uint64_t, StringDataT> _strings = {};
+        std::unordered_map<std::size_t, StringDataT> _strings;
     };
 
     template<class CharType>
@@ -484,7 +505,7 @@ namespace Core
         template<bool IsConst>
         using AdaptiveRawPtr = std::conditional_t<IsConst, const Self, Self>*;
 
-        constexpr static uint64_t invalidSize = StringDataReadOnlyT::invalidSize;
+        constexpr static std::size_t invalidSize = StringDataReadOnlyT::invalidSize;
         constexpr static std::size_t minAllocationSize = 32u;
 
         enum class LineSeparator : uint8_t
@@ -664,27 +685,36 @@ namespace Core
          */
         [[nodiscard]] static Self Intern(const CharT* newString)
         {
-            return Self{ StringPool<CharT>::instance().add(newString, Toolset::Length(newString)) };
+            auto& pool = StringPool<CharT>::instance();
+            return Self{ pool.add(newString, Toolset::Length(newString)) };
         }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(const CharT* newString, uint64_t size) { return Self{ StringPool<CharT>::instance().add(newString, size) }; }
+        [[nodiscard]] static Self Intern(const CharT* newString, std::size_t size)
+        {
+            auto& pool = StringPool<CharT>::instance();
+            return Self{ pool.add(newString, size) };
+        }
 
         /**
          * @brief This function will use the provided string as a static string
          */
-        [[nodiscard]] static Self Intern(StdStringViewT string) { return Self{ StringPool<CharT>::instance().add(string.data(), string.size()) }; }
+        [[nodiscard]] static Self Intern(StdStringViewT string)
+        {
+            auto& pool = StringPool<CharT>::instance();
+            return Self{ pool.add(string.data(), string.size()) };
+        }
 
-        [[nodiscard]] uint64_t size() const noexcept { return _size; }
-        [[nodiscard]] uint64_t byteSize() const noexcept { return _size * sizeof(CharT); }
-        [[nodiscard]] uint64_t length() const noexcept { return _size; }
+        [[nodiscard]] std::size_t size() const noexcept { return _size; }
+        [[nodiscard]] std::size_t byteSize() const noexcept { return _size * sizeof(CharT); }
+        [[nodiscard]] std::size_t length() const noexcept { return _size; }
         [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
         [[nodiscard]] operator StdStringViewT() const noexcept { return toStdStringView(); }
-        [[nodiscard]] CharT& operator[](uint64_t index) noexcept { return _string[index]; }
-        [[nodiscard]] CharT operator[](uint64_t index) const noexcept { return _string[index]; }
+        [[nodiscard]] CharT& operator[](std::size_t index) noexcept { return _string[index]; }
+        [[nodiscard]] CharT operator[](std::size_t index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
         {
@@ -906,7 +936,7 @@ namespace Core
             return { _string };
         }
 
-        [[nodiscard]] CharT at(uint64_t index) const
+        [[nodiscard]] CharT at(std::size_t index) const
         {
             if (!DEBUG_ASSERT_VAL(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
             {
@@ -916,7 +946,7 @@ namespace Core
             return _string[index];
         }
 
-        [[nodiscard]] CharT& at(uint64_t index)
+        [[nodiscard]] CharT& at(std::size_t index)
         {
             DEBUG_ASSERT(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
             return _string[index];
@@ -1064,20 +1094,20 @@ namespace Core
             return temp;
         }
 
-        [[nodiscard]] uint64_t makeHash() const noexcept
+        [[nodiscard]] std::size_t makeHash() const noexcept
         {
             if (!isEmpty())
             {
-                return std::hash<StdStringViewT>{}({ _string, _size });
+                return Toolset::Hash(_string, _size);
             }
             return {};
         }
 
-        void subStr(uint64_t index, uint64_t count = 0)
+        void subStr(std::size_t index, std::size_t count = 0)
         {
             if (!isEmpty())
             {
-                const uint64_t finalCount = count == 0 ? _size - index : count - index;
+                const std::size_t finalCount = count == 0 ? _size - index : count - index;
                 *this = std::move(Self(_string + index, finalCount));
             }
         }
@@ -1086,7 +1116,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                uint64_t offset = 0;
+                std::size_t offset = 0;
                 while (offset < _size && _string[offset] == ch)
                 {
                     ++offset;
@@ -1102,7 +1132,7 @@ namespace Core
         {
             if (!isEmpty())
             {
-                uint64_t count = 0;
+                std::size_t count = 0;
                 while (count < _size && _string[_size - count - 1u] == ch)
                 {
                     ++count;
@@ -1126,7 +1156,7 @@ namespace Core
             if (!isEmpty())
             {
                 tryToMakeAsDynamic();
-                for (uint64_t i = 0; i < _size; ++i)
+                for (std::size_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(Toolset::ToUpper(_string[i]));
                 }
@@ -1138,14 +1168,14 @@ namespace Core
             if (!isEmpty())
             {
                 tryToMakeAsDynamic();
-                for (uint64_t i = 0; i < _size; ++i)
+                for (std::size_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(Toolset::ToLower(_string[i]));
                 }
             }
         }
 
-        void erase(uint64_t index)
+        void erase(std::size_t index)
         {
             if (!isEmpty())
             {
@@ -1160,7 +1190,7 @@ namespace Core
             }
         }
 
-        void erase(uint64_t from, uint64_t to)
+        void erase(std::size_t from, std::size_t to)
         {
             if (!isEmpty())
             {
@@ -1247,7 +1277,7 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions perl compile options
          */
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const char* expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                                                         uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
@@ -1271,17 +1301,17 @@ namespace Core
 
             return {};
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0,
                                                         uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFind(expr.data(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
                                                         uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
                                                         uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
@@ -1294,8 +1324,8 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions PCRE regex compile options
          */
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
-                                                                 uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const char* expr, std::size_t offset = 0, std::size_t limit = 0,
+                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
             {
@@ -1318,17 +1348,17 @@ namespace Core
 
             return {};
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0,
                                                                  uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.data(), offset, limit, matchOptions, 0);
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
                                                                  uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0,
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
                                                                  uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
@@ -1341,7 +1371,7 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions PCRE2 regex compile options
          */
-        [[nodiscard]] bool regexMatch(const char* expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const char* expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             if (!isEmpty())
@@ -1351,17 +1381,17 @@ namespace Core
 
             return false;
         }
-        [[nodiscard]] bool regexMatch(std::basic_string_view<char> expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.data(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] bool regexMatch(const std::basic_string<char>& expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] bool regexMatch(const BaseString<char>& expr, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
@@ -1378,7 +1408,7 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class FuncT>
-        void regexIterate(const char* expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        void regexIterate(const char* expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                           uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
@@ -1401,19 +1431,19 @@ namespace Core
             }
         }
         template<class FuncT>
-        void regexIterate(std::basic_string_view<char> expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
-                          uint32_t compileOptions = 0) const
+        void regexIterate(std::basic_string_view<char> expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0,
+                          uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             regexIterate(expr.data(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
         }
         template<class FuncT>
-        void regexIterate(const std::basic_string<char>& expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
-                          uint32_t compileOptions = 0) const
+        void regexIterate(const std::basic_string<char>& expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0,
+                          uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
         }
         template<class FuncT>
-        void regexIterate(const BaseString<char>& expr, FuncT&& callback, uint64_t offset = 0, uint64_t limit = 0, uint32_t matchOptions = 0,
+        void regexIterate(const BaseString<char>& expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                           uint32_t compileOptions = 0) const
         {
             regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
@@ -1430,7 +1460,7 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        bool regexReplace(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+        bool regexReplace(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
                           uint32_t replaceOptions = 0)
         {
             if (isEmpty() || !expr)
@@ -1471,18 +1501,18 @@ namespace Core
 
             return false;
         }
-        bool regexReplace(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
-                          uint64_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplace(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                          std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplace(expr.data(), newValue, predictedScaleSize, offset, limit, replaceOptions);
         }
-        bool regexReplace(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
-                          uint64_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplace(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                          std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
         }
-        bool regexReplace(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
-                          uint32_t replaceOptions = 0)
+        bool regexReplace(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                          std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
         }
@@ -1498,23 +1528,23 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        bool regexReplaceAll(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0, uint64_t limit = 0,
+        bool regexReplaceAll(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
                              uint32_t replaceOptions = 0)
         {
             return regexReplace(expr, std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
-                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplaceAll(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                             std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplaceAll(expr.data(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
-                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplaceAll(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                             std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, uint64_t offset = 0,
-                             uint64_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplaceAll(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+                             std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
             return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
@@ -1534,7 +1564,12 @@ namespace Core
             return tmp;
         }
 
-        Self& operator+=(CharT ch) { return pushBack(ch); }
+        Self& operator+=(CharT ch)
+        {
+            pushBack(ch);
+            return *this;
+        }
+
         Self& operator+=(StdStringViewT str)
         {
             pushBack(str);
@@ -1545,7 +1580,7 @@ namespace Core
 
         void pushBack(CharT ch) { pushBack(&ch, 1); }
 
-        void pushBack(const CharT* str, uint64_t size)
+        void pushBack(const CharT* str, std::size_t size)
         {
             if (str == nullptr) [[unlikely]]
             {
@@ -1573,7 +1608,7 @@ namespace Core
 
         void pushFront(StdStringViewT str) { return pushFront(str.data(), str.size()); }
 
-        void pushFront(const CharT* str, uint64_t size)
+        void pushFront(const CharT* str, std::size_t size)
         {
             if (str == nullptr)
             {
@@ -1616,7 +1651,7 @@ namespace Core
             if (_size > 0)
             {
                 tryToMakeAsDynamic();
-                for (uint64_t i = 1; i < _size; ++i)
+                for (std::size_t i = 1; i < _size; ++i)
                 {
                     _string[i - 1] = _string[i];
                 }
@@ -1624,7 +1659,7 @@ namespace Core
             }
         }
 
-        void copyTo(CharT* dest, uint64_t count, uint64_t offset = 0) const
+        void copyTo(CharT* dest, std::size_t count, std::size_t offset = 0) const
         {
             if (!isEmpty())
             {
@@ -1667,9 +1702,9 @@ namespace Core
             }
         }
 
-        [[nodiscard]] uint64_t capacity() const noexcept { return _capacity; }
+        [[nodiscard]] std::size_t capacity() const noexcept { return _capacity; }
 
-        void insert(Iterator iterator, const CharT* str, uint64_t size = invalidSize)
+        void insert(Iterator iterator, const CharT* str, std::size_t size = invalidSize)
         {
             DEBUG_ASSERT(iterator._owner == this);
             if (iterator._owner == this)
@@ -1678,7 +1713,7 @@ namespace Core
             }
         }
 
-        void insert(int64_t pos, const CharT* str, uint64_t size = invalidSize)
+        void insert(int64_t pos, const CharT* str, std::size_t size = invalidSize)
         {
             if (size == invalidSize)
             {
@@ -1697,7 +1732,7 @@ namespace Core
                 _string[i + size] = _string[i];
             }
 
-            for (uint64_t i = pos; i < pos + size; ++i, ++str)
+            for (std::size_t i = pos; i < pos + size; ++i, ++str)
             {
                 _string[i] = *str;
             }
@@ -1723,7 +1758,7 @@ namespace Core
 
             if (isIgnoreCase)
             {
-                for (uint64_t index = 0; index < other.size() && _string[index]; ++index)
+                for (std::size_t index = 0; index < other.size() && _string[index]; ++index)
                 {
                     if (_string[index + 1] == 0 && other.size() == index + 1)
                     {
@@ -1746,7 +1781,7 @@ namespace Core
             return Toolset::Cmp(_string, other.data());
         }
 
-        [[nodiscard]] const CharT* find(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* find(StdStringViewT other, std::size_t baseOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1759,7 +1794,7 @@ namespace Core
             }
             return Toolset::StrStr(_string + baseOffset, other.data());
         }
-        [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other, uint64_t baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other, std::size_t baseOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1773,7 +1808,7 @@ namespace Core
             return Toolset::StrIStr(_string + baseOffset, other.data());
         }
 
-        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, uint64_t baseOffset = 0, uint64_t limitOffset = 0) const noexcept
+        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, std::size_t baseOffset = 0, std::size_t limitOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1848,7 +1883,7 @@ namespace Core
             }
         }
 
-        BaseString(const CharT* str, uint64_t size = invalidSize)
+        BaseString(const CharT* str, std::size_t size = invalidSize)
         {
             if (str)
             {
@@ -1858,13 +1893,13 @@ namespace Core
             }
         }
 
-        BaseString(const char* str, uint64_t size = invalidSize)
+        BaseString(const char* str, std::size_t size = invalidSize)
             requires(sizeof(CharT) > 1)
         {
             if (str)
             {
                 resize(size == invalidSize ? StringToolset<char>::Length(str) : size);
-                for (uint64_t i = 0; i < _size; ++i)
+                for (std::size_t i = 0; i < _size; ++i)
                 {
                     _string[i] = static_cast<CharT>(str[i]);
                 }
@@ -1878,7 +1913,7 @@ namespace Core
 
         BaseString(const Self& other) { *this = other; }
 
-        explicit BaseString(uint64_t reserveCount) { reserve(reserveCount); }
+        explicit BaseString(std::size_t reserveCount) { reserve(reserveCount); }
 
         Self& operator=(const CharT* str)
         {
@@ -2000,7 +2035,7 @@ namespace Core
             }
         }
 
-        void reserve(uint64_t newCapacity)
+        void reserve(std::size_t newCapacity)
         {
             const auto oldCapacity = _capacity;
 
@@ -2042,7 +2077,7 @@ namespace Core
             }
         }
 
-        void resize(const uint64_t newSize, bool isIgnoreMultiplier = false)
+        void resize(const std::size_t newSize, bool isIgnoreMultiplier = false)
         {
             if (_string && newSize + 1u < _size && _policy != StringPolicy::Static)
             {
@@ -2066,7 +2101,7 @@ namespace Core
             BaseString<char> temp;
             temp.resize(_size);
 
-            for (uint64_t i = 0; i < _size; ++i)
+            for (std::size_t i = 0; i < _size; ++i)
             {
                 temp[i] = static_cast<char>(_string[i]);
             }
@@ -2143,7 +2178,7 @@ namespace Core
             return 2;
         }
 
-        static uint64_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
+        static std::size_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
         {
             if (!DEBUG_ASSERT_VAL(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
             {
@@ -2155,7 +2190,7 @@ namespace Core
                 end = source + Toolset::Length(source);
             }
 
-            uint64_t count = 0;
+            std::size_t count = 0;
             const auto* string = source;
             while ((string = FindNextLine(string, end, separator)))
             {
@@ -2223,7 +2258,6 @@ namespace Core
             ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
         }
 
-    protected:
         explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
               _size{ data.size },
@@ -2232,6 +2266,7 @@ namespace Core
         {
         }
 
+    protected:
         void tryToMakeAsDynamic()
         {
             if (_policy != StringPolicy::Dynamic && !isEmpty())
@@ -2242,10 +2277,10 @@ namespace Core
 
     protected:
         CharT* _string = nullptr;
-        uint64_t _size = 0;
-        uint64_t _capacity = 0;
+        std::size_t _size = 0;
+        std::size_t _capacity = 0;
         StringPolicy _policy = StringPolicy::None;
-        static constexpr uint64_t _capacityMultiplier = 2;
+        static constexpr std::size_t _capacityMultiplier = 2;
 
     private:
         // ================== PIMPLs =======================
@@ -2263,7 +2298,7 @@ namespace Core
             do
             {
                 nextLine = FindNextLine(oldString, nullptr, separator);
-                uint64_t strSize = invalidSize;
+                std::size_t strSize = invalidSize;
                 if (nextLine != nullptr)
                 {
                     strSize = nextLine - oldString - GetLineSeparatorStringSize(separator);
@@ -2344,22 +2379,24 @@ struct std::hash<Core::BaseString<CharType>>
     size_t operator()(const Core::BaseString<CharType>& x) const noexcept { return x.makeHash(); }
 };
 
-inline Core::BaseString<char> operator""_atom(const char* str, uint64_t size)
+inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size)
 {
-    return Core::BaseString<char>::Intern(str, size);
+    static auto& pool = Core::StringPool<char>::instance();
+    return Core::BaseString{ pool.add(str, size) };
 }
 
-inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, uint64_t size)
+inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, std::size_t size)
 {
-    return Core::BaseString<wchar_t>::Intern(str, size);
+    static auto& pool = Core::StringPool<wchar_t>::instance();
+    return Core::BaseString{ pool.add(str, size) };
 }
 
-inline Core::BaseString<char> operator""_dyn(const char* str, uint64_t size)
+inline Core::BaseString<char> operator""_dyn(const char* str, std::size_t size)
 {
     return { str, size };
 }
 
-inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, uint64_t size)
+inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, std::size_t size)
 {
     return { str, size };
 }
@@ -2405,12 +2442,12 @@ template<class CharType>
     return temp;
 }
 
-inline Core::StringFormatter<char> operator""_f(const char* str, uint64_t size)
+inline Core::StringFormatter<char> operator""_f(const char* str, std::size_t size)
 {
     return { str, size };
 }
 
-inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, uint64_t size)
+inline Core::StringFormatter<wchar_t> operator""_f(const wchar_t* str, std::size_t size)
 {
     return { str, size };
 }
