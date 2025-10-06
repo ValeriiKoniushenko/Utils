@@ -405,26 +405,19 @@ namespace Core
     {
         using Toolset = StringToolset<CharT>;
 
-        StringData(CharT* ptr, std::size_t newSize)
-            : str{ ptr },
+        StringData(std::unique_ptr<CharT[]>&& ptr, std::size_t newSize)
+            : str{ std::move(ptr) },
               size{ newSize }
         {
         }
 
-        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return { str, size }; }
+        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return { str.get(), size }; }
 
-        [[nodiscard]] bool operator<(const StringData& other) const { return Toolset::Cmp(str, other.str) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less; }
 
-        [[nodiscard]] bool operator==(const StringData& other) const { return Toolset::Cmp(str, other.str) == Comparison::Equal; }
+        [[nodiscard]] bool operator==(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal; }
 
-        void clear()
-        {
-            delete[] str;
-            str = nullptr;
-            size = StringDataReadOnly<CharT>::invalidSize;
-        }
-
-        CharT* str = nullptr;
+        std::unique_ptr<CharT[]> str;
         std::size_t size = StringDataReadOnly<CharT>::invalidSize;
     };
 
@@ -455,11 +448,12 @@ namespace Core
                 return it->second.toReadOnly();
             }
 
-            auto* ptr = new CharT[size + 1];
-            memcpy(ptr, string, (size + 1) * sizeof(CharT));
-            _strings.emplace(currentHash, StringDataT{ ptr, size });
+            auto ptr = std::make_unique<CharT[]>(size + 1);
+            auto* addr = ptr.get();
+            memcpy(ptr.get(), string, (size + 1) * sizeof(CharT));
+            _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
 
-            return StringDataReadOnlyT{ ptr, size };
+            return StringDataReadOnlyT{ addr, size };
         }
 
         void clear()
