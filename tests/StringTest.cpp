@@ -460,8 +460,8 @@ TEST_F(StringTestF, OperationsWithEmptyString)
             BaseString<T> str;
             auto dynamic = str.getCopyAsDynamic();
             EXPECT_EQ(0, dynamic.size());
-            EXPECT_NE(0, dynamic.capacity());
-            EXPECT_NE(nullptr, dynamic.c_str());
+            EXPECT_EQ(0, dynamic.capacity());
+            EXPECT_EQ(nullptr, dynamic.c_str());
         }
 
         {
@@ -639,7 +639,7 @@ TEST_F(StringTestF, SequentalPushBack)
     auto test = [this]<class T>()
     {
         BaseString<T> str;
-        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        ASSERT_EQ(0, str.capacity());
         ASSERT_EQ(0, str.size());
 
         str.pushBack(Str<T>("Hello"));
@@ -667,7 +667,7 @@ TEST_F(StringTestF, SequentalPushFront)
     auto test = [this]<class T>()
     {
         BaseString<T> str;
-        ASSERT_EQ(BaseString<T>::minAllocationSize, str.capacity());
+        ASSERT_EQ(0, str.capacity());
         ASSERT_EQ(0, str.size());
 
         str.pushFront(Str<T>("Hello"));

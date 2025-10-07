@@ -124,6 +124,37 @@ namespace
     }
 
     // -------------------------------
+    // PushingFront/Prepend
+    // -------------------------------
+    void BM_StringAtomPushingFront(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            StringAtom str;
+            for (const auto i : dictionary)
+            {
+                str.pushFront(i);
+            }
+            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(str);
+        }
+    }
+
+    void BM_StdStringPushingFront(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            std::string str;
+            for (const auto i : dictionary)
+            {
+                str.insert(0, i);
+            }
+            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(str);
+        }
+    }
+
+    // -------------------------------
     // SUBSTRING
     // -------------------------------
     void BM_StringAtom_Substr(benchmark::State& state)
@@ -176,6 +207,9 @@ namespace
     }
 
 } // namespace
+
+BENCHMARK(BM_StringAtomPushingFront);
+BENCHMARK(BM_StdStringPushingFront);
 
 BENCHMARK(BM_StringAtomPushingBack);
 BENCHMARK(BM_StdStringPushingBack);

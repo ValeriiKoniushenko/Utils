@@ -1463,7 +1463,7 @@ namespace Core
          * @param predictedScaleSize will scale future string allocation size based on
          * the programmer prediction. If the new string is bigger than needed - it will
          * pretend to UB. This function is using BaseString::Reserve - so the final value will
-         * be multiplied to BaseString::_capacityMultiplier
+         * be multiplied to BaseString::capacityMultiplier
          * @param newValue new string for the replacement
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
@@ -1533,7 +1533,7 @@ namespace Core
          * @param predictedScaleSize will scale future string allocation size based on
          * the programmer prediction. If the new string is bigger than needed - it will
          * pretend to UB. This function is using BaseString::Reserve - so the final value will
-         * be multiplied to BaseString::_capacityMultiplier
+         * be multiplied to BaseString::capacityMultiplier
          * @param newValue new string for the replacement
          * @param offset from the start of the string
          * @param limit string size for searching of the matches
@@ -1608,7 +1608,7 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                reserve(finalSize * _capacityMultiplier);
+                reserve(finalSize * capacityMultiplier);
             }
 
             memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
@@ -1634,21 +1634,15 @@ namespace Core
                 size = Toolset::Length(str);
             }
 
-            const auto oldSize = _size;
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                reserve(finalSize * _capacityMultiplier);
+                reserve(finalSize * capacityMultiplier);
             }
 
-            // TODO: use memxxx
-            for (int64_t i = oldSize; i >= 0; --i)
-            {
-                _string[i + size] = _string[i];
-            }
-
+            memcpy_s(_string + size, (_capacity - size) * sizeof(CharT), _string, _size * sizeof(CharT));
+            memcpy_s(_string, _capacity * sizeof(CharT), str, size * sizeof(CharT));
             _size += size;
-            memcpy_s(_string, _size * sizeof(CharT), str, size * sizeof(CharT));
             _string[_size] = 0;
         }
 
@@ -1755,8 +1749,8 @@ namespace Core
             _size += size;
         }
 
-        [[nodiscard]] bool isStatic() const noexcept { return _string && _capacity == _maxCapacity; }
-        [[nodiscard]] bool isDynamic() const noexcept { return _string && _capacity != _maxCapacity; }
+        [[nodiscard]] bool isStatic() const noexcept { return _string && _capacity == maxCapacity; }
+        [[nodiscard]] bool isDynamic() const noexcept { return _string && _capacity != maxCapacity; }
 
         [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const
         {
@@ -1880,7 +1874,7 @@ namespace Core
             return strings;
         }
 
-        BaseString() { reserve(minAllocationSize); }
+        BaseString() {}
 
         template<class IterT>
         BaseString(IterT first, IterT last)
@@ -2059,7 +2053,7 @@ namespace Core
 
                 _string = newString;
                 _capacity = newCapacity;
-                if (oldCapacity != _maxCapacity && newCapacity < oldCapacity)
+                if (oldCapacity != maxCapacity && newCapacity < oldCapacity)
                 {
                     _size = newCapacity - 1;
                 }
@@ -2071,7 +2065,7 @@ namespace Core
         {
             if (newSize >= _capacity)
             {
-                reserve(std::max(newSize * _capacityMultiplier, minAllocationSize));
+                reserve(std::max(newSize * capacityMultiplier, minAllocationSize));
             }
 
             _size = newSize;
@@ -2243,7 +2237,7 @@ namespace Core
         explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
               _size{ data.size },
-              _capacity{ _maxCapacity }
+              _capacity{ maxCapacity }
         {
         }
 
@@ -2262,9 +2256,9 @@ namespace Core
 
         void tryToMakeAsDynamic()
         {
-            if (isStatic() && !isEmpty())
+            if (isStatic() || !_string)
             {
-                reserve(_size);
+                reserve(std::max((_size + 1) * capacityMultiplier, minAllocationSize));
             }
         }
 
@@ -2273,8 +2267,8 @@ namespace Core
         std::size_t _size = 0;
         std::size_t _capacity = 0;
 
-        static constexpr std::size_t _maxCapacity = std::numeric_limits<std::size_t>::max();
-        static constexpr std::size_t _capacityMultiplier = 2;
+        static constexpr std::size_t maxCapacity = std::numeric_limits<std::size_t>::max();
+        static constexpr std::size_t capacityMultiplier = 2;
 
     private:
         // ================== PIMPLs =======================
