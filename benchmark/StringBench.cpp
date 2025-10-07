@@ -24,11 +24,6 @@
 
 #include "Core/String.h"
 
-#ifdef _WIN32
-    #undef max
-    #undef min
-#endif
-
 #include "Dictionary.h"
 
 #include <benchmark/benchmark.h>
@@ -44,10 +39,10 @@ namespace
     {
         std::vector<std::string> set1;
         std::vector<std::string> set2;
-        for (std::size_t i = 0; i < std::size(dictionary); ++i)
+        for (const auto i : dictionary)
         {
-            set1.push_back(dictionary[i]);
-            set2.push_back(dictionary[i]);
+            set1.push_back(i);
+            set2.push_back(i);
         }
 
         for (auto _ : state)
@@ -63,10 +58,10 @@ namespace
     {
         std::vector<StringAtom> set1;
         std::vector<StringAtom> set2;
-        for (std::size_t i = 0; i < std::size(dictionary); ++i)
+        for (const auto i : dictionary)
         {
-            set1.push_back(StringAtom::Intern(dictionary[i]));
-            set2.push_back(StringAtom::Intern(dictionary[i]));
+            set1.push_back(StringAtom::Intern(i));
+            set2.push_back(StringAtom::Intern(i));
         }
 
         for (auto _ : state)
@@ -82,10 +77,10 @@ namespace
     {
         std::vector<StringAtom> set1;
         std::vector<StringAtom> set2;
-        for (std::size_t i = 0; i < std::size(dictionary); ++i)
+        for (const auto i : dictionary)
         {
-            set1.push_back(dictionary[i]);
-            set2.push_back(dictionary[i]);
+            set1.emplace_back(i);
+            set2.emplace_back(i);
         }
 
         for (auto _ : state)
@@ -105,9 +100,9 @@ namespace
         for (auto _ : state)
         {
             StringAtom str;
-            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            for (const auto i : dictionary)
             {
-                str.pushBack(dictionary[i]);
+                str.pushBack(i);
             }
             benchmark::ClobberMemory();
             benchmark::DoNotOptimize(str);
@@ -119,9 +114,9 @@ namespace
         for (auto _ : state)
         {
             std::string str;
-            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            for (const auto i : dictionary)
             {
-                str.append(dictionary[i]);
+                str.append(i);
             }
             benchmark::ClobberMemory();
             benchmark::DoNotOptimize(str);

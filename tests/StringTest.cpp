@@ -81,6 +81,9 @@ TEST_F(StringTestF, ConverterToString)
         EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>().c_str()));
     };
 
+    auto a = "Hello"_atom;
+    a.pushBack("World");
+
     test.template operator()<char>();
     test.template operator()<wchar_t>();
 }

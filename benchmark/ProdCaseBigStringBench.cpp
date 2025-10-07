@@ -42,7 +42,7 @@ namespace
 
         for (std::size_t i = 0; i < std::size(dictionary); ++i)
         {
-            (void)GetPool().add(dictionary[i], strlen(dictionary[i]));
+            (void)GetPool().intern(dictionary[i], strlen(dictionary[i]));
         }
 
         for (auto _ : state)

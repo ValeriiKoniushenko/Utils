@@ -52,12 +52,6 @@
 
 namespace Core
 {
-    enum class StringPolicy : uint8_t
-    {
-        None,
-        Static,
-        Dynamic
-    };
 
     class Iterator;
 
@@ -433,7 +427,7 @@ namespace Core
         using StringDataReadOnlyT = StringDataReadOnly<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT add(const CharT* string, std::size_t size)
+        [[nodiscard]] StringDataReadOnlyT intern(const CharT* string, std::size_t size)
         {
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
@@ -455,6 +449,8 @@ namespace Core
 
             return StringDataReadOnlyT{ addr, size };
         }
+
+        [[nodiscard]] bool isStatic(const CharT* string, std::size_t size) { return _strings.contains(Toolset::Hash(string, size)); }
 
         void clear()
         {
@@ -680,7 +676,7 @@ namespace Core
         [[nodiscard]] static Self Intern(const CharT* newString)
         {
             auto& pool = StringPool<CharT>::instance();
-            return Self{ pool.add(newString, Toolset::Length(newString)) };
+            return Self{ pool.intern(newString, Toolset::Length(newString)) };
         }
 
         /**
@@ -689,7 +685,7 @@ namespace Core
         [[nodiscard]] static Self Intern(const CharT* newString, std::size_t size)
         {
             auto& pool = StringPool<CharT>::instance();
-            return Self{ pool.add(newString, size) };
+            return Self{ pool.intern(newString, size) };
         }
 
         /**
@@ -698,7 +694,7 @@ namespace Core
         [[nodiscard]] static Self Intern(StdStringViewT string)
         {
             auto& pool = StringPool<CharT>::instance();
-            return Self{ pool.add(string.data(), string.size()) };
+            return Self{ pool.intern(string.data(), string.size()) };
         }
 
         [[nodiscard]] std::size_t size() const noexcept { return _size; }
@@ -927,7 +923,7 @@ namespace Core
                 return {};
             }
 
-            return { _string };
+            return { _string ? _string : "", _size };
         }
 
         [[nodiscard]] CharT at(std::size_t index) const
@@ -940,9 +936,20 @@ namespace Core
             return _string[index];
         }
 
+        [[nodiscard]] CharT safeAt(std::size_t index) const
+        {
+            if (!DEBUG_ASSERT_VAL(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
+            {
+                return {};
+            }
+
+            return _string[index];
+        }
+
         [[nodiscard]] CharT& at(std::size_t index)
         {
             DEBUG_ASSERT(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
+            tryToMakeAsDynamic();
             return _string[index];
         }
 
@@ -1110,6 +1117,7 @@ namespace Core
         {
             if (!isEmpty())
             {
+                tryToMakeAsDynamic();
                 std::size_t offset = 0;
                 while (offset < _size && _string[offset] == ch)
                 {
@@ -1126,6 +1134,7 @@ namespace Core
         {
             if (!isEmpty())
             {
+                tryToMakeAsDynamic();
                 std::size_t count = 0;
                 while (count < _size && _string[_size - count - 1u] == ch)
                 {
@@ -1173,7 +1182,9 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!DEBUG_ASSERT_VAL(index < _size, "Invalid index"))
+                tryToMakeAsDynamic();
+
+                if (!DEBUG_ASSERT_VAL(index < _size, "Invalid index")) [[unlikely]]
                 {
                     return;
                 }
@@ -1188,7 +1199,9 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (!DEBUG_ASSERT_VAL(from < _size && to < _size, "Invalid index"))
+                tryToMakeAsDynamic();
+
+                if (!DEBUG_ASSERT_VAL(from < _size && to < _size, "Invalid index")) [[unlikely]]
                 {
                     return;
                 }
@@ -1226,6 +1239,7 @@ namespace Core
         {
             if (!isEmpty())
             {
+                tryToMakeAsDynamic();
                 if (auto* found = find(mainValue))
                 {
                     auto temp = Self(_string, found - _string);
@@ -1240,6 +1254,7 @@ namespace Core
         {
             if (!isEmpty())
             {
+                tryToMakeAsDynamic();
                 int offset = 0;
                 // TODO: optimize this code
                 while (auto* found = find(mainValue, offset))
@@ -1462,6 +1477,8 @@ namespace Core
                 return false;
             }
 
+            tryToMakeAsDynamic();
+
             Core::RegexReplace regex(expr, _string);
             regex.setOffset(offset);
             if (limit != 0)
@@ -1580,6 +1597,7 @@ namespace Core
             {
                 return;
             }
+            tryToMakeAsDynamic();
 
             if (size == 0)
             {
@@ -1590,7 +1608,7 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                reserve(finalSize * 2u);
+                reserve(finalSize * _capacityMultiplier);
             }
 
             memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
@@ -1609,6 +1627,8 @@ namespace Core
                 return;
             }
 
+            tryToMakeAsDynamic();
+
             if (size == 0)
             {
                 size = Toolset::Length(str);
@@ -1618,9 +1638,10 @@ namespace Core
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
-                reserve(finalSize * 2u);
+                reserve(finalSize * _capacityMultiplier);
             }
 
+            // TODO: use memxxx
             for (int64_t i = oldSize; i >= 0; --i)
             {
                 _string[i + size] = _string[i];
@@ -1668,35 +1689,33 @@ namespace Core
             {
                 return;
             }
-
-            const auto* oldString = _string;
-            const auto capacity = _size + 1;
-
-            if ((_string = new CharT[capacity]))
-            {
-                _capacity = capacity;
-                memcpy_s(_string, _size * sizeof(CharT), oldString, _size * sizeof(CharT));
-                _string[_size] = 0;
-
-                if (_policy == StringPolicy::Static)
-                {
 #if defined(UTILS_DEBUG)
-                    if constexpr (sizeof(CharT) == 1)
-                    {
-                        StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
-                    }
+            if constexpr (sizeof(CharT) == 1)
+            {
+                if (_string)
+                {
+                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
+                }
+            }
 #endif
 
-                    _policy = StringPolicy::Dynamic;
-                }
-                else if (_policy == StringPolicy::Dynamic)
+            const auto newCapacity = _size + 1;
+
+            if (auto newString = new CharT[newCapacity])
+            {
+                memcpy_s(newString, newCapacity * sizeof(CharT), _string, newCapacity * sizeof(CharT));
+
+                if (isDynamic())
                 {
-                    delete[] oldString;
+                    delete[] _string;
                 }
+
+                _capacity = newCapacity;
+                _string = newString;
             }
         }
 
-        [[nodiscard]] std::size_t capacity() const noexcept { return _capacity; }
+        [[nodiscard]] std::size_t capacity() const noexcept { return isStatic() ? _size + 1 : _capacity; }
 
         void insert(Iterator iterator, const CharT* str, std::size_t size = invalidSize)
         {
@@ -1713,6 +1732,8 @@ namespace Core
             {
                 size = Toolset::Length(str);
             }
+
+            tryToMakeAsDynamic();
 
             const auto oldSize = _size;
             const auto finalSize = _size + size;
@@ -1734,9 +1755,8 @@ namespace Core
             _size += size;
         }
 
-        [[nodiscard]] bool isStatic() const noexcept { return _policy == StringPolicy::Static; }
-        [[nodiscard]] bool isDynamic() const noexcept { return _policy == StringPolicy::Dynamic; }
-        [[nodiscard, maybe_unused]] bool checkForPolicy(StringPolicy policy) const noexcept { return _policy == policy; }
+        [[nodiscard]] bool isStatic() const noexcept { return _string && _capacity == _maxCapacity; }
+        [[nodiscard]] bool isDynamic() const noexcept { return _string && _capacity != _maxCapacity; }
 
         [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const
         {
@@ -1935,24 +1955,19 @@ namespace Core
                 return *this;
             }
 
-            if (other._policy == StringPolicy::Dynamic)
+            clear();
+
+            if (other.isDynamic())
             {
-                clear();
-                resize(other._size, true);
+                resize(other._size);
                 memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
                 _string[_size] = 0;
             }
-            else if (other._policy == StringPolicy::Static)
+            else
             {
-                clear();
-                _policy = other._policy;
                 _string = other._string;
                 _size = other._size;
                 _capacity = other._capacity;
-            }
-            else
-            {
-                clear();
             }
 
             return *this;
@@ -1962,43 +1977,30 @@ namespace Core
 
         Self& operator=(Self&& other) noexcept
         {
-            if (other._policy == StringPolicy::Dynamic)
+            clear();
+
+            if (other.isDynamic())
             {
-                clear();
                 _string = other._string;
                 _size = other._size;
-                _policy = StringPolicy::Dynamic;
+                _capacity = other._capacity;
 #if defined(UTILS_DEBUG)
                 if constexpr (sizeof(CharT) == 1)
                 {
                     StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
                 }
 #endif
-
-                _capacity = other._capacity;
-
-                other._size = 0;
-                other._string = nullptr;
-                other._policy = StringPolicy::None;
-                other._capacity = 0;
-            }
-            else if (other._policy == StringPolicy::Static)
-            {
-                clear();
-                _policy = StringPolicy::Static;
-                _string = other._string;
-                _size = other._size;
-                _capacity = other._capacity;
-
-                other._size = 0;
-                other._string = nullptr;
-                other._policy = StringPolicy::None;
-                other._capacity = 0;
             }
             else
             {
-                clear();
+                _string = other._string;
+                _size = other._size;
+                _capacity = other._capacity;
             }
+
+            other._size = 0;
+            other._string = nullptr;
+            other._capacity = 0;
 
             return *this;
         }
@@ -2007,30 +2009,34 @@ namespace Core
         {
             if (_string)
             {
-                if (_policy == StringPolicy::Static)
+                if (isStatic())
                 {
                     _string = nullptr;
                     _size = 0;
-                    _policy = StringPolicy::None;
-                    _capacity = 0;
-                }
-                else if (_policy == StringPolicy::Dynamic)
-                {
-                    delete[] _string;
-                    _string = nullptr;
-                    _size = 0;
-                    _policy = StringPolicy::None;
                     _capacity = 0;
                 }
                 else
                 {
-                    DEBUG_ASSERT("Invalid StringPolicy type. Impossible to delete.");
+                    delete[] _string;
+                    _string = nullptr;
+                    _size = 0;
+                    _capacity = 0;
                 }
             }
         }
 
         void reserve(std::size_t newCapacity)
         {
+#if defined(UTILS_DEBUG)
+            if constexpr (sizeof(CharT) == 1)
+            {
+                if (isStatic() && _string)
+                {
+                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
+                }
+            }
+#endif
+
             const auto oldCapacity = _capacity;
 
             if (newCapacity < minAllocationSize)
@@ -2046,24 +2052,14 @@ namespace Core
                     memcpy(newString, _string, (std::min)(newCapacity, oldCapacity) * sizeof(CharT));
                 }
 
-                if (_policy == StringPolicy::Static)
-                {
-#if defined(UTILS_DEBUG)
-                    if constexpr (sizeof(CharT) == 1)
-                    {
-                        StringTracer::instance().addChangedPolicyToDynamic(std::string(newString));
-                    }
-#endif
-                    _string = nullptr;
-                }
-                else
+                if (isDynamic())
                 {
                     delete[] _string;
                 }
+
                 _string = newString;
                 _capacity = newCapacity;
-                _policy = StringPolicy::Dynamic;
-                if (newCapacity < oldCapacity)
+                if (oldCapacity != _maxCapacity && newCapacity < oldCapacity)
                 {
                     _size = newCapacity - 1;
                 }
@@ -2071,23 +2067,15 @@ namespace Core
             }
         }
 
-        void resize(const std::size_t newSize, bool isIgnoreMultiplier = false)
+        void resize(const std::size_t newSize)
         {
-            if (_string && newSize + 1u < _size && _policy != StringPolicy::Static)
+            if (newSize >= _capacity)
             {
-                _string[newSize] = 0;
+                reserve(std::max(newSize * _capacityMultiplier, minAllocationSize));
             }
-            else if (newSize > _size || _policy == StringPolicy::Static)
-            {
-                this->reserve(newSize * 2u);
-                _string[newSize] = 0;
-            }
-            // for empty init
-            else if (newSize == 0 && _policy == StringPolicy::None)
-            {
-                this->reserve(minAllocationSize);
-            }
+
             _size = newSize;
+            _string[newSize] = 0;
         }
 
         [[nodiscard]] BaseString<char> toASCII() const
@@ -2255,15 +2243,26 @@ namespace Core
         explicit BaseString(StringDataReadOnlyT data)
             : _string{ data.str },
               _size{ data.size },
-              _capacity{ data.size + 1 },
-              _policy{ StringPolicy::Static }
+              _capacity{ _maxCapacity }
         {
         }
 
     protected:
+        void markAsStatic() noexcept
+        {
+            if (isEmpty())
+            {
+                return;
+            }
+
+#if defined(UTILS_DEBUG)
+            DEBUG_ASSERT(Core::StringPool<char>::instance().isStatic(_string));
+#endif
+        }
+
         void tryToMakeAsDynamic()
         {
-            if (_policy != StringPolicy::Dynamic && !isEmpty())
+            if (isStatic() && !isEmpty())
             {
                 reserve(_size);
             }
@@ -2273,7 +2272,8 @@ namespace Core
         CharT* _string = nullptr;
         std::size_t _size = 0;
         std::size_t _capacity = 0;
-        StringPolicy _policy = StringPolicy::None;
+
+        static constexpr std::size_t _maxCapacity = std::numeric_limits<std::size_t>::max();
         static constexpr std::size_t _capacityMultiplier = 2;
 
     private:
@@ -2376,13 +2376,13 @@ struct std::hash<Core::BaseString<CharType>>
 inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size)
 {
     static auto& pool = Core::StringPool<char>::instance();
-    return Core::BaseString{ pool.add(str, size) };
+    return Core::BaseString{ pool.intern(str, size) };
 }
 
 inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, std::size_t size)
 {
     static auto& pool = Core::StringPool<wchar_t>::instance();
-    return Core::BaseString{ pool.add(str, size) };
+    return Core::BaseString{ pool.intern(str, size) };
 }
 
 inline Core::BaseString<char> operator""_dyn(const char* str, std::size_t size)
