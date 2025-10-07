@@ -2043,7 +2043,7 @@ namespace Core
                 newString[0] = 0;
                 if (_string)
                 {
-                    memcpy(newString, _string, (std::min)(newCapacity, oldCapacity) * sizeof(CharT));
+                    memcpy(newString, _string, _size * sizeof(CharT));
                 }
 
                 if (isDynamic())
