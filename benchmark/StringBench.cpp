@@ -29,251 +29,165 @@
     #undef min
 #endif
 
+#include "Dictionary.h"
+
 #include <benchmark/benchmark.h>
 
-// -------------------------------
-// Static comparison
-// -------------------------------
-static void BM_StdStringComparison(benchmark::State& state)
+using namespace Core;
+
+namespace
 {
-    std::string str1(state.range(0), 'a');
-    std::string str2(state.range(0), 'a');
-
-    for (auto _ : state)
+    // -------------------------------
+    // Static comparison
+    // -------------------------------
+    void BM_StdStringComparison(benchmark::State& state)
     {
-        benchmark::DoNotOptimize(str1 == str2);
-    }
-    state.SetComplexityN(state.range(0));
-}
-
-static void BM_StringAtom_Static_Comparison(benchmark::State& state)
-{
-    Core::StringAtom mainString;
-    for (int64_t i = 0; i < state.range(0); ++i)
-    {
-        mainString.pushBack('a');
-    }
-
-    auto str1 = Core::StringAtom::Intern(mainString);
-    auto str2 = Core::StringAtom::Intern(mainString);
-    mainString.clear();
-
-    for (auto _ : state)
-    {
-        benchmark::DoNotOptimize(str1 == str2);
-    }
-    state.SetComplexityN(state.range(0));
-}
-
-// -------------------------------
-// Dynamic comparison
-// -------------------------------
-static void BM_StdString_Dynamic_Comparison(benchmark::State& state)
-{
-    std::string str1;
-    for (int64_t i = 0; i < state.range(0); ++i)
-    {
-        str1.push_back('a');
-    }
-
-    std::string str2;
-    for (int64_t i = 0; i < state.range(0); ++i)
-    {
-        str2.push_back('a');
-    }
-
-    for (auto _ : state)
-    {
-        benchmark::DoNotOptimize(str1 == str2);
-    }
-    state.SetComplexityN(state.range(0));
-}
-
-static void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
-{
-    Core::StringAtom str1;
-    for (int64_t i = 0; i < state.range(0); ++i)
-    {
-        str1.pushBack('a');
-    }
-
-    Core::StringAtom str2;
-    for (int64_t i = 0; i < state.range(0); ++i)
-    {
-        str2.pushBack('a');
-    }
-
-    for (auto _ : state)
-    {
-        benchmark::DoNotOptimize(str1 == str2);
-    }
-    state.SetComplexityN(state.range(0));
-}
-
-// -------------------------------
-// PushingBack
-// -------------------------------
-static void BM_StringAtomPushingBack(benchmark::State& state)
-{
-    for (auto _ : state)
-    {
-        Core::StringAtom str;
-        for (int64_t i = 0; i < state.range(0); ++i)
+        std::vector<std::string> set1;
+        std::vector<std::string> set2;
+        for (std::size_t i = 0; i < std::size(dictionary); ++i)
         {
-            str.pushBack('a');
+            set1.push_back(dictionary[i]);
+            set2.push_back(dictionary[i]);
         }
-        benchmark::DoNotOptimize(str);
-    }
-    state.SetComplexityN(state.range(0));
-}
 
-static void BM_StdStringPushingBack(benchmark::State& state)
-{
-    for (auto _ : state)
-    {
-        std::string str;
-        for (int64_t i = 0; i < state.range(0); ++i)
+        for (auto _ : state)
         {
-            str.push_back('a');
+            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            {
+                benchmark::DoNotOptimize(set1[i] == set2[i]);
+            }
         }
-        benchmark::DoNotOptimize(str);
     }
-    state.SetComplexityN(state.range(0));
-}
 
-// -------------------------------
-// PushingBack LongString
-// -------------------------------
-static void BM_StdStringPushingBack_LongString(benchmark::State& state)
-{
-    for (auto _ : state)
+    void BM_StringAtom_Static_Comparison(benchmark::State& state)
     {
-        std::string str;
-
-        for (int64_t i = 0; i < state.range(0); ++i)
+        std::vector<StringAtom> set1;
+        std::vector<StringAtom> set2;
+        for (std::size_t i = 0; i < std::size(dictionary); ++i)
         {
-            str.append("Hello");
+            set1.push_back(StringAtom::Intern(dictionary[i]));
+            set2.push_back(StringAtom::Intern(dictionary[i]));
         }
-        benchmark::DoNotOptimize(str);
-    }
-    state.SetComplexityN(state.range(0));
-}
 
-static void BM_StringAtomPushingBack_LongString(benchmark::State& state)
-{
-    for (auto _ : state)
-    {
-        Core::StringAtom str;
-        for (int64_t i = 0; i < state.range(0); ++i)
+        for (auto _ : state)
         {
-            str.pushBack("Hello");
+            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            {
+                benchmark::DoNotOptimize(set1[i] == set2[i]);
+            }
         }
-        benchmark::DoNotOptimize(str);
     }
-    state.SetComplexityN(state.range(0));
-}
 
-// -------------------------------
-// APPEND (concatenate another string)
-// -------------------------------
-static void BM_StringAtom_Append(benchmark::State& state)
-{
-    Core::StringAtom base("hello");
-    Core::StringAtom toAdd(" world");
-    for (auto _ : state)
+    void BM_StringAtom_Dynamic_Comparison(benchmark::State& state)
     {
-        Core::StringAtom str = base;
-        for (int64_t i = 0; i < state.range(0); ++i)
+        std::vector<StringAtom> set1;
+        std::vector<StringAtom> set2;
+        for (std::size_t i = 0; i < std::size(dictionary); ++i)
         {
-            str += toAdd;
+            set1.push_back(dictionary[i]);
+            set2.push_back(dictionary[i]);
         }
-        benchmark::DoNotOptimize(str);
-    }
-    state.SetComplexityN(state.range(0));
-}
 
-static void BM_StdString_Append(benchmark::State& state)
-{
-    std::string base("hello");
-    std::string toAdd(" world");
-    for (auto _ : state)
-    {
-        std::string str = base;
-        for (int64_t i = 0; i < state.range(0); ++i)
+        for (auto _ : state)
         {
-            str += toAdd;
+            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            {
+                benchmark::DoNotOptimize(set1[i] == set2[i]);
+            }
         }
-        benchmark::DoNotOptimize(str);
     }
-    state.SetComplexityN(state.range(0));
-}
 
-// -------------------------------
-// SUBSTRING
-// -------------------------------
-static void BM_StringAtom_Substr(benchmark::State& state)
-{
-    Core::StringAtom str(std::string(state.range(0), 'a').c_str());
-    for (auto _ : state)
+    // -------------------------------
+    // PushingBack/Append
+    // -------------------------------
+    void BM_StringAtomPushingBack(benchmark::State& state)
     {
-        str.subStr(0, state.range(0) / 2);
-        benchmark::DoNotOptimize(str);
+        for (auto _ : state)
+        {
+            StringAtom str;
+            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            {
+                str.pushBack(dictionary[i]);
+            }
+            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(str);
+        }
     }
-    state.SetComplexityN(state.range(0));
-}
 
-static void BM_StdString_Substr(benchmark::State& state)
-{
-    std::string str(state.range(0), 'a');
-    for (auto _ : state)
+    void BM_StdStringPushingBack(benchmark::State& state)
     {
-        auto sub = str.substr(0, state.range(0) / 2);
-        benchmark::DoNotOptimize(sub);
+        for (auto _ : state)
+        {
+            std::string str;
+            for (std::size_t i = 0; i < std::size(dictionary); ++i)
+            {
+                str.append(dictionary[i]);
+            }
+            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(str);
+        }
     }
-    state.SetComplexityN(state.range(0));
-}
 
-// -------------------------------
-// FIND (linear search)
-// -------------------------------
-static void BM_StringAtom_Find(benchmark::State& state)
-{
-    Core::StringAtom str(std::string(state.range(0), 'a').c_str());
-    str.pushBack('b'); // ensure something to find
-    for (auto _ : state)
+    // -------------------------------
+    // SUBSTRING
+    // -------------------------------
+    void BM_StringAtom_Substr(benchmark::State& state)
     {
-        auto pos = str.find("b");
-        benchmark::DoNotOptimize(pos);
+        StringAtom str(std::string(state.range(0), 'a').c_str());
+        for (auto _ : state)
+        {
+            str.subStr(0, state.range(0) / 2);
+            benchmark::DoNotOptimize(str);
+        }
+        state.SetComplexityN(state.range(0));
     }
-    state.SetComplexityN(state.range(0));
-}
 
-static void BM_StdString_Find(benchmark::State& state)
-{
-    std::string str(state.range(0), 'a');
-    str.push_back('b');
-    for (auto _ : state)
+    void BM_StdString_Substr(benchmark::State& state)
     {
-        auto pos = str.find('b');
-        benchmark::DoNotOptimize(pos);
+        std::string str(state.range(0), 'a');
+        for (auto _ : state)
+        {
+            auto sub = str.substr(0, state.range(0) / 2);
+            benchmark::DoNotOptimize(sub);
+        }
+        state.SetComplexityN(state.range(0));
     }
-    state.SetComplexityN(state.range(0));
-}
 
-BENCHMARK(BM_StdStringComparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StringAtom_Static_Comparison)->Range(2, 2 << 10)->Complexity();
+    // -------------------------------
+    // FIND (linear search)
+    // -------------------------------
+    void BM_StringAtom_Find(benchmark::State& state)
+    {
+        StringAtom str(std::string(state.range(0), 'a').c_str());
+        str.pushBack('b'); // ensure something to find
+        for (auto _ : state)
+        {
+            auto pos = str.find("b");
+            benchmark::DoNotOptimize(pos);
+        }
+        state.SetComplexityN(state.range(0));
+    }
 
-BENCHMARK(BM_StringAtom_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StdString_Dynamic_Comparison)->Range(2, 2 << 10)->Complexity();
+    void BM_StdString_Find(benchmark::State& state)
+    {
+        std::string str(state.range(0), 'a');
+        str.push_back('b');
+        for (auto _ : state)
+        {
+            auto pos = str.find('b');
+            benchmark::DoNotOptimize(pos);
+        }
+        state.SetComplexityN(state.range(0));
+    }
 
-BENCHMARK(BM_StringAtomPushingBack)->Range(2, 2 << 10)->Complexity();
-BENCHMARK(BM_StdStringPushingBack)->Range(2, 2 << 10)->Complexity();
+} // namespace
 
-BENCHMARK(BM_StringAtomPushingBack_LongString)->Range(2, 2 << 12)->Complexity();
-BENCHMARK(BM_StdStringPushingBack_LongString)->Range(2, 2 << 12)->Complexity();
+BENCHMARK(BM_StringAtomPushingBack);
+BENCHMARK(BM_StdStringPushingBack);
 
-BENCHMARK(BM_StringAtom_Append)->Range(8, 1 << 10)->Complexity();
-BENCHMARK(BM_StdString_Append)->Range(8, 1 << 10)->Complexity();
+BENCHMARK(BM_StdStringComparison);
+BENCHMARK(BM_StringAtom_Static_Comparison);
+BENCHMARK(BM_StringAtom_Dynamic_Comparison);
 
 BENCHMARK(BM_StringAtom_Substr)->Range(8, 1 << 16)->Complexity();
 BENCHMARK(BM_StdString_Substr)->Range(8, 1 << 16)->Complexity();
