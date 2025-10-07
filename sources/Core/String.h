@@ -34,8 +34,8 @@
 #include "libassert/assert.hpp"
 
 #include <algorithm>
+#include <array>
 #include <charconv>
-#include <cinttypes>
 #include <cstring>
 #include <cwctype>
 #include <filesystem>
