@@ -24,6 +24,8 @@
 
 #include "Regex.h"
 
+#include <array>
+
 namespace Core
 {
     BaseRegex::~BaseRegex()
