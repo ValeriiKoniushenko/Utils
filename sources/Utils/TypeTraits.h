@@ -84,4 +84,7 @@ namespace Utils
     {
     };
 
+    template<class T>
+    inline constexpr bool AlwaysFalseV = AlwaysFalse<T>::value;
+
 } // namespace Utils

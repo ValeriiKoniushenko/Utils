@@ -374,19 +374,19 @@ namespace Core
                 }
                 else
                 {
-                    static_assert(false, "Can't determine integer type");
+                    static_assert(Utils::AlwaysFalseV<T>, "Can't determine integer type");
                 }
             }
             else
             {
-                static_assert(false, "Unsupported type. Can't convert from string to your T");
+                static_assert(Utils::AlwaysFalseV<T>, "Unsupported type. Can't convert from string to your T");
             }
             return {};
         }
     };
 
     template<class CharT>
-    struct StringDataReadOnly
+    struct InternalStringView
     {
         constexpr static std::size_t invalidSize = ~static_cast<std::size_t>(0);
 
@@ -405,14 +405,14 @@ namespace Core
         {
         }
 
-        [[nodiscard]] StringDataReadOnly<CharT> toReadOnly() noexcept { return { str.get(), size }; }
+        [[nodiscard]] InternalStringView<CharT> toReadOnly() noexcept { return { str.get(), size }; }
 
         [[nodiscard]] bool operator<(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less; }
 
         [[nodiscard]] bool operator==(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal; }
 
         std::unique_ptr<CharT[]> str;
-        std::size_t size = StringDataReadOnly<CharT>::invalidSize;
+        std::size_t size = InternalStringView<CharT>::invalidSize;
     };
 
     template<class CharType>
@@ -424,10 +424,10 @@ namespace Core
         using Toolset = StringToolset<CharT>;
         using StdStringViewT = typename Toolset::StdStringViewT;
         using StringDataT = StringData<CharT>;
-        using StringDataReadOnlyT = StringDataReadOnly<CharT>;
+        using InternalStringViewT = InternalStringView<CharT>;
 
     public:
-        [[nodiscard]] StringDataReadOnlyT intern(const CharT* string, std::size_t size)
+        [[nodiscard]] InternalStringViewT intern(const CharT* string, std::size_t size)
         {
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
@@ -447,7 +447,7 @@ namespace Core
             memcpy(ptr.get(), string, (size + 1) * sizeof(CharT));
             _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
 
-            return StringDataReadOnlyT{ addr, size };
+            return InternalStringViewT{ addr, size };
         }
 
         [[nodiscard]] bool isStatic(const CharT* string, std::size_t size) { return _strings.contains(Toolset::Hash(string, size)); }
@@ -486,7 +486,7 @@ namespace Core
         using Toolset = StringToolset<CharT>;
         using StdStringT = typename Toolset::StdStringT;
         using StdStringViewT = typename Toolset::StdStringViewT;
-        using StringDataReadOnlyT = StringDataReadOnly<CharT>;
+        using InternalStringViewT = InternalStringView<CharT>;
 
         using value_type = CharT;
         using pointer = value_type*;
@@ -495,7 +495,7 @@ namespace Core
         template<bool IsConst>
         using AdaptiveRawPtr = std::conditional_t<IsConst, const Self, Self>*;
 
-        constexpr static std::size_t invalidSize = StringDataReadOnlyT::invalidSize;
+        constexpr static std::size_t invalidSize = InternalStringViewT::invalidSize;
         constexpr static std::size_t minAllocationSize = 32u;
 
         enum class LineSeparator : uint8_t
@@ -2234,7 +2234,7 @@ namespace Core
             ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
         }
 
-        explicit BaseString(StringDataReadOnlyT data)
+        explicit BaseString(InternalStringViewT data)
             : _string{ data.str },
               _size{ data.size },
               _capacity{ maxCapacity }

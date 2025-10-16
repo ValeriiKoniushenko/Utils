@@ -33,7 +33,7 @@ namespace Core
     template<Utils::IsArithmetic T, int Dimension>
     struct Size final
     {
-        static_assert(false, "Invalid 'Dimension' value. You can use only 2D or 3D Size type.");
+        static_assert(Dimension != Dimension, "Invalid 'Dimension' value. You can use only 2D or 3D Size type.");
     };
 
     template<Utils::IsArithmetic T>
