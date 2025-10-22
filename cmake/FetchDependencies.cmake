@@ -57,11 +57,3 @@ set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(PCRE2)
 Core_SuppressAllSubmoduleWarnings(pcre2-8-static)
-
-FetchContent_Declare(
-    libassert
-    GIT_REPOSITORY https://github.com/jeremy-rifkin/libassert.git
-    GIT_TAG        v2.2.1
-)
-FetchContent_MakeAvailable(libassert)
-Core_SuppressAllSubmoduleWarnings(libassert-lib)

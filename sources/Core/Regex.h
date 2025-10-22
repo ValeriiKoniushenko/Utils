@@ -24,9 +24,9 @@
 
 #pragma once
 
+#include "BaseAssert.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
-#include "libassert/assert.hpp"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include "pcre2.h"
@@ -129,7 +129,7 @@ namespace Core
             {
                 if (offset + size > origSize) [[unlikely]]
                 {
-                    DEBUG_ASSERT(false);
+                    Assert(false);
                     return {};
                 }
 
@@ -189,7 +189,7 @@ namespace Core
         {
             if (!isCompiled() || _matchData == nullptr) [[unlikely]]
             {
-                DEBUG_ASSERT("Regex wasn't compiled or match data was failed!");
+                Assert("Regex wasn't compiled or match data was failed!");
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace Core
                     const auto* ovector = pcre2_get_ovector_pointer(_matchData);
                     if (!ovector) [[unlikely]]
                     {
-                        DEBUG_ASSERT(false);
+                        Assert(false);
                         return;
                     }
 

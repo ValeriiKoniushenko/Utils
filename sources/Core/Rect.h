@@ -24,11 +24,11 @@
 
 #pragma once
 
+#include "BaseAssert.h"
 #include "Position.h"
 #include "Size.h"
 #include "Utils/Concepts.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
-#include "libassert/assert.hpp"
 
 namespace Core
 {
@@ -119,17 +119,7 @@ namespace Core
 
         [[nodiscard]] constexpr bool isValid() const noexcept { return _top >= _bottom && _left <= _right; }
 
-        bool requireValid() const noexcept
-        {
-            if (isValid())
-            {
-                return true;
-            }
-
-            DEBUG_ASSERT(false);
-
-            return false;
-        }
+        bool requireValid() const noexcept { return Verify(isValid()); }
 
         [[nodiscard]] constexpr bool isContain(const GlobalPositionT& point) const noexcept
         {

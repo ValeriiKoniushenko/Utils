@@ -24,8 +24,8 @@
 
 #pragma once
 
+#include "BaseAssert.h"
 #include "Utils/TypeTraits.h"
-#include "libassert/assert.hpp"
 
 #include <cstdint>
 #include <utility>
@@ -60,7 +60,7 @@ namespace Core
     template<class T, IsPolicy Policy>
     void _DecrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
     {
-        DEBUG_ASSERT(obj->_hardRefCount > 0);
+        Assert(obj->_hardRefCount > 0);
         if (obj->_hardRefCount > 0) [[likely]]
         {
             Policy::DecrementRef(obj->_hardRefCount);
@@ -81,7 +81,7 @@ namespace Core
     template<class T, IsPolicy Policy>
     void _DecrementWeakRefCounter(IntrusiveRefCounter<T, Policy>* obj, T*& weakRawPtr) noexcept
     {
-        DEBUG_ASSERT(obj->_weakRefCount > 0);
+        Assert(obj->_weakRefCount > 0);
         if (obj->_weakRefCount > 0) [[likely]]
         {
             Policy::DecrementRef(obj->_weakRefCount);
@@ -198,25 +198,25 @@ namespace Core
 
         [[nodiscard]] const T& operator*() const
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return *_ptr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return _ptr;
         }
 
         [[nodiscard]] T& operator*()
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return *_ptr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return _ptr;
         }
 
@@ -265,25 +265,25 @@ namespace Core
 
         [[nodiscard]] const T& operator*() const
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return *_ptr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return _ptr;
         }
 
         [[nodiscard]] T& operator*()
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return *_ptr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            DEBUG_ASSERT(_ptr != nullptr);
+            Assert(_ptr != nullptr);
             return _ptr;
         }
 

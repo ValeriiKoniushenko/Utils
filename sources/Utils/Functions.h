@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include "libassert/assert.hpp"
-
 #include <filesystem>
 #include <fstream>
 #include <vector>
