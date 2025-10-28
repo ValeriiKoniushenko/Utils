@@ -138,6 +138,12 @@ namespace Core
             }
         }
 
+        IntrusivePtr(const IntrusivePtr<std::remove_const_t<T>>& other)
+            requires std::is_const_v<T>
+        {
+            *this = other;
+        }
+
         IntrusivePtr(const IntrusivePtr& other) { *this = other; }
         IntrusivePtr(IntrusivePtr&& other) noexcept { *this = std::move(other); }
         IntrusivePtr& operator=(const IntrusivePtr& other)
@@ -235,6 +241,8 @@ namespace Core
 
         template<class>
         friend class WeakPtr;
+
+        friend class IntrusivePtr<const T>;
     };
 
     //

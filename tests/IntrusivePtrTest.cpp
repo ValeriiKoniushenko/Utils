@@ -131,6 +131,38 @@ TEST(IntrusivePtrTests, ConstructTakesOwnershipAndIncrements)
     }
 }
 
+TEST(IntrusivePtrTests, CVCvalifiers)
+{
+    {
+        IntrusivePtr<const TestObject> p = new TestObject;
+        ASSERT_TRUE(p);
+
+        // TestObject* raw = p.get();
+        const TestObject* constRaw = p.get();
+    }
+    {
+        const IntrusivePtr<TestObject> p = new TestObject;
+        ASSERT_TRUE(p);
+
+        // TestObject* raw = p.get();
+        const TestObject* constRaw = p.get();
+    }
+    {
+        IntrusivePtr<TestObject> p = new TestObject;
+        ASSERT_TRUE(p);
+
+        IntrusivePtr<const TestObject> cp1 = p.get();
+        IntrusivePtr<const TestObject> cp2 = p;
+        IntrusivePtr<const TestObject> cp3;
+        cp3 = p;
+
+        IntrusivePtr<const TestObject> p2 = cp2;
+        // IntrusivePtr<TestObject> p3 = cp2;
+        const IntrusivePtr<const TestObject> p4 = cp2;
+        // const IntrusivePtr<TestObject> p5 = cp2;
+    }
+}
+
 TEST(IntrusivePtrTests, CopyIncrementsReference)
 {
     auto* raw = new TestObject();
