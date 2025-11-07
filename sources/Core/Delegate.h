@@ -87,8 +87,12 @@ namespace Core
     public:
         using CallbackT = std::function<F>;
         using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
+        using Ptr = IntrusivePtr<Delegate>;
+        using CPtr = IntrusivePtr<const Delegate>;
 
     public:
+        ~Delegate() override = default;
+
         template<class... TArgs>
         void trigger(TArgs&&... args)
         {
@@ -122,6 +126,9 @@ namespace Core
         void reset() { _callbacks.clear(); }
 
         [[nodiscard]] typename ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
+
+    private:
+        Delegate() = default;
 
     private:
         CallbackContainerT _callbacks{};

@@ -28,61 +28,61 @@
 
 TEST(DelegateTest, SimpleTest1)
 {
-    Core::Delegate<void()> delegate;
+    auto delegate = Core::Delegate<void()>::Create();
 
     bool wasInvoked = false;
 
-    auto id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
+    auto id = delegate->subscribeAndGetID([&]() { wasInvoked = true; });
 
-    delegate.trigger();
+    delegate->trigger();
     EXPECT_TRUE(wasInvoked);
 }
 
 TEST(DelegateTest, SimpleTest2)
 {
-    Core::Delegate<void()> delegate;
+    auto delegate = Core::Delegate<void()>::Create();
 
     bool wasInvoked = false;
 
-    auto id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
-    EXPECT_EQ(1, delegate.getSubscriptionsCount());
-    EXPECT_FALSE(delegate.isEmpty());
+    auto id = delegate->subscribeAndGetID([&]() { wasInvoked = true; });
+    EXPECT_EQ(1, delegate->getSubscriptionsCount());
+    EXPECT_FALSE(delegate->isEmpty());
 
-    delegate.trigger();
+    delegate->trigger();
     EXPECT_TRUE(wasInvoked);
 
-    delegate.unsubscribe(id);
+    delegate->unsubscribe(id);
 
-    EXPECT_EQ(0, delegate.getSubscriptionsCount());
-    EXPECT_TRUE(delegate.isEmpty());
+    EXPECT_EQ(0, delegate->getSubscriptionsCount());
+    EXPECT_TRUE(delegate->isEmpty());
 }
 
 TEST(DelegateTest, SubscribeWithoutIDGetting)
 {
-    Core::Delegate<void()> delegate;
+    auto delegate = Core::Delegate<void()>::Create();
     {
         bool wasInvoked = false;
 
-        delegate.subscribe([&]() { wasInvoked = true; });
+        delegate->subscribe([&]() { wasInvoked = true; });
 
-        delegate.trigger();
+        delegate->trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(1, delegate.getSubscriptionsCount());
-    EXPECT_FALSE(delegate.isEmpty());
+    EXPECT_EQ(1, delegate->getSubscriptionsCount());
+    EXPECT_FALSE(delegate->isEmpty());
 }
 
 TEST(DelegateTest, UsingOfDelegateSubscriber)
 {
-    Core::Delegate<void()> delegate;
+    auto delegate = Core::Delegate<void()>::Create();
     {
         bool wasInvoked = false;
-        Core::DelegateSubscriber id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
-        delegate.trigger();
+        Core::DelegateSubscriber id = delegate->subscribeAndGetID([&]() { wasInvoked = true; });
+        delegate->trigger();
         EXPECT_TRUE(wasInvoked);
     }
-    EXPECT_EQ(0, delegate.getSubscriptionsCount());
-    EXPECT_TRUE(delegate.isEmpty());
+    EXPECT_EQ(0, delegate->getSubscriptionsCount());
+    EXPECT_TRUE(delegate->isEmpty());
 }
 
 TEST(DelegateTest, OutOfScopeDelegate)
@@ -91,7 +91,18 @@ TEST(DelegateTest, OutOfScopeDelegate)
     {
         Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
         Core::DelegateSubscriber id2 = delegate->subscribeAndGetID([&]() {});
-        delegate.reset();
+        delegate->reset();
+        // Shouldn't be any crashes here!!!
+    }
+}
+
+TEST(DelegateTest, OutOfScopeDelegateAndCopying)
+{
+    auto delegate = Core::Delegate<void()>::Create();
+    {
+        Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
+        Core::DelegateSubscriber id2 = id1;
+        delegate->reset();
         // Shouldn't be any crashes here!!!
     }
 }
