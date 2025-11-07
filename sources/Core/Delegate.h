@@ -142,6 +142,31 @@ namespace Core
                 });
         }
 
+        template<class RefObjectT, class ClassFuncT>
+        [[nodiscard]] ID subscribeAndGetID(RefObjectT* object, ClassFuncT func)
+        {
+            ID id(nullptr, ++_generatedID);
+            _callbacks.emplace(id, [object, func]<class... TArgs>(TArgs&&... args)
+                               { std::invoke(func, *object, std::forward<TArgs>(args)...); });
+            return id;
+        }
+
+        template<class RefObjectT, class ClassFuncT>
+        [[nodiscard]] ID subscribeAndGetID(const IntrusivePtr<RefObjectT>& object, ClassFuncT func)
+        {
+            ID id(nullptr, ++_generatedID);
+            _callbacks.emplace(
+                id,
+                [weak = WeakPtr<RefObjectT>(object), func]<class... TArgs>(TArgs&&... args)
+                {
+                    if (auto&& ptr = weak.tryLoad())
+                    {
+                        std::invoke(func, *ptr, std::forward<TArgs>(args)...);
+                    }
+                });
+            return id;
+        }
+
         void unsubscribe(const ID& id) override { _callbacks.erase(id); }
 
         [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept
