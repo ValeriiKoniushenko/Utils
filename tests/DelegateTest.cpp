@@ -24,6 +24,8 @@
 
 #include "Core/Delegate.h"
 
+#include "Core/IntrusivePtr.h"
+
 #include <gtest/gtest.h>
 
 TEST(DelegateTest, SimpleTest1)
@@ -160,4 +162,121 @@ TEST(DelegateTest, DelegateSubscriberPool)
         ASSERT_EQ(1, delegate->getSubscriptionsCount());
     }
     ASSERT_EQ(0, delegate->getSubscriptionsCount());
+}
+
+namespace
+{
+
+    class DelegateFixture : public ::testing::Test
+    {
+    protected:
+        std::stringstream output;
+        std::streambuf* oldOutput = nullptr;
+
+        void SetUp() override { oldOutput = std::cout.rdbuf(output.rdbuf()); }
+
+        void TearDown() override { std::cout.rdbuf(oldOutput); }
+    };
+
+    void globalCallbackFunc(int i)
+    {
+        std::cout << i;
+    }
+
+    struct Temp
+    {
+        int i = 0;
+
+        void set(int val)
+        {
+            i = val;
+            std::cout << i;
+        }
+    };
+
+    struct IntrTemp : public Core::IntrusiveRefCounter<IntrTemp>
+    {
+        INTRUSIVE_PTR_ADAPTERS(IntrTemp)
+
+        int i = 0;
+
+        void set(int val) { i = val; }
+    };
+} // namespace
+
+TEST_F(DelegateFixture, DifferentTypeOfSubsciptions)
+{
+    auto delegate = Core::Delegate<void(int)>::Create();
+
+    // static global function
+    delegate->subscribe(globalCallbackFunc);
+    delegate->trigger(1);
+
+    ASSERT_EQ("1", output.str());
+
+    // lambda
+    delegate->subscribe([](int i) { std::cout << i; });
+    delegate->trigger(2);
+    ASSERT_EQ("122", output.str());
+
+    // object's function
+    Temp temp;
+    delegate->subscribe(&temp, &Temp::set);
+    delegate->trigger(3);
+    ASSERT_EQ("122333", output.str());
+    ASSERT_EQ(3, temp.i);
+}
+
+TEST_F(DelegateFixture, SubscriptionWithWeakObjectRef)
+{
+    auto delegate = Core::Delegate<void(int)>::Create();
+
+    auto temp = IntrTemp::Create();
+
+    ASSERT_EQ(1, temp->getHardRefCount());
+    ASSERT_EQ(0, temp->getWeakRefCount());
+
+    delegate->subscribe(temp, &IntrTemp::set);
+
+    ASSERT_EQ(1, temp->getHardRefCount());
+    ASSERT_EQ(1, temp->getWeakRefCount()); // 1 - in lambda's [weak...]
+
+    delegate->trigger(4);
+    ASSERT_EQ(4, temp->i);
+
+    delegate.reset();
+
+    ASSERT_EQ(1, temp->getHardRefCount());
+    ASSERT_EQ(0, temp->getWeakRefCount());
+}
+
+TEST_F(DelegateFixture, SubscriptionWithWeakObjectRef2)
+{
+    auto delegate = Core::Delegate<void(int)>::Create();
+
+    auto temp = IntrTemp::Create();
+
+    ASSERT_EQ(1, temp->getHardRefCount());
+    ASSERT_EQ(0, temp->getWeakRefCount());
+
+    delegate->subscribe(temp, &IntrTemp::set);
+
+    ASSERT_EQ(1, temp->getHardRefCount());
+    ASSERT_EQ(1, temp->getWeakRefCount()); // 1 - in lambda's [weak...]
+
+    auto* unsafeViewer = temp.get();
+    temp.reset();
+
+    ASSERT_EQ(0, unsafeViewer->getHardRefCount());
+    ASSERT_EQ(1, unsafeViewer->getWeakRefCount()); // 1 - in lambda's [weak...]
+
+    delegate->trigger(6);
+    ASSERT_EQ(6, unsafeViewer->i);
+
+    delegate->trigger(4);
+    // The object MUST be deleted, so, can't even view
+    // ASSERT_EQ(0, unsafeViewer->getHardRefCount());
+    // ASSERT_EQ(0, unsafeViewer->getWeakRefCount());
+
+    delegate.reset();
 }

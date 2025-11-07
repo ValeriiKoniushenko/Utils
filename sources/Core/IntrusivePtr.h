@@ -33,14 +33,15 @@
 #define INTRUSIVE_PTR_ADAPTERS(ClassName)                                                          \
 public:                                                                                            \
     template<class... ArgsT>                                                                       \
-    [[nodiscard]] static IntrusivePtr<ClassName> Create(ArgsT&&... args)                           \
+    [[nodiscard]] static Core::IntrusivePtr<ClassName> Create(ArgsT&&... args)                     \
     {                                                                                              \
-        return IntrusivePtr<ClassName>(new ClassName(std::forward<ArgsT>(args)...));               \
+        return Core::IntrusivePtr<ClassName>(new ClassName(std::forward<ArgsT>(args)...));         \
     }                                                                                              \
     template<class... ArgsT>                                                                       \
-    [[nodiscard]] static IntrusivePtr<const ClassName> CreateConst(ArgsT&&... args)                \
+    [[nodiscard]] static Core::IntrusivePtr<const ClassName> CreateConst(ArgsT&&... args)          \
     {                                                                                              \
-        return IntrusivePtr<const ClassName>(new const ClassName(std::forward<ArgsT>(args)...));   \
+        return Core::IntrusivePtr<const ClassName>(                                                \
+            new const ClassName(std::forward<ArgsT>(args)...));                                    \
     }
 
 namespace Core
