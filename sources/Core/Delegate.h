@@ -40,7 +40,7 @@ namespace Core
         /**
          * @brief using to identify & control of the attached Delegate
          */
-        class ID final : public Utils::CopyableAndMoveable
+        class ID final
         {
         public:
             using IdT = uint32_t;
@@ -60,7 +60,7 @@ namespace Core
             {
             }
 
-            ~ID() override = default;
+            ~ID() = default;
 
             [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept
             {
@@ -80,7 +80,7 @@ namespace Core
     };
 
     template<class F>
-    class Delegate : public AbstractDelegate
+    class Delegate final : public AbstractDelegate
     {
         INTRUSIVE_PTR_ADAPTERS(Delegate)
 
@@ -135,18 +135,13 @@ namespace Core
         typename ID::IdT _generatedID = ID::invalidID;
     };
 
-    /**
-     * @brief Use it to remove at the end of the scope your subscription to a delegate.
-     * But, for now you must avoid situations where Delegate will be destroyed earlier
-     * than this object.
-     */
-    class DelegateSubscriber : public Utils::NotCopyableButMoveable
+    class DelegateSubscriber final
     {
     public:
         using ID = AbstractDelegate::ID;
 
         DelegateSubscriber() = default;
-        ~DelegateSubscriber() override { release(); }
+        ~DelegateSubscriber() { release(); }
 
         DelegateSubscriber(const ID& id)
             : _id{ id }

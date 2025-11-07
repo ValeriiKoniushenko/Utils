@@ -91,7 +91,7 @@ TEST(DelegateTest, OutOfScopeDelegate)
     {
         Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
         Core::DelegateSubscriber id2 = delegate->subscribeAndGetID([&]() {});
-        delegate->reset();
+        delegate.reset();
         // Shouldn't be any crashes here!!!
     }
 }
@@ -102,7 +102,7 @@ TEST(DelegateTest, OutOfScopeDelegateAndCopying)
     {
         Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
         Core::DelegateSubscriber id2 = id1;
-        delegate->reset();
+        delegate.reset();
         // Shouldn't be any crashes here!!!
     }
 }
