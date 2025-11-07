@@ -98,11 +98,66 @@ TEST(DelegateTest, OutOfScopeDelegate)
 
 TEST(DelegateTest, OutOfScopeDelegateAndCopying)
 {
-    auto delegate = Core::Delegate<void()>::Create();
+    auto delegate_ = Core::Delegate<void()>::Create();
+    auto delegate = Core::Delegate<void()>::Create(std::move(*delegate_));
+
     {
-        Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
+        Core::DelegateSubscriber id1 = delegate->subscribeAndGetID(
+            [&]()
+            {
+                int i = 123;
+                int is = 123;
+            });
         Core::DelegateSubscriber id2 = id1;
+
+        delegate_->trigger();
+        delegate->trigger();
+
         delegate.reset();
         // Shouldn't be any crashes here!!!
     }
+}
+
+TEST(DelegateTest, MoveDelegateSubscriber)
+{
+    auto delegate = Core::Delegate<void()>::Create();
+
+    {
+        bool val = false;
+        Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() { val = true; });
+
+        ASSERT_FALSE(val);
+        delegate->trigger();
+        ASSERT_TRUE(val);
+
+        Core::DelegateSubscriber id2 = std::move(id1);
+        val = false;
+
+        ASSERT_FALSE(val);
+        delegate->trigger();
+        ASSERT_TRUE(val);
+    }
+}
+
+TEST(DelegateTest, DelegateSubscriberPool)
+{
+    auto delegate = Core::Delegate<void()>::Create();
+
+    {
+        ASSERT_EQ(0, delegate->getSubscriptionsCount());
+
+        Core::DelegateSubscriberPoolGuard pool;
+        pool << delegate->subscribeAndGetID([&]() {});
+        pool << delegate->subscribeAndGetID([&]() {});
+        pool << delegate->subscribeAndGetID([&]() {});
+
+        ASSERT_EQ(3, delegate->getSubscriptionsCount());
+        pool.clearAndReleaseAll();
+
+        ASSERT_EQ(0, delegate->getSubscriptionsCount());
+
+        pool << delegate->subscribeAndGetID([&]() {});
+        ASSERT_EQ(1, delegate->getSubscriptionsCount());
+    }
+    ASSERT_EQ(0, delegate->getSubscriptionsCount());
 }

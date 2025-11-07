@@ -25,11 +25,11 @@
 #pragma once
 
 #include "IntrusivePtr.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
+#include <vector>
 
 namespace Core
 {
@@ -53,6 +53,10 @@ namespace Core
 
         public:
             ID() = default;
+            ID(const ID&) = default;
+            ID& operator=(const ID&) = default;
+            ID(ID&&) noexcept = default;
+            ID& operator=(ID&&) noexcept = default;
 
             ID(AbstractDelegate* owner, IdT newId)
                 : _owner{ owner },
@@ -128,6 +132,7 @@ namespace Core
         [[nodiscard]] typename ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
 
     private:
+        // Use Delegate<..>::Create() to create an ob
         Delegate() = default;
 
     private:
@@ -140,36 +145,46 @@ namespace Core
     public:
         using ID = AbstractDelegate::ID;
 
+    public:
         DelegateSubscriber() = default;
-        ~DelegateSubscriber() { release(); }
+        ~DelegateSubscriber();
 
-        DelegateSubscriber(const ID& id)
-            : _id{ id }
-        {
-        }
+        DelegateSubscriber(const ID& id);
+        DelegateSubscriber& operator=(const ID& id);
 
-        DelegateSubscriber& operator=(const ID& id)
-        {
-            release();
-            _id = id;
-            return *this;
-        }
+        DelegateSubscriber(const DelegateSubscriber& other) { *this = other; }
+        DelegateSubscriber& operator=(const DelegateSubscriber& other);
+        DelegateSubscriber(DelegateSubscriber&& other) noexcept { *this = std::move(other); }
+        DelegateSubscriber& operator=(DelegateSubscriber&& other) noexcept;
 
-        void release()
-        {
-            if (_id.isValid())
-            {
-                if (auto weak = _id.getOwner().tryLoad())
-                {
-                    weak->unsubscribe(_id);
-                }
-            }
-        }
+        void release();
 
         [[nodiscard]] ID& getID() noexcept { return _id; }
+        [[nodiscard]] const ID& getID() const noexcept { return _id; }
 
     private:
         ID _id;
+    };
+
+    class DelegateSubscriberPoolGuard final
+    {
+    public:
+        DelegateSubscriberPoolGuard() = default;
+        ~DelegateSubscriberPoolGuard() = default;
+        DelegateSubscriberPoolGuard(const DelegateSubscriberPoolGuard&) = default;
+        DelegateSubscriberPoolGuard(DelegateSubscriberPoolGuard&&) noexcept = default;
+
+        void add(DelegateSubscriber&& subscriber);
+        void add(DelegateSubscriber& subscriber);
+        void operator<<(DelegateSubscriber&& subscriber) { add(std::move(subscriber)); }
+        void operator<<(DelegateSubscriber& subscriber) { add(subscriber); }
+
+        void clearAndReleaseAll();
+        [[nodiscard]] bool isEmpty() const noexcept { return _pool.empty(); }
+        [[nodiscard]] std::size_t size() const noexcept { return _pool.size(); }
+
+    private:
+        std::vector<DelegateSubscriber> _pool;
     };
 
 } // namespace Core
