@@ -104,20 +104,36 @@ namespace Core
 
         [[nodiscard]] constexpr T getHeight() const noexcept { return Math::Abs(_top - _bottom); }
 
-        [[nodiscard]] constexpr GlobalPositionT getLeftTop() const noexcept { return GlobalPositionT{ _left, _top }; }
+        [[nodiscard]] constexpr GlobalPositionT getLeftTop() const noexcept
+        {
+            return GlobalPositionT{ _left, _top };
+        }
 
-        [[nodiscard]] constexpr GlobalPositionT getLeftBottom() const noexcept { return GlobalPositionT{ _left, _bottom }; }
+        [[nodiscard]] constexpr GlobalPositionT getLeftBottom() const noexcept
+        {
+            return GlobalPositionT{ _left, _bottom };
+        }
 
-        [[nodiscard]] constexpr GlobalPositionT getRightBottom() const noexcept { return GlobalPositionT{ _right, _bottom }; }
+        [[nodiscard]] constexpr GlobalPositionT getRightBottom() const noexcept
+        {
+            return GlobalPositionT{ _right, _bottom };
+        }
 
-        [[nodiscard]] constexpr GlobalPositionT getRightTop() const noexcept { return GlobalPositionT{ _right, _top }; }
+        [[nodiscard]] constexpr GlobalPositionT getRightTop() const noexcept
+        {
+            return GlobalPositionT{ _right, _top };
+        }
 
         [[nodiscard]] constexpr GlobalPositionT getCenter() const noexcept
         {
-            return GlobalPositionT{ (_left + _right) / static_cast<T>(2), (_bottom + _top) / static_cast<T>(2) };
+            return GlobalPositionT{ (_left + _right) / static_cast<T>(2),
+                                    (_bottom + _top) / static_cast<T>(2) };
         }
 
-        [[nodiscard]] constexpr bool isValid() const noexcept { return _top >= _bottom && _left <= _right; }
+        [[nodiscard]] constexpr bool isValid() const noexcept
+        {
+            return _top >= _bottom && _left <= _right;
+        }
 
         bool requireValid() const noexcept { return Verify(isValid()); }
 
@@ -128,8 +144,8 @@ namespace Core
 
         [[nodiscard]] constexpr bool isContain(const Rect<T>& rect) const noexcept
         {
-            return isContain(rect.getLeftBottom()) || isContain(rect.getLeftTop()) || isContain(rect.getRightBottom()) ||
-                   isContain(rect.getRightTop());
+            return isContain(rect.getLeftBottom()) || isContain(rect.getLeftTop())
+                   || isContain(rect.getRightBottom()) || isContain(rect.getRightTop());
         }
 
     private:

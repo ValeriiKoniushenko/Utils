@@ -135,7 +135,8 @@ namespace Core
             }
         }
 
-        [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delimiter, CharT*& context) noexcept
+        [[nodiscard]] static CharT* StrTok(CharT* string, const CharT* delimiter,
+                                           CharT*& context) noexcept
         {
             if constexpr (sizeof(CharT) == 1)
             {
@@ -158,7 +159,8 @@ namespace Core
                 return wcsstr(mainString, subString);
             }
         }
-        [[nodiscard]] static const CharT* StrStr(const CharT* mainString, const CharT* subString) noexcept
+        [[nodiscard]] static const CharT* StrStr(const CharT* mainString,
+                                                 const CharT* subString) noexcept
         {
             if constexpr (sizeof(CharT) == 1)
             {
@@ -261,7 +263,8 @@ namespace Core
             return Comparison::Less;
         }
 
-        static const CharT* ReverseStrStr(const CharT* string, const CharT* substr, const CharT* end = nullptr)
+        static const CharT* ReverseStrStr(const CharT* string, const CharT* substr,
+                                          const CharT* end = nullptr)
         {
             if (!string)
             {
@@ -297,7 +300,8 @@ namespace Core
         }
         static CharT* ReverseStrStr(CharT* string, const CharT* substr, const CharT* end = nullptr)
         {
-            return const_cast<CharT*>(ReverseStrStr(static_cast<const CharT*>(string), substr, end));
+            return const_cast<CharT*>(
+                ReverseStrStr(static_cast<const CharT*>(string), substr, end));
         }
 
         template<class T>
@@ -320,10 +324,12 @@ namespace Core
                 else
                 {
                     CharT* end = nullptr;
-                    const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end) : std::wcstod(str, &end);
+                    const auto r = std::is_same_v<T, float> ? std::wcstof(str, &end)
+                                                            : std::wcstod(str, &end);
                     if (end == str)
                     {
-                        throw std::invalid_argument("Can't convert wide string to the floating type");
+                        throw std::invalid_argument(
+                            "Can't convert wide string to the floating type");
                     }
                     return r;
                 }
@@ -337,36 +343,45 @@ namespace Core
                     // char
                     if constexpr (sizeof(CharT) == 1)
                     {
-                        return static_cast<T>(std::is_signed_v<T> ? std::stoi(str) : std::stoul(str));
+                        return static_cast<T>(std::is_signed_v<T> ? std::stoi(str)
+                                                                  : std::stoul(str));
                     }
                     // wchar_t
                     else
                     {
                         CharT* end = nullptr;
-                        const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10) : std::wcstoul(str, &end, 10));
+                        const auto r
+                            = static_cast<T>(std::is_signed_v<T> ? std::wcstol(str, &end, 10)
+                                                                 : std::wcstoul(str, &end, 10));
                         if (end == str)
                         {
-                            throw std::invalid_argument("Can't convert wide string to the [u]int32");
+                            throw std::invalid_argument(
+                                "Can't convert wide string to the [u]int32");
                         }
                         return r;
                     }
                 }
                 // >>> non-narrow int64 <<<
-                else if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>, std::size_t>)
+                else if constexpr (Utils::IsNonNarrowingConvertibleV<std::make_unsigned_t<T>,
+                                                                     std::size_t>)
                 {
                     // char
                     if constexpr (sizeof(CharT) == 1)
                     {
-                        return static_cast<T>(std::is_signed_v<T> ? std::stoll(str) : std::stoull(str));
+                        return static_cast<T>(std::is_signed_v<T> ? std::stoll(str)
+                                                                  : std::stoull(str));
                     }
                     // wchar_t
                     else
                     {
                         CharT* end = nullptr;
-                        const auto r = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10) : std::wcstoull(str, &end, 10));
+                        const auto r
+                            = static_cast<T>(std::is_signed_v<T> ? std::wcstoll(str, &end, 10)
+                                                                 : std::wcstoull(str, &end, 10));
                         if (end == str)
                         {
-                            throw std::invalid_argument("Can't convert wide string to the [u]int64");
+                            throw std::invalid_argument(
+                                "Can't convert wide string to the [u]int64");
                         }
                         return r;
                     }
@@ -378,7 +393,8 @@ namespace Core
             }
             else
             {
-                static_assert(Utils::AlwaysFalseV<T>, "Unsupported type. Can't convert from string to your T");
+                static_assert(Utils::AlwaysFalseV<T>,
+                              "Unsupported type. Can't convert from string to your T");
             }
             return {};
         }
@@ -404,11 +420,20 @@ namespace Core
         {
         }
 
-        [[nodiscard]] InternalStringView<CharT> toReadOnly() noexcept { return { str.get(), size }; }
+        [[nodiscard]] InternalStringView<CharT> toReadOnly() noexcept
+        {
+            return { str.get(), size };
+        }
 
-        [[nodiscard]] bool operator<(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less; }
+        [[nodiscard]] bool operator<(const StringData& other) const
+        {
+            return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less;
+        }
 
-        [[nodiscard]] bool operator==(const StringData& other) const { return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal; }
+        [[nodiscard]] bool operator==(const StringData& other) const
+        {
+            return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal;
+        }
 
         std::unique_ptr<CharT[]> str;
         std::size_t size = InternalStringView<CharT>::invalidSize;
@@ -449,7 +474,10 @@ namespace Core
             return InternalStringViewT{ addr, size };
         }
 
-        [[nodiscard]] bool isStatic(const CharT* string, std::size_t size) { return _strings.contains(Toolset::Hash(string, size)); }
+        [[nodiscard]] bool isStatic(const CharT* string, std::size_t size)
+        {
+            return _strings.contains(Toolset::Hash(string, size));
+        }
 
         void clear()
         {
@@ -507,11 +535,14 @@ namespace Core
 
     public:
         template<bool IsReversed>
-        class BaseIterator : public IRandomAccessIterator<CharT, BaseIterator<IsReversed>, Utils::CopyableAndMoveable, true>
+        class BaseIterator :
+            public IRandomAccessIterator<CharT, BaseIterator<IsReversed>,
+                                         Utils::CopyableAndMoveable, true>
         {
         public:
             using Self = BaseIterator;
-            using Super = IRandomAccessIterator<CharT, BaseIterator, Utils::CopyableAndMoveable, true>;
+            using Super
+                = IRandomAccessIterator<CharT, BaseIterator, Utils::CopyableAndMoveable, true>;
             using iterator_category = std::random_access_iterator_tag;
             using value_type = typename BaseString<CharT>::value_type;
             using difference_type = typename BaseString<CharT>::difference_type;
@@ -521,13 +552,25 @@ namespace Core
         public:
             BaseIterator() = default;
 
-            [[nodiscard]] bool operator==(const Self& other) const noexcept override { return _data == other._data; };
+            [[nodiscard]] bool operator==(const Self& other) const noexcept override
+            {
+                return _data == other._data;
+            };
 
-            [[nodiscard]] bool operator!=(const Self& other) const noexcept override { return _data != other._data; };
+            [[nodiscard]] bool operator!=(const Self& other) const noexcept override
+            {
+                return _data != other._data;
+            };
 
-            [[nodiscard]] const typename Super::DataRefT operator*() const noexcept override { return *_data; }
+            [[nodiscard]] const typename Super::DataRefT operator*() const noexcept override
+            {
+                return *_data;
+            }
 
-            [[nodiscard]] const typename Super::DataRefT operator->() const override { return *_data; }
+            [[nodiscard]] const typename Super::DataRefT operator->() const override
+            {
+                return *_data;
+            }
 
             [[nodiscard]] typename Super::DataRefT operator*() noexcept override { return *_data; }
 
@@ -571,9 +614,15 @@ namespace Core
                 return *this;
             }
 
-            [[nodiscard]] Self operator+(int step) const noexcept override { return Self{ _data + (IsReversed ? -step : step), _owner }; }
+            [[nodiscard]] Self operator+(int step) const noexcept override
+            {
+                return Self{ _data + (IsReversed ? -step : step), _owner };
+            }
 
-            [[nodiscard]] Self operator-(int step) const noexcept override { return Self{ _data - (IsReversed ? -step : step), _owner }; }
+            [[nodiscard]] Self operator-(int step) const noexcept override
+            {
+                return Self{ _data - (IsReversed ? -step : step), _owner };
+            }
 
             difference_type operator-(const Self& other) const noexcept
             {
@@ -585,7 +634,10 @@ namespace Core
                 return {};
             }
 
-            [[nodiscard]] bool operator>(const Self& other) const noexcept override { return (*this <=> other) == Comparison::Greater; }
+            [[nodiscard]] bool operator>(const Self& other) const noexcept override
+            {
+                return (*this <=> other) == Comparison::Greater;
+            }
 
             [[nodiscard]] bool operator>=(const Self& other) const noexcept override
             {
@@ -593,7 +645,10 @@ namespace Core
                 return result == Comparison::Equal || result == Comparison::Greater;
             }
 
-            [[nodiscard]] bool operator<(const Self& other) const noexcept override { return (*this <=> other) == Comparison::Less; }
+            [[nodiscard]] bool operator<(const Self& other) const noexcept override
+            {
+                return (*this <=> other) == Comparison::Less;
+            }
 
             [[nodiscard]] bool operator<=(const Self& other) const noexcept override
             {
@@ -659,15 +714,36 @@ namespace Core
         [[nodiscard]] ConstIterator begin() const noexcept { return Iterator{ _string, this }; }
         [[nodiscard]] ConstIterator cbegin() const noexcept { return Iterator{ _string, this }; }
         [[nodiscard]] Iterator end() noexcept { return Iterator{ _string + _size, this }; }
-        [[nodiscard]] ConstIterator end() const noexcept { return Iterator{ _string + _size, this }; }
-        [[nodiscard]] ConstIterator cend() const noexcept { return Iterator{ _string + _size, this }; }
+        [[nodiscard]] ConstIterator end() const noexcept
+        {
+            return Iterator{ _string + _size, this };
+        }
+        [[nodiscard]] ConstIterator cend() const noexcept
+        {
+            return Iterator{ _string + _size, this };
+        }
 
-        [[nodiscard]] ReverseIterator rbegin() noexcept { return ReverseIterator{ _string + _size, this }; }
-        [[nodiscard]] ConstReverseIterator rbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
-        [[nodiscard]] ConstReverseIterator crbegin() const noexcept { return ReverseIterator{ _string + _size, this }; }
+        [[nodiscard]] ReverseIterator rbegin() noexcept
+        {
+            return ReverseIterator{ _string + _size, this };
+        }
+        [[nodiscard]] ConstReverseIterator rbegin() const noexcept
+        {
+            return ReverseIterator{ _string + _size, this };
+        }
+        [[nodiscard]] ConstReverseIterator crbegin() const noexcept
+        {
+            return ReverseIterator{ _string + _size, this };
+        }
         [[nodiscard]] ReverseIterator rend() noexcept { return ReverseIterator{ _string, this }; }
-        [[nodiscard]] ConstReverseIterator rend() const noexcept { return ReverseIterator{ _string, this }; }
-        [[nodiscard]] ConstReverseIterator crend() const noexcept { return ReverseIterator{ _string, this }; }
+        [[nodiscard]] ConstReverseIterator rend() const noexcept
+        {
+            return ReverseIterator{ _string, this };
+        }
+        [[nodiscard]] ConstReverseIterator crend() const noexcept
+        {
+            return ReverseIterator{ _string, this };
+        }
 
         /**
          * @brief This function will use the provided string as a static string
@@ -786,7 +862,8 @@ namespace Core
         {
             if (isEmpty() || !other)
             {
-                return ((_string && _string[0] == 0) || _string == nullptr) && ((other && other[0] == 0) || other == nullptr);
+                return ((_string && _string[0] == 0) || _string == nullptr)
+                       && ((other && other[0] == 0) || other == nullptr);
             }
             return Toolset::Cmp(_string, other) == Comparison::Equal;
         }
@@ -927,7 +1004,8 @@ namespace Core
 
         [[nodiscard]] CharT at(std::size_t index) const
         {
-            if (!Verify(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!Verify(!isEmpty() || _size < index,
+                        "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
@@ -937,7 +1015,8 @@ namespace Core
 
         [[nodiscard]] CharT safeAt(std::size_t index) const
         {
-            if (!Verify(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index."))
+            if (!Verify(!isEmpty() || _size < index,
+                        "Impossible to work with nullptr string. or invalid index."))
             {
                 return {};
             }
@@ -947,7 +1026,8 @@ namespace Core
 
         [[nodiscard]] CharT& at(std::size_t index)
         {
-            Assert(!isEmpty() || _size < index, "Impossible to work with nullptr string. or invalid index.");
+            Assert(!isEmpty() || _size < index,
+                   "Impossible to work with nullptr string. or invalid index.");
             tryToMakeAsDynamic();
             return _string[index];
         }
@@ -1044,7 +1124,9 @@ namespace Core
                 memset(buffer.data(), 0, buffer.size() * sizeof(buffer[0]));
                 Self temp;
 
-                if (auto result = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value); result.ec != std::errc())
+                if (auto result
+                    = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+                    result.ec != std::errc())
                 {
                     Assert(false, std::make_error_code(result.ec).message().c_str());
                     return temp;
@@ -1089,7 +1171,8 @@ namespace Core
             {
                 expr = L"{}";
             }
-            (temp.replaceFirst(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()), ...);
+            (temp.replaceFirst(static_cast<const CharT*>(expr), MakeFrom(args).toStdStringView()),
+             ...);
 
             return temp;
         }
@@ -1215,7 +1298,8 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (Verify(iterator._owner == this && iterator._data, "Was passed an invalid iterator"))
+                if (Verify(iterator._owner == this && iterator._data,
+                           "Was passed an invalid iterator"))
                 {
                     erase(iterator._data - _string);
                 }
@@ -1226,8 +1310,9 @@ namespace Core
         {
             if (!isEmpty())
             {
-                if (Verify(from._owner == this && from._data, "Was passed an invalid iterator 'from'") &&
-                    Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
+                if (Verify(from._owner == this && from._data,
+                           "Was passed an invalid iterator 'from'")
+                    && Verify(to._owner == this && to._data, "Was passed an invalid iterator 'to'"))
                 {
                     erase(from._data - _string, to._data - _string);
                 }
@@ -1271,11 +1356,7 @@ namespace Core
 
         [[nodiscard]] static bool IsContainChar(CharT ch, StdStringViewT set) noexcept
         {
-            return std::ranges::any_of(set,
-                                       [ch](auto value)
-                                       {
-                                           return value == ch;
-                                       });
+            return std::ranges::any_of(set, [ch](auto value) { return value == ch; });
         }
 
         /**
@@ -1285,7 +1366,9 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions perl compile options
          */
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const char* expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const char* expr, std::size_t offset = 0,
+                                                        std::size_t limit = 0,
+                                                        uint32_t matchOptions = 0,
                                                         uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
@@ -1309,18 +1392,27 @@ namespace Core
 
             return {};
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(std::basic_string_view<char> expr,
+                                                        std::size_t offset = 0,
+                                                        std::size_t limit = 0,
+                                                        uint32_t matchOptions = 0,
+                                                        uint32_t compileOptions = 0) const
         {
             return regexFind(expr.data(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const std::basic_string<char>& expr,
+                                                        std::size_t offset = 0,
+                                                        std::size_t limit = 0,
+                                                        uint32_t matchOptions = 0,
+                                                        uint32_t compileOptions = 0) const
         {
             return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] RegexMatch::MatchedData regexFind(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                        uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedData regexFind(const BaseString<char>& expr,
+                                                        std::size_t offset = 0,
+                                                        std::size_t limit = 0,
+                                                        uint32_t matchOptions = 0,
+                                                        uint32_t compileOptions = 0) const
         {
             return regexFind(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
@@ -1332,8 +1424,11 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions PCRE regex compile options
          */
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const char* expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const char* expr,
+                                                                 std::size_t offset = 0,
+                                                                 std::size_t limit = 0,
+                                                                 uint32_t matchOptions = 0,
+                                                                 uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
             {
@@ -1356,18 +1451,25 @@ namespace Core
 
             return {};
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(std::basic_string_view<char> expr,
+                                                                 std::size_t offset = 0,
+                                                                 std::size_t limit = 0,
+                                                                 uint32_t matchOptions = 0,
+                                                                 uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.data(), offset, limit, matchOptions, 0);
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(
+            const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
+            uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
         }
-        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0,
-                                                                 uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
+        [[nodiscard]] RegexMatch::MatchedDataVector regexFindAll(const BaseString<char>& expr,
+                                                                 std::size_t offset = 0,
+                                                                 std::size_t limit = 0,
+                                                                 uint32_t matchOptions = 0,
+                                                                 uint32_t compileOptions = 0) const
         {
             return regexFindAll(expr.c_str(), offset, limit, matchOptions, 0);
         }
@@ -1379,27 +1481,32 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          * @param compileOptions PCRE2 regex compile options
          */
-        [[nodiscard]] bool regexMatch(const char* expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const char* expr, std::size_t offset = 0,
+                                      std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             if (!isEmpty())
             {
-                return regexFind(expr, offset, limit, matchOptions | PCRE2_ANCHORED, compileOptions).isMatched();
+                return regexFind(expr, offset, limit, matchOptions | PCRE2_ANCHORED, compileOptions)
+                    .isMatched();
             }
 
             return false;
         }
-        [[nodiscard]] bool regexMatch(std::basic_string_view<char> expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(std::basic_string_view<char> expr, std::size_t offset = 0,
+                                      std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.data(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] bool regexMatch(const std::basic_string<char>& expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const std::basic_string<char>& expr, std::size_t offset = 0,
+                                      std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
         }
-        [[nodiscard]] bool regexMatch(const BaseString<char>& expr, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        [[nodiscard]] bool regexMatch(const BaseString<char>& expr, std::size_t offset = 0,
+                                      std::size_t limit = 0, uint32_t matchOptions = 0,
                                       uint32_t compileOptions = 0) const
         {
             return regexMatch(expr.c_str(), offset, limit, matchOptions, compileOptions);
@@ -1416,7 +1523,8 @@ namespace Core
          * @param matchOptions corresponding to PCRE2 rules
          */
         template<class FuncT>
-        void regexIterate(const char* expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        void regexIterate(const char* expr, FuncT&& callback, std::size_t offset = 0,
+                          std::size_t limit = 0, uint32_t matchOptions = 0,
                           uint32_t compileOptions = 0) const
         {
             if (isEmpty() || !expr)
@@ -1439,22 +1547,28 @@ namespace Core
             }
         }
         template<class FuncT>
-        void regexIterate(std::basic_string_view<char> expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0,
-                          uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
-        {
-            regexIterate(expr.data(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
-        }
-        template<class FuncT>
-        void regexIterate(const std::basic_string<char>& expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0,
-                          uint32_t matchOptions = 0, uint32_t compileOptions = 0) const
-        {
-            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
-        }
-        template<class FuncT>
-        void regexIterate(const BaseString<char>& expr, FuncT&& callback, std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+        void regexIterate(std::basic_string_view<char> expr, FuncT&& callback,
+                          std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
                           uint32_t compileOptions = 0) const
         {
-            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit, matchOptions, compileOptions);
+            regexIterate(expr.data(), std::forward<decltype(callback)>(callback), offset, limit,
+                         matchOptions, compileOptions);
+        }
+        template<class FuncT>
+        void regexIterate(const std::basic_string<char>& expr, FuncT&& callback,
+                          std::size_t offset = 0, std::size_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
+        {
+            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit,
+                         matchOptions, compileOptions);
+        }
+        template<class FuncT>
+        void regexIterate(const BaseString<char>& expr, FuncT&& callback, std::size_t offset = 0,
+                          std::size_t limit = 0, uint32_t matchOptions = 0,
+                          uint32_t compileOptions = 0) const
+        {
+            regexIterate(expr.c_str(), std::forward<decltype(callback)>(callback), offset, limit,
+                         matchOptions, compileOptions);
         }
 
         /**
@@ -1468,7 +1582,8 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        bool regexReplace(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
+        bool regexReplace(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2,
+                          std::size_t offset = 0, std::size_t limit = 0,
                           uint32_t replaceOptions = 0)
         {
             if (isEmpty() || !expr)
@@ -1511,20 +1626,26 @@ namespace Core
 
             return false;
         }
-        bool regexReplace(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
-                          std::size_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplace(std::basic_string_view<char> expr, StdStringViewT newValue,
+                          int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
+                          uint32_t replaceOptions = 0)
         {
-            return regexReplace(expr.data(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+            return regexReplace(expr.data(), newValue, predictedScaleSize, offset, limit,
+                                replaceOptions);
         }
-        bool regexReplace(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
-                          std::size_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplace(const std::basic_string<char>& expr, StdStringViewT newValue,
+                          int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
+                          uint32_t replaceOptions = 0)
         {
-            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit,
+                                replaceOptions);
         }
-        bool regexReplace(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
-                          std::size_t limit = 0, uint32_t replaceOptions = 0)
+        bool regexReplace(const BaseString<char>& expr, StdStringViewT newValue,
+                          int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
+                          uint32_t replaceOptions = 0)
         {
-            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit, replaceOptions);
+            return regexReplace(expr.c_str(), newValue, predictedScaleSize, offset, limit,
+                                replaceOptions);
         }
 
         /**
@@ -1538,25 +1659,33 @@ namespace Core
          * @param limit string size for searching of the matches
          * @param replaceOptions corresponding to PCRE2 rules
          */
-        bool regexReplaceAll(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0, std::size_t limit = 0,
+        bool regexReplaceAll(const char* expr, StdStringViewT newValue, int predictedScaleSize = 2,
+                             std::size_t offset = 0, std::size_t limit = 0,
                              uint32_t replaceOptions = 0)
         {
-            return regexReplace(expr, std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+            return regexReplace(expr, std::move(newValue), predictedScaleSize, offset, limit,
+                                replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(std::basic_string_view<char> expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+        bool regexReplaceAll(std::basic_string_view<char> expr, StdStringViewT newValue,
+                             int predictedScaleSize = 2, std::size_t offset = 0,
                              std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
-            return regexReplaceAll(expr.data(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+            return regexReplaceAll(expr.data(), std::move(newValue), predictedScaleSize, offset,
+                                   limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(const std::basic_string<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+        bool regexReplaceAll(const std::basic_string<char>& expr, StdStringViewT newValue,
+                             int predictedScaleSize = 2, std::size_t offset = 0,
                              std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
-            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset,
+                                   limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
-        bool regexReplaceAll(const BaseString<char>& expr, StdStringViewT newValue, int predictedScaleSize = 2, std::size_t offset = 0,
+        bool regexReplaceAll(const BaseString<char>& expr, StdStringViewT newValue,
+                             int predictedScaleSize = 2, std::size_t offset = 0,
                              std::size_t limit = 0, uint32_t replaceOptions = 0)
         {
-            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset, limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
+            return regexReplaceAll(expr.c_str(), std::move(newValue), predictedScaleSize, offset,
+                                   limit, replaceOptions | PCRE2_SUBSTITUTE_GLOBAL);
         }
 
         [[nodiscard]] Self getCopyAsDynamic() const { return BaseString(_string, _size); }
@@ -1610,7 +1739,8 @@ namespace Core
                 reserve(finalSize * capacityMultiplier);
             }
 
-            memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str, size * sizeof(CharT));
+            memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str,
+                     size * sizeof(CharT));
             _size += size;
             _string[_size] = 0;
         }
@@ -1639,7 +1769,8 @@ namespace Core
                 reserve(finalSize * capacityMultiplier);
             }
 
-            memcpy_s(_string + size, (_capacity - size) * sizeof(CharT), _string, _size * sizeof(CharT));
+            memcpy_s(_string + size, (_capacity - size) * sizeof(CharT), _string,
+                     _size * sizeof(CharT));
             memcpy_s(_string, _capacity * sizeof(CharT), str, size * sizeof(CharT));
             _size += size;
             _string[_size] = 0;
@@ -1671,7 +1802,8 @@ namespace Core
         {
             if (!isEmpty())
             {
-                memcpy_s(dest, count * sizeof(CharT), _string + offset, (std::min)(_size - offset, count) * sizeof(CharT));
+                memcpy_s(dest, count * sizeof(CharT), _string + offset,
+                         (std::min)(_size - offset, count) * sizeof(CharT));
                 dest[count] = 0;
             }
         }
@@ -1696,7 +1828,8 @@ namespace Core
 
             if (auto newString = new CharT[newCapacity])
             {
-                memcpy_s(newString, newCapacity * sizeof(CharT), _string, newCapacity * sizeof(CharT));
+                memcpy_s(newString, newCapacity * sizeof(CharT), _string,
+                         newCapacity * sizeof(CharT));
 
                 if (isDynamic())
                 {
@@ -1708,7 +1841,10 @@ namespace Core
             }
         }
 
-        [[nodiscard]] std::size_t capacity() const noexcept { return isStatic() ? _size + 1 : _capacity; }
+        [[nodiscard]] std::size_t capacity() const noexcept
+        {
+            return isStatic() ? _size + 1 : _capacity;
+        }
 
         void insert(Iterator iterator, const CharT* str, std::size_t size = invalidSize)
         {
@@ -1749,9 +1885,13 @@ namespace Core
         }
 
         [[nodiscard]] bool isStatic() const noexcept { return _string && _capacity == maxCapacity; }
-        [[nodiscard]] bool isDynamic() const noexcept { return _string && _capacity != maxCapacity; }
+        [[nodiscard]] bool isDynamic() const noexcept
+        {
+            return _string && _capacity != maxCapacity;
+        }
 
-        [[nodiscard]] Comparison compare(StdStringViewT other, const bool isIgnoreCase = false) const
+        [[nodiscard]] Comparison compare(StdStringViewT other,
+                                         const bool isIgnoreCase = false) const
         {
             if (isEmpty() || other.empty())
             {
@@ -1772,7 +1912,8 @@ namespace Core
                         return Comparison::Equal;
                     }
 
-                    const auto diff = Toolset::ToUpper(_string[index]) - Toolset::ToUpper(other[index]);
+                    const auto diff
+                        = Toolset::ToUpper(_string[index]) - Toolset::ToUpper(other[index]);
                     if (diff > 0 || _string[index + 1] == 0)
                     {
                         return Comparison::Greater;
@@ -1788,7 +1929,8 @@ namespace Core
             return Toolset::Cmp(_string, other.data());
         }
 
-        [[nodiscard]] const CharT* find(StdStringViewT other, std::size_t baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* find(StdStringViewT other,
+                                        std::size_t baseOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1801,7 +1943,8 @@ namespace Core
             }
             return Toolset::StrStr(_string + baseOffset, other.data());
         }
-        [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other, std::size_t baseOffset = 0) const noexcept
+        [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other,
+                                                  std::size_t baseOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1815,7 +1958,8 @@ namespace Core
             return Toolset::StrIStr(_string + baseOffset, other.data());
         }
 
-        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, std::size_t baseOffset = 0, std::size_t limitOffset = 0) const noexcept
+        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, std::size_t baseOffset = 0,
+                                               std::size_t limitOffset = 0) const noexcept
         {
             if (isEmpty())
             {
@@ -1827,7 +1971,8 @@ namespace Core
                 return _string;
             }
 
-            return Toolset::ReverseStrStr(_string + baseOffset, other.data(), _string + size() - limitOffset);
+            return Toolset::ReverseStrStr(_string + baseOffset, other.data(),
+                                          _string + size() - limitOffset);
         }
 
         [[nodiscard]] std::vector<const CharT*> findAll(StdStringViewT other) const noexcept
@@ -1851,7 +1996,8 @@ namespace Core
 
             return strings;
         }
-        [[nodiscard]] std::vector<const CharT*> findAllIgnoreCase(StdStringViewT other) const noexcept
+        [[nodiscard]] std::vector<const CharT*> findAllIgnoreCase(
+            StdStringViewT other) const noexcept
         {
             if (isEmpty() || other.empty())
             {
@@ -1953,7 +2099,8 @@ namespace Core
             if (other.isDynamic())
             {
                 resize(other._size);
-                memcpy_s(_string, _size * sizeof(CharT), other._string, other._size * sizeof(CharT));
+                memcpy_s(_string, _size * sizeof(CharT), other._string,
+                         other._size * sizeof(CharT));
                 _string[_size] = 0;
             }
             else
@@ -2153,9 +2300,12 @@ namespace Core
             return 2;
         }
 
-        static std::size_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF) noexcept
+        static std::size_t GetLinesCountInText(const CharT* source, const CharT* end = nullptr,
+                                               LineSeparator separator = LineSeparator::LF) noexcept
         {
-            if (!Verify(source, "Impossible to calculate count of lines in the text, because was passed NULL pointer to the string."))
+            if (!Verify(source,
+                        "Impossible to calculate count of lines in the text, because was passed "
+                        "NULL pointer to the string."))
             {
                 return 0;
             }
@@ -2175,9 +2325,11 @@ namespace Core
             return ++count;
         }
 
-        static const CharT* FindNextLine(const CharT* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        static const CharT* FindNextLine(const CharT* string, const CharT* end = nullptr,
+                                         LineSeparator separator = LineSeparator::LF)
         {
-            const auto* result = StringToolset<CharT>::StrStr(string, GetLineSeparatorString(separator));
+            const auto* result
+                = StringToolset<CharT>::StrStr(string, GetLineSeparatorString(separator));
             if (result != nullptr)
             {
                 if (end != nullptr && result >= end)
@@ -2190,19 +2342,23 @@ namespace Core
             return result;
         }
 
-        static CharT* FindNextLine(CharT* string, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        static CharT* FindNextLine(CharT* string, const CharT* end = nullptr,
+                                   LineSeparator separator = LineSeparator::LF)
         {
-            return const_cast<const CharT*>(FindNextLine(static_cast<const CharT*>(string), end, separator));
+            return const_cast<const CharT*>(
+                FindNextLine(static_cast<const CharT*>(string), end, separator));
         }
 
-        static const CharT* FindPrevLine(const CharT* begin, const CharT* end = nullptr, LineSeparator separator = LineSeparator::LF)
+        static const CharT* FindPrevLine(const CharT* begin, const CharT* end = nullptr,
+                                         LineSeparator separator = LineSeparator::LF)
         {
             if (begin == nullptr)
             {
                 return nullptr;
             }
 
-            const auto* result = StringToolset<CharT>::ReverseStrStr(begin, GetLineSeparatorString(separator), end);
+            const auto* result = StringToolset<CharT>::ReverseStrStr(
+                begin, GetLineSeparatorString(separator), end);
             if (result != nullptr && result != begin)
             {
                 result += GetLineSeparatorStringSize(separator);
@@ -2219,7 +2375,8 @@ namespace Core
         template<class FuncT>
         void forEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF)
         {
-            ForEachByLineImpl<false, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
+            ForEachByLineImpl<false, FuncT>(this, std::forward<decltype(callback)>(callback),
+                                            separator);
         }
 
         /**
@@ -2230,7 +2387,8 @@ namespace Core
         template<class FuncT>
         void forEachByLine(FuncT&& callback, LineSeparator separator = LineSeparator::LF) const
         {
-            ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback), separator);
+            ForEachByLineImpl<true, FuncT>(this, std::forward<decltype(callback)>(callback),
+                                           separator);
         }
 
         explicit BaseString(InternalStringViewT data)
@@ -2272,7 +2430,8 @@ namespace Core
     private:
         // ================== PIMPLs =======================
         template<bool IsConst, class FuncT>
-        static void ForEachByLineImpl(AdaptiveRawPtr<IsConst> base, FuncT&& callback, LineSeparator separator)
+        static void ForEachByLineImpl(AdaptiveRawPtr<IsConst> base, FuncT&& callback,
+                                      LineSeparator separator)
         {
             if (!base)
             {
@@ -2347,7 +2506,8 @@ namespace Core
             if (!this->find(static_cast<const CharT*>(expr)) && this->_string)
             {
                 std::stringstream ss;
-                ss << "Can't find replace token '" << static_cast<const CharT*>(expr) << "' while formatting of string: " << this->_string << '\n';
+                ss << "Can't find replace token '" << static_cast<const CharT*>(expr)
+                   << "' while formatting of string: " << this->_string << '\n';
                 Assert(ss.str().c_str());
             }
 #endif
@@ -2389,32 +2549,37 @@ inline Core::BaseString<wchar_t> operator""_dyn(const wchar_t* str, std::size_t 
 }
 
 template<class CharType>
-[[nodiscard]] bool operator>(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator>(typename Core::StringToolset<CharType>::StdStringViewT str1,
+                             const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator>=(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator>=(typename Core::StringToolset<CharType>::StdStringViewT str1,
+                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 > str1) || (str1 == str2);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator<(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator<(typename Core::StringToolset<CharType>::StdStringViewT str1,
+                             const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1);
 }
 
 template<class CharType>
-[[nodiscard]] bool operator<=(typename Core::StringToolset<CharType>::StdStringViewT str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] bool operator<=(typename Core::StringToolset<CharType>::StdStringViewT str1,
+                              const Core::BaseString<CharType>& str2)
 {
     return !(str2 < str1) || (str1 == str2);
 }
 
 template<class CharType>
-[[nodiscard]] Core::BaseString<CharType> operator+(typename Core::StringToolset<CharType>::StdStringViewT str1,
-                                                   const Core::BaseString<CharType>& str2)
+[[nodiscard]] Core::BaseString<CharType> operator+(
+    typename Core::StringToolset<CharType>::StdStringViewT str1,
+    const Core::BaseString<CharType>& str2)
 {
     auto temp = Core::BaseString<CharType>(str1);
     temp += str2;
@@ -2422,7 +2587,8 @@ template<class CharType>
 }
 
 template<class CharType>
-[[nodiscard]] Core::BaseString<CharType> operator+(CharType str1, const Core::BaseString<CharType>& str2)
+[[nodiscard]] Core::BaseString<CharType> operator+(CharType str1,
+                                                   const Core::BaseString<CharType>& str2)
 {
     auto temp = Core::BaseString<CharType>(&str1, 1);
     temp += str2;

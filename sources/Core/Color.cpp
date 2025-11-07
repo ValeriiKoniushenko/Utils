@@ -31,13 +31,14 @@ using namespace Core;
 
 std::ostream& operator<<(std::ostream& os, const Color3& color)
 {
-    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << static_cast<int>(color.z);
+    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " "
+              << static_cast<int>(color.z);
 }
 
 std::ostream& operator<<(std::ostream& os, const Color4& color)
 {
-    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " " << static_cast<int>(color.z) << " "
-              << static_cast<int>(color.w);
+    return os << static_cast<int>(color.x) << " " << static_cast<int>(color.y) << " "
+              << static_cast<int>(color.z) << " " << static_cast<int>(color.w);
 }
 
 std::ostream& operator<<(std::ostream& os, const NormColor3& normColor)

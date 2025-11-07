@@ -30,6 +30,8 @@ using namespace Core;
 
 struct TestObject : public IntrusiveRefCounter<TestObject>
 {
+    INTRUSIVE_PTR_ADAPTERS(TestObject)
+
     int value = 0;
     int increments = 0;
     int decrements = 0;
@@ -284,6 +286,8 @@ TEST(IntrusivePtrTests, CreateMethod)
 
 class AnotherObject : public IntrusiveRefCounter<AnotherObject>
 {
+    INTRUSIVE_PTR_ADAPTERS(AnotherObject)
+
 public:
     AnotherObject()
     {

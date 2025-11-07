@@ -66,7 +66,8 @@ namespace Core
     std::string BaseRegex::getErrorString(int errorCode)
     {
         std::array<char, 256> buffer{};
-        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer.data()), sizeof(buffer[0]) * 256);
+        pcre2_get_error_message(errorCode, reinterpret_cast<PCRE2_UCHAR8*>(buffer.data()),
+                                sizeof(buffer[0]) * 256);
         if (buffer[0] != '\0')
         {
             return { buffer.data() };
@@ -85,11 +86,11 @@ namespace Core
 
         _freeRegex();
         _regex = pcre2_compile(reinterpret_cast<PCRE2_SPTR8>(_pattern.c_str()), // The regex pattern
-                               _limit,                                          // Pattern is null-terminated
-                               _compileOptions,                                 // Default options
-                               &_errorCode,                                     // Error code
-                               &_errorOffset,                                   // Error offset
-                               nullptr                                          // Default compile context
+                               _limit,          // Pattern is null-terminated
+                               _compileOptions, // Default options
+                               &_errorCode,     // Error code
+                               &_errorOffset,   // Error offset
+                               nullptr          // Default compile context
         );
 
         if (_regex == nullptr || _errorCode != 100) [[unlikely]] // 100 == no errors
@@ -154,11 +155,11 @@ namespace Core
 
         const auto result = pcre2_match(_regex,                                  // Compiled regex
                                         reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
-                                        _limit,                                  // Subject is null-terminated
-                                        _offset,                                 // Start at offset 0
-                                        _matchOptions,                           // Default options
-                                        _matchData,                              // Match data
-                                        nullptr                                  // Default match context
+                                        _limit,        // Subject is null-terminated
+                                        _offset,       // Start at offset 0
+                                        _matchOptions, // Default options
+                                        _matchData,    // Match data
+                                        nullptr        // Default match context
         );
 
         if (result > 0)
@@ -209,11 +210,11 @@ namespace Core
         {
             result = pcre2_match(_regex,                                  // Compiled regex
                                  reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
-                                 _limit,                                  // Subject is null-terminated
-                                 offset,                                  // Start at offset 0
-                                 _matchOptions,                           // Default options
-                                 _matchData,                              // Match data
-                                 nullptr                                  // Default match context
+                                 _limit,        // Subject is null-terminated
+                                 offset,        // Start at offset 0
+                                 _matchOptions, // Default options
+                                 _matchData,    // Match data
+                                 nullptr        // Default match context
             );
 
             if (result > 0)
@@ -287,18 +288,19 @@ namespace Core
             return false;
         }
 
-        const int rc = pcre2_substitute(_regex,                                            // Compiled regex
-                                        reinterpret_cast<PCRE2_SPTR8>(_subject),           // Subject string
-                                        _limit,                                            // Subject is null-terminated
-                                        0,                                                 // Start at offset 0
-                                        _replaceOptions,                                   // Options
-                                        nullptr,                                           // Default match context
-                                        nullptr,                                           // Default substitute context
-                                        reinterpret_cast<PCRE2_SPTR8>(_replacement),       // Replacement string
-                                        PCRE2_ZERO_TERMINATED,                             // Replacement is null-terminated
-                                        reinterpret_cast<PCRE2_UCHAR8*>(_allocatedString), // Output buffer
-                                        &_allocatedSize                                    // Length of the output buffer
-        );
+        const int rc
+            = pcre2_substitute(_regex,                                  // Compiled regex
+                               reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
+                               _limit,          // Subject is null-terminated
+                               0,               // Start at offset 0
+                               _replaceOptions, // Options
+                               nullptr,         // Default match context
+                               nullptr,         // Default substitute context
+                               reinterpret_cast<PCRE2_SPTR8>(_replacement), // Replacement string
+                               PCRE2_ZERO_TERMINATED, // Replacement is null-terminated
+                               reinterpret_cast<PCRE2_UCHAR8*>(_allocatedString), // Output buffer
+                               &_allocatedSize // Length of the output buffer
+            );
 
         if (rc >= 0)
         {

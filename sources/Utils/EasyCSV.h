@@ -42,17 +42,26 @@ namespace Utils
         CSV& operator=(CSV&&) = default;
 
         void setSavePath(const std::filesystem::path& path);
-        [[nodiscard]] const std::filesystem::path& getSavePath() const noexcept { return _savePath; }
+        [[nodiscard]] const std::filesystem::path& getSavePath() const noexcept
+        {
+            return _savePath;
+        }
 
         void addRow(const std::vector<std::string>& row);
         [[nodiscard]] const std::vector<std::string>& getRow(std::size_t index) const;
-        [[nodiscard]] const std::vector<std::string>& operator[](std::size_t index) const { return getRow(index); }
+        [[nodiscard]] const std::vector<std::string>& operator[](std::size_t index) const
+        {
+            return getRow(index);
+        }
 
         void addToBottomOfColumn(std::size_t column, const std::string& value);
         void addToBottomOfColumn(std::size_t column, const std::vector<std::string>& row);
 
         [[nodiscard]] std::vector<std::string>& getRow(std::size_t index);
-        [[nodiscard]] std::vector<std::string>& operator[](std::size_t index) { return getRow(index); }
+        [[nodiscard]] std::vector<std::string>& operator[](std::size_t index)
+        {
+            return getRow(index);
+        }
 
         void save(bool ignoreSpecChars = true) const;
 

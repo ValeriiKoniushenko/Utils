@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "IntrusivePtr.h"
 #include "Utils/CopyableAndMoveableBehaviour.h"
 
 #include <cstdint>
@@ -33,7 +34,7 @@
 namespace Core
 {
 
-    class AbstractDelegate : public Utils::CopyableAndMoveable
+    class AbstractDelegate : public IntrusiveRefCounter<AbstractDelegate>
     {
     public:
         /**
@@ -61,13 +62,16 @@ namespace Core
 
             ~ID() override = default;
 
-            [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept { return value._id == _id && value._owner == _owner; }
+            [[nodiscard]] constexpr bool operator==(const ID& value) const noexcept
+            {
+                return value._id == _id && value._owner == _owner;
+            }
 
-            [[nodiscard]] AbstractDelegate* getOwner() noexcept { return _owner; }
+            [[nodiscard]] WeakPtr<AbstractDelegate> getOwner() noexcept { return _owner; }
             [[nodiscard]] bool isValid() { return _id != invalidID && _owner; }
 
         private:
-            AbstractDelegate* _owner = nullptr;
+            WeakPtr<AbstractDelegate> _owner;
             IdT _id = invalidID;
         }; // class ID
 
@@ -78,6 +82,8 @@ namespace Core
     template<class F>
     class Delegate : public AbstractDelegate
     {
+        INTRUSIVE_PTR_ADAPTERS(Delegate)
+
     public:
         using CallbackT = std::function<F>;
         using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
@@ -107,7 +113,10 @@ namespace Core
 
         void unsubscribe(const ID& id) override { _callbacks.erase(id); }
 
-        [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept { return _callbacks.size(); }
+        [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept
+        {
+            return _callbacks.size();
+        }
         [[nodiscard]] bool isEmpty() const noexcept { return _callbacks.empty(); }
 
         void reset() { _callbacks.clear(); }
@@ -148,7 +157,10 @@ namespace Core
         {
             if (_id.isValid())
             {
-                _id.getOwner()->unsubscribe(_id);
+                if (auto weak = _id.getOwner().tryLoad())
+                {
+                    weak->unsubscribe(_id);
+                }
             }
         }
 

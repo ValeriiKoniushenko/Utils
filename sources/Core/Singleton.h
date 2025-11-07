@@ -30,22 +30,24 @@
 #include <mutex>
 #include <type_traits>
 
-#define _SINGLETONS_FRIEND(className)                                                                                                                \
-    template<class, Utils::IsCopyableAndMoveableBehaviour, bool>                                                                                     \
+#define _SINGLETONS_FRIEND(className)                                                              \
+    template<class, Utils::IsCopyableAndMoveableBehaviour, bool>                                   \
     friend class ::Core::BaseSingleton;
 
 #define SINGLETONS_FRIEND_NO_CNSTR(className) _SINGLETONS_FRIEND(className)
 
-#define SINGLETONS_FRIEND(className)                                                                                                                 \
-    _SINGLETONS_FRIEND(className)                                                                                                                    \
-                                                                                                                                                     \
-private:                                                                                                                                             \
+#define SINGLETONS_FRIEND(className)                                                               \
+    _SINGLETONS_FRIEND(className)                                                                  \
+                                                                                                   \
+private:                                                                                           \
     className() = default;
 
 namespace Core
 {
 
-    template<class T, Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable, bool IsTreadSafe = false>
+    template<class T,
+             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable,
+             bool IsTreadSafe = false>
     class BaseSingleton : public CopyBehaviour
     {
     public:
@@ -81,13 +83,15 @@ namespace Core
         inline static std::mutex _mutex;
     };
 
-    template<class T, Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
+    template<class T,
+             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
     using Singleton = BaseSingleton<T, CopyBehaviour, false>;
 
     template<class T>
     using StrictSingleton = Singleton<T, Utils::NotCopyableAndNotMoveable>;
 
-    template<class T, Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
+    template<class T,
+             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
     using ThreadSafeSingleton = BaseSingleton<T, CopyBehaviour, true>;
 
     template<class T>

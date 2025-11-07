@@ -161,8 +161,8 @@ namespace Core
 
     constexpr NormColor4 NormColor4::From(const Color4& other) noexcept
     {
-        return { static_cast<float>(other.r) / 255.f, static_cast<float>(other.g) / 255.f, static_cast<float>(other.b) / 255.f,
-                 static_cast<float>(other.a) / 255.f };
+        return { static_cast<float>(other.r) / 255.f, static_cast<float>(other.g) / 255.f,
+                 static_cast<float>(other.b) / 255.f, static_cast<float>(other.a) / 255.f };
     }
 
     constexpr Color4 NormColor4::toColor() const noexcept

@@ -57,7 +57,8 @@ namespace Utils
         {
             if constexpr (!ignoreAssert)
             {
-                throw std::runtime_error("Impossible to open a file(permission error): " + path.generic_string());
+                throw std::runtime_error("Impossible to open a file(permission error): "
+                                         + path.generic_string());
             }
             return {};
         }

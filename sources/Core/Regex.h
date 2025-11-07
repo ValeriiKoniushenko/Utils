@@ -115,7 +115,10 @@ namespace Core
             uint64_t offset = invalid;
             uint64_t size = invalid;
 
-            [[nodiscard]] bool isMatched() const noexcept { return size != invalid || offset != invalid; }
+            [[nodiscard]] bool isMatched() const noexcept
+            {
+                return size != invalid || offset != invalid;
+            }
             [[nodiscard]] explicit operator bool() const noexcept { return isMatched(); }
 
             template<BaseRegexMatch_MatchedData_Convert_Reqs T>
@@ -135,7 +138,8 @@ namespace Core
 
                 T out;
                 out.resize(size);
-                memcpy_s(out.data(), size * sizeof(*out.data()), origStr + offset, size * sizeof(*origStr));
+                memcpy_s(out.data(), size * sizeof(*out.data()), origStr + offset,
+                         size * sizeof(*origStr));
                 return out;
             }
         };
@@ -198,11 +202,11 @@ namespace Core
             {
                 result = pcre2_match(_regex,                                  // Compiled regex
                                      reinterpret_cast<PCRE2_SPTR8>(_subject), // Subject string
-                                     _limit,                                  // Subject is null-terminated
-                                     offset,                                  // Start at offset 0
-                                     _matchOptions,                           // Default options
-                                     _matchData,                              // Match data
-                                     nullptr                                  // Default match context
+                                     _limit,        // Subject is null-terminated
+                                     offset,        // Start at offset 0
+                                     _matchOptions, // Default options
+                                     _matchData,    // Match data
+                                     nullptr        // Default match context
                 );
 
                 if (result > 0)

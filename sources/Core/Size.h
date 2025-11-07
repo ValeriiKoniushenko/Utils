@@ -33,7 +33,8 @@ namespace Core
     template<Utils::IsArithmetic T, int Dimension>
     struct Size final
     {
-        static_assert(Dimension != Dimension, "Invalid 'Dimension' value. You can use only 2D or 3D Size type.");
+        static_assert(Dimension != Dimension,
+                      "Invalid 'Dimension' value. You can use only 2D or 3D Size type.");
     };
 
     template<Utils::IsArithmetic T>
@@ -67,22 +68,36 @@ namespace Core
         T width{};
         T height{};
 
-        [[nodiscard]] constexpr bool operator<(const ObjectType& other) const noexcept { return area() < other.area(); }
+        [[nodiscard]] constexpr bool operator<(const ObjectType& other) const noexcept
+        {
+            return area() < other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator>(const ObjectType& other) const noexcept { return area() > other.area(); }
+        [[nodiscard]] constexpr bool operator>(const ObjectType& other) const noexcept
+        {
+            return area() > other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator<=(const ObjectType& other) const noexcept { return area() <= other.area(); }
+        [[nodiscard]] constexpr bool operator<=(const ObjectType& other) const noexcept
+        {
+            return area() <= other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator>=(const ObjectType& other) const noexcept { return area() >= other.area(); }
+        [[nodiscard]] constexpr bool operator>=(const ObjectType& other) const noexcept
+        {
+            return area() >= other.area();
+        }
 
         template<Utils::IsIntegral Type>
-        [[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+        [[nodiscard, maybe_unused]] constexpr bool operator==(
+            const Size<Type, DimensionValue>& other) const noexcept
         {
             return area() == other.area();
         }
 
         template<Utils::IsFloating Type>
-        [[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+        [[nodiscard, maybe_unused]] constexpr bool operator==(
+            const Size<Type, DimensionValue>& other) const noexcept
         {
             return Math::IsEqual(area(), other.area());
         }
@@ -94,28 +109,40 @@ namespace Core
             return ObjectType{ width + value.width, height + value.height };
         }
 
-        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept { return ObjectType{ width + offset, height + offset }; }
+        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept
+        {
+            return ObjectType{ width + offset, height + offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator-(const ObjectType& value) const noexcept
         {
             return ObjectType{ width - value.width, height - value.height };
         }
 
-        [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept { return { width - offset, height - offset }; }
+        [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept
+        {
+            return { width - offset, height - offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const
         {
             return ObjectType{ width * value.width, height * value.height };
         }
 
-        [[nodiscard]] constexpr ObjectType operator*(T offset) const { return ObjectType{ width * offset, height * offset }; }
+        [[nodiscard]] constexpr ObjectType operator*(T offset) const
+        {
+            return ObjectType{ width * offset, height * offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const
         {
             return ObjectType{ width / value.width, height / value.height };
         }
 
-        [[nodiscard]] constexpr ObjectType operator/(T offset) const { return ObjectType{ width / offset, height / offset }; }
+        [[nodiscard]] constexpr ObjectType operator/(T offset) const
+        {
+            return ObjectType{ width / offset, height / offset };
+        }
 
         constexpr ObjectType& operator+=(const ObjectType& other) noexcept
         {
@@ -148,7 +175,8 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return CastType{ static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height) };
+            return CastType{ static_cast<typename CastType::ValueType>(width),
+                             static_cast<typename CastType::ValueType>(height) };
         }
 
         [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height }; }
@@ -159,7 +187,10 @@ namespace Core
             return { width, height };
         }
 
-        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept { return ObjectType{ vec.x, vec.y }; }
+        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept
+        {
+            return ObjectType{ vec.x, vec.y };
+        }
     };
 
     template<Utils::IsArithmetic T>
@@ -197,22 +228,36 @@ namespace Core
         T height{};
         T deep{};
 
-        [[nodiscard]] constexpr bool operator<(const ObjectType& other) const noexcept { return area() < other.area(); }
+        [[nodiscard]] constexpr bool operator<(const ObjectType& other) const noexcept
+        {
+            return area() < other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator>(const ObjectType& other) const noexcept { return area() > other.area(); }
+        [[nodiscard]] constexpr bool operator>(const ObjectType& other) const noexcept
+        {
+            return area() > other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator<=(const ObjectType& other) const noexcept { return area() <= other.area(); }
+        [[nodiscard]] constexpr bool operator<=(const ObjectType& other) const noexcept
+        {
+            return area() <= other.area();
+        }
 
-        [[nodiscard]] constexpr bool operator>=(const ObjectType& other) const noexcept { return area() >= other.area(); }
+        [[nodiscard]] constexpr bool operator>=(const ObjectType& other) const noexcept
+        {
+            return area() >= other.area();
+        }
 
         template<Utils::IsIntegral Type>
-        [[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+        [[nodiscard, maybe_unused]] constexpr bool operator==(
+            const Size<Type, DimensionValue>& other) const noexcept
         {
             return area() == other.area();
         }
 
         template<Utils::IsFloating Type>
-        [[nodiscard, maybe_unused]] constexpr bool operator==(const Size<Type, DimensionValue>& other) const noexcept
+        [[nodiscard, maybe_unused]] constexpr bool operator==(
+            const Size<Type, DimensionValue>& other) const noexcept
         {
             return IsEqual(area(), other.area());
         }
@@ -224,28 +269,40 @@ namespace Core
             return { width + value.width, height + value.height, deep + value.deep };
         }
 
-        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept { return { width + offset, height + offset, deep + offset }; }
+        [[nodiscard]] constexpr ObjectType operator+(T offset) const noexcept
+        {
+            return { width + offset, height + offset, deep + offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator-(const ObjectType& value) const noexcept
         {
             return { width - value.width, height - value.height, deep + value.deep };
         }
 
-        [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept { return { width - offset, height - offset, deep + offset }; }
+        [[nodiscard]] constexpr ObjectType operator-(T offset) const noexcept
+        {
+            return { width - offset, height - offset, deep + offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator*(const ObjectType& value) const
         {
             return { width * value.width, height * value.height, deep + value.deep };
         }
 
-        [[nodiscard]] constexpr ObjectType operator*(T offset) const { return { width * offset, height * offset, deep + offset }; }
+        [[nodiscard]] constexpr ObjectType operator*(T offset) const
+        {
+            return { width * offset, height * offset, deep + offset };
+        }
 
         [[nodiscard]] constexpr ObjectType operator/(const ObjectType& value) const
         {
             return { width / value.width, height / value.height, deep + value.deep };
         }
 
-        [[nodiscard]] constexpr ObjectType operator/(T offset) const { return { width / offset, height / offset, deep + offset }; }
+        [[nodiscard]] constexpr ObjectType operator/(T offset) const
+        {
+            return { width / offset, height / offset, deep + offset };
+        }
 
         constexpr ObjectType& operator+=(const ObjectType& other) noexcept
         {
@@ -282,11 +339,15 @@ namespace Core
         template<class CastType>
         [[nodiscard]] explicit constexpr operator CastType() const noexcept
         {
-            return { static_cast<typename CastType::ValueType>(width), static_cast<typename CastType::ValueType>(height),
+            return { static_cast<typename CastType::ValueType>(width),
+                     static_cast<typename CastType::ValueType>(height),
                      static_cast<CastType::ValueType>(deep) };
         }
 
-        [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept { return { width, height, deep }; }
+        [[nodiscard]] constexpr GlmObjectType toGlm() const noexcept
+        {
+            return { width, height, deep };
+        }
 
         template<Utils::IsArithmetic Type>
         [[nodiscard]] constexpr Size<Type, DimensionValue> asSize() const noexcept
@@ -294,7 +355,10 @@ namespace Core
             return { width, height, deep };
         }
 
-        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept { return { vec.x, vec.y, vec.z }; }
+        [[nodiscard]] constexpr static ObjectType fromGlm(const GlmObjectType& vec) noexcept
+        {
+            return { vec.x, vec.y, vec.z };
+        }
     };
 
     using FSize2 = Size<float, 2>;

@@ -32,11 +32,7 @@ TEST(DelegateTest, SimpleTest1)
 
     bool wasInvoked = false;
 
-    auto id = delegate.subscribeAndGetID(
-        [&]()
-        {
-            wasInvoked = true;
-        });
+    auto id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
 
     delegate.trigger();
     EXPECT_TRUE(wasInvoked);
@@ -48,11 +44,7 @@ TEST(DelegateTest, SimpleTest2)
 
     bool wasInvoked = false;
 
-    auto id = delegate.subscribeAndGetID(
-        [&]()
-        {
-            wasInvoked = true;
-        });
+    auto id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
     EXPECT_EQ(1, delegate.getSubscriptionsCount());
     EXPECT_FALSE(delegate.isEmpty());
 
@@ -71,11 +63,7 @@ TEST(DelegateTest, SubscribeWithoutIDGetting)
     {
         bool wasInvoked = false;
 
-        delegate.subscribe(
-            [&]()
-            {
-                wasInvoked = true;
-            });
+        delegate.subscribe([&]() { wasInvoked = true; });
 
         delegate.trigger();
         EXPECT_TRUE(wasInvoked);
@@ -89,11 +77,7 @@ TEST(DelegateTest, UsingOfDelegateSubscriber)
     Core::Delegate<void()> delegate;
     {
         bool wasInvoked = false;
-        Core::DelegateSubscriber id = delegate.subscribeAndGetID(
-            [&]()
-            {
-                wasInvoked = true;
-            });
+        Core::DelegateSubscriber id = delegate.subscribeAndGetID([&]() { wasInvoked = true; });
         delegate.trigger();
         EXPECT_TRUE(wasInvoked);
     }
@@ -103,15 +87,11 @@ TEST(DelegateTest, UsingOfDelegateSubscriber)
 
 TEST(DelegateTest, OutOfScopeDelegate)
 {
-    /*Core::DelegateSubscriber id;
-
+    auto delegate = Core::Delegate<void()>::Create();
     {
-        Core::Delegate<void()> delegate;
-        bool wasInvoked = false;
-        id = delegate.subscribeAndGetID(
-            [&]()
-            {
-                wasInvoked = true;
-            });
-    }*/
+        Core::DelegateSubscriber id1 = delegate->subscribeAndGetID([&]() {});
+        Core::DelegateSubscriber id2 = delegate->subscribeAndGetID([&]() {});
+        delegate.reset();
+        // Shouldn't be any crashes here!!!
+    }
 }

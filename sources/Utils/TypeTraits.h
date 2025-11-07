@@ -30,18 +30,21 @@ namespace Utils
 {
 
     template<class From, class To>
-    decltype(std::declval<void(To)>()({ std::declval<From>() }), std::true_type{}) IsNonNarrowingConvertibleHelperFunction(int);
+    decltype(std::declval<void(To)>()({ std::declval<From>() }), std::true_type{})
+        IsNonNarrowingConvertibleHelperFunction(int);
 
     template<class From, class To>
     std::false_type IsNonNarrowingConvertibleHelperFunction(...);
 
     template<class From, class To,
-             bool = (std::is_arithmetic_v<From> || std::is_enum_v<From> || std::is_pointer_v<From> || std::is_member_pointer_v<From>) &&
-                    (std::is_arithmetic_v<To> || std::is_enum_v<To>)>
+             bool = (std::is_arithmetic_v<From> || std::is_enum_v<From> || std::is_pointer_v<From>
+                     || std::is_member_pointer_v<From>)
+                    && (std::is_arithmetic_v<To> || std::is_enum_v<To>)>
     struct IsNonNarrowingConvertibleHelper;
 
     template<class From, class To>
-    struct IsNonNarrowingConvertibleHelper<From, To, true> : decltype(IsNonNarrowingConvertibleHelperFunction<From, To>(0))
+    struct IsNonNarrowingConvertibleHelper<From, To, true> :
+        decltype(IsNonNarrowingConvertibleHelperFunction<From, To>(0))
     {
     };
 
@@ -59,12 +62,14 @@ namespace Utils
     inline constexpr bool IsNonNarrowingConvertibleV = IsNonNarrowingConvertible<From, To>::value;
 
     template<class From, class To>
-    struct IsNothrowNonNarrowingConvertible : std::conjunction<IsNonNarrowingConvertible<From, To>, std::is_nothrow_convertible<From, To>>
+    struct IsNothrowNonNarrowingConvertible :
+        std::conjunction<IsNonNarrowingConvertible<From, To>, std::is_nothrow_convertible<From, To>>
     {
     };
 
     template<class From, class To>
-    inline constexpr bool IsNothrowNonNarrowingConvertible_v = IsNothrowNonNarrowingConvertible<From, To>::value;
+    inline constexpr bool IsNothrowNonNarrowingConvertible_v
+        = IsNothrowNonNarrowingConvertible<From, To>::value;
 
     template<class T>
     struct IsStringLiteral : std::false_type

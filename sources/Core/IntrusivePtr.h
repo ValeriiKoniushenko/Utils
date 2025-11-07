@@ -30,6 +30,19 @@
 #include <cstdint>
 #include <utility>
 
+#define INTRUSIVE_PTR_ADAPTERS(ClassName)                                                          \
+public:                                                                                            \
+    template<class... ArgsT>                                                                       \
+    [[nodiscard]] static IntrusivePtr<ClassName> Create(ArgsT&&... args)                           \
+    {                                                                                              \
+        return IntrusivePtr<ClassName>(new ClassName(std::forward<ArgsT>(args)...));               \
+    }                                                                                              \
+    template<class... ArgsT>                                                                       \
+    [[nodiscard]] static IntrusivePtr<const ClassName> CreateConst(ArgsT&&... args)                \
+    {                                                                                              \
+        return IntrusivePtr<const ClassName>(new const ClassName(std::forward<ArgsT>(args)...));   \
+    }
+
 namespace Core
 {
     //
@@ -264,7 +277,8 @@ namespace Core
         {
             if (_ptr && !_noRefDecrement)
             {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr), const_cast<std::remove_const_t<T>*&>(_ptr));
+                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                         const_cast<std::remove_const_t<T>*&>(_ptr));
             }
         }
 
@@ -371,7 +385,8 @@ namespace Core
         {
             if (_ptr)
             {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr), const_cast<std::remove_const_t<T>*&>(_ptr));
+                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                         const_cast<std::remove_const_t<T>*&>(_ptr));
             }
         }
 
@@ -380,7 +395,10 @@ namespace Core
         [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
         [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
 
-        [[nodiscard]] bool hasHardLink() const noexcept { return _ptr && _ptr->getHardRefCount() > 0; }
+        [[nodiscard]] bool hasHardLink() const noexcept
+        {
+            return _ptr && _ptr->getHardRefCount() > 0;
+        }
 
         void swap(WeakPtr& other) noexcept
         {
@@ -413,6 +431,8 @@ namespace Core
     template<class T, IsPolicy Policy = DefaultPolicy_IntrusiveRefCounter>
     class IntrusiveRefCounter
     {
+        INTRUSIVE_PTR_ADAPTERS(IntrusiveRefCounter)
+
     public:
         using ValueT = T;
         using PolicyT = Policy;
@@ -420,17 +440,6 @@ namespace Core
 
     public:
         virtual ~IntrusiveRefCounter() = default;
-
-        template<class... ArgsT>
-        [[nodiscard]] static IntrusivePtr<T> Create(ArgsT&&... args)
-        {
-            return IntrusivePtr<T>(new T(std::forward<ArgsT>(args)...));
-        }
-        template<class... ArgsT>
-        [[nodiscard]] static IntrusivePtr<const T> CreateConst(ArgsT&&... args)
-        {
-            return IntrusivePtr<const T>(new const T(std::forward<ArgsT>(args)...));
-        }
 
         [[nodiscard]] CounterT getHardRefCount() const noexcept { return _hardRefCount; }
         [[nodiscard]] CounterT getWeakRefCount() const noexcept { return _weakRefCount; }
