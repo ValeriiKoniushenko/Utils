@@ -74,23 +74,44 @@ namespace Core
             [[nodiscard]] WeakPtr<AbstractDelegate> getOwner() noexcept { return _owner; }
             [[nodiscard]] bool isValid() { return _id != invalidID && _owner; }
 
+            [[nodiscard]] IdT getId() const noexcept { return _id; }
+
+            void _invalidate()
+            {
+                _id = invalidID;
+                _owner.reset();
+            }
+
         private:
             WeakPtr<AbstractDelegate> _owner;
             IdT _id = invalidID;
         }; // class ID
 
     public:
-        virtual void unsubscribe(const ID& id) = 0;
+        virtual void unsubscribe(ID& id) = 0;
     };
 
     template<class F>
     class Delegate final : public AbstractDelegate
     {
-        INTRUSIVE_PTR_ADAPTERS(Delegate)
+        // INTRUSIVE_PTR_ADAPTERS(Delegate)
+    public:
+        template<class... ArgsT>
+        [[nodiscard]] static Core::IntrusivePtr<Delegate> Create(ArgsT&&... args)
+        {
+            return Core::IntrusivePtr<Delegate>(new Delegate(std::forward<ArgsT>(args)...));
+        }
+
+        template<class... ArgsT>
+        [[nodiscard]] static Core::IntrusivePtr<const Delegate> CreateConst(ArgsT&&... args)
+        {
+            return Core::IntrusivePtr<const Delegate>(
+                new const Delegate(std::forward<ArgsT>(args)...));
+        }
 
     public:
         using CallbackT = std::function<F>;
-        using CallbackContainerT = std::unordered_map<ID, CallbackT, typename ID::Hasher>;
+        using CallbackContainerT = std::unordered_map<ID::IdT, CallbackT>;
         using Ptr = IntrusivePtr<Delegate>;
         using CPtr = IntrusivePtr<const Delegate>;
 
@@ -112,21 +133,21 @@ namespace Core
         [[nodiscard]] ID subscribeAndGetID(CallbackT&& callback)
         {
             ID id(this, ++_generatedID);
-            _callbacks.emplace(id, std::forward<CallbackT>(callback));
+            _callbacks.emplace(id.getId(), std::forward<CallbackT>(callback));
             return id;
         }
 
         void subscribe(CallbackT&& callback)
         {
             ID id(nullptr, ++_generatedID);
-            _callbacks.emplace(id, std::forward<CallbackT>(callback));
+            _callbacks.emplace(id.getId(), std::forward<CallbackT>(callback));
         }
 
         template<class RefObjectT, class ClassFuncT>
         void subscribe(RefObjectT* object, ClassFuncT func)
         {
             ID id(nullptr, ++_generatedID);
-            _callbacks.emplace(id, [object, func]<class... TArgs>(TArgs&&... args)
+            _callbacks.emplace(id.getId(), [object, func]<class... TArgs>(TArgs&&... args)
                                { std::invoke(func, *object, std::forward<TArgs>(args)...); });
         }
 
@@ -135,7 +156,7 @@ namespace Core
         {
             ID id(nullptr, ++_generatedID);
             _callbacks.emplace(
-                id,
+                id.getId(),
                 [weak = WeakPtr<RefObjectT>(object), func]<class... TArgs>(TArgs&&... args)
                 {
                     if (auto&& ptr = weak.tryLoad())
@@ -149,8 +170,8 @@ namespace Core
         [[nodiscard]] ID subscribeAndGetID(RefObjectT* object, ClassFuncT func)
         {
             ID id(nullptr, ++_generatedID);
-            _callbacks.emplace(id, [object, func]<class... TArgs>(TArgs&&... args)
-                               { std::invoke(func, *object, std::forward<TArgs>(args)...); });
+            // _callbacks.emplace(id.getId(), [object, func]<class... TArgs>(TArgs&&... args)
+            //                    { std::invoke(func, *object, std::forward<TArgs>(args)...); });
             return id;
         }
 
@@ -159,7 +180,7 @@ namespace Core
         {
             ID id(nullptr, ++_generatedID);
             _callbacks.emplace(
-                id,
+                id.getId(),
                 [weak = WeakPtr<RefObjectT>(object), func]<class... TArgs>(TArgs&&... args)
                 {
                     if (auto&& ptr = weak.tryLoad())
@@ -170,7 +191,11 @@ namespace Core
             return id;
         }
 
-        void unsubscribe(const ID& id) override { _callbacks.erase(id); }
+        void unsubscribe(ID& id) override
+        {
+            _callbacks.erase(id.getId());
+            id._invalidate();
+        }
 
         [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept
         {
@@ -183,7 +208,7 @@ namespace Core
         [[nodiscard]] typename ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
 
     private:
-        // Use Delegate<..>::Create() to create an ob
+        // Use Delegate<..>::Create() to create an object
         Delegate() = default;
 
     private:

@@ -447,8 +447,15 @@ namespace Core
 
     protected:
         constexpr IntrusiveRefCounter() = default;
-        IntrusiveRefCounter(const IntrusiveRefCounter&) = default;
-        IntrusiveRefCounter& operator=(const IntrusiveRefCounter&) = default;
+        IntrusiveRefCounter(const IntrusiveRefCounter&)
+        {
+            // Do nothing
+        }
+        IntrusiveRefCounter& operator=(const IntrusiveRefCounter&)
+        {
+            // Do nothing
+            return *this;
+        }
 
         /*!
          * You can't use move constructor due to logical limitations from the
