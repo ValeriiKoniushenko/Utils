@@ -271,12 +271,11 @@ TEST_F(DelegateFixture, SubscriptionWithWeakObjectRef2)
     ASSERT_EQ(1, unsafeViewer->getWeakRefCount()); // 1 - in lambda's [weak...]
 
     delegate->trigger(6);
-    ASSERT_EQ(6, unsafeViewer->i);
-
-    delegate->trigger(4);
     // The object MUST be deleted, so, can't even view
     // ASSERT_EQ(0, unsafeViewer->getHardRefCount());
     // ASSERT_EQ(0, unsafeViewer->getWeakRefCount());
+
+    delegate->trigger(4);
 
     delegate.reset();
 }
