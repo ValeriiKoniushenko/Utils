@@ -68,7 +68,7 @@ namespace Core
     {
         if (_id.isValid())
         {
-            if (auto weak = _id.getOwner().tryLoad())
+            if (auto&& weak = _id.getOwner().tryLoad())
             {
                 weak->unsubscribe(_id);
             }

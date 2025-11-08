@@ -157,8 +157,8 @@ namespace Core
         [[nodiscard]] ID subscribeAndGetID(RefObjectT* object, ClassFuncT func)
         {
             ID id(nullptr, ++_generatedID);
-            // _callbacks.emplace(id.getId(), [object, func]<class... TArgs>(TArgs&&... args)
-            //                    { std::invoke(func, *object, std::forward<TArgs>(args)...); });
+            _callbacks.emplace(id.getId(), [object, func]<class... TArgs>(TArgs&&... args)
+                               { std::invoke(func, *object, std::forward<TArgs>(args)...); });
             return id;
         }
 

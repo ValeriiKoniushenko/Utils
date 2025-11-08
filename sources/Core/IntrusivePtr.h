@@ -341,13 +341,18 @@ namespace Core
     public:
         constexpr WeakPtr() = default;
 
-        WeakPtr(const IntrusivePtr<T>& ptr)
-            : _ptr{ ptr._ptr }
+        WeakPtr(T* ptr)
+            : _ptr{ ptr }
         {
             if (_ptr)
             {
                 _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
+        }
+
+        WeakPtr(const IntrusivePtr<T>& ptr)
+            : WeakPtr{ ptr._ptr }
+        {
         }
 
         WeakPtr(const WeakPtr& other) { *this = other; }
@@ -412,11 +417,20 @@ namespace Core
 
         [[nodiscard]] WeakData<T> tryLoad() const
         {
-            WeakData<T> out(_ptr, hasHardLink());
+            if (!_ptr)
+            {
+                return WeakData<T>(nullptr, false);
+            }
+
             if (!hasHardLink())
             {
+                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                         const_cast<std::remove_const_t<T>*&>(_ptr));
                 _ptr = nullptr;
+                return WeakData<T>(nullptr, false);
             }
+
+            WeakData<T> out(_ptr, true);
             return out;
         }
 
