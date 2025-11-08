@@ -449,15 +449,20 @@ namespace Core
         constexpr IntrusiveRefCounter() = default;
         IntrusiveRefCounter(const IntrusiveRefCounter&) = default;
         IntrusiveRefCounter& operator=(const IntrusiveRefCounter&) = default;
-        IntrusiveRefCounter(IntrusiveRefCounter&& other) noexcept { *this = std::move(other); }
-        IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept
-        {
-            static_assert(Utils::AlwaysFalse<T>::value,
-                          "You can't use move constructor due to logical limitations from the "
-                          "ref-counter side. Use copy instead, or move an IntrusivePtr with "
-                          "your object.");
-            return *this;
-        }
+
+        /*!
+         * You can't use move constructor due to logical limitations from the
+         * ref-counter side. Use copy instead or move an IntrusivePtr with
+         * your object.
+         */
+        IntrusiveRefCounter(IntrusiveRefCounter&& other) noexcept = delete;
+
+        /*!
+         * You can't use move constructor due to logical limitations from the
+         * ref-counter side. Use copy instead or move an IntrusivePtr with
+         * your object.
+         */
+        IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept = delete;
 
         [[maybe_unused]] virtual void onIncrementRef(CounterT ref) {}
         [[maybe_unused]] virtual void onDecrementRef(CounterT ref) {}

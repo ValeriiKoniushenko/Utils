@@ -101,7 +101,7 @@ TEST(DelegateTest, OutOfScopeDelegate)
 TEST(DelegateTest, OutOfScopeDelegateAndCopying)
 {
     auto delegate_ = Core::Delegate<void()>::Create();
-    auto delegate = Core::Delegate<void()>::Create(std::move(*delegate_));
+    auto delegate = Core::Delegate<void()>::Create(*delegate_);
 
     {
         Core::DelegateSubscriber id1 = delegate->subscribeAndGetID(

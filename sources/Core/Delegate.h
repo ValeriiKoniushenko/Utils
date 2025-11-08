@@ -96,6 +96,9 @@ namespace Core
 
     public:
         ~Delegate() override = default;
+        Delegate(const Delegate&) = default;
+
+        Delegate(Delegate&&) = delete;
 
         template<class... TArgs>
         void trigger(TArgs&&... args)
