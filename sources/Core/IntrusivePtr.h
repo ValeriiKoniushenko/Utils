@@ -32,11 +32,13 @@
 
 #define INTRUSIVE_PTR_ADAPTERS(ClassName)                                                          \
 public:                                                                                            \
+    /* cppcheck-suppress duplInheritedMember */                                                    \
     template<class... ArgsT>                                                                       \
     [[nodiscard]] static Core::IntrusivePtr<ClassName> Create(ArgsT&&... args)                     \
     {                                                                                              \
         return Core::IntrusivePtr<ClassName>(new ClassName(std::forward<ArgsT>(args)...));         \
     }                                                                                              \
+    /* cppcheck-suppress duplInheritedMember */                                                    \
     template<class... ArgsT>                                                                       \
     [[nodiscard]] static Core::IntrusivePtr<const ClassName> CreateConst(ArgsT&&... args)          \
     {                                                                                              \

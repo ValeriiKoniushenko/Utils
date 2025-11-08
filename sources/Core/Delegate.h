@@ -94,20 +94,7 @@ namespace Core
     template<class F>
     class Delegate final : public AbstractDelegate
     {
-        // INTRUSIVE_PTR_ADAPTERS(Delegate)
-    public:
-        template<class... ArgsT>
-        [[nodiscard]] static Core::IntrusivePtr<Delegate> Create(ArgsT&&... args)
-        {
-            return Core::IntrusivePtr<Delegate>(new Delegate(std::forward<ArgsT>(args)...));
-        }
-
-        template<class... ArgsT>
-        [[nodiscard]] static Core::IntrusivePtr<const Delegate> CreateConst(ArgsT&&... args)
-        {
-            return Core::IntrusivePtr<const Delegate>(
-                new const Delegate(std::forward<ArgsT>(args)...));
-        }
+        INTRUSIVE_PTR_ADAPTERS(Delegate)
 
     public:
         using CallbackT = std::function<F>;
