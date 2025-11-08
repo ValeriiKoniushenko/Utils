@@ -102,8 +102,10 @@ namespace Utils
             return;
         }
 
+        // cppcheck-suppress useStlAlgorithm
         for (const auto& row : _table)
         {
+            // cppcheck-suppress useStlAlgorithm
             for (auto cell : row)
             {
                 if (ignoreSpecChars)
