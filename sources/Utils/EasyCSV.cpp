@@ -108,11 +108,11 @@ namespace Utils
             {
                 if (ignoreSpecChars)
                 {
+                    // cppcheck-suppress useStlAlgorithm
                     for (auto& c : cell)
                     {
                         if (c == delimiter || c < 32)
                         {
-                            // cppcheck-suppress useStlAlgorithm
                             c = '_';
                         }
                     }
