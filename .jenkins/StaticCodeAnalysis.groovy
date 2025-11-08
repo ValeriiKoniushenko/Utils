@@ -10,10 +10,10 @@ pipeline {
                             --suppress=missingIncludeSystem \
                             --suppress=unusedFunction \
                             --suppress=missingInclude \
-                            --suppress=unknownMacro \
                             --suppress=identicalInnerCondition \
                             --suppress=knownConditionTrueFalse \
                             --suppress=noExplicitConstructor \
+                            --check-level=exhaustive \
                             --xml --xml-version=2 sources/ 2> cppcheck.xml
                     '''
                 }
