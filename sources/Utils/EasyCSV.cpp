@@ -112,6 +112,7 @@ namespace Utils
                     {
                         if (c == delimiter || c < 32)
                         {
+                            // cppcheck-suppress useStlAlgorithm
                             c = '_';
                         }
                     }
