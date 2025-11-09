@@ -32,18 +32,22 @@
 
 #define INTRUSIVE_PTR_ADAPTERS(ClassName)                                                          \
 public:                                                                                            \
+    using Ptr = Core::IntrusivePtr<ClassName>;                                                     \
+    using WPtr = Core::WeakPtr<ClassName>;                                                         \
+    using CPtr = Core::IntrusivePtr<const ClassName>;                                              \
+    using CWPtr = Core::WeakPtr<const ClassName>;                                                  \
+                                                                                                   \
     /* cppcheck-suppress duplInheritedMember */                                                    \
     template<class... ArgsT>                                                                       \
-    [[nodiscard]] static Core::IntrusivePtr<ClassName> Create(ArgsT&&... args)                     \
+    [[nodiscard]] static Ptr Create(ArgsT&&... args)                                               \
     {                                                                                              \
-        return Core::IntrusivePtr<ClassName>(new ClassName(std::forward<ArgsT>(args)...));         \
+        return { new ClassName(std::forward<ArgsT>(args)...) };                                    \
     }                                                                                              \
     /* cppcheck-suppress duplInheritedMember */                                                    \
     template<class... ArgsT>                                                                       \
-    [[nodiscard]] static Core::IntrusivePtr<const ClassName> CreateConst(ArgsT&&... args)          \
+    [[nodiscard]] static CPtr CreateConst(ArgsT&&... args)                                         \
     {                                                                                              \
-        return Core::IntrusivePtr<const ClassName>(                                                \
-            new const ClassName(std::forward<ArgsT>(args)...));                                    \
+        return { new const ClassName(std::forward<ArgsT>(args)...) };                              \
     }
 
 namespace Core
@@ -154,6 +158,12 @@ namespace Core
             }
         }
 
+        template<class T2>
+        IntrusivePtr(const IntrusivePtr<T2>& other, bool addRef = true)
+            : IntrusivePtr(static_cast<T2*>(other.get()), addRef)
+        {
+        }
+
         IntrusivePtr(const IntrusivePtr<std::remove_const_t<T>>& other)
             requires std::is_const_v<T>
         {
@@ -208,10 +218,9 @@ namespace Core
 
         void reset(T* other, bool addRef) { IntrusivePtr(other, addRef).swap(*this); }
 
-        [[nodiscard]] T* get() noexcept { return _ptr; }
-        [[nodiscard]] const T* get() const noexcept { return _ptr; }
+        [[nodiscard]] T* get() const noexcept { return _ptr; }
 
-        [[nodiscard]] T* detach() noexcept
+        [[nodiscard]] T* detach() const noexcept
         {
             T* ret = _ptr;
             _ptr = nullptr;
@@ -352,6 +361,12 @@ namespace Core
 
         WeakPtr(const IntrusivePtr<T>& ptr)
             : WeakPtr{ ptr._ptr }
+        {
+        }
+
+        template<class T2>
+        WeakPtr(const IntrusivePtr<T2>& other)
+            : WeakPtr(static_cast<T2*>(other.get()))
         {
         }
 
@@ -506,5 +521,53 @@ namespace Core
         template<class _T, IsPolicy _P>
         friend void _DecrementWeakRefCounter(IntrusiveRefCounter<_T, _P>*, _T*&) noexcept;
     };
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] IntrusivePtr<NewT> StaticCast(const IntrusivePtr<T>& ptr)
+    {
+        return { static_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] IntrusivePtr<NewT> DynamicCast(const IntrusivePtr<T>& ptr)
+    {
+        return { dynamic_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] IntrusivePtr<NewT> ReinterpretCast(const IntrusivePtr<T>& ptr)
+    {
+        return { reinterpret_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] IntrusivePtr<NewT> ConstCast(const IntrusivePtr<T>& ptr)
+    {
+        return { const_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] WeakPtr<NewT> StaticCast(const WeakPtr<T>& ptr)
+    {
+        return { static_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] WeakPtr<NewT> DynamicCast(const WeakPtr<T>& ptr)
+    {
+        return { dynamic_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] WeakPtr<NewT> ReinterpretCast(const WeakPtr<T>& ptr)
+    {
+        return { reinterpret_cast<NewT*>(ptr.get()) };
+    }
+
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    [[nodiscard]] WeakPtr<NewT> ConstCast(const WeakPtr<T>& ptr)
+    {
+        return { const_cast<NewT*>(ptr.get()) };
+    }
 
 } // namespace Core

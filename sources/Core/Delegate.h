@@ -99,8 +99,6 @@ namespace Core
     public:
         using CallbackT = std::function<F>;
         using CallbackContainerT = std::unordered_map<ID::IdT, CallbackT>;
-        using Ptr = IntrusivePtr<Delegate>;
-        using CPtr = IntrusivePtr<const Delegate>;
 
     public:
         ~Delegate() override = default;

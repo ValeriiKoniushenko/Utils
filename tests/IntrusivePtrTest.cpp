@@ -323,3 +323,31 @@ TEST(IntrusivePtrTests, WeakTest)
     fund();
     fund();
 }
+
+namespace
+{
+    struct A : public IntrusiveRefCounter<A>
+    {
+        INTRUSIVE_PTR_ADAPTERS(A)
+    };
+
+    struct B : public A
+    {
+        INTRUSIVE_PTR_ADAPTERS(B)
+    };
+} // namespace
+
+TEST(IntrusivePtrTests, Casts)
+{
+    auto ptr = B::Create();
+    A::Ptr a = ptr;
+    A::Ptr c;
+    c = ptr;
+
+    A::WPtr bw = ptr;
+    A::WPtr cw;
+    cw = ptr;
+
+    auto b = Core::DynamicCast<B>(a);
+    ASSERT_TRUE(b);
+}
