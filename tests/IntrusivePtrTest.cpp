@@ -351,3 +351,20 @@ TEST(IntrusivePtrTests, Casts)
     auto b = Core::DynamicCast<B>(a);
     ASSERT_TRUE(b);
 }
+
+TEST(IntrusivePtrTests, Operators)
+{
+    auto a = A::Create();
+    auto a2 = A::Create();
+
+    ASSERT_FALSE(a == a2);
+    ASSERT_TRUE(a != a2);
+    ASSERT_FALSE(a.get() == a2);
+    ASSERT_TRUE(a.get() != a2);
+    ASSERT_FALSE(a == a2.get());
+    ASSERT_TRUE(a != a2.get());
+
+    auto b = B::Create();
+    ASSERT_FALSE(a == b);
+    ASSERT_TRUE(a != b);
+}
