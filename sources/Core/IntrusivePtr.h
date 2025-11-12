@@ -148,11 +148,16 @@ namespace Core
         [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
         [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
 
-        [[nodiscard]] bool operator==(const BasePtr& other) const noexcept
+        [[nodiscard]] bool operator==(const Child& other) const noexcept
         {
             return _ptr == other._ptr;
         }
+        [[nodiscard]] bool operator!=(const Child& other) const noexcept
+        {
+            return !operator==(other);
+        }
         [[nodiscard]] bool operator==(const T* other) const noexcept { return _ptr == other; }
+        [[nodiscard]] bool operator!=(const T* other) const noexcept { return !operator==(other); }
 
         [[nodiscard]] T* _raw() const noexcept { return _ptr; }
 
