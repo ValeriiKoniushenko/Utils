@@ -170,9 +170,9 @@ namespace Core
         mutable T* _ptr = nullptr;
     };
 
-    template<class T, template<class> class PtrT>
-    [[nodiscard]] bool operator==(const T* other,
-                                  const PtrT<std::remove_pointer_t<T>>& ptr) noexcept
+    template<template<class> class Ptr, class T>
+        requires std::derived_from<Ptr<T>, BasePtr<Ptr<T>, T>>
+    [[nodiscard]] bool operator==(const T* other, const Ptr<std::remove_pointer_t<T>>& ptr) noexcept
     {
         return ptr._raw() == other;
     }
