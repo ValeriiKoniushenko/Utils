@@ -25,6 +25,7 @@
 #pragma once
 
 #include "BaseAssert.h"
+#include "IntrusivePtr.h"
 #include "Utils/TypeTraits.h"
 
 #include <cstdint>
@@ -162,8 +163,7 @@ namespace Core
         [[nodiscard]] T* _raw() const noexcept { return _ptr; }
 
     protected:
-        constexpr BasePtr() = default;
-        BasePtr(T* ptr)
+        constexpr explicit BasePtr(T* ptr)
             : _ptr{ ptr }
         {
         }
@@ -202,9 +202,7 @@ namespace Core
         using BasePtr<IntrusivePtr<T>, T>::swap;
 
     public:
-        constexpr IntrusivePtr() = default;
-
-        IntrusivePtr(T* ptr, bool addRef = true)
+        constexpr IntrusivePtr(T* ptr = nullptr, bool addRef = true)
             : BasePtr<IntrusivePtr, T>(ptr)
         {
             if (this->_ptr && addRef)
@@ -221,12 +219,23 @@ namespace Core
 
         IntrusivePtr(const IntrusivePtr<std::remove_const_t<T>>& other)
             requires std::is_const_v<T>
+            : BasePtr<IntrusivePtr, T>(nullptr)
         {
             (void)*this->operator=(reinterpret_cast<const IntrusivePtr&>(other));
         }
 
-        IntrusivePtr(const IntrusivePtr& other) { *this = other; }
-        IntrusivePtr(IntrusivePtr&& other) noexcept { *this = std::move(other); }
+        IntrusivePtr(const IntrusivePtr& other)
+            : BasePtr<IntrusivePtr, T>(nullptr)
+        {
+            *this = other;
+        }
+
+        IntrusivePtr(IntrusivePtr&& other) noexcept
+            : BasePtr<IntrusivePtr, T>(nullptr)
+        {
+            *this = std::move(other);
+        }
+
         IntrusivePtr& operator=(const IntrusivePtr& other)
         {
             if (&other != this) [[likely]]
@@ -388,9 +397,7 @@ namespace Core
         using CounterT = typename ValueT::CounterT;
 
     public:
-        constexpr WeakPtr() = default;
-
-        WeakPtr(T* ptr)
+        constexpr WeakPtr(T* ptr = nullptr)
             : BasePtr<WeakPtr, T>{ ptr }
         {
             if (this->_ptr)
@@ -410,8 +417,16 @@ namespace Core
         {
         }
 
-        WeakPtr(const WeakPtr& other) { *this = other; }
-        WeakPtr(WeakPtr&& other) noexcept { *this = std::move(other); }
+        WeakPtr(const WeakPtr& other)
+            : BasePtr<WeakPtr, T>(nullptr)
+        {
+            *this = other;
+        }
+        WeakPtr(WeakPtr&& other) noexcept
+            : BasePtr<WeakPtr, T>(nullptr)
+        {
+            *this = std::move(other);
+        }
         WeakPtr& operator=(const WeakPtr& other)
         {
             if (&other != this) [[likely]]
