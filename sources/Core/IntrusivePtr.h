@@ -62,7 +62,8 @@ namespace Core
     // \_|  |_/|_||___/ \___|
 
     template<class T>
-    concept IsPolicy = requires() {
+    concept IsPolicy = requires()
+    {
         typename T::CounterT;
         std::is_invocable_v<decltype(T::IncrementRef)>;
         std::is_invocable_v<decltype(T::DecrementRef)>;
@@ -131,57 +132,6 @@ namespace Core
         static void DecrementRef(CounterT& counter) noexcept { --counter; }
     };
 
-    template<class Child, class T>
-    class BasePtr
-    {
-    public:
-        ~BasePtr() = default;
-
-        void reset() { Child().swap(static_cast<Child&>(*this)); }
-
-        void swap(Child& other) noexcept
-        {
-            T* tmp = _ptr;
-            _ptr = other._ptr;
-            other._ptr = tmp;
-        }
-
-        [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
-        [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
-
-        [[nodiscard]] bool operator==(const Child& other) const noexcept
-        {
-            return _ptr == other._ptr;
-        }
-        [[nodiscard]] bool operator!=(const Child& other) const noexcept
-        {
-            return !operator==(other);
-        }
-        [[nodiscard]] bool operator==(const T* other) const noexcept { return _ptr == other; }
-        [[nodiscard]] bool operator!=(const T* other) const noexcept { return !operator==(other); }
-
-        [[nodiscard]] T* _raw() const noexcept { return _ptr; }
-
-    protected:
-        constexpr explicit BasePtr(T* ptr)
-            : _ptr{ ptr }
-        {
-        }
-
-        BasePtr(const BasePtr&) = default;
-        BasePtr(BasePtr&&) noexcept = default;
-
-    protected:
-        mutable T* _ptr = nullptr;
-    };
-
-    template<template<class> class Ptr, class T>
-        requires std::derived_from<Ptr<T>, BasePtr<Ptr<T>, T>>
-    [[nodiscard]] bool operator==(const T* other, const Ptr<std::remove_pointer_t<T>>& ptr) noexcept
-    {
-        return ptr._raw() == other;
-    }
-
     //
     // ______  _
     // | ___ \| |
@@ -191,23 +141,19 @@ namespace Core
     // \_|     \__||_|
 
     template<class T>
-    class IntrusivePtr final : public BasePtr<IntrusivePtr<T>, T>
+    class IntrusivePtr final
     {
     public:
         using ValueT = T;
         using PolicyT = typename ValueT::PolicyT;
         using CounterT = typename ValueT::CounterT;
 
-        using BasePtr<IntrusivePtr<T>, T>::reset;
-        using BasePtr<IntrusivePtr<T>, T>::swap;
-
     public:
-        constexpr IntrusivePtr(T* ptr = nullptr, bool addRef = true)
-            : BasePtr<IntrusivePtr, T>(ptr)
+        constexpr IntrusivePtr(T* ptr = nullptr, bool addRef = true) : _ptr(ptr)
         {
-            if (this->_ptr && addRef)
+            if (_ptr && addRef)
             {
-                _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
         }
 
@@ -217,21 +163,18 @@ namespace Core
         {
         }
 
-        IntrusivePtr(const IntrusivePtr<std::remove_const_t<T>>& other)
+        IntrusivePtr(const IntrusivePtr<std::remove_const_t<T> >& other)
             requires std::is_const_v<T>
-            : BasePtr<IntrusivePtr, T>(nullptr)
         {
             (void)*this->operator=(reinterpret_cast<const IntrusivePtr&>(other));
         }
 
         IntrusivePtr(const IntrusivePtr& other)
-            : BasePtr<IntrusivePtr, T>(nullptr)
         {
             *this = other;
         }
 
         IntrusivePtr(IntrusivePtr&& other) noexcept
-            : BasePtr<IntrusivePtr, T>(nullptr)
         {
             *this = std::move(other);
         }
@@ -240,14 +183,14 @@ namespace Core
         {
             if (&other != this) [[likely]]
             {
-                if (this->_ptr)
+                if (_ptr)
                 {
-                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
-                this->_ptr = other._ptr;
-                if (this->_ptr)
+                _ptr = other._ptr;
+                if (_ptr)
                 {
-                    _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                    _IncrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
             }
             return *this;
@@ -257,11 +200,11 @@ namespace Core
         {
             if (&other != this) [[likely]]
             {
-                if (this->_ptr)
+                if (_ptr)
                 {
-                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                    _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
-                this->_ptr = other._ptr;
+                _ptr = other._ptr;
 
                 other._ptr = nullptr;
             }
@@ -270,9 +213,9 @@ namespace Core
 
         ~IntrusivePtr() noexcept
         {
-            if (this->_ptr)
+            if (_ptr)
             {
-                _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                _DecrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
         }
 
@@ -280,41 +223,68 @@ namespace Core
 
         void reset(T* other, bool addRef) { IntrusivePtr(other, addRef).swap(*this); }
 
-        [[nodiscard]] T* get() const noexcept { return this->_ptr; }
+        [[nodiscard]] T* get() const noexcept { return _ptr; }
 
         [[nodiscard]] T* detach() const noexcept
         {
-            T* ret = this->_ptr;
-            this->_ptr = nullptr;
+            T* ret = _ptr;
+            _ptr = nullptr;
             return ret;
         }
 
         [[nodiscard]] const T& operator*() const
         {
-            Assert(this->_ptr != nullptr);
-            return *this->_ptr;
+            Assert(_ptr != nullptr);
+            return *_ptr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            Assert(this->_ptr != nullptr);
-            return this->_ptr;
+            Assert(_ptr != nullptr);
+            return _ptr;
         }
 
         [[nodiscard]] T& operator*()
         {
-            Assert(this->_ptr != nullptr);
-            return *this->_ptr;
+            Assert(_ptr != nullptr);
+            return *_ptr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            Assert(this->_ptr != nullptr);
-            return this->_ptr;
+            Assert(_ptr != nullptr);
+            return _ptr;
         }
+
+        void reset() { IntrusivePtr().swap(static_cast<IntrusivePtr&>(*this)); }
+
+        void swap(IntrusivePtr& other) noexcept
+        {
+            T* tmp = _ptr;
+            _ptr = other._ptr;
+            other._ptr = tmp;
+        }
+
+        [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
+        [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
+
+        template<class SubT>
+        [[nodiscard]] bool operator==(const IntrusivePtr<SubT>& other) const noexcept
+        {
+            return _ptr == other._ptr;
+        }
+
+        template<class SubT>
+        [[nodiscard]] bool operator==(const SubT* other) const noexcept { return _ptr == other; }
+
+    private:
+        T* _ptr = nullptr;
 
         template<class>
         friend class WeakPtr;
+
+        template<class>
+        friend class IntrusivePtr;
 
         friend class IntrusivePtr<const T>;
     };
@@ -389,7 +359,7 @@ namespace Core
     };
 
     template<class T>
-    class WeakPtr final : public BasePtr<WeakPtr<T>, T>
+    class WeakPtr final
     {
     public:
         using ValueT = T;
@@ -397,12 +367,11 @@ namespace Core
         using CounterT = typename ValueT::CounterT;
 
     public:
-        constexpr WeakPtr(T* ptr = nullptr)
-            : BasePtr<WeakPtr, T>{ ptr }
+        constexpr WeakPtr(T* ptr = nullptr) : _ptr(ptr)
         {
-            if (this->_ptr)
+            if (_ptr)
             {
-                _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
             }
         }
 
@@ -418,28 +387,28 @@ namespace Core
         }
 
         WeakPtr(const WeakPtr& other)
-            : BasePtr<WeakPtr, T>(nullptr)
         {
             *this = other;
         }
+
         WeakPtr(WeakPtr&& other) noexcept
-            : BasePtr<WeakPtr, T>(nullptr)
         {
             *this = std::move(other);
         }
+
         WeakPtr& operator=(const WeakPtr& other)
         {
             if (&other != this) [[likely]]
             {
-                if (this->_ptr)
+                if (_ptr)
                 {
-                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr),
-                                             this->_ptr);
+                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                             _ptr);
                 }
-                this->_ptr = other._ptr;
-                if (this->_ptr)
+                _ptr = other._ptr;
+                if (_ptr)
                 {
-                    _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr));
+                    _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
                 }
             }
             return *this;
@@ -449,12 +418,12 @@ namespace Core
         {
             if (&other != this) [[likely]]
             {
-                if (this->_ptr)
+                if (_ptr)
                 {
-                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr),
-                                             this->_ptr);
+                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                             _ptr);
                 }
-                this->_ptr = other._ptr;
+                _ptr = other._ptr;
 
                 other._ptr = nullptr;
             }
@@ -463,36 +432,87 @@ namespace Core
 
         ~WeakPtr() noexcept
         {
-            if (this->_ptr)
+            if (_ptr)
             {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr),
-                                         const_cast<std::remove_const_t<T>*&>(this->_ptr));
+                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                         const_cast<std::remove_const_t<T>*&>(_ptr));
             }
         }
 
         [[nodiscard]] bool hasHardLink() const noexcept
         {
-            return this->_ptr && this->_ptr->getHardRefCount() > 0;
+            return _ptr && _ptr->getHardRefCount() > 0;
         }
 
         [[nodiscard]] WeakData<T> tryLoad() const
         {
-            if (!this->_ptr)
+            if (!_ptr)
             {
                 return WeakData<T>(nullptr, false);
             }
 
             if (!hasHardLink())
             {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(this->_ptr),
-                                         const_cast<std::remove_const_t<T>*&>(this->_ptr));
-                this->_ptr = nullptr;
+                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
+                                         const_cast<std::remove_const_t<T>*&>(_ptr));
+                _ptr = nullptr;
                 return WeakData<T>(nullptr, false);
             }
 
-            WeakData<T> out(this->_ptr, true);
+            WeakData<T> out(_ptr, true);
             return out;
         }
+
+        [[nodiscard]] const T& operator*() const
+        {
+            Assert(_ptr != nullptr);
+            return *_ptr;
+        }
+
+        [[nodiscard]] const T* operator->() const
+        {
+            Assert(_ptr != nullptr);
+            return _ptr;
+        }
+
+        [[nodiscard]] T& operator*()
+        {
+            Assert(_ptr != nullptr);
+            return *_ptr;
+        }
+
+        [[nodiscard]] T* operator->()
+        {
+            Assert(_ptr != nullptr);
+            return _ptr;
+        }
+
+        void reset() { WeakPtr().swap(static_cast<WeakPtr&>(*this)); }
+
+        void swap(WeakPtr& other) noexcept
+        {
+            T* tmp = _ptr;
+            _ptr = other._ptr;
+            other._ptr = tmp;
+        }
+
+        [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
+        [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
+
+        template<class SubT>
+        [[nodiscard]] bool operator==(const WeakPtr<SubT>& other) const noexcept
+        {
+            return _ptr == other._ptr;
+        }
+
+        template<class SubT>
+        [[nodiscard]] bool operator==(const SubT* other) const noexcept { return _ptr == other; }
+
+    private:
+        mutable T* _ptr = nullptr;
+
+        template<class>
+        friend class WeakPtr;
     };
 
     //  _____                       _
@@ -520,10 +540,12 @@ namespace Core
 
     protected:
         constexpr IntrusiveRefCounter() = default;
+
         IntrusiveRefCounter(const IntrusiveRefCounter&)
         {
             // Do nothing
         }
+
         IntrusiveRefCounter& operator=(const IntrusiveRefCounter&)
         {
             // Do nothing
@@ -544,8 +566,13 @@ namespace Core
          */
         IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept = delete;
 
-        [[maybe_unused]] virtual void onIncrementRef(CounterT ref) {}
-        [[maybe_unused]] virtual void onDecrementRef(CounterT ref) {}
+        [[maybe_unused]] virtual void onIncrementRef(CounterT ref)
+        {
+        }
+
+        [[maybe_unused]] virtual void onDecrementRef(CounterT ref)
+        {
+        }
 
     private:
         mutable CounterT _hardRefCount = 0;
@@ -564,52 +591,51 @@ namespace Core
         friend void _DecrementWeakRefCounter(IntrusiveRefCounter<_T, _P>*, _T*&) noexcept;
     };
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] IntrusivePtr<NewT> StaticCast(const IntrusivePtr<T>& ptr)
     {
         return { static_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] IntrusivePtr<NewT> DynamicCast(const IntrusivePtr<T>& ptr)
     {
         return { dynamic_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] IntrusivePtr<NewT> ReinterpretCast(const IntrusivePtr<T>& ptr)
     {
         return { reinterpret_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] IntrusivePtr<NewT> ConstCast(const IntrusivePtr<T>& ptr)
     {
         return { const_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] WeakPtr<NewT> StaticCast(const WeakPtr<T>& ptr)
     {
         return { static_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] WeakPtr<NewT> DynamicCast(const WeakPtr<T>& ptr)
     {
         return { dynamic_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] WeakPtr<NewT> ReinterpretCast(const WeakPtr<T>& ptr)
     {
         return { reinterpret_cast<NewT*>(ptr.get()) };
     }
 
-    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>
+    template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_> >
     [[nodiscard]] WeakPtr<NewT> ConstCast(const WeakPtr<T>& ptr)
     {
         return { const_cast<NewT*>(ptr.get()) };
     }
-
 } // namespace Core
