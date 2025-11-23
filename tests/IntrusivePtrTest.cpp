@@ -368,3 +368,22 @@ TEST(IntrusivePtrTests, Operators)
     ASSERT_FALSE(a == b);
     ASSERT_TRUE(a != b);
 }
+
+class ConstexprCreatable : public IntrusiveRefCounter<ConstexprCreatable>
+{
+    INTRUSIVE_PTR_ADAPTERS(ConstexprCreatable)
+
+public:
+    constexpr ConstexprCreatable() = default;
+};
+
+TEST(IntrusivePtrTests, Constepxrs)
+{
+    constexpr IntrusivePtr<ConstexprCreatable> a;
+    constexpr auto b1 = a.get();
+    constexpr auto b2 = static_cast<bool>(a);
+
+    constexpr IntrusivePtr<ConstexprCreatable> a1;
+    constexpr auto b3 = a1 == a;
+    constexpr auto b4 = a1 == (void*)(0);
+}
