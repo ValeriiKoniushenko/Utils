@@ -27,16 +27,23 @@
 namespace Core
 {
 
+    void Repeater::reset()
+    {
+        _callback = nullptr;
+        _startTime.reset();
+        _lastCall = {};
+    }
+
     void Repeater::startOrUpdate()
     {
-        const auto now = std::chrono::system_clock::now();
+        const auto now = ClockT::now();
 
         if (!_startTime)
         {
             _startTime = now;
         }
 
-        const auto d = std::chrono::duration<double>(now - _lastCall).count();
+        const auto d = DurationT(now - _lastCall).count();
         if (d >= _repeatTime)
         {
             if (_callback) [[likely]]
@@ -47,14 +54,14 @@ namespace Core
         }
     }
 
-    double Repeater::getTimeGap() const noexcept
+    float Repeater::getTimeGap() const noexcept
     {
         if (!_startTime)
         {
             return 0;
         }
 
-        return std::chrono::duration<double>(_lastCall - *_startTime).count();
+        return DurationT(_lastCall - *_startTime).count();
     }
 
 } // namespace Core
