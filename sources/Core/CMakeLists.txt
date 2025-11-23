@@ -11,4 +11,6 @@ set_target_properties(UtilsCore PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(UtilsCore PUBLIC ../)
 target_link_libraries(UtilsCore PUBLIC glm UtilsUtils pcre2-8)
 
+target_compile_definitions(UtilsCore PUBLIC PCRE2_CODE_UNIT_WIDTH=8)
+
 UtilsCoreAddCompileOptionsTo(UtilsCore)

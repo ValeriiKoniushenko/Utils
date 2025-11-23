@@ -312,7 +312,7 @@ namespace Core
         return false;
     }
 
-    void BaseRegexReplace::setOutputString(char* allocatedString, size_t size) noexcept
+    void BaseRegexReplace::setOutputString(char* allocatedString, PCRE2_SIZE size) noexcept
     {
         _allocatedString = allocatedString;
         _allocatedSize = size;
