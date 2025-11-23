@@ -92,4 +92,14 @@ namespace Utils
     template<class T>
     inline constexpr bool AlwaysFalseV = AlwaysFalse<T>::value;
 
+    template<typename, typename = void>
+    struct HasValueType : std::false_type
+    {
+    };
+
+    template<typename T>
+    struct HasValueType<T, decltype(T::value_type, void())> : std::true_type
+    {
+    };
+
 } // namespace Utils

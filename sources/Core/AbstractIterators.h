@@ -24,15 +24,13 @@
 
 #pragma once
 
-#include "Core/CommonInterfaces.h"
-
 #include <type_traits>
 
 namespace Core
 {
 
     template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
-    class IInputIterator : public ISwappable<DerivedIterator>
+    class IInputIterator
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
@@ -53,7 +51,7 @@ namespace Core
     };
 
     template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
-    class IOutputIterator : public ISwappable<DerivedIterator>
+    class IOutputIterator
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
@@ -74,7 +72,7 @@ namespace Core
     };
 
     template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
-    class IForwardIterator : public ISwappable<DerivedIterator>
+    class IForwardIterator
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
@@ -103,7 +101,7 @@ namespace Core
     };
 
     template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
-    class IBidirectionalIterator : public ISwappable<DerivedIterator>
+    class IBidirectionalIterator
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
@@ -136,7 +134,7 @@ namespace Core
     };
 
     template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
-    class IRandomAccessIterator : public ISwappable<DerivedIterator>
+    class IRandomAccessIterator
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;

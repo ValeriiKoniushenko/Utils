@@ -31,6 +31,7 @@
 
 namespace Math
 {
+
     template<Utils::IsArithmetic T>
     [[nodiscard]] constexpr T Abs(T value) noexcept
     {
@@ -48,4 +49,5 @@ namespace Math
     {
         return Abs(n) < Epsilon;
     }
+
 } // namespace Math

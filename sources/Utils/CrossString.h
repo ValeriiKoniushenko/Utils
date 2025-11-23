@@ -27,22 +27,12 @@
 #ifdef __unix__
 
     #include <cinttypes>
-    #include <cstdarg>
     #include <cstring>
     #include <cwchar>
 
 inline char* strtok_s(char* s, const char* delim, char** context)
 {
     return strtok_r(s, delim, context);
-}
-
-inline int _snwprintf_s(wchar_t* s, uint64_t n, uint64_t, const wchar_t* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    const auto result = vswprintf(s, n, format, args);
-    va_end(args);
-    return result;
 }
 
 inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** ptr)

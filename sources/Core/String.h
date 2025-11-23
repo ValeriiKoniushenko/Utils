@@ -652,7 +652,7 @@ namespace Core
                 return result == Comparison::Equal || result == Comparison::Less;
             }
 
-            void swap(Self& other) noexcept override
+            void swap(Self& other) noexcept
             {
                 auto temp = *this;
                 *this = other;
