@@ -28,7 +28,6 @@
 #include "Core/CommonEnums.h"
 #include "Regex.h"
 #include "Singleton.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
@@ -58,7 +57,7 @@ namespace Core
     class BaseString;
 
 #if defined(UTILS_DEBUG)
-    class StringTracer : public StrictSingleton<StringTracer>
+    class StringTracer : public Singleton<StringTracer>
     {
         SINGLETONS_FRIEND(StringTracer)
     public:
@@ -440,7 +439,7 @@ namespace Core
     };
 
     template<class CharType>
-    class StringPool : public StrictSingleton<StringPool<CharType>>
+    class StringPool : public Singleton<StringPool<CharType>>
     {
         SINGLETONS_FRIEND_NO_CNSTR(StringPool<CharType>)
     public:
@@ -456,7 +455,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
             {
-                StringTracer::instance().addAtomRequest(std::string(string));
+                StringTracer::Instance().addAtomRequest(std::string(string));
             }
 #endif
             const auto currentHash = Toolset::Hash(string, size);
@@ -535,14 +534,11 @@ namespace Core
 
     public:
         template<bool IsReversed>
-        class BaseIterator :
-            public IRandomAccessIterator<CharT, BaseIterator<IsReversed>,
-                                         Utils::CopyableAndMoveable, true>
+        class BaseIterator : public IRandomAccessIterator<CharT, BaseIterator<IsReversed>, true>
         {
         public:
             using Self = BaseIterator;
-            using Super
-                = IRandomAccessIterator<CharT, BaseIterator, Utils::CopyableAndMoveable, true>;
+            using Super = IRandomAccessIterator<CharT, BaseIterator, true>;
             using iterator_category = std::random_access_iterator_tag;
             using value_type = typename BaseString<CharT>::value_type;
             using difference_type = typename BaseString<CharT>::difference_type;
@@ -750,7 +746,7 @@ namespace Core
          */
         [[nodiscard]] static Self Intern(const CharT* newString)
         {
-            auto& pool = StringPool<CharT>::instance();
+            auto& pool = StringPool<CharT>::Instance();
             return Self{ pool.intern(newString, Toolset::Length(newString)) };
         }
 
@@ -759,7 +755,7 @@ namespace Core
          */
         [[nodiscard]] static Self Intern(const CharT* newString, std::size_t size)
         {
-            auto& pool = StringPool<CharT>::instance();
+            auto& pool = StringPool<CharT>::Instance();
             return Self{ pool.intern(newString, size) };
         }
 
@@ -768,7 +764,7 @@ namespace Core
          */
         [[nodiscard]] static Self Intern(StdStringViewT string)
         {
-            auto& pool = StringPool<CharT>::instance();
+            auto& pool = StringPool<CharT>::Instance();
             return Self{ pool.intern(string.data(), string.size()) };
         }
 
@@ -793,7 +789,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                 if constexpr (sizeof(CharT) == 1)
                 {
-                    StringTracer::instance().addAtomComparisonRequest(std::string(other.c_str()));
+                    StringTracer::Instance().addAtomComparisonRequest(std::string(other.c_str()));
                 }
 #endif
                 return _string == other._string;
@@ -802,7 +798,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
             {
-                StringTracer::instance().addDynamicComparisonRequest(std::string(other.c_str()));
+                StringTracer::Instance().addDynamicComparisonRequest(std::string(other.c_str()));
             }
 #endif
 
@@ -1819,7 +1815,7 @@ namespace Core
             {
                 if (_string)
                 {
-                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
+                    StringTracer::Instance().addChangedPolicyToDynamic(std::string(_string));
                 }
             }
 #endif
@@ -2127,7 +2123,7 @@ namespace Core
 #if defined(UTILS_DEBUG)
                 if constexpr (sizeof(CharT) == 1)
                 {
-                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
+                    StringTracer::Instance().addChangedPolicyToDynamic(std::string(_string));
                 }
 #endif
             }
@@ -2172,7 +2168,7 @@ namespace Core
             {
                 if (isStatic() && _string)
                 {
-                    StringTracer::instance().addChangedPolicyToDynamic(std::string(_string));
+                    StringTracer::Instance().addChangedPolicyToDynamic(std::string(_string));
                 }
             }
 #endif
@@ -2407,7 +2403,7 @@ namespace Core
             }
 
 #if defined(UTILS_DEBUG)
-            Assert(Core::StringPool<char>::instance().isStatic(_string));
+            Assert(Core::StringPool<char>::Instance().isStatic(_string));
 #endif
         }
 
@@ -2528,13 +2524,13 @@ struct std::hash<Core::BaseString<CharType>>
 
 inline Core::BaseString<char> operator""_atom(const char* str, std::size_t size)
 {
-    static auto& pool = Core::StringPool<char>::instance();
+    static auto& pool = Core::StringPool<char>::Instance();
     return Core::BaseString{ pool.intern(str, size) };
 }
 
 inline Core::BaseString<wchar_t> operator""_atom(const wchar_t* str, std::size_t size)
 {
-    static auto& pool = Core::StringPool<wchar_t>::instance();
+    static auto& pool = Core::StringPool<wchar_t>::Instance();
     return Core::BaseString{ pool.intern(str, size) };
 }
 

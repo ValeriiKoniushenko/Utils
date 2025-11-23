@@ -31,12 +31,12 @@
 namespace Core
 {
 
-    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
-    class IInputIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
+    template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
+    class IInputIterator : public ISwappable<DerivedIterator>
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
-        using CopyAndMovePolicyT = CopyAndMovePolicy;
+
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
@@ -52,12 +52,12 @@ namespace Core
         IInputIterator() = default;
     };
 
-    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
-    class IOutputIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
+    template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
+    class IOutputIterator : public ISwappable<DerivedIterator>
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
-        using CopyAndMovePolicyT = CopyAndMovePolicy;
+
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
@@ -73,12 +73,12 @@ namespace Core
         IOutputIterator() = default;
     };
 
-    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
-    class IForwardIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
+    template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
+    class IForwardIterator : public ISwappable<DerivedIterator>
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
-        using CopyAndMovePolicyT = CopyAndMovePolicy;
+
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
@@ -102,12 +102,12 @@ namespace Core
         IForwardIterator() = default;
     };
 
-    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
-    class IBidirectionalIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
+    template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
+    class IBidirectionalIterator : public ISwappable<DerivedIterator>
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
-        using CopyAndMovePolicyT = CopyAndMovePolicy;
+
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 
@@ -135,12 +135,12 @@ namespace Core
         IBidirectionalIterator() = default;
     };
 
-    template<class T, class DerivedIterator, class CopyAndMovePolicy, bool IsIgnoreDataRef = false>
-    class IRandomAccessIterator : public CopyAndMovePolicy, public ISwappable<DerivedIterator>
+    template<class T, class DerivedIterator, bool IsIgnoreDataRef = false>
+    class IRandomAccessIterator : public ISwappable<DerivedIterator>
     {
     public:
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
-        using CopyAndMovePolicyT = CopyAndMovePolicy;
+
         using DataT = T;
         using DataRefT = std::conditional_t<IsIgnoreDataRef, DataT, DataT&>;
 

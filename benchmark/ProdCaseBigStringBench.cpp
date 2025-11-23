@@ -33,7 +33,7 @@ namespace
 {
     StringPool<char>& GetPool()
     {
-        return StringPool<char>::instance();
+        return StringPool<char>::Instance();
     }
 
     void BM_Peek(benchmark::State& state)

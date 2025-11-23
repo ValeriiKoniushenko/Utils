@@ -24,34 +24,28 @@
 
 #pragma once
 
-#include "Utils/CopyableAndMoveableBehaviour.h"
-
 #include <memory>
 #include <mutex>
-#include <type_traits>
 
 #define _SINGLETONS_FRIEND(className)                                                              \
-    template<class, Utils::IsCopyableAndMoveableBehaviour, bool>                                   \
+    template<class, bool>                                                                          \
     friend class ::Core::BaseSingleton;
 
 #define SINGLETONS_FRIEND_NO_CNSTR(className) _SINGLETONS_FRIEND(className)
 
 #define SINGLETONS_FRIEND(className)                                                               \
     _SINGLETONS_FRIEND(className)                                                                  \
-                                                                                                   \
 private:                                                                                           \
     className() = default;
 
 namespace Core
 {
 
-    template<class T,
-             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable,
-             bool IsTreadSafe = false>
-    class BaseSingleton : public CopyBehaviour
+    template<class T, bool IsTreadSafe>
+    class BaseSingleton
     {
     public:
-        static T& instance()
+        static T& Instance()
         {
             static std::unique_ptr<T> object;
 
@@ -59,7 +53,8 @@ namespace Core
             {
                 if constexpr (IsTreadSafe)
                 {
-                    const std::scoped_lock lg(_mutex);
+                    static std::mutex mutex;
+                    const std::scoped_lock lg(mutex);
                     if (!object)
                     {
                         object = std::unique_ptr<T>(new T);
@@ -74,27 +69,18 @@ namespace Core
             return *object.get();
         }
 
-        ~BaseSingleton() override = default;
+        virtual ~BaseSingleton() = default;
 
     protected:
         BaseSingleton() = default;
-
-    private:
-        inline static std::mutex _mutex;
+        BaseSingleton(BaseSingleton&&) = delete;
+        BaseSingleton(const BaseSingleton&) = delete;
     };
 
-    template<class T,
-             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
-    using Singleton = BaseSingleton<T, CopyBehaviour, false>;
+    template<class T>
+    using Singleton = BaseSingleton<T, false>;
 
     template<class T>
-    using StrictSingleton = Singleton<T, Utils::NotCopyableAndNotMoveable>;
-
-    template<class T,
-             Utils::IsCopyableAndMoveableBehaviour CopyBehaviour = Utils::CopyableAndMoveable>
-    using ThreadSafeSingleton = BaseSingleton<T, CopyBehaviour, true>;
-
-    template<class T>
-    using StrictThreadSafeSingleton = ThreadSafeSingleton<T, Utils::NotCopyableAndNotMoveable>;
+    using ThreadSafeSingleton = BaseSingleton<T, true>;
 
 } // namespace Core

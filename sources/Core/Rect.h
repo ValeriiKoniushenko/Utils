@@ -28,12 +28,11 @@
 #include "Position.h"
 #include "Size.h"
 #include "Utils/Concepts.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
 
 namespace Core
 {
     template<Utils::IsArithmetic T>
-    class Rect final : public Utils::CopyableAndMoveable
+    class Rect final
     {
     public:
         constexpr static int DimensionValue = 2;
@@ -42,6 +41,9 @@ namespace Core
 
     public:
         constexpr Rect() = default;
+        constexpr Rect(const Rect&) = default;
+        constexpr Rect(Rect&&) noexcept = default;
+
         constexpr Rect(T left, T top, T right, T bottom)
             : _left(left),
               _right(right),

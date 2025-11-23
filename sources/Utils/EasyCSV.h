@@ -23,7 +23,6 @@
  */
 
 #pragma once
-#include "CopyableAndMoveableBehaviour.h"
 
 #include <filesystem>
 #include <vector>

@@ -25,7 +25,6 @@
 #pragma once
 
 #include "BaseAssert.h"
-#include "Utils/CopyableAndMoveableBehaviour.h"
 #include "Utils/CrossString.h"
 
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -38,7 +37,7 @@
 namespace Core
 {
 
-    class BaseRegex : public Utils::CopyableAndMoveable
+    class BaseRegex
     {
     public:
         BaseRegex() = default;
@@ -46,7 +45,7 @@ namespace Core
         BaseRegex(BaseRegex&&) = default;
         BaseRegex& operator=(const BaseRegex&) = default;
         BaseRegex& operator=(BaseRegex&&) = default;
-        ~BaseRegex() override;
+        virtual ~BaseRegex();
 
         explicit BaseRegex(const char* pattern, const char* subject = nullptr);
 
