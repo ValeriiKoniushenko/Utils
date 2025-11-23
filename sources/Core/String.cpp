@@ -24,14 +24,15 @@
 
 #include "String.h"
 
-#include "Utils/EasyCSV.h"
-
 #include <iostream>
+
+#if defined(UTILS_DEBUG)
+
+    #include "Utils/EasyCSV.h"
 
 namespace Core
 {
 
-#if defined(UTILS_DEBUG)
     StringTracer::~StringTracer()
     {
         saveMetrics();
@@ -83,9 +84,9 @@ namespace Core
         csv.save();
     }
 
-#endif
-
 } // namespace Core
+
+#endif // defined(UTILS_DEBUG)
 
 std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s)
 {

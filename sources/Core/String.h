@@ -31,16 +31,10 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
-#include <algorithm>
 #include <array>
 #include <charconv>
-#include <cstring>
 #include <cwctype>
 #include <filesystem>
-#include <functional>
-#include <optional>
-#include <regex>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -57,7 +51,7 @@ namespace Core
     class BaseString;
 
 #if defined(UTILS_DEBUG)
-    class StringTracer : public Singleton<StringTracer>
+    class StringTracer final : public Singleton<StringTracer>
     {
         SINGLETONS_FRIEND(StringTracer)
     public:
@@ -1352,7 +1346,14 @@ namespace Core
 
         [[nodiscard]] static bool IsContainChar(CharT ch, StdStringViewT set) noexcept
         {
-            return std::ranges::any_of(set, [ch](auto value) { return value == ch; });
+            for (const auto c : set)
+            {
+                if (ch == c)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
