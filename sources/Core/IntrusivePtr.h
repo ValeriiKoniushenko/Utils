@@ -456,30 +456,6 @@ namespace Core
             return out;
         }
 
-        [[nodiscard]] const T& operator*() const
-        {
-            Assert(_ptr != nullptr);
-            return *_ptr;
-        }
-
-        [[nodiscard]] const T* operator->() const
-        {
-            Assert(_ptr != nullptr);
-            return _ptr;
-        }
-
-        [[nodiscard]] T& operator*()
-        {
-            Assert(_ptr != nullptr);
-            return *_ptr;
-        }
-
-        [[nodiscard]] T* operator->()
-        {
-            Assert(_ptr != nullptr);
-            return _ptr;
-        }
-
         void reset() { WeakPtr().swap(static_cast<WeakPtr&>(*this)); }
 
         void swap(WeakPtr& other) noexcept
