@@ -6,6 +6,7 @@ function(Core_SuppressAllSubmoduleWarnings Target)
     target_compile_options(${Target} PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/w>
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-c2y-extensions>
     )
 endfunction()
 
