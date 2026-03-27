@@ -34,7 +34,8 @@
 // clang-format on
 #endif
 
-#if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)
+#if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)                         \
+    && !(defined(__clang__) && defined(__GLIBCXX__))
     #include <stacktrace>
 #endif
 
