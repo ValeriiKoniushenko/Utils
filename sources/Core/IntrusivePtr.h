@@ -62,6 +62,20 @@ namespace Core
     // \_|  |_/|_||___/ \___|
 
     template<class T>
+    class IntrusivePtr;
+
+    // Helper to detect IntrusivePtr specialization
+    template<class T>
+    struct IsIntrusivePtrHelper : std::false_type
+    {
+    };
+
+    template<class T>
+    struct IsIntrusivePtrHelper<IntrusivePtr<T>> : std::true_type
+    {
+    };
+
+    template<class T>
     concept IsPolicy = requires() {
         typename T::CounterT;
         std::is_invocable_v<decltype(T::IncrementRef)>;
