@@ -7,6 +7,7 @@ function(Core_SuppressAllSubmoduleWarnings Target)
         $<$<CXX_COMPILER_ID:MSVC>:/w>
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-w>
         $<$<CXX_COMPILER_ID:Clang>:-Wno-c2y-extensions>
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-c2y-extensions>
     )
 endfunction()
 
