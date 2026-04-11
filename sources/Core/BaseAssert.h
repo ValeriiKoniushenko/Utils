@@ -35,7 +35,7 @@
 #endif
 
 #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)                         \
-    && !(defined(__clang__) && defined(__GLIBCXX__))
+    && !(defined(__clang__) && defined(__GLIBCXX__)) && !defined(__GNUC__)
     #include <stacktrace>
 #endif
 
@@ -53,8 +53,8 @@ inline void Assert(bool condition, const char* message = nullptr)
 
     cerr << "Assert was got: " << endl
          << "Message: " << (message ? message : "None") << endl
-    #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)                         \
-        && !(defined(__clang__) && defined(__GLIBCXX__))
+    #if defined(__cpp_lib_stacktrace) && !defined(DONT_USE_CPP_LIB_STACKTRACE)                     \
+        && !(defined(__clang__) && defined(__GLIBCXX__)) && !defined(__GNUC__)
          << "Stacktrace: " << endl
          << std::stacktrace::current() << endl
     #endif
