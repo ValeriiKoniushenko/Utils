@@ -43,6 +43,8 @@ namespace Core
         constexpr Rect() = default;
         constexpr Rect(const Rect&) = default;
         constexpr Rect(Rect&&) noexcept = default;
+        Rect& operator=(const Rect&) = default;
+        Rect& operator=(Rect&&) noexcept = default;
 
         constexpr Rect(T left, T top, T right, T bottom)
             : _left(left),
