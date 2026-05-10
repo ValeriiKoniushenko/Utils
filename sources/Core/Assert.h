@@ -27,7 +27,10 @@
 #include "BaseAssert.h"
 #include "String.h"
 
-#if defined(UTILS_DEBUG)
+#include <atomic>
+#include <chrono>
+
+#if defined(UTILS_DEBUG) || defined(NDEBUG) || defined(DEBUG)
 
 inline void Assert(const bool condition, const Core::StringAtom& message = "")
 {
@@ -43,5 +46,73 @@ inline bool Verify(const bool condition, const Core::StringAtom& message = "")
 {
     ::Assert(false, message.c_str());
 }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // AssertOnce — fires at most once per call site, no matter how many times the
+    //              condition is false afterward.
+    // ─────────────────────────────────────────────────────────────────────────────
+    #define AssertOnce(cond, ...)                                                                  \
+        do                                                                                         \
+        {                                                                                          \
+            static std::atomic<bool> _once_fired{ false };                                         \
+            /* exchange returns the OLD value; if it was false we are first */                     \
+            if (!(cond) && !_once_fired.exchange(true, std::memory_order_relaxed))                 \
+            {                                                                                      \
+                Assert(false, ##__VA_ARGS__);                                                      \
+            }                                                                                      \
+        } while (0)
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // AssertAtCount — fires only on the N-th failure of the condition.
+    //                 All other failures (before or after N) are silent.
+    // ─────────────────────────────────────────────────────────────────────────────
+    #define AssertAtCount(cond, n, ...)                                                            \
+        do                                                                                         \
+        {                                                                                          \
+            static std::atomic<int> _fail_count{ 0 };                                              \
+            if (!(cond) && ++_fail_count == (n))                                                   \
+            {                                                                                      \
+                Assert(false, ##__VA_ARGS__);                                                      \
+            }                                                                                      \
+        } while (0)
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // AssertTimed — fires when the condition is false, but rate-limited to once
+    //               per `seconds` seconds.  The first failure always fires; after
+    //               that the assert is silenced until the cooldown expires.
+    //
+    //               Thread-safe: compare_exchange ensures only one thread wins when
+    //               multiple threads cross the threshold simultaneously.
+    // ─────────────────────────────────────────────────────────────────────────────
+    #define AssertTimed(cond, seconds, ...)                                                        \
+        do                                                                                         \
+        {                                                                                          \
+            using _Clock = std::chrono::steady_clock;                                              \
+            using _Rep = _Clock::rep;                                                              \
+            /* Default time_point{} is the epoch — guarantees the first failure fires */           \
+            static std::atomic<_Rep> _last_fire{                                                   \
+                _Clock::time_point{}.time_since_epoch().count()                                    \
+            };                                                                                     \
+            if (!(cond))                                                                           \
+            {                                                                                      \
+                const auto _now = _Clock::now();                                                   \
+                _Rep _prev = _last_fire.load(std::memory_order_relaxed);                           \
+                const auto _prev_tp = _Clock::time_point{ _Clock::duration{ _prev } };             \
+                const double _elapsed = std::chrono::duration<double>(_now - _prev_tp).count();    \
+                /* CAS: only the thread that successfully swaps the timestamp fires */             \
+                if (_elapsed >= static_cast<double>(seconds)                                       \
+                    && _last_fire.compare_exchange_strong(_prev, _now.time_since_epoch().count(),  \
+                                                          std::memory_order_relaxed))              \
+                {                                                                                  \
+                    Assert(false, ##__VA_ARGS__);                                                  \
+                }                                                                                  \
+            }                                                                                      \
+        } while (0)
+
+#else // !UTILS_DEBUG — all three are complete no-ops
+
+    #define AssertOnce(cond, ...)        ((void)0)
+    #define AssertAtCount(cond, n, ...)  ((void)0)
+    #define AssertTimed(cond, secs, ...) ((void)0)
 
 #endif
