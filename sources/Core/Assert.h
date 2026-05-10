@@ -32,12 +32,12 @@
 
 #if defined(UTILS_DEBUG) || defined(NDEBUG) || defined(DEBUG)
 
-inline void Assert(const bool condition, const Core::StringAtom& message = "")
+inline void Assert(const bool condition, const Core::StringAtom& message)
 {
     ::Assert(condition, message.c_str());
 }
 
-inline bool Verify(const bool condition, const Core::StringAtom& message = "")
+inline bool Verify(const bool condition, const Core::StringAtom& message)
 {
     return ::Verify(condition, message.c_str());
 }
