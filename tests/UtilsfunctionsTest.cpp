@@ -40,7 +40,7 @@ and more recently with desktop publishing software like Aldus PageMaker includin
 
     std::ofstream testFile(correctPath);
     ASSERT_TRUE(testFile.is_open());
-    testFile.write(text, strlen(text));
+    testFile.write(text, static_cast<std::streamsize>(strlen(text)));
     testFile.close();
 
     auto&& fileContent = Utils::GetTextFileContentAs<std::string>(correctPath);
@@ -63,7 +63,7 @@ and more recently with desktop publishing software like Aldus PageMaker includin
 
     std::ofstream testFile(correctPath);
     ASSERT_TRUE(testFile.is_open());
-    testFile.write(text, textLen);
+    testFile.write(text, static_cast<std::streamsize>(textLen));
     testFile.close();
 
     auto&& fileContent = Utils::GetTextFileContentAs<std::vector<unsigned char>>(correctPath);
@@ -81,7 +81,7 @@ TEST(UtilsTests, SimpleGetFileContent)
 
     std::ofstream testFile(correctPath);
     ASSERT_TRUE(testFile.is_open());
-    testFile.write(text, strlen(text));
+    testFile.write(text, static_cast<std::streamsize>(strlen(text)));
     testFile.close();
 
     auto&& fileContent = Utils::GetFileContent(correctPath);
