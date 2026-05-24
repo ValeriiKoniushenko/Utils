@@ -31,6 +31,7 @@
 #include "Utils/CrossString.h"
 #include "Utils/TypeTraits.h"
 
+#include <algorithm>
 #include <array>
 #include <charconv>
 #include <cwctype>
@@ -55,6 +56,11 @@ namespace Core
     {
         SINGLETONS_FRIEND(StringTracer)
     public:
+        StringTracer(StringTracer&&) = delete;
+        StringTracer(const StringTracer&) = delete;
+        StringTracer& operator=(StringTracer&&) = delete;
+        StringTracer& operator=(const StringTracer&) = delete;
+
         ~StringTracer() override;
 
         [[maybe_unused]] void addAtomRequest(std::string str);
@@ -407,7 +413,7 @@ namespace Core
     {
         using Toolset = StringToolset<CharT>;
 
-        StringData(std::unique_ptr<CharT[]>&& ptr, std::size_t newSize)
+        StringData(std::vector<CharT>&& ptr, std::size_t newSize)
             : str{ std::move(ptr) },
               size{ newSize }
         {
@@ -415,20 +421,20 @@ namespace Core
 
         [[nodiscard]] InternalStringView<CharT> toReadOnly() noexcept
         {
-            return { str.get(), size };
+            return { str.data(), size };
         }
 
         [[nodiscard]] bool operator<(const StringData& other) const
         {
-            return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Less;
+            return Toolset::Cmp(str.data(), other.str.data()) == Comparison::Less;
         }
 
         [[nodiscard]] bool operator==(const StringData& other) const
         {
-            return Toolset::Cmp(str.get(), other.str.get()) == Comparison::Equal;
+            return Toolset::Cmp(str.data(), other.str.data()) == Comparison::Equal;
         }
 
-        std::unique_ptr<CharT[]> str;
+        std::vector<CharT> str;
         std::size_t size = InternalStringView<CharT>::invalidSize;
     };
 
@@ -459,10 +465,12 @@ namespace Core
                 return it->second.toReadOnly();
             }
 
-            auto ptr = std::make_unique<CharT[]>(size + 1);
-            auto* addr = ptr.get();
-            memcpy(ptr.get(), string, (size + 1) * sizeof(CharT));
-            _strings.emplace(currentHash, StringDataT{ std::move(ptr), size });
+            std::vector<CharT> buffer;
+            buffer.reserve(size + 1);
+
+            auto* addr = buffer.data();
+            memcpy(addr, string, (size + 1) * sizeof(CharT));
+            _strings.emplace(currentHash, StringDataT(std::move(buffer), size));
 
             return InternalStringViewT{ addr, size };
         }
@@ -1091,11 +1099,8 @@ namespace Core
                     return value ? Self{ L"true" } : Self{ L"false" };
                 }
             }
-            else if constexpr (std::is_same_v<T, Self>)
-            {
-                return Self{ value.c_str(), value.size() };
-            }
-            else if constexpr (std::is_same_v<T, std::basic_string<CharT>>)
+            else if constexpr (std::is_same_v<T, Self>
+                               || std::is_same_v<T, std::basic_string<CharT>>)
             {
                 return Self{ value.c_str(), value.size() };
             }
@@ -1607,7 +1612,7 @@ namespace Core
 
                 if (regex.replace())
                 {
-                    // recal size
+                    // recalculate string size
                     output._size = 0;
                     while (output._string[output._size])
                     {
@@ -1984,7 +1989,8 @@ namespace Core
             CharT* foundStr = _string;
             do
             {
-                if ((foundStr = Toolset::StrStr(foundStr, other.data())))
+                foundStr = Toolset::StrStr(foundStr, other.data());
+                if (foundStr)
                 {
                     strings.push_back(foundStr);
                     ++foundStr;
@@ -2006,7 +2012,8 @@ namespace Core
             CharT* foundStr = _string;
             do
             {
-                if ((foundStr = Toolset::StrIStr(foundStr, other.data())))
+                foundStr = Toolset::StrIStr(foundStr, other.data());
+                if (foundStr)
                 {
                     strings.push_back(foundStr);
                     ++foundStr;
@@ -2016,7 +2023,7 @@ namespace Core
             return strings;
         }
 
-        BaseString() {}
+        BaseString() = default;
 
         template<class IterT>
         BaseString(IterT first, IterT last)
@@ -2176,10 +2183,7 @@ namespace Core
 
             const auto oldCapacity = _capacity;
 
-            if (newCapacity < minAllocationSize)
-            {
-                newCapacity = minAllocationSize;
-            }
+            newCapacity = std::max(newCapacity, minAllocationSize);
 
             if (auto* newString = new CharT[newCapacity])
             {
