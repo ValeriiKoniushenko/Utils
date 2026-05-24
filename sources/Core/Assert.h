@@ -24,20 +24,19 @@
 
 #pragma once
 
-#include "BaseAssert.h"
-#include "String.h"
-
-#include <atomic>
-#include <chrono>
-
 #if defined(UTILS_DEBUG) || defined(NDEBUG) || defined(DEBUG)
 
-inline void Assert(const bool condition, const Core::StringAtom& message)
+    #include "BaseAssert.h"
+    #include "String.h"
+
+    #include <chrono>
+
+inline void Assert(bool condition, const Core::StringAtom& message)
 {
     ::Assert(condition, message.c_str());
 }
 
-inline bool Verify(const bool condition, const Core::StringAtom& message)
+inline bool Verify(bool condition, const Core::StringAtom& message)
 {
     return ::Verify(condition, message.c_str());
 }
@@ -87,22 +86,18 @@ inline bool Verify(const bool condition, const Core::StringAtom& message)
     #define AssertTimed(cond, seconds, ...)                                                        \
         do                                                                                         \
         {                                                                                          \
-            using _Clock = std::chrono::steady_clock;                                              \
-            using _Rep = _Clock::rep;                                                              \
-            /* Default time_point{} is the epoch — guarantees the first failure fires */           \
-            static std::atomic<_Rep> _last_fire{                                                   \
-                _Clock::time_point{}.time_since_epoch().count()                                    \
-            };                                                                                     \
-            if (!(cond))                                                                           \
+            using namespace std::chrono;                                                           \
+            using ClockT = std::chrono::steady_clock;                                              \
+                                                                                                   \
+            if (!cond)                                                                             \
             {                                                                                      \
-                const auto _now = _Clock::now();                                                   \
-                _Rep _prev = _last_fire.load(std::memory_order_relaxed);                           \
-                const auto _prev_tp = _Clock::time_point{ _Clock::duration{ _prev } };             \
-                const double _elapsed = std::chrono::duration<double>(_now - _prev_tp).count();    \
-                /* CAS: only the thread that successfully swaps the timestamp fires */             \
-                if (_elapsed >= static_cast<double>(seconds)                                       \
-                    && _last_fire.compare_exchange_strong(_prev, _now.time_since_epoch().count(),  \
-                                                          std::memory_order_relaxed))              \
+                static thread_local const auto firstFire                                           \
+                    = duration_cast<milliseconds>(ClockT::now().time_since_epoch()).count();       \
+                                                                                                   \
+                const auto now                                                                     \
+                    = duration_cast<milliseconds>(ClockT::now().time_since_epoch()).count();       \
+                                                                                                   \
+                if (now - firstFire >= seconds)                                                    \
                 {                                                                                  \
                     Assert(false, ##__VA_ARGS__);                                                  \
                 }                                                                                  \
