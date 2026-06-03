@@ -35,6 +35,11 @@
 
 #define SINGLETONS_FRIEND(className)                                                               \
     _SINGLETONS_FRIEND(className)                                                                  \
+    className(const className&) = delete;                                                          \
+    className(className&&) = delete;                                                               \
+    className& operator=(const className&) = delete;                                               \
+    className& operator=(className&&) = delete;                                                    \
+                                                                                                   \
 private:                                                                                           \
     className() = default;
 

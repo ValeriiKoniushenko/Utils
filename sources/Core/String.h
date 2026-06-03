@@ -56,11 +56,6 @@ namespace Core
     {
         SINGLETONS_FRIEND(StringTracer)
     public:
-        StringTracer(StringTracer&&) = delete;
-        StringTracer(const StringTracer&) = delete;
-        StringTracer& operator=(StringTracer&&) = delete;
-        StringTracer& operator=(const StringTracer&) = delete;
-
         ~StringTracer() override;
 
         [[maybe_unused]] void addAtomRequest(std::string str);
