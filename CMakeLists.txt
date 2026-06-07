@@ -22,9 +22,12 @@ Utils_InstallCXXStandardVersion()
 
 # ========= Adding subdirectories =========
 # Adding dependencies
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
+set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
 # Adding core
 add_subdirectory(benchmark)
 add_subdirectory(tests)
 add_subdirectory(sources)
+
