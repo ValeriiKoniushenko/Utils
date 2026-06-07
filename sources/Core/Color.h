@@ -40,10 +40,6 @@ namespace Core
     /**
      * @brief Non-normalized Color. Can get values 0 - 255
      */
-    /**
-     * @brief A 4-component color structure representing RGBA values with 8-bit precision per
-     * channel.
-     */
     struct Color4 : public glm::vec<4, uint8_t>
     {
         using Parent = glm::vec<4, uint8_t>;
@@ -94,10 +90,6 @@ namespace Core
     /**
      * @brief Non-normalized Color. Can get values 0 - 255
      */
-    /**
-     * @brief A 3-component color structure representing RGB values with 8-bit precision per
-     * channel.
-     */
     struct Color3 : public glm::vec<3, uint8_t>
     {
         using Parent = glm::vec<3, uint8_t>;
@@ -141,10 +133,6 @@ namespace Core
     /**
      * @brief Normalized Color. Can get values 0.0 - 1.0
      */
-    /**
-     * @brief A 4-component normalized color structure representing RGBA values with floating-point
-     * precision.
-     */
     struct NormColor4 : public glm::vec<4, float>
     {
         using Parent = glm::vec<4, float>;
@@ -187,10 +175,6 @@ namespace Core
 
     /**
      * @brief Normalized Color. Can get values 0.0 - 1.0
-     */
-    /**
-     * @brief A 3-component normalized color structure representing RGB values with floating-point
-     * precision.
      */
     struct NormColor3 : public glm::vec<3, float>
     {
