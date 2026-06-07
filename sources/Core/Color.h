@@ -27,6 +27,8 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <iosfwd>
 
 namespace Core
@@ -36,6 +38,14 @@ namespace Core
     struct Color4;
     struct NormColor3;
     struct NormColor4;
+
+    namespace Details
+    {
+        constexpr uint8_t normToByte(float v) noexcept
+        {
+            return static_cast<uint8_t>(std::round(std::clamp(v, 0.f, 1.f) * 255.f));
+        }
+    } // namespace Details
 
     /**
      * @brief Non-normalized Color. Can get values 0 - 255
@@ -148,6 +158,13 @@ namespace Core
         }
 
         /**
+         * @brief Constructs a Color4 from a Color3 and alpha value
+         * @param value The source Color3
+         * @param alpha The alpha value (default: 255)
+         */
+        constexpr explicit NormColor4(const NormColor3& value, uint8_t alpha = 255);
+
+        /**
          * @brief Creates a NormColor4 from a non-normalized color
          * @param other The source color
          * @return The resulting normalized color
@@ -233,12 +250,8 @@ namespace Core
 
     constexpr Color4 Color4::From(const NormColor4& other) noexcept
     {
-        Color4 out;
-        out.r = static_cast<uint8_t>(other.r * 255.f);
-        out.g = static_cast<uint8_t>(other.g * 255.f);
-        out.b = static_cast<uint8_t>(other.b * 255.f);
-        out.a = static_cast<uint8_t>(other.a * 255.f);
-        return out;
+        return { Details::normToByte(other.r), Details::normToByte(other.g),
+                 Details::normToByte(other.b), Details::normToByte(other.a) };
     }
 
     constexpr void Color3::from(const NormColor3& other) noexcept
@@ -248,16 +261,18 @@ namespace Core
 
     constexpr Color3 Color3::From(const NormColor3& other) noexcept
     {
-        Color3 out;
-        out.r = static_cast<uint8_t>(other.r * 255.f);
-        out.g = static_cast<uint8_t>(other.g * 255.f);
-        out.b = static_cast<uint8_t>(other.b * 255.f);
-        return out;
+        return { Details::normToByte(other.r), Details::normToByte(other.g),
+                 Details::normToByte(other.b) };
     }
 
     constexpr NormColor3 Color3::toNorm() const noexcept
     {
         return NormColor3::From(*this);
+    }
+
+    constexpr NormColor4::NormColor4(const NormColor3& value, uint8_t alpha)
+        : Parent(value.r, value.g, value.b, alpha)
+    {
     }
 
     constexpr NormColor4 NormColor4::From(const Color4& other) noexcept
