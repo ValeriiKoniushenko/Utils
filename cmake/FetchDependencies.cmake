@@ -30,7 +30,6 @@ FetchContent_Declare(GoogleTest
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(GoogleTest)
-Core_SuppressAllSubmoduleWarnings(gtest)
 
 
 FetchContent_Declare(Benchmark
@@ -41,7 +40,6 @@ FetchContent_Declare(Benchmark
 )
 
 FetchContent_MakeAvailable(Benchmark)
-Core_SuppressAllSubmoduleWarnings(benchmark)
 
 
 FetchContent_Declare(PCRE2
