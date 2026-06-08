@@ -24,25 +24,18 @@
 
 #pragma once
 
-#ifdef __unix__
+#if defined(__unix__) || (defined(__MINGW32__) && !defined(_MSC_VER))
 
     #include <cinttypes>
     #include <cstring>
-    #include <cwchar>
+    #include <cassert>
 
-inline char* strtok_s(char* s, const char* delim, char** context)
-{
-    return strtok_r(s, delim, context);
-}
 
-inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** ptr)
+inline int memcpy_s(void* dest, [[maybe_unused]] uint64_t destsz, const void* src, uint64_t count)
 {
-    return wcstok(str, delim, ptr);
-}
-
-inline void* memcpy_s(void* dest, [[maybe_unused]] uint64_t destsz, const void* src, uint64_t count)
-{
-    return memcpy(dest, src, count);
+    assert(count <= destsz);
+    memcpy(dest, src, count);
+    return 0;
 }
 
 #endif

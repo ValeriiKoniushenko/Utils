@@ -80,18 +80,18 @@ TEST(Color4Test, FromNormColor4)
         NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
         Color4 c = Color4::From(n);
         EXPECT_EQ(c.x, 0);
-        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);
-        EXPECT_EQ(c.w, 63);
+        EXPECT_EQ(c.w, 64);
     }
 
     {
         constexpr NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
         Color4 c = Color4::From(n);
         EXPECT_EQ(c.x, 0);
-        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);
-        EXPECT_EQ(c.w, 63);
+        EXPECT_EQ(c.w, 64);
     }
 }
 
@@ -179,7 +179,7 @@ TEST(Color3Test, FromNormColor3)
         NormColor3 n(glm::vec3(0.0f, 0.5f, 1.0f));
         Color3 c = Color3::From(n);
         EXPECT_EQ(c.x, 0);
-        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);
     }
 
@@ -187,7 +187,7 @@ TEST(Color3Test, FromNormColor3)
         constexpr NormColor3 n(glm::vec3(0.0f, 0.5f, 1.0f));
         Color3 c = Color3::From(n);
         EXPECT_EQ(c.x, 0);
-        EXPECT_EQ(c.y, 127);
+        EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);
     }
 }

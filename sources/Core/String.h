@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cstring>
 #include <cwctype>
 #include <filesystem>
 #include <unordered_map>
@@ -134,11 +135,48 @@ namespace Core
         {
             if constexpr (sizeof(CharT) == 1)
             {
+#ifdef _MSC_VER
                 return strtok_s(string, delimiter, &context);
+#else
+                return strtok_r(string, delimiter, &context);
+#endif
             }
             else
             {
+#if defined(_MSC_VER)
                 return wcstok_s(string, delimiter, &context);
+#elif defined(__MINGW32__)
+                static thread_local wchar_t* saved = nullptr;
+                wchar_t* s = string ? string : saved;
+                if (!s)
+                {
+                    return nullptr;
+                }
+
+                s += wcsspn(s, delimiter);
+                if (*s == L'\0')
+                {
+                    saved = nullptr;
+                    return nullptr;
+                }
+
+                wchar_t* token = s;
+                s += wcscspn(s, delimiter);
+                if (*s != L'\0')
+                {
+                    *s++ = L'\0';
+                }
+                else
+                {
+                    s = nullptr;
+                }
+
+                saved = s;
+                context = s; // keep context in sync
+                return token;
+#else
+                return wcstok(string, delimiter, &context);
+#endif
             }
         }
 
