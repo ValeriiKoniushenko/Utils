@@ -1,7 +1,7 @@
 include_guard()
 
 function(UtilsCoreAddCompileOptionsTo Target)
-    target_compile_definitions(${Target} PRIVATE NOMINMAX=1)
+    target_compile_definitions(${Target} PUBLIC NOMINMAX)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_definitions(${Target} PUBLIC
