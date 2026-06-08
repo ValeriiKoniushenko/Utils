@@ -24,9 +24,10 @@
 
 #pragma once
 
+#include "BaseAssert.h"
+
 #if defined(UTILS_DEBUG) || defined(NDEBUG) || defined(DEBUG)
 
-    #include "BaseAssert.h"
     #include "String.h"
 
     #include <chrono>
