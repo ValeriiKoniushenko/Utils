@@ -15,18 +15,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(REQUIRED_CXX_STANDARD cxx_std_23) # read-only
 set(CXX_STANDARD)
 
-set(DEPENDENCIES_DIR dependencies)
-set(BENCHMARK_ENABLE_TESTING OFF)
-
 Utils_InstallCXXStandardVersion()
 
 # ========= Adding subdirectories =========
-# Adding dependencies
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependencies.cmake)
-set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
+add_subdirectory(dependencies)
 
-# Adding core
 add_subdirectory(benchmark)
 add_subdirectory(tests)
 add_subdirectory(sources)
