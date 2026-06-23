@@ -40,6 +40,8 @@ Utils_InstallCXXStandardVersion()
 add_subdirectory(dependencies)
 
 add_subdirectory(benchmark)
+target_compile_options(benchmark PUBLIC -Wno-c2y-extensions)
+
 add_subdirectory(tests)
 add_subdirectory(sources)
 
