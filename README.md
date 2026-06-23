@@ -58,10 +58,154 @@ For better experience:
 
 ## Installation
 
-**Blazing fast answer is:**
+**Quick start is:**
 ```sh
 mkdir build && cd build && cmake ../ && cmake --build .
 ```
+
+## Blazing fast build with ccache
+
+# ccache Setup
+
+ccache is a compiler cache that dramatically speeds up recompilation by caching previous compilation results. This
+project supports ccache on both Linux and Windows.
+
+---
+
+## Linux
+
+### Install
+
+**Arch Linux:**
+
+```bash
+sudo pacman -S ccache
+```
+
+**Ubuntu/Debian:**
+
+```bash
+sudo apt install ccache
+```
+
+### Configure
+
+Create `~/.config/ccache/ccache.conf`:
+
+```ini
+hash_dir = false
+sloppiness = include_file_mtime,include_file_ctime,time_macros,locale
+depend_mode = true
+compression = true
+max_size = 20G
+```
+
+---
+
+## Windows
+
+ccache supports MSVC since version 4.3.
+
+### Install
+
+**winget:**
+
+```powershell
+winget install ccache
+```
+
+**Or download manually** from [ccache releases](https://github.com/ccache/ccache/releases) and add the directory to your
+`PATH`.
+
+Verify:
+
+```powershell
+ccache --version
+```
+
+### Configure
+
+Create `%APPDATA%\ccache\ccache.conf` (e.g. `C:\Users\<you>\AppData\Roaming\ccache\ccache.conf`):
+
+```ini
+hash_dir = false
+sloppiness = include_file_mtime,include_file_ctime,time_macros,locale
+compression = true
+max_size = 20G
+```
+
+> `depend_mode` is omitted on Windows — it requires GCC/Clang-style `.d` files and does not work with MSVC.
+
+### MSVC: required CMake flag
+
+MSVC by default writes debug info into `.pdb` files with absolute paths, which causes cache misses. The project already
+handles this — `/Zi` is replaced with `/Z7` (embedded debug info) automatically when ccache is detected.
+
+### Environment variable (PowerShell)
+
+For MSVC builds, set this in your session or CI environment:
+
+```powershell
+$env:CCACHE_CPP2 = "true"
+```
+
+Or add it permanently via System Properties → Environment Variables.
+
+### Enable in CMake
+
+Same as Linux — ccache is detected automatically from `PATH`.
+
+---
+
+## CMake integration details
+
+The project detects ccache at configure time and sets it as the compiler launcher:
+
+```cmake
+find_program(CCACHE_PROGRAM ccache)
+if (CCACHE_PROGRAM)
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif ()
+```
+
+This works for Clang, GCC, and MSVC without any manual configuration.
+
+---
+
+## Troubleshooting
+
+**Stats not changing after build** — ccache is not on `PATH` or the launcher is not set. Confirm with:
+
+```bash
+cmake --build build/ -v 2>&1 | head -5
+# Should show: ccache /usr/bin/g++ ...
+```
+
+**0% hits after second build** — check `hash_dir`. It must be `false`. Verify with:
+
+```bash
+ccache --show-config | grep hash_dir
+```
+
+**Uncacheable calls** — expected for linker invocations. Also check for C++20 module scanning flags (`-fmodules-ts`). If
+present and you do not use C++20 modules, disable scanning:
+
+```cmake
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+```
+
+**Diagnosing misses** — enable the log temporarily:
+
+```bash
+# Add to ccache.conf:
+log_file = /tmp/ccache.log
+
+# Then build and inspect:
+grep "Result: " /tmp/ccache.log | sort | uniq -c | sort -rn
+```
+
+Remove `log_file` from the config once done.
 
 ### Step #1: Repository preparation
 
