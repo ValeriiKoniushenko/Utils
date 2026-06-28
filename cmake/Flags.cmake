@@ -18,7 +18,6 @@ function(UtilsCoreAddCompileOptionsTo Target)
             "/wd4702"            # no unreachable code
 
             # Debug config
-            "$<$<CONFIG:DEBUG>:/Zi>"
             "$<$<CONFIG:DEBUG>:/Od>"
             "$<$<CONFIG:DEBUG>:/Ob0>"
             "$<$<CONFIG:DEBUG>:/Oy->"
