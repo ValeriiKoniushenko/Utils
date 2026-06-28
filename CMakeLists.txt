@@ -7,7 +7,6 @@ set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
     "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>"
 )
 
-set(UTILS__USE_CCACHE OFF)
 if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     find_program(CCACHE_PROGRAM ccache)
     if (CCACHE_PROGRAM)
