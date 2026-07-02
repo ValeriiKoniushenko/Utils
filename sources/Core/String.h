@@ -1790,24 +1790,20 @@ namespace Core
             {
                 return;
             }
-
             tryToMakeAsDynamic();
-
             if (size == 0)
             {
                 size = Toolset::Length(str);
             }
-
             const auto finalSize = _size + size;
             if (finalSize >= _capacity)
             {
                 reserve(finalSize * capacityMultiplier);
             }
 
-            memcpy_s(_string + size, (_capacity - size) * sizeof(CharT), _string,
-                     _size * sizeof(CharT));
-            memcpy_s(_string, _capacity * sizeof(CharT), str, size * sizeof(CharT));
-            _size += size;
+            std::memmove(_string + size, _string, _size * sizeof(CharT));
+            std::memcpy(_string, str, size * sizeof(CharT));
+            _size = finalSize;
             _string[_size] = 0;
         }
 

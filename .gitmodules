@@ -1,12 +1,16 @@
 [submodule "dependencies/glm"]
 	path = dependencies/glm
-	url = https://github.com/g-truc/glm.git
+    url = https://github.com/g-truc/glm.git
+    ignore = all
 [submodule "dependencies/googletest"]
 	path = dependencies/googletest
-	url = https://github.com/google/googletest.git
+    url = https://github.com/google/googletest.git
+    ignore = all
 [submodule "dependencies/benchmark"]
 	path = dependencies/benchmark
-	url = https://github.com/google/benchmark.git
+    url = https://github.com/google/benchmark.git
+    ignore = all
 [submodule "dependencies/pcre2"]
 	path = dependencies/pcre2
-	url = https://github.com/PCRE2Project/pcre2.git
+    url = https://github.com/PCRE2Project/pcre2.git
+    ignore = all
