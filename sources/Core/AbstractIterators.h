@@ -137,6 +137,7 @@ namespace Core
     class IRandomAccessIterator
     {
     public:
+        virtual ~IRandomAccessIterator() = default;
         constexpr static bool isIgnoreDataRef = IsIgnoreDataRef;
 
         using DataT = T;
