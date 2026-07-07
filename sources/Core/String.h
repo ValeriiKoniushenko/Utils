@@ -809,7 +809,13 @@ namespace Core
         [[nodiscard]] bool isEmpty() const noexcept { return _string == nullptr || _size == 0; }
         [[nodiscard]] explicit operator const CharT*() const noexcept { return _string; }
         [[nodiscard]] operator StdStringViewT() const noexcept { return toStdStringView(); }
-        [[nodiscard]] CharT& operator[](std::size_t index) noexcept { return _string[index]; }
+        [[nodiscard]] CharT& operator[](std::size_t index) noexcept
+        {
+            Assert(!isEmpty() || _size < index,
+                   "Impossible to work with nullptr string. or invalid index.");
+            tryToMakeAsDynamic();
+            return _string[index];
+        }
         [[nodiscard]] CharT operator[](std::size_t index) const noexcept { return _string[index]; }
 
         [[nodiscard]] bool operator==(const Self& other) const
@@ -1223,7 +1229,7 @@ namespace Core
             }
         }
 
-        void trimStart(CharT ch)
+        void trimStart(CharT ch = ' ')
         {
             if (!isEmpty())
             {
@@ -1240,7 +1246,7 @@ namespace Core
             }
         }
 
-        void trimEnd(CharT ch)
+        void trimEnd(CharT ch = ' ')
         {
             if (!isEmpty())
             {
@@ -1258,7 +1264,7 @@ namespace Core
             }
         }
 
-        void trim(CharT ch)
+        void trim(CharT ch = ' ')
         {
             trimStart(ch);
             trimEnd(ch);
@@ -2239,6 +2245,8 @@ namespace Core
 
         void resize(const std::size_t newSize)
         {
+            tryToMakeAsDynamic();
+
             if (newSize >= _capacity)
             {
                 reserve(std::max(newSize * capacityMultiplier, minAllocationSize));

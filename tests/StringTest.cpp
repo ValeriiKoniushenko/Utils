@@ -1905,3 +1905,178 @@ TEST_F(StringTestF, RegexReplace)
     test.template operator()<char>();
     // test.template operator()<wchar_t>(); - regex only for char
 }
+
+TEST_F(StringTestF, AtomStringAndResizeLogic)
+{
+    {
+        StringAtom str = "hello"_atom;
+
+        ASSERT_TRUE(str.isStatic());
+        str.resize(4);
+        ASSERT_FALSE(str.isStatic());
+        str.resize(5);
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.pushBack("!");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.pushFront("!");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.popBack();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.popFront();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.at(0) = '1';
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str[0] = '1';
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.reserve(10);
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.reserve(1);
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.erase(0);
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.erase(4);
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.regexReplace("hel", "000");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.regexReplaceAll("l", "0");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.clear();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.insert(0, "s");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.insert(4, "s");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.insert(5, "s");
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.shrinkToFit();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.trim();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.trimEnd();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.trimStart();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        (void)str.data();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.toLowerCase();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+    {
+        StringAtom str = "hello"_atom;
+        ASSERT_TRUE(str.isStatic());
+        str.toUpperCase();
+        ASSERT_FALSE(str.isStatic());
+    }
+
+}
