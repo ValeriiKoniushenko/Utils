@@ -38,5 +38,8 @@ add_subdirectory(dependencies)
 add_subdirectory(benchmark)
 target_compile_options(benchmark PUBLIC $<$<CXX_COMPILER_ID:Clang,GNU>:-Wno-c2y-extensions>)
 
-add_subdirectory(tests)
+if (UTILS_DISABLE_TESTS)
+    add_subdirectory(tests)
+endif ()
+
 add_subdirectory(sources)
