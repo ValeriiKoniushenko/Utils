@@ -29,7 +29,6 @@
 
 namespace Core
 {
-
     /**
      * @brief A utility class for measuring elapsed time.
      *
@@ -86,8 +85,10 @@ namespace Core
 
     public:
         explicit Repeater(float value = 0) { setRepeatTime(value); };
-        Repeater(const Repeater&) = delete;
-        Repeater(Repeater&&) = default;
+        Repeater(const Repeater&) = default;
+        Repeater& operator=(const Repeater&) = default;
+        Repeater(Repeater&&) noexcept = default;
+        Repeater& operator=(Repeater&&) noexcept = default;
         ~Repeater() = default;
 
         /**
@@ -136,5 +137,4 @@ namespace Core
         std::optional<ClockT::time_point> _startTime;
         float _repeatTime = 1.0;
     };
-
 } // namespace Core
