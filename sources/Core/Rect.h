@@ -104,9 +104,9 @@ namespace Core
             _top = rightTop.y;
         }
 
-        [[nodiscard]] constexpr T getWidth() const noexcept { return Math::Abs(_right - _left); }
+        [[nodiscard]] constexpr T getWidth() const noexcept { return ::Math::Abs(_right - _left); }
 
-        [[nodiscard]] constexpr T getHeight() const noexcept { return Math::Abs(_top - _bottom); }
+        [[nodiscard]] constexpr T getHeight() const noexcept { return ::Math::Abs(_top - _bottom); }
 
         [[nodiscard]] constexpr GlobalPositionT getLeftTop() const noexcept
         {

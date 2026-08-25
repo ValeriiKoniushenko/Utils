@@ -60,10 +60,10 @@ namespace
     {
         for (auto _ : state)
         {
-            benchmark::DoNotOptimize(Math::Abs(state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs(-state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs(state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs(-state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs(state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs(-state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs(state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs(-state.range(0)));
         }
         state.SetComplexityN(state.range(0));
     }
@@ -72,10 +72,10 @@ namespace
     {
         for (auto _ : state)
         {
-            benchmark::DoNotOptimize(Math::Abs((float)state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs((float)-state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs((float)state.range(0)));
-            benchmark::DoNotOptimize(Math::Abs((float)-state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs((float)state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs((float)-state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs((float)state.range(0)));
+            benchmark::DoNotOptimize(::Math::Abs((float)-state.range(0)));
         }
         state.SetComplexityN(state.range(0));
     }

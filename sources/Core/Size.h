@@ -160,7 +160,7 @@ namespace Core
         [[nodiscard, maybe_unused]] constexpr bool operator==(
             const Size<Type, DimensionValue>& other) const noexcept
         {
-            return Math::IsEqual(area(), other.area());
+            return ::Math::IsEqual(area(), other.area());
         }
 
         [[nodiscard]] constexpr T area() const noexcept { return width * height; }
@@ -521,5 +521,4 @@ namespace Core
     using FSize3 = Size<float, 3>;
     using DSize3 = Size<double, 3>;
     using ISize3 = Size<int, 3>;
-
 } // namespace Core
