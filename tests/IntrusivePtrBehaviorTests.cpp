@@ -219,16 +219,17 @@ TEST(IntrusivePtrBehaviorTests, WeakPointerObservesWithoutKeepingObjectAlive)
         ASSERT_TRUE(loaded);
         ASSERT_EQ(raw, loaded.get());
         ASSERT_EQ(12, loaded->value);
-        ASSERT_EQ(1u, raw->getHardRefCount());
+        ASSERT_EQ(2u, raw->getHardRefCount());
     }
 
+    ASSERT_EQ(1u, raw->getHardRefCount());
     strong.reset();
-    ASSERT_EQ(0, Tracked::destructions);
+    ASSERT_EQ(1, Tracked::destructions);
     ASSERT_FALSE(weak.hasHardLink());
+
     auto expired = weak.tryLoad();
     ASSERT_EQ(nullptr, expired.get());
     ASSERT_FALSE(weak);
-    ASSERT_EQ(1, Tracked::destructions);
 }
 
 TEST(IntrusivePtrBehaviorTests, WeakCopiesMovesAndResetManageWeakReferences)

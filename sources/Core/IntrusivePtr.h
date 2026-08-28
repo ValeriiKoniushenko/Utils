@@ -63,6 +63,9 @@ namespace Core
     template<class T>
     class IntrusivePtr;
 
+    template<class T>
+    class WeakPtr;
+
     // Helper to detect IntrusivePtr specialization
     template<class T>
     struct IsIntrusivePtrHelper : std::false_type
@@ -84,6 +87,15 @@ namespace Core
     template<class T, IsPolicy Policy>
     class IntrusiveRefCounter;
 
+    template<IsPolicy Policy>
+    struct WeakControlBlock final
+    {
+        using CounterT = typename Policy::CounterT;
+
+        CounterT weakRefCount = 0;
+        bool isObjectAlive = true;
+    };
+
     template<class T, IsPolicy Policy>
     void _IncrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
     {
@@ -99,32 +111,77 @@ namespace Core
         {
             Policy::DecrementRef(obj->_hardRefCount);
             obj->onDecrementRef(obj->_hardRefCount);
-            if (obj->_hardRefCount == 0 && obj->_weakRefCount == 0)
+            if (obj->_hardRefCount == 0)
             {
+                auto* const weakControl = obj->_weakControl;
+                if (weakControl)
+                {
+                    // Keep the control block alive while object destruction releases self-weak
+                    // references.
+                    Policy::IncrementRef(weakControl->weakRefCount);
+                    weakControl->isObjectAlive = false;
+                }
+
                 delete obj;
+
+                if (weakControl)
+                {
+                    Policy::DecrementRef(weakControl->weakRefCount);
+                    if (weakControl->weakRefCount == 0)
+                    {
+                        delete weakControl;
+                    }
+                }
             }
         }
     }
 
     template<class T, IsPolicy Policy>
-    void _IncrementWeakRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
+    [[nodiscard]] WeakControlBlock<Policy>* _GetWeakControlBlock(
+        IntrusiveRefCounter<T, Policy>* obj)
     {
-        Policy::IncrementRef(obj->_weakRefCount);
+        if (!obj->_weakControl)
+        {
+            obj->_weakControl = new WeakControlBlock<Policy>;
+        }
+
+        return obj->_weakControl;
     }
 
-    template<class T, class U, IsPolicy Policy>
-    void _DecrementWeakRefCounter(IntrusiveRefCounter<T, Policy>* obj, U*& weakRawPtr) noexcept
+    template<IsPolicy Policy>
+    void _IncrementWeakRefCounter(WeakControlBlock<Policy>* control) noexcept
     {
-        Assert(obj->_weakRefCount > 0);
-        if (obj->_weakRefCount > 0) [[likely]]
+        Assert(control);
+        if (control) [[likely]]
         {
-            Policy::DecrementRef(obj->_weakRefCount);
-            if (obj->_hardRefCount == 0 && obj->_weakRefCount == 0)
+            Policy::IncrementRef(control->weakRefCount);
+        }
+    }
+
+    template<IsPolicy Policy>
+    void _DecrementWeakRefCounter(WeakControlBlock<Policy>* control) noexcept
+    {
+        Assert(control && control->weakRefCount > 0);
+        if (control && control->weakRefCount > 0) [[likely]]
+        {
+            Policy::DecrementRef(control->weakRefCount);
+            if (!control->isObjectAlive && control->weakRefCount == 0)
             {
-                delete obj;
-                weakRawPtr = nullptr;
+                delete control;
             }
         }
+    }
+
+    template<class T, IsPolicy Policy>
+    [[nodiscard]] bool _TryIncrementRefCounter(IntrusiveRefCounter<T, Policy>* obj) noexcept
+    {
+        if (!obj || obj->_hardRefCount == 0)
+        {
+            return false;
+        }
+
+        _IncrementRefCounter(obj);
+        return true;
     }
 
     //
@@ -320,55 +377,46 @@ namespace Core
         WeakData(WeakData&& other) noexcept = default;
         WeakData& operator=(const WeakData& other) = default;
         WeakData& operator=(WeakData&& other) noexcept = default;
-        ~WeakData()
-        {
-            if (_ptr && !_noRefDecrement)
-            {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
-                                         const_cast<std::remove_const_t<T>*&>(_ptr));
-            }
-        }
+        ~WeakData() = default;
 
-        [[nodiscard]] T* get() noexcept { return _ptr; }
-        [[nodiscard]] const T* get() const noexcept { return _ptr; }
+        [[nodiscard]] T* get() noexcept { return _ptr.get(); }
+        [[nodiscard]] const T* get() const noexcept { return _ptr.get(); }
 
         [[nodiscard]] const T& operator*() const
         {
-            Assert(_ptr != nullptr);
+            Assert(_ptr);
             return *_ptr;
         }
 
         [[nodiscard]] const T* operator->() const
         {
-            Assert(_ptr != nullptr);
-            return _ptr;
+            Assert(_ptr);
+            return _ptr.get();
         }
 
         [[nodiscard]] T& operator*()
         {
-            Assert(_ptr != nullptr);
+            Assert(_ptr);
             return *_ptr;
         }
 
         [[nodiscard]] T* operator->()
         {
-            Assert(_ptr != nullptr);
-            return _ptr;
+            Assert(_ptr);
+            return _ptr.get();
         }
 
-        [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
-        [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
+        [[nodiscard]] operator bool() const noexcept { return !!_ptr; }
+        [[nodiscard]] bool isValid() const noexcept { return !!_ptr; }
 
     private:
-        WeakData(T* ptr, bool noRefDecrement)
-            : _ptr{ ptr },
-              _noRefDecrement{ noRefDecrement }
+        WeakData(T* ptr, bool addRef)
+            : _ptr{ ptr, addRef }
         {
         }
 
     private:
-        T* _ptr = nullptr;
-        bool _noRefDecrement = false;
+        IntrusivePtr<T> _ptr;
 
         template<class>
         friend class WeakPtr;
@@ -385,14 +433,7 @@ namespace Core
     public:
         WeakPtr() = default;
 
-        WeakPtr(T* ptr)
-            : _ptr(ptr)
-        {
-            if (_ptr)
-            {
-                _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
-            }
-        }
+        WeakPtr(T* ptr) { assign(ptr); }
 
         WeakPtr(const IntrusivePtr<T>& ptr)
             : WeakPtr{ ptr._ptr }
@@ -413,15 +454,10 @@ namespace Core
         {
             if (&other != this) [[likely]]
             {
-                if (_ptr)
-                {
-                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr), _ptr);
-                }
+                release();
                 _ptr = other._ptr;
-                if (_ptr)
-                {
-                    _IncrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr));
-                }
+                _control = other._control;
+                retain();
             }
             return *this;
         }
@@ -430,61 +466,50 @@ namespace Core
         {
             if (&other != this) [[likely]]
             {
-                if (_ptr)
-                {
-                    _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr), _ptr);
-                }
+                release();
                 _ptr = other._ptr;
+                _control = other._control;
 
                 other._ptr = nullptr;
+                other._control = nullptr;
             }
             return *this;
         }
 
-        ~WeakPtr() noexcept
-        {
-            if (_ptr)
-            {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
-                                         const_cast<std::remove_const_t<T>*&>(_ptr));
-            }
-        }
+        ~WeakPtr() noexcept { release(); }
 
         [[nodiscard]] bool hasHardLink() const noexcept
         {
-            return _ptr && _ptr->getHardRefCount() > 0;
+            return _control && _control->isObjectAlive;
         }
+
+        [[nodiscard]] T* get() const noexcept { return hasHardLink() ? _ptr : nullptr; }
 
         [[nodiscard]] WeakData<T> tryLoad() const
         {
-            if (!_ptr)
-            {
-                return WeakData<T>(nullptr, false);
-            }
-
             if (!hasHardLink())
             {
-                _DecrementWeakRefCounter(const_cast<std::remove_const_t<T>*>(_ptr),
-                                         const_cast<std::remove_const_t<T>*&>(_ptr));
-                _ptr = nullptr;
-                return WeakData<T>(nullptr, false);
+                return {};
             }
 
-            WeakData<T> out(_ptr, true);
-            return out;
+            if (!_TryIncrementRefCounter(const_cast<std::remove_const_t<T>*>(_ptr)))
+            {
+                return {};
+            }
+
+            return WeakData<T>(_ptr, false);
         }
 
         void reset() { WeakPtr().swap(static_cast<WeakPtr&>(*this)); }
 
         void swap(WeakPtr& other) noexcept
         {
-            T* tmp = _ptr;
-            _ptr = other._ptr;
-            other._ptr = tmp;
+            std::swap(_ptr, other._ptr);
+            std::swap(_control, other._control);
         }
 
-        [[nodiscard]] operator bool() const noexcept { return _ptr != nullptr; }
-        [[nodiscard]] bool isValid() const noexcept { return _ptr != nullptr; }
+        [[nodiscard]] operator bool() const noexcept { return hasHardLink(); }
+        [[nodiscard]] bool isValid() const noexcept { return hasHardLink(); }
 
         template<class SubT>
         [[nodiscard]] bool operator==(const WeakPtr<SubT>& other) const noexcept
@@ -499,7 +524,37 @@ namespace Core
         }
 
     private:
-        mutable T* _ptr = nullptr;
+        void assign(T* ptr)
+        {
+            _ptr = ptr;
+            if (_ptr)
+            {
+                _control = _GetWeakControlBlock(const_cast<std::remove_const_t<T>*>(_ptr));
+                retain();
+            }
+        }
+
+        void retain() noexcept
+        {
+            if (_control)
+            {
+                _IncrementWeakRefCounter(_control);
+            }
+        }
+
+        void release() noexcept
+        {
+            if (_control)
+            {
+                _DecrementWeakRefCounter(_control);
+                _control = nullptr;
+            }
+            _ptr = nullptr;
+        }
+
+    private:
+        T* _ptr = nullptr;
+        WeakControlBlock<PolicyT>* _control = nullptr;
 
         template<class>
         friend class WeakPtr;
@@ -537,10 +592,23 @@ namespace Core
          */
         IntrusiveRefCounter& operator=(IntrusiveRefCounter&&) noexcept = delete;
 
-        virtual ~IntrusiveRefCounter() = default;
+        virtual ~IntrusiveRefCounter()
+        {
+            if (_weakControl)
+            {
+                _weakControl->isObjectAlive = false;
+                if (_weakControl->weakRefCount == 0)
+                {
+                    delete _weakControl;
+                }
+            }
+        }
 
         [[nodiscard]] constexpr CounterT getHardRefCount() const noexcept { return _hardRefCount; }
-        [[nodiscard]] constexpr CounterT getWeakRefCount() const noexcept { return _weakRefCount; }
+        [[nodiscard]] CounterT getWeakRefCount() const noexcept
+        {
+            return _weakControl ? _weakControl->weakRefCount : 0;
+        }
 
     protected:
         constexpr IntrusiveRefCounter() = default;
@@ -562,7 +630,7 @@ namespace Core
 
     private:
         CounterT _hardRefCount = 0;
-        CounterT _weakRefCount = 0;
+        WeakControlBlock<Policy>* _weakControl = nullptr;
 
         template<class _T, IsPolicy _P>
         friend void _IncrementRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
@@ -571,10 +639,10 @@ namespace Core
         friend void _DecrementRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
 
         template<class _T, IsPolicy _P>
-        friend void _IncrementWeakRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
+        friend WeakControlBlock<_P>* _GetWeakControlBlock(IntrusiveRefCounter<_T, _P>*);
 
-        template<class _T, class _U, IsPolicy _P>
-        friend void _DecrementWeakRefCounter(IntrusiveRefCounter<_T, _P>*, _U*&) noexcept;
+        template<class _T, IsPolicy _P>
+        friend bool _TryIncrementRefCounter(IntrusiveRefCounter<_T, _P>*) noexcept;
     };
 
     template<class NewT_, class T, class NewT = std::remove_reference_t<NewT_>>

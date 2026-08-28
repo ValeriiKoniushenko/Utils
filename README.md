@@ -40,10 +40,11 @@ A utility library providing common solutions for your code. It already includes 
 >     2. [Space coordinates](#working-with-space-coordinates)
 >     3. [Math](#common-functions-to-work-with-math)
 >     4. [Interfaces & patterns](#common-interfaces-%26-patterns)
->     5. [Enum-generator](#enum-generator)
->     6. [Atomic Strings](#atomic-strings)
->     7. [Delegates](#delegates)
->     8. [Asserts](#asserts)
+>     5. [Intrusive pointers](#intrusive-pointers)
+>     6. [Enum-generator](#enum-generator)
+>     7. [Atomic Strings](#atomic-strings)
+>     8. [Delegates](#delegates)
+>     9. [Asserts](#asserts)
 > 3. **[Feedback & Contacts](#feedback-%26-contacts)**
 
 # Getting started
@@ -436,6 +437,114 @@ Just link it with your already existing target in your CMakeLists.txt:
 
 - For singleton: ```#include "Core/Singleton.h"```
 - For interfaces: ```#include "Core/CommonInterfaces.h"```
+
+[☝️ Go Top](#table-of-contents)
+
+## Intrusive pointers
+
+### Intro
+
+`IntrusivePtr`, `WeakPtr`, and `WeakData` provide shared ownership without a
+separate allocation for each strong pointer. The owned type stores its strong
+reference count by inheriting from `IntrusiveRefCounter`.
+
+```c++
+#include <cassert>
+
+#include "Core/IntrusivePtr.h"
+
+class Widget final : public Core::IntrusiveRefCounter<Widget>
+{
+public:
+    void refresh();
+};
+
+Core::IntrusivePtr<Widget> owner{new Widget};
+```
+
+### Ownership model
+
+- `IntrusivePtr<T>` is a strong owner. Copying it increments the object's
+  strong reference count; destroying, resetting, or replacing it decrements
+  that count.
+- When the final `IntrusivePtr` releases the object, the object is destroyed
+  immediately, even if `WeakPtr`s still refer to it.
+- `WeakPtr<T>` is a non-owning observer. It keeps only a small control block
+  alive, allocated when the first weak reference is made. The control block
+  contains a weak reference count and whether the object is alive; it never
+  keeps the object itself alive.
+- The control block is deleted after the object is destroyed and the final
+  `WeakPtr` releases it.
+
+This separation prevents a self-weak reference from retaining its owner. For
+example, a delegate stored by an object may capture `WeakPtr(this)` without
+forming an ownership cycle.
+
+### Reading through a weak pointer
+
+Use `tryLoad()` when accessing an object through a `WeakPtr`. It returns a
+`WeakData<T>` that owns a temporary `IntrusivePtr<T>`, so the object remains
+alive for as long as the returned `WeakData` exists.
+
+```c++
+Core::WeakPtr<Widget> weak = owner;
+
+if (auto widget = weak.tryLoad())
+{
+    widget->refresh(); // `widget` holds a temporary strong reference.
+}
+
+owner.reset(); // Widget is destroyed here if this was the final strong owner.
+
+assert(!weak);
+assert(!weak.tryLoad());
+```
+
+`tryLoad()` first verifies that the control block reports a live object, then
+increments the strong reference count. `WeakData` adopts that increment rather
+than incrementing it again. Its destruction releases the temporary strong
+reference. An expired `WeakPtr` produces an empty `WeakData`.
+
+`WeakPtr::get()` returns a raw pointer only while the control block currently
+reports that the object is alive. It does not extend the lifetime; prefer
+`tryLoad()` whenever the pointer may be released during the operation.
+
+### Delegate callbacks
+
+Capturing a `WeakPtr` avoids keeping an owner alive solely because it
+subscribed to an event that it owns or that outlives it.
+
+```c++
+onRefresh->subscribe([weakThis = Core::WeakPtr<Widget>{owner}]()
+{
+    if (auto self = weakThis.tryLoad())
+    {
+        self->refresh();
+    }
+});
+```
+
+The callback becomes a no-op after `Widget` is destroyed, while the delegate
+may safely retain the expired `WeakPtr` until it removes the callback.
+
+### Threading
+
+The default reference-count policy is not thread-safe. In particular,
+`WeakPtr::tryLoad()` is not an atomic weak-to-strong promotion. Synchronize
+access externally, or provide a policy and promotion mechanism appropriate for
+your threading model.
+
+### Requirements
+
+#### CMake
+
+Needed target for you is: ```Utils::Core```
+Just link it with your already existing target in your CMakeLists.txt:
+```target_link_libraries(YourTarget PUBLIC Utils::Core)```
+
+#### C++ side
+
+Just include: ```#include "Core/IntrusivePtr.h"```
 
 [☝️ Go Top](#table-of-contents)
 

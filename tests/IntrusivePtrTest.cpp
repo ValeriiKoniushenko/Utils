@@ -24,6 +24,8 @@
 
 #include "Core/IntrusivePtr.h"
 
+#include "Core/Delegate.h"
+
 #include <gtest/gtest.h>
 
 using namespace Core;
@@ -304,6 +306,28 @@ public:
     void nonConstMethod() {}
 };
 
+class LifetimeTrackedObject : public IntrusiveRefCounter<LifetimeTrackedObject>
+{
+    INTRUSIVE_PTR_ADAPTERS(LifetimeTrackedObject)
+
+public:
+    ~LifetimeTrackedObject() override { ++destructions; }
+
+    static inline int destructions = 0;
+};
+
+class SelfWeakDelegateOwner : public IntrusiveRefCounter<SelfWeakDelegateOwner>
+{
+    INTRUSIVE_PTR_ADAPTERS(SelfWeakDelegateOwner)
+
+public:
+    Delegate<void()>::Ptr onSignal = Delegate<void()>::Create();
+
+    ~SelfWeakDelegateOwner() override { ++destructions; }
+
+    static inline int destructions = 0;
+};
+
 TEST(IntrusivePtrTests, WeakTest)
 {
     auto ptr = AnotherObject::Create();
@@ -322,6 +346,53 @@ TEST(IntrusivePtrTests, WeakTest)
 
     fund();
     fund();
+}
+
+TEST(IntrusivePtrTests, WeakReferencesDoNotKeepObjectAlive)
+{
+    LifetimeTrackedObject::destructions = 0;
+
+    auto owner = LifetimeTrackedObject::Create();
+    auto weak = WeakPtr(owner);
+
+    ASSERT_EQ(owner->getWeakRefCount(), 1u);
+    owner.reset();
+
+    EXPECT_EQ(LifetimeTrackedObject::destructions, 1);
+    EXPECT_FALSE(weak);
+    EXPECT_FALSE(weak.tryLoad());
+}
+
+TEST(IntrusivePtrTests, WeakLockKeepsObjectAlive)
+{
+    LifetimeTrackedObject::destructions = 0;
+
+    auto owner = LifetimeTrackedObject::Create();
+    auto weak = WeakPtr(owner);
+
+    {
+        auto lock = weak.tryLoad();
+        ASSERT_TRUE(lock);
+        owner.reset();
+
+        EXPECT_EQ(LifetimeTrackedObject::destructions, 0);
+    }
+
+    EXPECT_EQ(LifetimeTrackedObject::destructions, 1);
+    EXPECT_FALSE(weak);
+}
+
+TEST(IntrusivePtrTests, SelfWeakDelegateCallbackDoesNotKeepOwnerAlive)
+{
+    SelfWeakDelegateOwner::destructions = 0;
+
+    auto owner = SelfWeakDelegateOwner::Create();
+    [[maybe_unused]] auto subscription
+        = owner->onSignal->subscribeAndGetID([weak = WeakPtr(owner)]() { EXPECT_TRUE(weak); });
+
+    owner.reset();
+
+    EXPECT_EQ(SelfWeakDelegateOwner::destructions, 1);
 }
 
 namespace
@@ -350,6 +421,23 @@ TEST(IntrusivePtrTests, Casts)
 
     auto b = Core::DynamicCast<B>(a);
     ASSERT_TRUE(b);
+}
+
+TEST(IntrusivePtrTests, WeakCastsExpireWithTheirSourceObject)
+{
+    auto owner = B::Create();
+    A::WPtr base = owner;
+    B::WPtr derived = owner;
+
+    ASSERT_TRUE(base);
+    ASSERT_TRUE(derived);
+
+    owner.reset();
+
+    EXPECT_FALSE(base);
+    EXPECT_FALSE(derived);
+    EXPECT_FALSE(base.tryLoad());
+    EXPECT_FALSE(derived.tryLoad());
 }
 
 TEST(IntrusivePtrTests, Operators)
