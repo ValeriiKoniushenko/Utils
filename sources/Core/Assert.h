@@ -26,7 +26,7 @@
 
 #include "BaseAssert.h"
 
-#if defined(UTILS_DEBUG) || defined(NDEBUG) || defined(DEBUG)
+#if defined(UTILS_DEBUG) || defined(DEBUG)
 
     #include "String.h"
 
