@@ -1,0 +1,313 @@
+name: Code Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+
+# Build caches are shared by self-hosted runners. Serialize runs so concurrent
+# workflows cannot overwrite the same cache directories.
+concurrency:
+  group: utils-ci-shared-cache
+  cancel-in-progress: false
+
+jobs:
+  clear-previous-ci-reviews:
+    name: "[cleanup] previous CI reviews"
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove previous CI reviews
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: python3 .gitea/clear_ci_reviews.py
+
+  clang-format:
+    name: "[fmt] clang-format"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check clang-format
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          python3 .gitea/check_clang_format.py --base develop
+
+  build:
+    name: "[build] clang (linux)"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/git-repo:/repo-cache
+        - /srv/ci-cache/build-cache:/build-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: clang
+      CXX: clang++
+    timeout-minutes: 30
+    steps:
+      - name: Sync repo cache
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
+
+          if [ -d /repo-cache/.git ]; then
+            echo "Using existing repo cache"
+            cd /repo-cache
+            git remote set-url origin "$REPO_URL"
+            git fetch origin "$GITHUB_SHA" develop
+            git checkout -f "$GITHUB_SHA"
+            git submodule sync --recursive
+            git submodule update --init --recursive --depth=1
+          else
+            echo "No cache found, cloning fresh"
+            git clone --recurse-submodules --shallow-submodules "$REPO_URL" /repo-cache
+            cd /repo-cache
+            git fetch --depth=1 origin "$GITHUB_SHA"
+            git checkout -f "$GITHUB_SHA"
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE"
+          cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
+
+      - name: Configure
+        run: |
+          echo "::group::CMake configure"
+          cmake -S . -B build \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=ON \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          echo "::endgroup::"
+
+      - name: Build
+        run: |
+          echo "::group::Build"
+          cmake --build build -j$(nproc)
+          echo "::endgroup::"
+          {
+            echo "## Build: clang"
+            echo "Build succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
+  clang-tidy:
+    name: "[lint] clang-tidy"
+    needs: build
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/git-repo:/repo-cache
+        - /srv/ci-cache/build-cache:/build-cache
+    timeout-minutes: 20
+    steps:
+      - name: Sync repo cache
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
+
+          if [ -d /repo-cache/.git ]; then
+            echo "Using existing repo cache"
+            cd /repo-cache
+            git remote set-url origin "$REPO_URL"
+            git fetch --depth=1 origin "$GITHUB_SHA"
+            git checkout -f "$GITHUB_SHA"
+            git submodule sync --recursive
+            git submodule update --init --recursive --depth=1
+          else
+            echo "No cache found, cloning fresh"
+            git clone --recurse-submodules --shallow-submodules "$REPO_URL" /repo-cache
+            cd /repo-cache
+            git fetch --depth=1 origin "$GITHUB_SHA"
+            git checkout -f "$GITHUB_SHA"
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE"
+          cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
+
+      - name: Fetch develop for diffing
+        run: |
+          echo "::group::Ensuring full history for diff"
+          if ! git fetch --unshallow origin 2> /tmp/unshallow.log; then
+            if grep -q "already a complete repository" /tmp/unshallow.log; then
+              echo "Repository already has full history"
+            else
+              cat /tmp/unshallow.log
+              exit 1
+            fi
+          fi
+          git fetch origin develop:refs/remotes/origin/develop
+          echo "::endgroup::"
+
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
+
+      - name: Configure tests for analysis headers
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Check clang-tidy
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          set +e
+          python3 .gitea/check_clang_tidy.py \
+            --base develop \
+            --build-dir build \
+            --fail-on error
+          exit_code=$?
+          set -e
+          if [ "$exit_code" -eq 1 ]; then
+            echo "clang-tidy found issues, but continuing (non-blocking mode)"
+            exit 0
+          fi
+          exit $exit_code
+
+  unit-tests:
+    name: "[test] unit tests (clang)"
+    needs: build
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/git-repo:/repo-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: clang
+      CXX: clang++
+    timeout-minutes: 15
+    steps:
+      - name: Sync repo cache
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
+
+          if [ -d /repo-cache/.git ]; then
+            echo "Using existing repo cache"
+            cd /repo-cache
+            git remote set-url origin "$REPO_URL"
+            git fetch origin "$GITHUB_SHA" develop
+            git checkout -f "$GITHUB_SHA"
+            git submodule sync --recursive
+            git submodule update --init --recursive --depth=1
+          else
+            echo "No cache found, cloning fresh"
+            git clone --recurse-submodules --shallow-submodules "$REPO_URL" /repo-cache
+            cd /repo-cache
+            git fetch --depth=1 origin "$GITHUB_SHA"
+            git checkout -f "$GITHUB_SHA"
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE"
+          cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
+
+      - name: Configure (tests enabled)
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build tests
+        run: cmake --build build -j$(nproc)
+
+      - name: Run tests
+        run: |
+          echo "::group::UtilsTests"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+
+  valgrind:
+    name: "[test] valgrind (clang)"
+    needs: unit-tests
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/git-repo:/repo-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: clang
+      CXX: clang++
+    timeout-minutes: 20
+    steps:
+      - name: Sync repo cache
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
+
+          if [ -d /repo-cache/.git ]; then
+            echo "Using existing repo cache"
+            cd /repo-cache
+            git remote set-url origin "$REPO_URL"
+            git fetch origin "$GITHUB_SHA" develop
+            git checkout -f "$GITHUB_SHA"
+            git submodule sync --recursive
+            git submodule update --init --recursive --depth=1
+          else
+            echo "No cache found, cloning fresh"
+            git clone --recurse-submodules --shallow-submodules "$REPO_URL" /repo-cache
+            cd /repo-cache
+            git fetch --depth=1 origin "$GITHUB_SHA"
+            git checkout -f "$GITHUB_SHA"
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE"
+          cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
+
+      - name: Configure tests
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build tests
+        run: cmake --build build -j$(nproc)
+
+      - name: Run tests under Valgrind
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          set -o pipefail
+          python3 .gitea/check_valgrind.py \
+            --executable build/bin/UtilsTests \
+            --verbose 2>&1 | tee valgrind-output.txt

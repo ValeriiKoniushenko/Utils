@@ -37,7 +37,7 @@ run-clang-tidy -p "$BUILD_DIR" -j 16 "$(realpath ./sources)/.*\. (cpp|cxx|cc)$"
 ## Valgrind check
 
 ```
-valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes build/bin/Nexium_Tests
+valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes build/bin/UtilsTests
 ```
 
 ## Known build layouts

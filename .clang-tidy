@@ -41,6 +41,7 @@ Checks: >
   
   -performance-enum-size,
   -performance-no-int-to-ptr,
+  -performance-unnecessary-copy-initialization,
   
   -readability-avoid-nested-conditional-operator,
   -readability-braces-around-statements,
