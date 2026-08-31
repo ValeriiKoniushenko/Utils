@@ -28,6 +28,19 @@ jobs:
           GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: python3 .gitea/clear_ci_reviews.py
 
+  prepare-cache:
+    name: "[setup] cache directories"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    timeout-minutes: 2
+    steps:
+      - name: Ensure CI cache directories exist
+        run: |
+          mkdir -p /srv/ci-cache/ccache
+          mkdir -p /srv/ci-cache/git-repo
+          mkdir -p /srv/ci-cache/build-cache
+          mkdir -p /srv/ci-cache/build-cache-gcc
+
   clang-format:
     name: "[fmt] clang-format"
     needs: clear-previous-ci-reviews
@@ -49,7 +62,7 @@ jobs:
 
   build:
     name: "[build] clang (linux)"
-    needs: clear-previous-ci-reviews
+    needs: prepare-cache
     runs-on: linux
     container:
       image: cpp-ci:latest
@@ -90,8 +103,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure
         run: |
@@ -116,11 +134,13 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
+        run: |
+          mkdir -p /build-cache
+          rsync -a --delete build/ /build-cache/
 
   build-gcc:
     name: "[build] gcc (linux)"
-    needs: clear-previous-ci-reviews
+    needs: prepare-cache
     runs-on: linux
     container:
       image: cpp-ci:latest
@@ -161,8 +181,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure
         run: |
@@ -187,7 +212,9 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
+        run: |
+          mkdir -p /build-cache
+          rsync -a --delete build/ /build-cache/
 
   clang-tidy:
     name: "[lint] clang-tidy"
@@ -241,8 +268,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure tests for analysis headers
         run: |
@@ -314,8 +346,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure (tests enabled)
         run: |
@@ -337,7 +374,9 @@ jobs:
           echo "::endgroup::"
 
       - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
+        run: |
+          mkdir -p /build-cache
+          rsync -a --delete build/ /build-cache/
 
   unit-tests-gcc:
     name: "[test] unit tests (gcc)"
@@ -382,8 +421,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure (tests enabled)
         run: |
@@ -405,7 +449,9 @@ jobs:
           echo "::endgroup::"
 
       - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
+        run: |
+          mkdir -p /build-cache
+          rsync -a --delete build/ /build-cache/
 
   valgrind:
     name: "[test] valgrind (clang)"
@@ -450,8 +496,13 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build
-          rsync -a /build-cache/ build/
+          mkdir -p build /build-cache
+          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
+            echo "Restoring build cache"
+            rsync -a /build-cache/ build/
+          else
+            echo "No build cache contents, starting fresh"
+          fi
 
       - name: Configure tests
         run: |
@@ -476,4 +527,6 @@ jobs:
             --verbose 2>&1 | tee valgrind-output.txt
 
       - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
+        run: |
+          mkdir -p /build-cache
+          rsync -a --delete build/ /build-cache/
