@@ -88,6 +88,11 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
+
       - name: Configure
         run: |
           echo "::group::CMake configure"
@@ -153,6 +158,11 @@ jobs:
 
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
+
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
 
       - name: Configure
         run: |
@@ -270,6 +280,7 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/git-repo:/repo-cache
+        - /srv/ci-cache/build-cache:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -301,6 +312,11 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
+
       - name: Configure (tests enabled)
         run: |
           cmake -S . -B build \
@@ -320,6 +336,9 @@ jobs:
           build/bin/UtilsTests
           echo "::endgroup::"
 
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
   unit-tests-gcc:
     name: "[test] unit tests (gcc)"
     needs: build-gcc
@@ -329,6 +348,7 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/git-repo:/repo-cache
+        - /srv/ci-cache/build-cache-gcc:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: gcc
@@ -360,6 +380,11 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
+
       - name: Configure (tests enabled)
         run: |
           cmake -S . -B build \
@@ -379,6 +404,9 @@ jobs:
           build/bin/UtilsTests
           echo "::endgroup::"
 
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
   valgrind:
     name: "[test] valgrind (clang)"
     needs: unit-tests
@@ -388,6 +416,7 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/git-repo:/repo-cache
+        - /srv/ci-cache/build-cache:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -419,6 +448,11 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
+      - name: Restore build output
+        run: |
+          mkdir -p build
+          rsync -a /build-cache/ build/
+
       - name: Configure tests
         run: |
           cmake -S . -B build \
@@ -440,3 +474,6 @@ jobs:
           python3 .gitea/check_valgrind.py \
             --executable build/bin/UtilsTests \
             --verbose 2>&1 | tee valgrind-output.txt
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
