@@ -1,5 +1,5 @@
 .vs
-.vscode
+/.vscode/*.json
 .idea
 cmake-build-*/
 build
