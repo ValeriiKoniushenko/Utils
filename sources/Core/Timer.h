@@ -25,14 +25,18 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <functional>
+#include <memory>
+#include <optional>
+#include <stdexcept>
 
 namespace Core
 {
     /**
      * @brief A utility class for measuring elapsed time.
      *
-     * The Stopwatch class provides methods for starting and stopping
+     * The Stopwatch class provides methods for starting and reading
      * a timer to measure the elapsed time. It uses a steady clock to
      * ensure monotonic time measurements. The stopwatch is templated
      * to allow customization of the type for the elapsed time's representation.
@@ -48,22 +52,34 @@ namespace Core
 
     public:
         /**
+         * @brief Constructs and immediately starts the stopwatch.
+         */
+        Stopwatch() noexcept
+            : _startTime(ClockT::now())
+        {
+        }
+
+        /**
          * @brief Starts the stopwatch and records the current time as the start time.
          *
          * This method initializes or resets the start time of the stopwatch to the current time,
          * which can be later used to measure elapsed time or duration.
          */
-        void start() { _startTime = ClockT::now(); }
+        void start() noexcept { _startTime = ClockT::now(); }
 
         /**
-         * @brief Stops the stopwatch and calculates the elapsed time since it started.
+         * @brief Calculates the elapsed time since the stopwatch was last started.
          *
          * This method determines the duration that has passed since the stopwatch was last started
-         * and returns the elapsed time in the type specified by the template parameter.
+         * and returns the elapsed time in the type specified by the template parameter. It does not
+         * pause the stopwatch; repeated calls continue to measure from the same start time.
          *
          * @return The elapsed time since the stopwatch was started, in the specified type.
          */
-        [[nodiscard]] Type stop() { return DurationT(ClockT::now() - _startTime).count(); }
+        [[nodiscard]] Type stop() const noexcept
+        {
+            return DurationT(ClockT::now() - _startTime).count();
+        }
 
     private:
         ClockT::time_point _startTime;
@@ -84,9 +100,9 @@ namespace Core
         using DurationT = std::chrono::duration<float>;
 
     public:
-        explicit Repeater(float value = 0) { setRepeatTime(value); };
-        Repeater(const Repeater&) = default;
-        Repeater& operator=(const Repeater&) = default;
+        explicit Repeater(float value = 0) { setRepeatTime(value); }
+        Repeater(const Repeater& other);
+        Repeater& operator=(const Repeater& other);
         Repeater(Repeater&&) noexcept = default;
         Repeater& operator=(Repeater&&) noexcept = default;
         ~Repeater() = default;
@@ -100,14 +116,32 @@ namespace Core
 
         /**
          * @brief Sets the repeat time interval for the repeater.
-         * @param value The repeat time in seconds.
+         * @param value The repeat time in seconds. Values less than or equal to zero make the
+         * callback eligible on every update.
+         * @throws std::invalid_argument If @p value is NaN or infinite.
          */
-        void setRepeatTime(float value) { _repeatTime = value; }
+        void setRepeatTime(float value)
+        {
+            if (!std::isfinite(value))
+            {
+                throw std::invalid_argument("Repeater interval must be finite");
+            }
+            _repeatTime = value;
+        }
 
         /**
-         * @brief will call the callback and pass one arg: delta time
+         * @brief Sets the callback invoked for an eligible update.
+         *
+         * The callback receives the elapsed seconds since the previous eligible update. It may
+         * safely reset the repeater or replace itself. Timing state is committed before invocation,
+         * so exceptions and recursive updates do not leave a stale last-call timestamp.
+         *
+         * @param callback The callback to install, or an empty function to clear it.
          */
-        void setCallback(const CallbackT& callback) { _callback = callback; }
+        void setCallback(const CallbackT& callback)
+        {
+            _callback = callback ? std::make_shared<CallbackT>(callback) : nullptr;
+        }
 
         /**
          * @brief Resets the repeater's internal state, including clearing the callback, resetting
@@ -117,9 +151,10 @@ namespace Core
 
         /**
          * @brief Initiates the repeater or updates its state. If the repeater is not yet started,
-         * it initializes the start time. If the time interval since the last call exceeds the
+         * it initializes the start time. If the time interval since the last call reaches the
          * repeat time, the callback function (if set) is invoked with the delta time as an
-         * argument.
+         * argument. A positive interval therefore waits for a later update, while a zero or
+         * negative interval is eligible immediately with an initial delta of zero.
          */
         void startOrUpdate();
 
@@ -132,9 +167,9 @@ namespace Core
         [[nodiscard]] float getTimeGap() const noexcept;
 
     private:
-        CallbackT _callback;
+        std::shared_ptr<CallbackT> _callback;
         ClockT::time_point _lastCall;
         std::optional<ClockT::time_point> _startTime;
-        float _repeatTime = 1.0;
+        float _repeatTime = 0.0;
     };
 } // namespace Core
