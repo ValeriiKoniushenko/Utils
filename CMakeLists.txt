@@ -29,7 +29,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # ========= Base setup & Predefinitions =========
-set(BUILD_UTILS_WITH_TEST_COVERAGE ON)
+option(
+    BUILD_UTILS_WITH_TEST_COVERAGE
+    "Enable Clang instrumentation coverage flags for Debug builds"
+    OFF
+)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(REQUIRED_CXX_STANDARD cxx_std_23) # read-only
 set(CXX_STANDARD)

@@ -95,6 +95,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           echo "::endgroup::"
@@ -160,6 +161,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           echo "::endgroup::"
@@ -238,6 +240,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
@@ -304,6 +307,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
@@ -362,6 +366,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
@@ -420,6 +425,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
