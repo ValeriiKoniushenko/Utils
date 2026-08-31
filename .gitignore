@@ -1,8 +1,8 @@
-.vs
+/.vs
 /.vscode/*.json
-.idea
-cmake-build-*/
-build
-out
-scripts/__pycache__
-*.output
+/.idea
+/cmake-build-*/
+/build
+/out
+__pycache__
+/*.output
