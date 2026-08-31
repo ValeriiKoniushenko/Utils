@@ -28,6 +28,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -103,57 +105,118 @@ namespace Core
     public:
         ~Delegate() override = default;
         Delegate(const Delegate&) = default;
-
         Delegate(Delegate&&) = delete;
+        Delegate& operator=(const Delegate&) = delete;
+        Delegate& operator=(Delegate&&) = delete;
 
         template<class... TArgs>
         void trigger(TArgs&&... args)
         {
-            for (auto&& [id, callback] : _callbacks)
+            [[maybe_unused]] auto keepAlive = Ptr(this);
+
+            std::vector<ID::IdT> callbackIDs;
+            callbackIDs.reserve(_callbacks.size());
+            for (const auto& entry : _callbacks)
             {
-                std::invoke(callback, std::forward<TArgs>(args)...);
+                callbackIDs.emplace_back(entry.first);
+            }
+
+            for (const auto id : callbackIDs)
+            {
+                const auto it = _callbacks.find(id);
+                if (it == _callbacks.end())
+                {
+                    continue;
+                }
+
+                auto callback = it->second;
+                if constexpr (std::is_invocable_v<CallbackT&, TArgs&...>)
+                {
+                    std::invoke(*callback, args...);
+                }
+                else
+                {
+                    std::invoke(*callback, std::forward<TArgs>(args)...);
+                }
             }
         }
 
         [[nodiscard]] ID subscribeAndGetID(CallbackT&& callback)
         {
+            if (!callback)
+            {
+                return {};
+            }
+
             ID id(this, ++_generatedID);
-            _callbacks.emplace(id.getId(), std::forward<CallbackT>(callback));
+            _callbacks.emplace(id.getId(), std::make_shared<CallbackT>(std::move(callback)));
             return id;
         }
 
         template<class RefObjectT, class ClassFuncT>
         [[nodiscard]] ID subscribeAndGetID(RefObjectT* object, ClassFuncT func)
         {
-            ID id(nullptr, ++_generatedID);
-            _callbacks.emplace(id.getId(), [object, func]<class... TArgs>(TArgs&&... args)
-                               { std::invoke(func, *object, std::forward<TArgs>(args)...); });
+            if (!object)
+            {
+                return {};
+            }
+            if constexpr (std::is_pointer_v<ClassFuncT> || std::is_member_pointer_v<ClassFuncT>)
+            {
+                if (!func)
+                {
+                    return {};
+                }
+            }
+
+            ID id(this, ++_generatedID);
+            _callbacks.emplace(id.getId(),
+                               std::make_shared<CallbackT>(
+                                   [object, func]<class... TArgs>(TArgs&&... args)
+                                   { std::invoke(func, *object, std::forward<TArgs>(args)...); }));
             return id;
         }
 
         template<class RefObjectT, class ClassFuncT>
         [[nodiscard]] ID subscribeAndGetID(const IntrusivePtr<RefObjectT>& object, ClassFuncT func)
         {
-            ID id(nullptr, ++_generatedID);
+            if (!object)
+            {
+                return {};
+            }
+            if constexpr (std::is_pointer_v<ClassFuncT> || std::is_member_pointer_v<ClassFuncT>)
+            {
+                if (!func)
+                {
+                    return {};
+                }
+            }
+
+            ID id(this, ++_generatedID);
             _callbacks.emplace(
                 id.getId(),
-                [weak = WeakPtr<RefObjectT>(object), func]<class... TArgs>(TArgs&&... args)
-                {
-                    if (auto&& ptr = weak.tryLoad())
+                std::make_shared<CallbackT>(
+                    [weak = WeakPtr<RefObjectT>(object), func]<class... TArgs>(TArgs&&... args)
                     {
-                        std::invoke(func, *ptr, std::forward<TArgs>(args)...);
-                    }
-                });
+                        if (auto&& ptr = weak.tryLoad())
+                        {
+                            std::invoke(func, *ptr, std::forward<TArgs>(args)...);
+                        }
+                    }));
             return id;
         }
 
         void unsubscribe(ID& id) override
         {
+            if (id.getOwner().get() != this)
+            {
+                return;
+            }
+
             _callbacks.erase(id.getId());
             id._invalidate();
         }
 
-        [[nodiscard]] typename CallbackContainerT::size_type getSubscriptionsCount() const noexcept
+        [[nodiscard]] CallbackContainerT::size_type getSubscriptionsCount() const noexcept
         {
             return _callbacks.size();
         }
@@ -161,15 +224,18 @@ namespace Core
 
         void reset() { _callbacks.clear(); }
 
-        [[nodiscard]] typename ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
+        [[nodiscard]] ID::IdT getLastGeneratedID() const noexcept { return _generatedID; }
+
+    private:
+        using StoredCallbackContainerT = std::unordered_map<ID::IdT, std::shared_ptr<CallbackT>>;
 
     private:
         // Use Delegate<..>::Create() to create an object
         Delegate() = default;
 
     private:
-        CallbackContainerT _callbacks{};
-        typename ID::IdT _generatedID = ID::invalidID;
+        StoredCallbackContainerT _callbacks{};
+        ID::IdT _generatedID = ID::invalidID;
     };
 
     class DelegateSubscriber final
@@ -191,11 +257,15 @@ namespace Core
 
         void release();
 
-        [[nodiscard]] ID& getID() noexcept { return _id; }
-        [[nodiscard]] const ID& getID() const noexcept { return _id; }
+        [[nodiscard]] ID& getID() noexcept { return _id ? *_id : _emptyID; }
+        [[nodiscard]] const ID& getID() const noexcept { return _id ? *_id : _emptyID; }
 
     private:
-        ID _id;
+        void releaseIfLastOwner();
+
+    private:
+        std::shared_ptr<ID> _id;
+        ID _emptyID;
     };
 
     class DelegateSubscriberPoolGuard final
@@ -205,6 +275,8 @@ namespace Core
         ~DelegateSubscriberPoolGuard() = default;
         DelegateSubscriberPoolGuard(const DelegateSubscriberPoolGuard&) = default;
         DelegateSubscriberPoolGuard(DelegateSubscriberPoolGuard&&) noexcept = default;
+        DelegateSubscriberPoolGuard& operator=(const DelegateSubscriberPoolGuard&) = default;
+        DelegateSubscriberPoolGuard& operator=(DelegateSubscriberPoolGuard&&) noexcept = default;
 
         void add(DelegateSubscriber&& subscriber);
         void add(DelegateSubscriber& subscriber);

@@ -1,21 +1,5 @@
 # Utils
 
-[![Jenkins](https://img.shields.io/badge/jenkins-%232C5263.svg?style=for-the-badge&logo=jenkins&logoColor=white)](https://jenkins.vakon.space/job/Utils/)
-
-**Builds**:
-- [![MSVC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FWinBuild_MSVC_Debug%2F&label=MSVC%20Debug)](https://jenkins.vakon.space/job/Utils/job/WinBuild_MSVC_Debug/) [![MSVC Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FWinBuild_MSVC_Release%2F&label=MSVC%20Release)](https://jenkins.vakon.space/job/Utils/job/WinBuild_MSVC_Release/)
-- [![GCC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxBuild_GCC_Debug%2F&label=GCC%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild_GCC_Debug/) [![GCC Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxBuild_GCC_Release%2F&label=GCC%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild_GCC_Release/)
-- [![Clang Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxBuild_Clang_Debug%2F&label=Clang%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild_Clang_Debug/) [![Clang Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxBuild_Clang_Release%2F&label=Clang%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxBuild_Clang_Release/)
-
-**Unit Tests**:
-- [![MSVC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FWinUnitTests_MSVC_Debug%2F&label=MSVC%20Debug)](https://jenkins.vakon.space/job/Utils/job/WinUnitTests_MSVC_Debug/) [![MSVC Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FWinUnitTests_MSVC_Release%2F&label=MSVC%20Release)](https://jenkins.vakon.space/job/Utils/job/WinUnitTests_MSVC_Release/)
-- [![GCC Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_GCC_Debug%2F&label=GCC%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_GCC_Debug/) [![GCC Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_GCC_Release%2F&label=GCC%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_GCC_Release/)
-- [![Clang Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_Clang_Debug%2F&label=Clang%20Debug)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_Clang_Debug/) [![Clang Release](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FLinuxUnitTests_Clang_Release%2F&label=Clang%20Release)](https://jenkins.vakon.space/job/Utils/job/LinuxUnitTests_Clang_Release/)
-
-[![Clang Debug](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.vakon.space%2Fjob%2FUtils%2Fjob%2FValgrind%2F&label=Valgrind)](https://jenkins.vakon.space/job/Utils/job/Valgrind/)
-
----
-
 ## Intro
 
 A utility library providing common solutions for your code. It already includes several implemented features, such as:

@@ -29,18 +29,21 @@ namespace Core
 
     DelegateSubscriber::~DelegateSubscriber()
     {
-        release();
+        releaseIfLastOwner();
     }
 
     DelegateSubscriber::DelegateSubscriber(const ID& id)
-        : _id{ id }
+        : _id{ std::make_shared<ID>(id) }
     {
     }
 
     DelegateSubscriber& DelegateSubscriber::operator=(const ID& id)
     {
-        release();
-        _id = id;
+        if (!(getID() == id))
+        {
+            releaseIfLastOwner();
+            _id = std::make_shared<ID>(id);
+        }
         return *this;
     }
 
@@ -48,6 +51,10 @@ namespace Core
     {
         if (this != &other) [[likely]]
         {
+            if (!(getID() == other.getID()))
+            {
+                releaseIfLastOwner();
+            }
             _id = other._id;
         }
 
@@ -58,6 +65,10 @@ namespace Core
     {
         if (this != &other) [[likely]]
         {
+            if (!(getID() == other.getID()))
+            {
+                releaseIfLastOwner();
+            }
             _id = std::move(other._id);
         }
 
@@ -66,12 +77,25 @@ namespace Core
 
     void DelegateSubscriber::release()
     {
-        if (_id.isValid())
+        if (_id && _id->isValid())
         {
-            if (auto&& weak = _id.getOwner().tryLoad())
+            if (auto&& weak = _id->getOwner().tryLoad())
             {
-                weak->unsubscribe(_id);
+                weak->unsubscribe(*_id);
             }
+        }
+        _id.reset();
+    }
+
+    void DelegateSubscriber::releaseIfLastOwner()
+    {
+        if (_id && _id.use_count() == 1)
+        {
+            release();
+        }
+        else
+        {
+            _id.reset();
         }
     }
 
@@ -87,6 +111,10 @@ namespace Core
 
     void DelegateSubscriberPoolGuard::clearAndReleaseAll()
     {
+        for (auto& subscriber : _pool)
+        {
+            subscriber.release();
+        }
         _pool.clear();
     }
 
