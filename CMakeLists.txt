@@ -38,7 +38,9 @@ Utils_InstallCXXStandardVersion()
 add_subdirectory(dependencies)
 
 if (NOT UTILS_DISABLE_BENCHMARKS)
-    add_subdirectory(benchmark)
+    add_subdirectory(benchmarks)
+
+    # benchmark target is Google Benchmark
     target_compile_options(benchmark PUBLIC $<$<CXX_COMPILER_ID:Clang,GNU>:-Wno-c2y-extensions>)
 endif ()
 
