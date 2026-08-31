@@ -121,6 +121,8 @@ namespace Core
                 callbackIDs.emplace_back(entry.first);
             }
 
+            // Both loops resolve the issue if the callback will be released/unsubscribed during the
+            // trigger by itself or by another thread.
             for (const auto id : callbackIDs)
             {
                 const auto it = _callbacks.find(id);
