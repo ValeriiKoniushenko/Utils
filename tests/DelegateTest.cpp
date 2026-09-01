@@ -63,6 +63,7 @@ TEST(DelegateTest, SimpleTest2)
 
 TEST(DelegateTest, UsingOfDelegateSubscriber)
 {
+    // tag::delegate_subscription[]
     auto delegate = Core::Delegate<void()>::Create();
     {
         bool wasInvoked = false;
@@ -72,6 +73,7 @@ TEST(DelegateTest, UsingOfDelegateSubscriber)
     }
     EXPECT_EQ(0, delegate->getSubscriptionsCount());
     EXPECT_TRUE(delegate->isEmpty());
+    // end::delegate_subscription[]
 }
 
 TEST(DelegateTest, OutOfScopeDelegate)

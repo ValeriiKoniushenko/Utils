@@ -1,0 +1,37 @@
+= Build from source
+
+== Configure and build
+
+From the repository root, initialize the submodules and create a Debug build:
+
+[source,shell]
+----
+include::example$getting-started.sh[tag=configure]
+----
+
+The generated executables are placed in the build directory's `bin/` subdirectory. Run the unit
+test executable directly:
+
+[source,shell]
+----
+include::example$getting-started.sh[tag=test]
+----
+
+Set `CMAKE_BUILD_TYPE` to `Release` for an optimized single-config build.
+
+== Build switches
+
+`UTILS_DISABLE_TESTS`:: Set to `ON` to omit `UtilsTests`.
+`UTILS_DISABLE_BENCHMARKS`:: Set to `ON` to omit all Google Benchmark executables.
+`BUILD_UTILS_WITH_TEST_COVERAGE`:: Enables Clang instrumentation coverage flags for Debug builds.
+
+Tests and benchmarks are enabled by default when their corresponding disable variable is not set.
+
+== Output targets
+
+`UtilsTests`:: GoogleTest unit-test executable.
+`UtilsBench_String`:: General string benchmarks.
+`UtilsBench_ProdStringsCase`:: Production-style string and navigation benchmarks.
+`UtilsBench_Math`:: Math helper benchmarks.
+
+See xref:contributing/building.adoc[] for incremental and clean development workflows.

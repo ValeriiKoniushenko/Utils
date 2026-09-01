@@ -1,0 +1,47 @@
+= Ownership and patterns
+
+== Intrusive pointers
+
+`IntrusivePtr<T>` is a strong owner for a type derived from `IntrusiveRefCounter<T>`. The reference
+counter lives in the object, so strong pointers do not require a separate control-block allocation.
+Add `INTRUSIVE_PTR_ADAPTERS(Type)` to a derived class when it should expose its `Ptr`, `WPtr`, and
+`Create` conveniences.
+
+[source,cpp]
+----
+include::example$tests/IntrusivePtrBehaviorTests.cpp[tag=intrusive_type]
+----
+
+`WeakPtr<T>` creates a small weak control block on demand and never keeps the object alive. Prefer
+`tryLoad()` over `get()` when performing work: the returned `WeakData<T>` owns a temporary strong
+reference for the duration of the access.
+
+[source,cpp]
+----
+include::example$tests/IntrusivePtrBehaviorTests.cpp[tag=weak_pointer_loading]
+----
+
+When the last strong owner releases the object, the object is destroyed immediately. The weak
+control block remains until the final weak pointer releases it. The default counter policy is not
+atomic, so weak-to-strong loading is not a thread-safe promotion without external synchronization
+or a suitable custom policy.
+
+Include `Core/IntrusivePtr.h` and link `Utils::Core`.
+
+== Singletons
+
+`Core::Singleton<T>` provides lazy, non-thread-safe construction. `Core::ThreadSafeSingleton<T>`
+serializes first construction. Both expose `T::Instance()` through the base type.
+
+Use `SINGLETONS_FRIEND(Type)` in the derived class to grant construction access, delete copy/move
+operations, and make the default constructor private. `SINGLETONS_FRIEND_NO_CNSTR(Type)` grants
+friend access without generating those constructor restrictions.
+
+There is no `StrictSingleton` type in the current API; older documentation used that obsolete name.
+Include `Core/Singleton.h`.
+
+== Iterator interfaces
+
+`Core/AbstractIterators.h` contains abstract input, output, forward, bidirectional, and random-access
+iterator interfaces. They are CRTP-style contracts intended for custom iterator implementations,
+not concrete containers.

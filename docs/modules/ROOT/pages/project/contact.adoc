@@ -1,0 +1,9 @@
+= Contact
+
+Questions, proposals, and private security reports can be sent through:
+
+* Email: mailto:valeriikoniushenko@gmail.com[]
+* Telegram: https://t.me/valeriikoniushenko[@valeriikoniushenko]
+
+Use the repository's issue tracker for public, actionable bug reports and feature discussions when
+possible. Follow xref:project/security.adoc[] for suspected vulnerabilities.

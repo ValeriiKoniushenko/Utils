@@ -1,0 +1,24 @@
+= Requirements
+
+== Required tools
+
+* CMake 3.30 or newer.
+* A compiler and standard library with C++23 support.
+* Git with submodule support when building from a repository checkout.
+
+The project documentation uses Clang 18.1.8 or GCC 14.2.1 as known baselines. Newer compatible
+Clang, GCC, or MSVC toolchains may also work; CMake verifies the required `cxx_std_23` feature at
+configure time.
+
+Ninja is used in the documented commands because it gives consistent single- and multi-config
+workflows, but another CMake generator can be selected.
+
+== Optional tools
+
+* `ccache` for compiler-result caching. See xref:getting-started/ccache.adoc[].
+* Google Benchmark targets for performance work.
+* `clang-format`, `run-clang-tidy`, and Valgrind for local quality checks.
+* Node.js and npm when generating the Antora documentation site.
+
+Git line-ending settings are environment-specific. Configure `core.autocrlf` to match the
+repository and team policy rather than treating one value as a build requirement.

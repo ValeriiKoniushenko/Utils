@@ -1,0 +1,38 @@
+= Fundamentals and files
+
+Link `Utils::Utils` and include the individual header for the facility being used.
+
+== Concepts
+
+`Utils/Concepts.h` provides the `Utils::IsArithmetic`, `Utils::IsFloating`, and
+`Utils::IsIntegral` concepts as readable constraints over the corresponding standard type traits.
+
+[source,cpp]
+----
+include::example$sources/Utils/Concepts.h[tag=fundamental_concepts]
+----
+
+== Type traits
+
+`Utils/TypeTraits.h` provides non-narrowing conversion checks, string-literal detection,
+`AlwaysFalse`, and `HasValueType`. Both trait types and variable templates are available where the
+header defines them.
+
+== File helpers
+
+`Utils/Functions.h` provides:
+
+`Utils::IsReadable`:: Tests whether a filesystem path can be read.
+`Utils::GetTextFileContentAs`:: Reads text into a caller-selected string-like type and throws on an unreadable path by default.
+`Utils::TryToGetTextFileContentAs`:: Returns an empty result instead of throwing for an unreadable path.
+`Utils::GetFileContent`:: Reads binary file content into a byte-oriented `std::vector<char>`.
+
+== CSV output
+
+`Utils::CSV` in `Utils/EasyCSV.h` stores a table of string rows. Set a save path, add rows or append
+values to columns, then call `save()`. The default output path is `default.csv`.
+
+== Portability helper
+
+`Utils/CrossString.h` supplies a Unix/MinGW compatibility implementation of `memcpy_s` when the
+platform does not provide the MSVC form.

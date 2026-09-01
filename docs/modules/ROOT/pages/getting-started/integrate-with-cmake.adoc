@@ -1,0 +1,37 @@
+= Integrate with CMake
+
+Add the repository to your build with `add_subdirectory`, then link the narrowest target that
+contains the APIs you use.
+
+== Entire library
+
+[source,cmake]
+----
+include::example$integration.cmake[tag=all_features]
+----
+
+The `Utils` interface target links both component libraries.
+
+== Core features
+
+[source,cmake]
+----
+include::example$integration.cmake[tag=core_only]
+----
+
+Use `Utils::Core` for geometry, colors, math, timers, intrusive pointers, enums, strings, regular
+expressions, delegates, and assertions. It publicly links the foundational library and its required
+third-party libraries.
+
+== Foundational utilities
+
+[source,cmake]
+----
+include::example$integration.cmake[tag=foundation_only]
+----
+
+Use `Utils::Utils` for concepts, traits, filesystem helpers, CSV support, and low-level helpers when
+none of the higher-level Core APIs are needed.
+
+The public include root is `sources/`, so headers are included as `Core/Rect.h`,
+`Core/String.h`, or `Utils/Concepts.h`.

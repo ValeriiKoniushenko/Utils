@@ -1,0 +1,35 @@
+= Benchmarking
+
+Use Release builds for performance conclusions. Debug measurements are dominated by diagnostic and
+optimization differences.
+
+== Build and run
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=release_benchmarks]
+----
+
+`UtilsBench_Math` measures arithmetic helpers. `UtilsBench_String` covers general string operations.
+`UtilsBench_ProdStringsCase` contains production-style string and navigation workloads.
+
+== Focus an investigation
+
+List registered benchmarks with the Google Benchmark `--benchmark_list_tests` option, then filter
+to the affected group. For a comparison-quality run, take repeated samples:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=focused_benchmark]
+----
+
+For before/after comparisons, keep the machine, compiler, build directory configuration, power
+mode, and benchmark arguments constant. Close CPU-intensive applications. Report the build type,
+command, units, and whether a conclusion uses real time or CPU time.
+
+Small changes can be noise. Prefer repeated aggregate results and treat a difference as meaningful
+only when it is consistent across samples.
+
+Historical benchmark tables from the Markdown documentation are not retained as API documentation:
+they came from different runs and had no complete environment metadata. Reproduce results against
+the current code instead.

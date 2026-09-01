@@ -1,0 +1,39 @@
+= Build workflows
+
+== Incremental build
+
+Reuse a configured build directory for normal development:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=incremental_build]
+----
+
+Common layouts include `build/`, `build/clang/debug`, `build/clang/release`, `build/gcc/debug`, and
+`build/gcc/release`. Substitute the selected path consistently in configure, build, test, lint, and
+debug commands.
+
+== First configure
+
+Use the xref:getting-started/build-from-source.adoc[getting-started build] when the build directory
+does not yet exist. The configure step also creates `compile_commands.json` for tooling.
+
+== Clean rebuild
+
+A clean rebuild is appropriate after structural CMake changes, a compiler/toolchain switch, or a
+confirmed stale-cache problem. Remove only the explicit build directory you intend to replace, then
+run:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=clean_build]
+----
+
+Do not routinely update submodules with `--remote` or `--force`; a reproducible checkout should use
+the commits recorded by the repository.
+
+== Optional targets
+
+Pass `-DUTILS_DISABLE_TESTS=ON` when a consumer does not need the test executable. Pass
+`-DUTILS_DISABLE_BENCHMARKS=ON` to skip benchmark targets. These are disable switches; the old
+`JRM_ENABLE_BENCHMARKS` name is not part of the current CMake project.

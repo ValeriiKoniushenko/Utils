@@ -32,9 +32,10 @@ using namespace Core;
 
 TEST(RegexTest, SimpleRegex)
 {
+    // tag::regex_match[]
     const std::string subject = "1234 Hello# world!";
 
-    RegexMatch regex;
+    Core::RegexMatch regex;
     regex.setPattern("([A-Za-z]+)(#|!)");
     regex.setSubject(subject.c_str());
     regex.setCompileOptions(PCRE2_MULTILINE);
@@ -46,6 +47,7 @@ TEST(RegexTest, SimpleRegex)
     ASSERT_TRUE(match);
 
     EXPECT_EQ("Hello#", subject.substr(match.offset, match.size));
+    // end::regex_match[]
 }
 
 TEST(RegexTest, SimpleRegexAfterClear)

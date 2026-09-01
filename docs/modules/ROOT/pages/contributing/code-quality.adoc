@@ -1,0 +1,40 @@
+= Code quality
+
+The local checks mirror the main CI categories: formatting, static analysis, tests, coverage, and
+Valgrind.
+
+== Formatting
+
+Run clang-format in check mode for every changed C++ source/header:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=format_check]
+----
+
+Replace `--dry-run --Werror` with `-i` to apply formatting. Review the result before committing.
+
+== Static analysis
+
+Configure a build first so `compile_commands.json` exists, then run clang-tidy against that build
+directory:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=tidy_check]
+----
+
+When several build trees exist, select the one configured with the intended compiler and options;
+do not rely on an ambiguous working-directory default.
+
+== Memory checks
+
+Run the test executable under Valgrind on a supported platform:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=valgrind_check]
+----
+
+Run these checks before pushing a completed change. Full-tree clang-tidy is significantly slower
+than checking the affected files and their headers.

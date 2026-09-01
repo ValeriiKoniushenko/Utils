@@ -32,9 +32,11 @@ TEST(CoreTests, Size2Area)
         constexpr Core::FSize2 _;
     }
     {
+        // tag::size_area[]
         constexpr float v = 5.5f;
         constexpr auto a = Core::Size<decltype(v), 2>{ v, v };
         static_assert(a.area() == v * v);
+        // end::size_area[]
     }
 
     {

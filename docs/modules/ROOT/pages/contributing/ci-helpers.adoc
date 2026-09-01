@@ -1,0 +1,17 @@
+= CI helpers
+
+The `.gitea/ci/` package contains reusable Python helpers shared by the repository's CI entry points.
+
+`gitea_client.py`:: Gitea reviews, commit statuses, and attachments.
+`diff.py`:: Changed C/C++ file discovery and analysis-target selection.
+`clang_format.py` and `clang_tidy.py`:: Configurable checker implementations.
+`coverage.py`:: gcovr summary publishing and ZIP report attachment.
+`valgrind.py`:: Valgrind execution and pull-request reporting.
+`cleanup.py`:: Replacement-review and attachment cleanup.
+
+Repository policy belongs in the consuming repository's thin entry points and configuration, not in
+the reusable helper package. A consumer supplies excluded paths and review contexts, then delegates
+to the package implementation.
+
+The main `.gitea/workflows/code-quality.yml` workflow runs cleanup, formatting, Clang and GCC builds,
+static analysis, unit tests, coverage, and memory checks in the configured CI environment.

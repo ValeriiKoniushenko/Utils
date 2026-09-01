@@ -1,0 +1,66 @@
+= Documentation workflow
+
+Utils documentation is an Antora component written in AsciiDoc. Sources live under
+`docs/modules/ROOT/pages/`, and every published page is reachable from
+`docs/modules/ROOT/nav.adoc`.
+
+== Source-of-truth order
+
+When documentation and behavior disagree, reconcile the claim using this order:
+
+. Project intent and concepts retained in the root README and existing documentation history.
+. Unit tests, which demonstrate expected behavior.
+. Current public headers and implementations.
+. Contributor workflow notes.
+
+Do not perpetuate an old example when the current tests or code contradict it. Document the current
+API and note a significant rename or semantic correction when it helps users migrate.
+
+== Code examples
+
+Never paste a real source snippet directly into an AsciiDoc page. Add `tag::name[]` and
+`end::name[]` markers around the canonical source/test region, then include that tag through an
+Antora `example$` resource.
+
+The collector extension maps headers, tests, and benchmarks from the repository worktree into the
+ROOT module's virtual examples family. Documentation-only shell, CMake, and configuration examples
+live in `docs/modules/ROOT/examples/` and use the same tag discipline.
+
+This arrangement keeps rendered examples tied to files that compilation or repository tooling can
+check.
+
+== Navigation and links
+
+Add, remove, or rename a page and its nav entry in the same change. Use `xref:` for internal pages;
+do not create manual Home or Parent links. Prefer readable lowercase filenames with hyphens rather
+than URL-encoded punctuation.
+
+== Generate the site
+
+Site generation is a separate, user-run step. Install the playbook dependencies once:
+
+[source,shell]
+----
+include::example$documentation.sh[tag=install]
+----
+
+Then generate the site from `docs/`:
+
+[source,shell]
+----
+include::example$documentation.sh[tag=build]
+----
+
+The generated `docs/html/` directory is ignored and must never be edited or used as a documentation
+source.
+
+Before finishing a documentation change, statically verify xref targets, include targets, tag pairs,
+page titles, navigation coverage, and whitespace. Site generation is useful as an explicit preview,
+but it is not part of an ordinary documentation-writing task.
+
+Run the repository's dependency-free static validator from `docs/`:
+
+[source,shell]
+----
+include::example$documentation.sh[tag=validate]
+----

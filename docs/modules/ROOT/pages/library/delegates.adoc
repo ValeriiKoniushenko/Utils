@@ -1,0 +1,25 @@
+= Delegates
+
+`Core::Delegate<Signature>` stores callbacks for event-oriented code. Delegates have a private
+constructor; create them with `Delegate<...>::Create()` and retain the resulting intrusive pointer.
+
+`subscribeAndGetID()` accepts a callback or supported object/member-function pair and returns a
+subscription ID. `trigger()` invokes callbacks that are still registered. `unsubscribe()` removes a
+specific ID, while `reset()` removes all callbacks.
+
+`DelegateSubscriber` is an RAII guard. Its final owning copy automatically unsubscribes. A
+`DelegateSubscriberPoolGuard` groups multiple subscriber guards.
+
+[source,cpp]
+----
+include::example$tests/DelegateTest.cpp[tag=delegate_subscription]
+----
+
+The intrusive-object member-function overload captures a weak pointer and loads it immediately
+before invocation. This avoids extending the receiver's lifetime solely because it subscribed.
+
+Callbacks may unsubscribe themselves, reset the delegate, or add callbacks while a trigger is in
+progress. Newly added callbacks participate in the next trigger. Empty callbacks and null receivers
+produce invalid IDs.
+
+Link `Utils::Core` and include `Core/Delegate.h`.

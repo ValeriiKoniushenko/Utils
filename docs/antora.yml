@@ -1,22 +1,18 @@
-site:
-  title: JustReflectMe
-  start_page: JustReflectMe:ROOT:index.adoc
+name: utils
+title: Utils
+version: ~
+nav:
+  - modules/ROOT/nav.adoc
 
-content:
-  sources:
-    - url: ../
-      branches: HEAD
-      start_path: docs/
-
-ui:
-  bundle:
-    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
-    snapshot: true
-
-asciidoc:
-  attributes:
-    page-pagination: true
-    experimental: true
-
-output:
-  dir: ./html
+ext:
+  collector:
+    scan:
+      - dir: sources
+        files: '**/*.h'
+        into: modules/ROOT/examples/sources
+      - dir: tests
+        files: '*.cpp'
+        into: modules/ROOT/examples/tests
+      - dir: benchmarks
+        files: '*.{cpp,h}'
+        into: modules/ROOT/examples/benchmarks

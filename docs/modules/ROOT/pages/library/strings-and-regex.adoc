@@ -1,0 +1,50 @@
+= Strings and regular expressions
+
+Link `Utils::Core`. The target supplies the required PCRE2 linkage and compile definition.
+
+== Interned and dynamic strings
+
+`Core::BaseString<CharT>` is the implementation behind `StringAtom` and `WStringAtom`. The `_atom`
+literal and `BaseString::Intern` place a value in the process-wide `StringPool`; equality between two
+interned strings can then use the interned address. The `_dyn` literal creates dynamic storage.
+
+A mutating operation converts an interned string to dynamic storage before changing it:
+
+[source,cpp]
+----
+include::example$tests/StringHelperTest.cpp[tag=atomic_string_mutation]
+----
+
+The string API includes iterators, search, trimming, case conversion, insertion and erasure,
+formatting, line navigation, hashing, and standard string/string-view conversions. Include
+`Core/String.h`; the obsolete `Core/Strings.h` and `Core/StringHelper.h` paths from older docs do not
+exist.
+
+== String-level regex operations
+
+For narrow strings, `BaseString` exposes match, find, find-all, iteration, and replacement methods
+backed by PCRE2.
+
+[source,cpp]
+----
+include::example$tests/StringHelperTest.cpp[tag=string_regex_match]
+----
+
+== Regex objects
+
+`Core/RegexMatch` and `Core/RegexReplace` expose PCRE2 more directly. Set a pattern and subject,
+configure options when needed, compile, and then match or replace.
+
+[source,cpp]
+----
+include::example$tests/RegexTest.cpp[tag=regex_match]
+----
+
+`RegexMatch::MatchedData` reports offsets and sizes and can convert a match based on the original
+subject. Include `Core/Regex.h`.
+
+== Performance claims
+
+Interning changes the cost model for repeated comparisons, but fixed benchmark numbers are not a
+portable contract. Use the current benchmark executables and record the machine, compiler, build
+type, and benchmark options. See xref:contributing/benchmarking.adoc[].

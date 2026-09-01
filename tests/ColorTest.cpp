@@ -77,12 +77,14 @@ TEST(Color4Test, ConstructFromParent)
 TEST(Color4Test, FromNormColor4)
 {
     {
-        NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
-        Color4 c = Color4::From(n);
+        // tag::color_conversion[]
+        Core::NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
+        Core::Color4 c = Core::Color4::From(n);
         EXPECT_EQ(c.x, 0);
         EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);
         EXPECT_EQ(c.w, 64);
+        // end::color_conversion[]
     }
 
     {

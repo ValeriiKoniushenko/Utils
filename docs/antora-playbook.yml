@@ -1,12 +1,16 @@
 site:
-  title: JustReflectMe
-  start_page: JustReflectMe:ROOT:index.adoc
+  title: Utils
+  start_page: utils::index.adoc
+
+antora:
+  extensions:
+    - '@antora/collector-extension'
 
 content:
   sources:
     - url: ../
       branches: HEAD
-      start_path: docs/
+      start_path: docs
 
 ui:
   bundle:

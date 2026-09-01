@@ -61,14 +61,16 @@ namespace
 
     TEST(StopwatchTest, MeasuresElapsedTimeUsingSeconds)
     {
+        // tag::stopwatch[]
         Core::DStopwatch stopwatch;
         stopwatch.start();
-        std::this_thread::sleep_for(5ms);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
         const auto elapsed = stopwatch.stop();
 
         EXPECT_GE(elapsed, 0.005);
         EXPECT_LT(elapsed, 1.0);
+        // end::stopwatch[]
     }
 
     TEST(StopwatchTest, StartRestartsTheMeasurement)

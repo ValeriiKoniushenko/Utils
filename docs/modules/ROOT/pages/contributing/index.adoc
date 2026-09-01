@@ -1,0 +1,23 @@
+= Contributing
+
+Discuss substantial changes through an issue, email, or another agreed channel before investing in
+an implementation. All project interactions are governed by the
+xref:project/code-of-conduct.adoc[Code of Conduct].
+
+== Pull request checklist
+
+. Keep the change focused and explain its user-visible effect.
+. Add or update tests for behavioral changes.
+. Update the AsciiDoc pages when a public interface, build variable, path, or workflow changes.
+. Run the relevant xref:contributing/building.adoc[build] and
+  xref:contributing/code-quality.adoc[quality] checks.
+. For performance-sensitive string, navigation, delegate, or intrusive-pointer changes, follow
+  xref:contributing/benchmarking.adoc[the benchmark workflow].
+. Obtain the required maintainer sign-off before merging. The existing project policy requires two
+  other developers to approve, or the second reviewer to perform the merge when the author cannot.
+
+Utils follows https://semver.org/[Semantic Versioning]. Version numbers are updated as part of a
+coordinated release, not mechanically for every pull request.
+
+The detailed documentation belongs under `docs/modules/ROOT/pages/`; `README.md` intentionally
+stays short and points readers to this site.

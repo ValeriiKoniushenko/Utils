@@ -1,0 +1,35 @@
+= Math and time
+
+Link `Utils::Core` and include the header for the selected facility.
+
+== Compile-time math
+
+`Core/Math.h` defines three `constexpr` helpers in the top-level `Math` namespace:
+
+[source,cpp]
+----
+include::example$sources/Core/Math.h[tag=math_helpers]
+----
+
+`Abs` accepts arithmetic types. `IsEqual` and `IsZero` accept floating-point types and allow the
+epsilon to be selected as a floating-point non-type template argument. Comparisons use a strict
+less-than check against epsilon.
+
+== Stopwatch
+
+`Core::Stopwatch<T>` starts during construction. Calling `start()` restarts the measurement;
+`stop()` returns elapsed seconds without pausing it. `FStopwatch` and `DStopwatch` select float and
+double results.
+
+[source,cpp]
+----
+include::example$tests/TimerTest.cpp[tag=stopwatch]
+----
+
+== Repeater
+
+`Core::Repeater` invokes a callback from `startOrUpdate()` when its interval is eligible. The
+callback receives the elapsed time in seconds. A zero or negative interval is eligible immediately;
+NaN and infinite intervals are rejected with `std::invalid_argument`.
+
+Include `Core/Timer.h` for both timer types.

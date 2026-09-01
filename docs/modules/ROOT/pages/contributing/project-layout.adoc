@@ -1,0 +1,34 @@
+= Project layout
+
+[cols="1,3"]
+|===
+|Path |Responsibility
+
+|`sources/Core/`
+|Higher-level utilities exposed by `Utils::Core`.
+
+|`sources/Utils/`
+|Concepts, traits, file/CSV helpers, and low-level utilities exposed by `Utils::Utils`.
+
+|`tests/`
+|GoogleTest sources for the `UtilsTests` executable and canonical behavior examples.
+
+|`benchmarks/`
+|Google Benchmark targets for math, strings, and production-style string navigation.
+
+|`cmake/`
+|Compiler-feature detection and shared compile options.
+
+|`docs/`
+|The Antora component descriptor, site playbook, AsciiDoc pages, navigation, and documentation-only examples.
+
+|`.gitea/`
+|CI workflow definitions and reusable Python helpers.
+|===
+
+The root `Utils` target links `Utils::Core` and `Utils::Utils`. Runtime binaries go to the selected
+build directory's `bin/` folder, while libraries go to `lib/`.
+
+The root project requires C++23, exports `compile_commands.json`, and turns C++ module scanning off.
+If ccache is available and Utils is configured as the top-level project, CMake selects it as the
+compiler launcher.

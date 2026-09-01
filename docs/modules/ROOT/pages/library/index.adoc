@@ -1,0 +1,44 @@
+= Library guide
+
+The public headers are split between the foundational `Utils::Utils` library and the higher-level
+`Utils::Core` library.
+
+[cols="1,2,2"]
+|===
+|Area |Primary headers |Purpose
+
+|Fundamentals
+|`Utils/Concepts.h`, `Utils/TypeTraits.h`, `Utils/Functions.h`, `Utils/EasyCSV.h`
+|Concepts, traits, file reads, and CSV construction
+
+|Geometry and color
+|`Core/Position.h`, `Core/Size.h`, `Core/Rect.h`, `Core/Color.h`
+|Spatial value types and color conversion
+
+|Math and time
+|`Core/Math.h`, `Core/Timer.h`
+|Compile-time arithmetic helpers, stopwatches, and repeated callbacks
+
+|Ownership and patterns
+|`Core/IntrusivePtr.h`, `Core/Singleton.h`, `Core/AbstractIterators.h`
+|Intrusive ownership, singleton construction, and iterator interfaces
+
+|Enums
+|`Core/Enum.h`, `Core/CommonEnums.h`
+|Generated enums and common comparison values
+
+|Strings and regex
+|`Core/String.h`, `Core/Regex.h`
+|Interned/dynamic strings and PCRE2-backed matching and replacement
+
+|Events
+|`Core/Delegate.h`
+|Callback subscriptions and RAII subscriber lifetime
+
+|Diagnostics
+|`Core/Assert.h`, `Core/BaseAssert.h`
+|Debug assertions and verification
+|===
+
+Each topic page describes the link target, required headers, important lifetime or build behavior,
+and a tested example where one exists.

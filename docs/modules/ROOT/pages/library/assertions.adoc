@@ -1,0 +1,32 @@
+= Assertions
+
+Link `Utils::Core` and include `Core/Assert.h` for the complete diagnostics API or
+`Core/BaseAssert.h` for the basic functions/macros.
+
+== Debug behavior
+
+When `UTILS_DEBUG` is defined, `Assert(condition, message)` reports a failed condition to
+`std::cerr`, includes a stack trace when the toolchain supports it, and calls the standard
+`assert`. `Verify(condition, message)` performs the same check and returns the condition.
+
+The build defines `UTILS_DEBUG=1` for the Debug CMake configuration. In other configurations,
+`Assert` is a no-op and `Verify` evaluates and returns its condition.
+
+The message is optional. Overloads in `Core/Assert.h` also accept `Core::StringAtom`.
+
+== Rate and count helpers
+
+`AssertOnce`:: Reports only the first failure at a call site.
+`AssertAtCount`:: Reports the selected numbered failure at a call site.
+`AssertTimed`:: Suppresses failures until its call-site time threshold is reached.
+
+These helpers are complete no-ops outside debug builds.
+
+== Stack traces
+
+Define `DONT_USE_CPP_LIB_STACKTRACE` before including the assertion header to disable the standard
+library stack-trace path. The implementation also avoids known unsupported compiler/standard-library
+combinations automatically.
+
+Assertions are diagnostics, not recoverable error handling. Do not rely on their side effects in a
+non-Debug build.

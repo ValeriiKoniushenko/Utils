@@ -31,6 +31,7 @@ using namespace Core;
 namespace
 {
 
+    // tag::intrusive_type[]
     class Tracked final : public IntrusiveRefCounter<Tracked>
     {
         INTRUSIVE_PTR_ADAPTERS(Tracked)
@@ -52,6 +53,7 @@ namespace
         void onIncrementRef(CounterT) override { ++increments; }
         void onDecrementRef(CounterT) override { ++decrements; }
     };
+    // end::intrusive_type[]
 
     int Tracked::destructions = 0;
 
@@ -206,6 +208,7 @@ TEST(IntrusivePtrBehaviorTests, PolymorphicCastsPreserveObjectAndSupportFailure)
 TEST(IntrusivePtrBehaviorTests, WeakPointerObservesWithoutKeepingObjectAlive)
 {
     ScopedDestructionReset reset;
+    // tag::weak_pointer_loading[]
     auto strong = Tracked::Create(12);
     auto* raw = strong.get();
     WeakPtr<Tracked> weak = strong;
@@ -230,6 +233,7 @@ TEST(IntrusivePtrBehaviorTests, WeakPointerObservesWithoutKeepingObjectAlive)
     auto expired = weak.tryLoad();
     ASSERT_EQ(nullptr, expired.get());
     ASSERT_FALSE(weak);
+    // end::weak_pointer_loading[]
 }
 
 TEST(IntrusivePtrBehaviorTests, WeakCopiesMovesAndResetManageWeakReferences)

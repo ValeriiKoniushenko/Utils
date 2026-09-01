@@ -4,6 +4,9 @@
 /cmake-build-*/
 /build
 /out
+/docs/html
+/docs/node_modules
+/docs/.cache
 __pycache__
 /*.output
 /*.log

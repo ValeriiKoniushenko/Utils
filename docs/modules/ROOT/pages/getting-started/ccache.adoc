@@ -1,0 +1,40 @@
+= Compiler cache
+
+When Utils is the top-level CMake project, configuration looks for `ccache` on `PATH` and assigns it
+as the C and C++ compiler launcher. No extra CMake option is required.
+
+== Linux configuration
+
+Install `ccache` with the system package manager, then place the following settings in
+`~/.config/ccache/ccache.conf`:
+
+[source,ini]
+----
+include::example$ccache-linux.conf[tag=configuration]
+----
+
+== Windows configuration
+
+Install ccache 4.3 or newer for MSVC support and ensure the executable is on `PATH`. Put the
+configuration in `%APPDATA%\ccache\ccache.conf`:
+
+[source,ini]
+----
+include::example$ccache-windows.conf[tag=configuration]
+----
+
+The project asks CMake to embed MSVC debug information for Debug and RelWithDebInfo configurations,
+which avoids absolute PDB paths in compiler output. If required by the local ccache/MSVC setup, set
+`CCACHE_CPP2=true` in the build environment.
+
+`depend_mode` is deliberately omitted from the Windows example because it relies on GCC/Clang-style
+dependency files.
+
+== Troubleshooting
+
+Use a verbose build to confirm that compiler commands are launched through ccache, then inspect
+`ccache --show-stats` and `ccache --show-config`. Reconfigure the build directory after adding
+ccache to `PATH`, because launcher discovery happens during CMake configuration.
+
+The project disables C++ module scanning, which avoids irrelevant module-scanner invocations for
+this non-module codebase.

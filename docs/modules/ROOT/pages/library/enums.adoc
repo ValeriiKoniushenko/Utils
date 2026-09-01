@@ -1,0 +1,26 @@
+= Generated enums
+
+`CreateEnum` in `Core/Enum.h` declares an enum-like value type with a chosen underlying type,
+enumerator constants, a `count`, and string/value conversion.
+
+Declare a generated enum at namespace scope:
+
+[source,cpp]
+----
+include::example$tests/EnumTest.cpp[tag=enum_declaration]
+----
+
+Instances convert with `toStr()` and `cast()`. `fromStr()` returns an `std::optional` containing the
+underlying value when the name is known.
+
+[source,cpp]
+----
+include::example$tests/EnumTest.cpp[tag=enum_conversion]
+----
+
+Explicit numeric assignments written directly in the macro invocation are supported, but values
+that the macro's parser cannot interpret are omitted from the conversion map. In that case,
+`toStr()` returns an empty string for the value and `fromStr()` returns an empty optional.
+
+Link `Utils::Core` and include `Core/Enum.h`. `Core/CommonEnums.h` separately defines the small
+`Core::Comparison` enum used by library internals and public comparisons.

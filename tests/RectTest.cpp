@@ -29,6 +29,7 @@
 
 TEST(CoreTests, CreateConstexprRect)
 {
+    // tag::geometry_rect[]
     using PosT = Core::FRect::GlobalPositionT;
     using SizeT = Core::FRect::SizeT;
 
@@ -45,6 +46,7 @@ TEST(CoreTests, CreateConstexprRect)
     static_assert(PosT(20, 10) == rect4.getRightTop());
     static_assert(PosT(20, 0) == rect4.getRightBottom());
     static_assert(PosT(10, 0) == rect4.getLeftBottom());
+    // end::geometry_rect[]
 }
 
 TEST(CoreTests, CreateConstexprRectGetters)

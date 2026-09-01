@@ -1,0 +1,30 @@
+= Security policy
+
+== Report a vulnerability
+
+Report suspected security vulnerabilities privately:
+
+* Email: mailto:valeriikoniushenko@gmail.com[]
+* Telegram: https://t.me/valeriikoniushenko[@valeriikoniushenko]
+
+Include as much of the following as possible:
+
+* The affected component or components.
+* Steps to reproduce the issue.
+* A clear description of the vulnerability and its potential impact.
+
+Do not disclose the issue publicly until the maintainers have confirmed and addressed it.
+Responsible disclosure gives the project time to verify, fix, and release an update.
+
+== Maintainer commitment
+
+For a valid report, the maintainers will:
+
+* Acknowledge receipt within five business days.
+* Investigate and verify the issue promptly.
+* Patch the current release branch and the most recent prior minor release branch.
+* Publish a security release and notify users when a fix is available.
+
+== Scope
+
+This policy applies to all code and documentation in the repository.

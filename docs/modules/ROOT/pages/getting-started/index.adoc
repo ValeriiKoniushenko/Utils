@@ -1,0 +1,13 @@
+= Getting started
+
+Utils builds as part of a CMake project and requires a C++23-capable toolchain.
+
+Follow these pages in order:
+
+. Check xref:getting-started/requirements.adoc[the build requirements].
+. xref:getting-started/build-from-source.adoc[Build and test the repository].
+. xref:getting-started/integrate-with-cmake.adoc[Link the appropriate target] from your application.
+. Optionally configure xref:getting-started/ccache.adoc[ccache] for faster rebuilds.
+
+The repository stores its third-party projects as Git submodules. Initialize those submodules
+before the first configure; CMake does not download them automatically.

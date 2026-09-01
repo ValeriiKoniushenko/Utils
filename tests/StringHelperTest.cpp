@@ -74,3 +74,25 @@ TEST(StringHelperTest, quickFormat)
     EXPECT_EQ("Hello World", "Hello {}"_f << "World");
     EXPECT_EQ("Hello 555", "Hello {}"_f << 555);
 }
+
+TEST(StringHelperTest, InternedStringBecomesDynamicOnMutation)
+{
+    // tag::atomic_string_mutation[]
+    Core::StringAtom string = "hello"_atom;
+    ASSERT_TRUE(string.isStatic());
+
+    string.pushBack("!");
+
+    ASSERT_FALSE(string.isStatic());
+    EXPECT_EQ("hello!", string);
+    // end::atomic_string_mutation[]
+}
+
+TEST(StringHelperTest, NarrowStringSupportsRegexMatching)
+{
+    // tag::string_regex_match[]
+    auto string = Core::StringAtom::Intern("RegEx");
+
+    EXPECT_TRUE(string.regexMatch("^([A-Z][a-z0-9]+)+$"));
+    // end::string_regex_match[]
+}

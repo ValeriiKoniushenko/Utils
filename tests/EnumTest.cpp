@@ -27,11 +27,13 @@
 #include <gtest/gtest.h>
 
 // clang-format off
+// tag::enum_declaration[]
 CreateEnum(Color, int,
     Red,
     Green,
     Blue
 );
+// end::enum_declaration[]
 
 CreateEnum(Name, int,
     Jim,
@@ -71,6 +73,7 @@ private:
 
 TEST_F(EnumTest, Color_Test)
 {
+    // tag::enum_conversion[]
     Color color = Color::Red;
     EXPECT_EQ("Red", color.toStr());
     EXPECT_EQ(0, color.cast());
@@ -86,6 +89,7 @@ TEST_F(EnumTest, Color_Test)
     EXPECT_EQ(color, color2);
     EXPECT_EQ("Red", color.toStr());
     EXPECT_EQ(0, color.cast());
+    // end::enum_conversion[]
 }
 
 TEST_F(EnumTest, Name_Test)

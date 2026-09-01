@@ -1,0 +1,56 @@
+= Geometry and color
+
+Link `Utils::Core` for these types.
+
+== Positions
+
+`Core::GlobalPosition` and `Core::RelativePosition` specialize two- and three-dimensional GLM
+vectors. Float, double, and integer aliases are provided for each supported dimension.
+
+Relative positions can be converted to a global position directly or applied to an origin:
+
+[source,cpp]
+----
+include::example$tests/PositionTests.cpp[tag=relative_position]
+----
+
+Include `Core/Position.h`.
+
+== Sizes
+
+`Core::Size<T, 2>` stores `width` and `height`; the three-dimensional specialization also stores
+`deep`. Both support arithmetic, comparisons, GLM conversion, and an `area()` calculation.
+
+[source,cpp]
+----
+include::example$tests/SizeTest.cpp[tag=size_area]
+----
+
+Common aliases include `FSize2`, `DSize2`, `ISize2`, `FSize3`, `DSize3`, and `ISize3`. Include
+`Core/Size.h`.
+
+== Rectangles
+
+`Core::Rect<T>` models a two-dimensional rectangle with left, top, right, and bottom coordinates.
+It exposes corner and center positions, width and height, validity checks, and point/rectangle
+containment queries.
+
+[source,cpp]
+----
+include::example$tests/RectTest.cpp[tag=geometry_rect]
+----
+
+Use `FRect`, `DRect`, or `IRect`, or instantiate the template directly. Include `Core/Rect.h`.
+
+== Colors
+
+`Color3` and `Color4` store 8-bit RGB/RGBA values. `NormColor3` and `NormColor4` store normalized
+floating-point components. Static `From`, mutating `from`, and `toNorm`/`toColor` methods convert
+between the representations.
+
+[source,cpp]
+----
+include::example$tests/ColorTest.cpp[tag=color_conversion]
+----
+
+The aliases `RGB`, `RGBA`, `RGBn`, and `RGBAn` are also available. Include `Core/Color.h`.

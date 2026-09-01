@@ -1,0 +1,48 @@
+= Utils
+:description: Cross-platform C++23 utilities for geometry, strings, ownership, events, enums, diagnostics, and common programming tasks.
+
+Utils is a cross-platform C++23 library that collects reusable building blocks for geometry,
+math, strings, ownership, events, enums, assertions, file handling, and related tasks.
+
+The project exposes two libraries and one umbrella target:
+
+`Utils::Utils`:: Concepts, type traits, file helpers, CSV support, and low-level portability helpers.
+`Utils::Core`:: Geometry, colors, math, timers, intrusive pointers, enums, strings, regular expressions, delegates, and diagnostics.
+`Utils`:: An interface target that links both libraries.
+
+Start with xref:getting-started/index.adoc[Getting started], then use the
+xref:library/index.adoc[Library guide] to choose a feature and its required header.
+
+== Highlights
+
+* Compile-time concepts and arithmetic helpers.
+* Two- and three-dimensional positions and sizes, rectangles, and byte/normalized colors.
+* Intrusive strong and weak ownership with lifetime-safe weak loading.
+* Interned and dynamic strings with PCRE2-backed matching and replacement.
+* Compile-time enum declarations with name/value conversion.
+* Delegate subscriptions with explicit IDs and RAII subscriber guards.
+* Debug assertions, timers, filesystem helpers, and CSV output.
+
+== Quick start
+
+[source,shell]
+----
+include::example$getting-started.sh[tag=configure]
+----
+
+Run the tests after the build:
+
+[source,shell]
+----
+include::example$getting-started.sh[tag=test]
+----
+
+For target selection and embedding the project in another CMake build, see
+xref:getting-started/integrate-with-cmake.adoc[].
+
+== Project information
+
+* xref:contributing/index.adoc[Contributing]
+* xref:project/security.adoc[Security policy]
+* xref:project/code-of-conduct.adoc[Code of conduct]
+* xref:project/contact.adoc[Contact]

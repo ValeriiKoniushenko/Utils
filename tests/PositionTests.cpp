@@ -147,6 +147,10 @@ TEST(PositionTests3, Math)
 TEST(PositionTests3, RelativePositionsSimple)
 {
     {
+        // tag::relative_position[]
+        using GPos3 = Core::GlobalPosition3F;
+        using RPos3 = Core::RelativePosition3F;
+
         GPos3 orig(3);
         RPos3 rel(-1);
 
@@ -156,6 +160,7 @@ TEST(PositionTests3, RelativePositionsSimple)
         EXPECT_EQ(commonResult, final.x);
         EXPECT_EQ(commonResult, final.y);
         EXPECT_EQ(commonResult, final.z);
+        // end::relative_position[]
     }
 
     {
