@@ -28,19 +28,6 @@ jobs:
           GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: python3 .gitea/clear_ci_reviews.py
 
-  prepare-cache:
-    name: "[setup] cache directories"
-    needs: clear-previous-ci-reviews
-    runs-on: linux
-    timeout-minutes: 2
-    steps:
-      - name: Ensure CI cache directories exist
-        run: |
-          mkdir -p /srv/ci-cache/ccache
-          mkdir -p /srv/ci-cache/git-repo
-          mkdir -p /srv/ci-cache/build-cache
-          mkdir -p /srv/ci-cache/build-cache-gcc
-
   clang-format:
     name: "[fmt] clang-format"
     needs: clear-previous-ci-reviews
@@ -62,7 +49,7 @@ jobs:
 
   build:
     name: "[build] clang (linux)"
-    needs: prepare-cache
+    needs: clear-previous-ci-reviews
     runs-on: linux
     container:
       image: cpp-ci:latest
@@ -101,20 +88,10 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
-      - name: Restore build output
-        run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
-
       - name: Configure
         run: |
           echo "::group::CMake configure"
-          cmake -S . -B build \
+          cmake --fresh -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -134,13 +111,11 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
-        run: |
-          mkdir -p /build-cache
-          rsync -a --delete build/ /build-cache/
+        run: rsync -a --delete build/ /build-cache/
 
   build-gcc:
     name: "[build] gcc (linux)"
-    needs: prepare-cache
+    needs: clear-previous-ci-reviews
     runs-on: linux
     container:
       image: cpp-ci:latest
@@ -159,7 +134,6 @@ jobs:
           GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
           REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
-
           if [ -d /repo-cache/.git ]; then
             echo "Using existing repo cache"
             cd /repo-cache
@@ -175,32 +149,17 @@ jobs:
             git fetch --depth=1 origin "$GITHUB_SHA"
             git checkout -f "$GITHUB_SHA"
           fi
-
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
-
-      - name: Restore build output
-        run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
-
       - name: Configure
         run: |
-          echo "::group::CMake configure"
-          cmake -S . -B build \
+          cmake --fresh -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
             -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          echo "::endgroup::"
-
       - name: Build
         run: |
           echo "::group::Build"
@@ -210,11 +169,8 @@ jobs:
             echo "## Build: gcc"
             echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Save build cache
-        run: |
-          mkdir -p /build-cache
-          rsync -a --delete build/ /build-cache/
+        run: rsync -a --delete build/ /build-cache/
 
   clang-tidy:
     name: "[lint] clang-tidy"
@@ -268,17 +224,12 @@ jobs:
 
       - name: Restore build output
         run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
+          mkdir -p build
+          rsync -a /build-cache/ build/
 
       - name: Configure tests for analysis headers
         run: |
-          cmake -S . -B build \
+          cmake --fresh -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -312,7 +263,6 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/git-repo:/repo-cache
-        - /srv/ci-cache/build-cache:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -344,19 +294,9 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
-      - name: Restore build output
-        run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
-
       - name: Configure (tests enabled)
         run: |
-          cmake -S . -B build \
+          cmake --fresh -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -372,86 +312,6 @@ jobs:
           echo "::group::UtilsTests"
           build/bin/UtilsTests
           echo "::endgroup::"
-
-      - name: Save build cache
-        run: |
-          mkdir -p /build-cache
-          rsync -a --delete build/ /build-cache/
-
-  unit-tests-gcc:
-    name: "[test] unit tests (gcc)"
-    needs: build-gcc
-    runs-on: linux
-    container:
-      image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/git-repo:/repo-cache
-        - /srv/ci-cache/build-cache-gcc:/build-cache
-    env:
-      CCACHE_DIR: /ccache
-      CC: gcc
-      CXX: g++
-    timeout-minutes: 15
-    steps:
-      - name: Sync repo cache
-        env:
-          GITEATOKEN: ${{ secrets.GITEATOKEN }}
-        run: |
-          REPO_URL="https://oauth2:${GITEATOKEN}@gitea.vakon.dev/${GITHUB_REPOSITORY}.git"
-
-          if [ -d /repo-cache/.git ]; then
-            echo "Using existing repo cache"
-            cd /repo-cache
-            git remote set-url origin "$REPO_URL"
-            git fetch origin "$GITHUB_SHA" develop
-            git checkout -f "$GITHUB_SHA"
-            git submodule sync --recursive
-            git submodule update --init --recursive --depth=1
-          else
-            echo "No cache found, cloning fresh"
-            git clone --recurse-submodules --shallow-submodules "$REPO_URL" /repo-cache
-            cd /repo-cache
-            git fetch --depth=1 origin "$GITHUB_SHA"
-            git checkout -f "$GITHUB_SHA"
-          fi
-
-          mkdir -p "$GITHUB_WORKSPACE"
-          cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
-
-      - name: Restore build output
-        run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
-
-      - name: Configure (tests enabled)
-        run: |
-          cmake -S . -B build \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DUTILS_DISABLE_TESTS=OFF \
-            -DUTILS_DISABLE_BENCHMARKS=ON \
-            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build tests
-        run: cmake --build build -j$(nproc)
-
-      - name: Run tests
-        run: |
-          echo "::group::UtilsTests"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-
-      - name: Save build cache
-        run: |
-          mkdir -p /build-cache
-          rsync -a --delete build/ /build-cache/
 
   valgrind:
     name: "[test] valgrind (clang)"
@@ -462,7 +322,6 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/git-repo:/repo-cache
-        - /srv/ci-cache/build-cache:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -494,19 +353,9 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"
           cp -a /repo-cache/. "$GITHUB_WORKSPACE"/
 
-      - name: Restore build output
-        run: |
-          mkdir -p build /build-cache
-          if [ -n "$(ls -A /build-cache 2>/dev/null)" ]; then
-            echo "Restoring build cache"
-            rsync -a /build-cache/ build/
-          else
-            echo "No build cache contents, starting fresh"
-          fi
-
       - name: Configure tests
         run: |
-          cmake -S . -B build \
+          cmake --fresh -S . -B build \
             -DCMAKE_BUILD_TYPE=Debug \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -525,8 +374,3 @@ jobs:
           python3 .gitea/check_valgrind.py \
             --executable build/bin/UtilsTests \
             --verbose 2>&1 | tee valgrind-output.txt
-
-      - name: Save build cache
-        run: |
-          mkdir -p /build-cache
-          rsync -a --delete build/ /build-cache/
