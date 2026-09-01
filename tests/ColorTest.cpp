@@ -78,8 +78,8 @@ TEST(Color4Test, FromNormColor4)
 {
     {
         // tag::color_conversion[]
-        Core::NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
-        Core::Color4 c = Core::Color4::From(n);
+        const Core::NormColor4 n(glm::vec4(0.0f, 0.5f, 1.0f, 0.25f));
+        const Core::Color4 c = Core::Color4::From(n);
         EXPECT_EQ(c.x, 0);
         EXPECT_EQ(c.y, 128);
         EXPECT_EQ(c.z, 255);

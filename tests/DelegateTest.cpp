@@ -166,7 +166,7 @@ TEST(DelegateTest, MemberFunctionSubscriptionIsReleasedBySubscriber)
     Receiver receiver;
 
     {
-        Core::DelegateSubscriber subscription
+        const Core::DelegateSubscriber subscription
             = delegate->subscribeAndGetID(&receiver, &Receiver::receive);
         delegate->trigger();
         EXPECT_EQ(1, receiver.invocationCount);
@@ -188,7 +188,7 @@ TEST(DelegateTest, IntrusiveMemberFunctionSubscriptionIsReleasedBySubscriber)
     Core::IntrusivePtr<Receiver> receiver(new Receiver);
 
     {
-        Core::DelegateSubscriber subscription
+        const Core::DelegateSubscriber subscription
             = delegate->subscribeAndGetID(receiver, &Receiver::receive);
         delegate->trigger();
         EXPECT_EQ(1, receiver->invocationCount);
@@ -201,7 +201,7 @@ TEST(DelegateTest, CopyAssignmentReleasesPreviouslyGuardedSubscription)
 {
     auto delegate = Core::Delegate<void()>::Create();
     Core::DelegateSubscriber first = delegate->subscribeAndGetID([]() {});
-    Core::DelegateSubscriber second = delegate->subscribeAndGetID([]() {});
+    const Core::DelegateSubscriber second = delegate->subscribeAndGetID([]() {});
     ASSERT_EQ(2, delegate->getSubscriptionsCount());
 
     first = second;
@@ -274,10 +274,10 @@ TEST(DelegateTest, EveryByValueCallbackReceivesTheOriginalRvalue)
 {
     auto delegate = Core::Delegate<void(std::string)>::Create();
     std::vector<std::string> receivedValues;
-    [[maybe_unused]] auto firstID
-        = delegate->subscribeAndGetID([&](std::string value) { receivedValues.push_back(value); });
-    [[maybe_unused]] auto secondID
-        = delegate->subscribeAndGetID([&](std::string value) { receivedValues.push_back(value); });
+    [[maybe_unused]] auto firstID = delegate->subscribeAndGetID(
+        [&](const std::string& value) { receivedValues.push_back(value); });
+    [[maybe_unused]] auto secondID = delegate->subscribeAndGetID(
+        [&](const std::string& value) { receivedValues.push_back(value); });
 
     delegate->trigger(std::string("payload"));
 
@@ -353,7 +353,7 @@ TEST(DelegateTest, NullIntrusiveMemberFunctionReceiverIsRejected)
     };
 
     auto delegate = Core::Delegate<void()>::Create();
-    Core::IntrusivePtr<Receiver> receiver;
+    const Core::IntrusivePtr<Receiver> receiver;
 
     auto id = delegate->subscribeAndGetID(receiver, &Receiver::receive);
 
@@ -381,7 +381,7 @@ TEST(DelegateTest, NullMemberFunctionIsRejected)
 
     auto delegate = Core::Delegate<void()>::Create();
     Receiver receiver;
-    void (Receiver::*function)() = nullptr;
+    void (Receiver::* const function)() = nullptr;
 
     auto id = delegate->subscribeAndGetID(&receiver, function);
 
@@ -419,7 +419,7 @@ TEST(DelegateTest, SubscriptionLivesUntilLastCopiedSubscriberIsReleased)
     auto delegate = Core::Delegate<void()>::Create();
     Core::DelegateSubscriber original = delegate->subscribeAndGetID([]() {});
     {
-        Core::DelegateSubscriber copy = original;
+        const Core::DelegateSubscriber copy = original;
         EXPECT_EQ(1, delegate->getSubscriptionsCount());
     }
 
