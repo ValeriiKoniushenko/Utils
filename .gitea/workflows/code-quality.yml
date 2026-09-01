@@ -48,7 +48,194 @@ jobs:
         run: |
           python3 .gitea/check_clang_format.py --base develop
 
-  build:
+  build-gcc-debug:
+    name: "[build] gcc debug & test (linux)"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-gcc-debug-v1:/build-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: gcc
+      CXX: g++
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible GCC Debug build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible GCC Debug build cache; configuring from scratch"
+          fi
+
+      - name: Configure Debug
+        run: |
+          echo "::group::CMake configure"
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          echo "::endgroup::"
+
+      - name: Build Debug
+        run: |
+          echo "::group::Build"
+          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          echo "::endgroup::"
+
+      - name: Run Debug unit tests
+        run: |
+          echo "::group::UtilsTests (GCC Debug)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Debug: gcc"
+            echo "Build and unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
+  build-gcc-release:
+    name: "[release] gcc build & test (linux)"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-gcc-release-v1:/build-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: gcc
+      CXX: g++
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible GCC Release build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible GCC Release build cache; configuring from scratch"
+          fi
+
+      - name: Configure Release
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build Release
+        run: |
+          echo "::group::Build"
+          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          echo "::endgroup::"
+
+      - name: Run Release unit tests
+        run: |
+          echo "::group::UtilsTests (GCC Release)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Release: gcc"
+            echo "Build and unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
+  build-clang-debug:
+    name: "[build] clang debug & test (linux)"
+    needs: clear-previous-ci-reviews
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: clang
+      CXX: clang++
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Debug build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible Clang Debug build cache; configuring from scratch"
+          fi
+
+      - name: Configure Debug
+        run: |
+          echo "::group::CMake configure"
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
+            -DUTILS_DISABLE_BENCHMARKS=ON \
+            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          echo "::endgroup::"
+
+      - name: Build Debug
+        run: |
+          echo "::group::Build"
+          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          echo "::endgroup::"
+
+      - name: Run Debug unit tests
+        run: |
+          echo "::group::UtilsTests (Clang Debug)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Debug: clang"
+            echo "Build and unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
+  build-clang-release:
     name: "[release] clang build & test (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
@@ -56,7 +243,7 @@ jobs:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-clang-v1:/build-cache
+        - /srv/ci-cache/utils/build-clang-release-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -111,76 +298,15 @@ jobs:
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
-  build-gcc:
-    name: "[release] gcc build & test (linux)"
-    needs: clear-previous-ci-reviews
-    runs-on: linux
-    container:
-      image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-gcc-v1:/build-cache
-    env:
-      CCACHE_DIR: /ccache
-      CC: gcc
-      CXX: g++
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Restore build cache
-        run: |
-          mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
-            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible GCC Release build cache"
-            rsync -a --delete /build-cache/ build/
-          else
-            echo "No compatible GCC Release build cache; configuring from scratch"
-          fi
-
-      - name: Configure Release
-        run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DUTILS_DISABLE_TESTS=OFF \
-            -DUTILS_DISABLE_BENCHMARKS=ON \
-            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build Release
-        run: |
-          echo "::group::Build"
-          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
-          echo "::endgroup::"
-
-      - name: Run Release unit tests
-        run: |
-          echo "::group::UtilsTests (GCC Release)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-          {
-            echo "## Release: gcc"
-            echo "Build and unit tests succeeded."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
-
   clang-tidy:
     name: "[lint] clang-tidy"
-    needs: build
+    needs: build-clang-debug
     runs-on: linux
     container:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-clang-v1:/build-cache
+        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
         - /srv/ci-cache/utils/clang-tidy-v1:/clang-tidy-cache
     env:
       CCACHE_DIR: /ccache
@@ -204,17 +330,17 @@ jobs:
         run: |
           mkdir -p build
           if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
-            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible Clang Release build cache"
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Debug build cache"
             rsync -a --delete /build-cache/ build/
           else
-            echo "No compatible Clang Release build cache; configuring from scratch"
+            echo "No compatible Clang Debug build cache; configuring from scratch"
           fi
 
       - name: Configure tests for analysis headers
         run: |
           cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -241,69 +367,15 @@ jobs:
           fi
           exit $exit_code
 
-  unit-tests:
-    name: "[test] unit tests (clang)"
-    needs: build
-    runs-on: linux
-    container:
-      image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-clang-tests-debug-v1:/build-cache
-    env:
-      CCACHE_DIR: /ccache
-      CC: clang
-      CXX: clang++
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Restore build cache
-        run: |
-          mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
-            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible Clang Debug test cache"
-            rsync -a --delete /build-cache/ build/
-          else
-            echo "No compatible Clang Debug test cache; configuring from scratch"
-          fi
-
-      - name: Configure (tests enabled)
-        run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DUTILS_DISABLE_TESTS=OFF \
-            -DUTILS_DISABLE_BENCHMARKS=ON \
-            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build tests
-        run: cmake --build build -j$(( ($(nproc) + 3) / 4 ))
-
-      - name: Run tests
-        run: |
-          echo "::group::UtilsTests"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-
-      - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
-
   valgrind:
     name: "[test] valgrind (clang)"
-    needs: unit-tests
+    needs: build-clang-debug
     runs-on: linux
     container:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-clang-tests-debug-v1:/build-cache
+        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
