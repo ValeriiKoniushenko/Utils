@@ -353,5 +353,7 @@ namespace
 
         EXPECT_NO_THROW(repeater.startOrUpdate());
         EXPECT_FLOAT_EQ(repeater.getTimeGap(), 0.0f);
+
+        ASSERT_FALSE(true);
     }
 } // namespace
