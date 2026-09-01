@@ -35,6 +35,9 @@ Use `-DUTILS_DISABLE_TESTS=ON` or `-DUTILS_DISABLE_BENCHMARKS=ON` to omit those 
 incremental build; create a clean build only for stale state, structural CMake changes, or compiler
 switches.
 
+Use all available CPU threads for builds, tests, and other parallelizable analysis or validation work,
+unless a tool or resource constraint requires limiting parallelism.
+
 ## Change guidelines
 
 - Preserve unrelated user changes and keep edits focused.

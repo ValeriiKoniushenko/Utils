@@ -49,7 +49,7 @@ jobs:
           python3 .gitea/check_clang_format.py --base develop
 
   build:
-    name: "[build] clang (linux)"
+    name: "[release] clang build & test (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -71,40 +71,48 @@ jobs:
       - name: Restore build cache
         run: |
           mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible Clang build cache"
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Release build cache"
             rsync -a --delete /build-cache/ build/
           else
-            echo "No compatible Clang build cache; configuring from scratch"
+            echo "No compatible Clang Release build cache; configuring from scratch"
           fi
 
-      - name: Configure
+      - name: Configure Release
         run: |
           echo "::group::CMake configure"
           cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DUTILS_DISABLE_TESTS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
             -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           echo "::endgroup::"
 
-      - name: Build
+      - name: Build Release
         run: |
           echo "::group::Build"
-          cmake --build build -j$(nproc)
+          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          echo "::endgroup::"
+
+      - name: Run Release unit tests
+        run: |
+          echo "::group::UtilsTests (Clang Release)"
+          build/bin/UtilsTests
           echo "::endgroup::"
           {
-            echo "## Build: clang"
-            echo "Build succeeded."
+            echo "## Release: clang"
+            echo "Build and unit tests succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
   build-gcc:
-    name: "[build] gcc (linux)"
+    name: "[release] gcc build & test (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -126,30 +134,39 @@ jobs:
       - name: Restore build cache
         run: |
           mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible GCC build cache"
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible GCC Release build cache"
             rsync -a --delete /build-cache/ build/
           else
-            echo "No compatible GCC build cache; configuring from scratch"
+            echo "No compatible GCC Release build cache; configuring from scratch"
           fi
 
-      - name: Configure
+      - name: Configure Release
         run: |
           cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DUTILS_DISABLE_TESTS=ON \
+            -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
             -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-      - name: Build
+
+      - name: Build Release
         run: |
           echo "::group::Build"
-          cmake --build build -j$(nproc)
+          cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          echo "::endgroup::"
+
+      - name: Run Release unit tests
+        run: |
+          echo "::group::UtilsTests (GCC Release)"
+          build/bin/UtilsTests
           echo "::endgroup::"
           {
-            echo "## Build: gcc"
-            echo "Build succeeded."
+            echo "## Release: gcc"
+            echo "Build and unit tests succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
@@ -186,16 +203,18 @@ jobs:
       - name: Restore build cache
         run: |
           mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible Clang build cache"
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Release build cache"
             rsync -a --delete /build-cache/ build/
           else
-            echo "No compatible Clang build cache; configuring from scratch"
+            echo "No compatible Clang Release build cache; configuring from scratch"
           fi
 
       - name: Configure tests for analysis headers
         run: |
           cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -212,6 +231,7 @@ jobs:
             --base develop \
             --build-dir build \
             --cache-dir /clang-tidy-cache \
+            --jobs $(( ($(nproc) + 3) / 4 )) \
             --fail-on error
           exit_code=$?
           set -e
@@ -264,7 +284,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build tests
-        run: cmake --build build -j$(nproc)
+        run: cmake --build build -j$(( ($(nproc) + 3) / 4 ))
 
       - name: Run tests
         run: |
@@ -317,7 +337,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build tests
-        run: cmake --build build -j$(nproc)
+        run: cmake --build build -j$(( ($(nproc) + 3) / 4 ))
 
       - name: Run tests under Valgrind
         env:
