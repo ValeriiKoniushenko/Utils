@@ -127,8 +127,6 @@ namespace Core
                 throw std::invalid_argument("Repeater interval must be finite");
             }
             _repeatTime = value;
-
-            int* i = NULL;
         }
 
         /**
