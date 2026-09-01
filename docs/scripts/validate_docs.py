@@ -103,7 +103,7 @@ def validate_markdown_count(errors: list[str]) -> None:
         names[:] = [name for name in names if name not in skipped_directories]
         markdown_files.extend(Path(directory) / name for name in files if name.endswith(".md"))
 
-    expected = {REPOSITORY_ROOT / "README.md"}
+    expected = {REPOSITORY_ROOT / "README.md", REPOSITORY_ROOT / "AGENTS.md"}
     if set(markdown_files) != expected:
         rendered = ", ".join(str(path.relative_to(REPOSITORY_ROOT)) for path in markdown_files)
         add_error(errors, REPOSITORY_ROOT / "README.md", f"unexpected Markdown inventory: {rendered}")
@@ -120,7 +120,7 @@ def main() -> int:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("Documentation validation passed; README.md is the sole Markdown file.")
+    print("Documentation validation passed; only README.md and AGENTS.md use Markdown.")
     return 0
 
 
