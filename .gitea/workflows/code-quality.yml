@@ -7,8 +7,9 @@ on:
       - develop
 
 # Serialize workflow runs so Gitea review updates and persistent build-cache writes
-# for this repository do not overlap. Parallel jobs use distinct cache slots, each
-# with one writer; dependent readers start only after their producer has completed.
+# for this repository do not overlap. Build jobs use four distinct cache slots.
+# Test executables cross runner boundaries as artifacts because dependent jobs are
+# not guaranteed to run on the same host as their build job.
 concurrency:
   group: utils-ci-shared-cache
   cancel-in-progress: false
@@ -105,6 +106,14 @@ jobs:
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
+      - name: Upload GCC Debug test executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: utils-tests-gcc-debug
+          path: build/bin/UtilsTests
+          if-no-files-found: error
+          retention-days: 1
+
   build-gcc-release:
     name: "[build] gcc release (linux)"
     needs: clear-previous-ci-reviews
@@ -159,6 +168,14 @@ jobs:
 
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
+
+      - name: Upload GCC Release test executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: utils-tests-gcc-release
+          path: build/bin/UtilsTests
+          if-no-files-found: error
+          retention-days: 1
 
   build-clang-debug:
     name: "[build] clang debug (linux)"
@@ -217,6 +234,14 @@ jobs:
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
+      - name: Upload Clang Debug test executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: utils-tests-clang-debug
+          path: build/bin/UtilsTests
+          if-no-files-found: error
+          retention-days: 1
+
   build-clang-release:
     name: "[build] clang release (linux)"
     needs: clear-previous-ci-reviews
@@ -274,28 +299,33 @@ jobs:
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
+      - name: Upload Clang Release test executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: utils-tests-clang-release
+          path: build/bin/UtilsTests
+          if-no-files-found: error
+          retention-days: 1
+
   test-gcc-debug:
     name: "[test] gcc debug (linux)"
     needs: build-gcc-debug
     runs-on: linux
     container:
       image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/utils/build-gcc-debug-v1:/build-cache
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore GCC Debug build
-        run: |
-          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
-            || [ ! -x /build-cache/bin/UtilsTests ]; then
-            echo "GCC Debug build cache is missing or incompatible" >&2
-            exit 1
-          fi
-          mkdir -p build
-          rsync -a --delete /build-cache/ build/
+      - name: Download GCC Debug test executable
+        uses: actions/download-artifact@v4
+        with:
+          name: utils-tests-gcc-debug
+          path: build/bin
+
+      - name: Prepare GCC Debug test executable
+        run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Debug unit tests
         run: |
@@ -313,22 +343,19 @@ jobs:
     runs-on: linux
     container:
       image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/utils/build-gcc-release-v1:/build-cache
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore GCC Release build
-        run: |
-          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null \
-            || [ ! -x /build-cache/bin/UtilsTests ]; then
-            echo "GCC Release build cache is missing or incompatible" >&2
-            exit 1
-          fi
-          mkdir -p build
-          rsync -a --delete /build-cache/ build/
+      - name: Download GCC Release test executable
+        uses: actions/download-artifact@v4
+        with:
+          name: utils-tests-gcc-release
+          path: build/bin
+
+      - name: Prepare GCC Release test executable
+        run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Release unit tests
         run: |
@@ -346,22 +373,19 @@ jobs:
     runs-on: linux
     container:
       image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore Clang Debug build
-        run: |
-          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
-            || [ ! -x /build-cache/bin/UtilsTests ]; then
-            echo "Clang Debug build cache is missing or incompatible" >&2
-            exit 1
-          fi
-          mkdir -p build
-          rsync -a --delete /build-cache/ build/
+      - name: Download Clang Debug test executable
+        uses: actions/download-artifact@v4
+        with:
+          name: utils-tests-clang-debug
+          path: build/bin
+
+      - name: Prepare Clang Debug test executable
+        run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Debug unit tests
         run: |
@@ -379,22 +403,19 @@ jobs:
     runs-on: linux
     container:
       image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/utils/build-clang-release-v1:/build-cache
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore Clang Release build
-        run: |
-          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null \
-            || [ ! -x /build-cache/bin/UtilsTests ]; then
-            echo "Clang Release build cache is missing or incompatible" >&2
-            exit 1
-          fi
-          mkdir -p build
-          rsync -a --delete /build-cache/ build/
+      - name: Download Clang Release test executable
+        uses: actions/download-artifact@v4
+        with:
+          name: utils-tests-clang-release
+          path: build/bin
+
+      - name: Prepare Clang Release test executable
+        run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Release unit tests
         run: |
@@ -481,13 +502,6 @@ jobs:
     runs-on: linux
     container:
       image: cpp-ci:latest
-      volumes:
-        - /srv/ci-cache/ccache:/ccache
-        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
-    env:
-      CCACHE_DIR: /ccache
-      CC: clang
-      CXX: clang++
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -495,15 +509,14 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Restore build cache
-        run: |
-          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
-            || [ ! -x /build-cache/bin/UtilsTests ]; then
-            echo "Clang Debug build cache is missing or incompatible" >&2
-            exit 1
-          fi
-          mkdir -p build
-          rsync -a --delete /build-cache/ build/
+      - name: Download Clang Debug test executable
+        uses: actions/download-artifact@v4
+        with:
+          name: utils-tests-clang-debug
+          path: build/bin
+
+      - name: Prepare Clang Debug test executable
+        run: chmod +x build/bin/UtilsTests
 
       - name: Run tests under Valgrind
         env:
