@@ -164,6 +164,7 @@ jobs:
       volumes:
         - /srv/ci-cache/ccache:/ccache
         - /srv/ci-cache/utils/build-clang-v1:/build-cache
+        - /srv/ci-cache/utils/clang-tidy-v1:/clang-tidy-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -210,6 +211,7 @@ jobs:
           python3 .gitea/check_clang_tidy.py \
             --base develop \
             --build-dir build \
+            --cache-dir /clang-tidy-cache \
             --fail-on error
           exit_code=$?
           set -e
