@@ -5,6 +5,8 @@ The `.gitea/ci/` package contains reusable Python helpers shared by the reposito
 `gitea_client.py`:: Gitea reviews, commit statuses, and attachments.
 `diff.py`:: Changed C/C++ file discovery and analysis-target selection.
 `clang_format.py` and `clang_tidy.py`:: Configurable checker implementations.
+`unit_tests.py`:: GoogleTest execution, failure parsing, and machine-readable result generation.
+`unit_test_report.py`:: Cross-variant aggregation and one replaceable pull-request review.
 `coverage.py`:: gcovr summary publishing and ZIP report attachment.
 `valgrind.py`:: Valgrind execution and pull-request reporting.
 `cleanup.py`:: Replacement-review and attachment cleanup.

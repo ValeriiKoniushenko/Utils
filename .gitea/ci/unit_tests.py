@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -18,6 +19,8 @@ FAILED_TEST_RE = re.compile(
     r"^\[  FAILED  \] (?P<name>[^\s]+)(?: \(\d+ ms\))?$",
     re.MULTILINE,
 )
+RUN_TEST_RE = re.compile(r"^\[ RUN      \] (?P<name>[^\s]+)$")
+FAILURE_START_RE = re.compile(r"^(?:.+:\d+|unknown file): Failure$")
 LOCATION_RE = re.compile(
     r"^(?P<path>.+\.(?:c|cc|cpp|cxx|h|hh|hpp|hxx)):(?P<line>\d+): Failure$",
     re.MULTILINE,
@@ -140,19 +143,54 @@ def result_description(result: UnitTestResult, label: str) -> str:
 
 
 def _failure_blocks(output: str) -> list[str]:
-    lines = output.splitlines()
-    blocks = []
-    for index, line in enumerate(lines):
-        if not LOCATION_RE.match(line):
+    return [
+        block
+        for blocks in failure_blocks_by_test(output).values()
+        for block in blocks
+    ]
+
+
+def _normalize_failure_block(block: str) -> str:
+    def replace_location(match: re.Match[str]) -> str:
+        return (
+            f"{_normalize_source_path(match.group('path'))}:"
+            f"{match.group('line')}: Failure"
+        )
+
+    return LOCATION_RE.sub(replace_location, block).strip()
+
+
+def failure_blocks_by_test(output: str) -> dict[str, list[str]]:
+    blocks: dict[str, list[str]] = {}
+    current_test = ""
+    current_block: list[str] | None = None
+
+    for line in output.splitlines():
+        run_match = RUN_TEST_RE.match(line)
+        if run_match:
+            current_test = run_match.group("name")
+            current_block = None
             continue
 
-        block = [line]
-        for following in lines[index + 1:index + 81]:
-            block.append(following)
-            if following.startswith("[  FAILED  ] "):
-                break
-        blocks.append("\n".join(block))
-    return _deduplicate(blocks)
+        if current_test and current_block is None and FAILURE_START_RE.match(line):
+            current_block = [line]
+            continue
+
+        if current_block is not None:
+            current_block.append(line)
+
+        failed_match = FAILED_TEST_RE.match(line)
+        if failed_match and failed_match.group("name") == current_test:
+            if current_block:
+                assertion_lines = current_block[:-1]
+                block = _normalize_failure_block("\n".join(assertion_lines))
+                test_blocks = blocks.setdefault(current_test, [])
+                if block not in test_blocks:
+                    test_blocks.append(block)
+            current_test = ""
+            current_block = None
+
+    return blocks
 
 
 def output_for_review(output: str, limit: int = MAX_REVIEW_OUTPUT_CHARS) -> str:
@@ -266,6 +304,23 @@ def write_step_summary(result: UnitTestResult, label: str) -> None:
         summary.write(f"## Unit tests: {label}\n\n{status.capitalize()}{counts}.\n")
 
 
+def write_json_report(result: UnitTestResult, label: str, report_path: str) -> None:
+    parent = os.path.dirname(report_path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+
+    payload = {
+        "schema_version": 1,
+        "label": label,
+        "command": result.command,
+        "returncode": result.returncode,
+        "output": result.output,
+    }
+    with open(report_path, "w") as report:
+        json.dump(payload, report, indent=2)
+        report.write("\n")
+
+
 def main(*, default_executable: str = "build/bin/UtilsTests") -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -275,6 +330,11 @@ def main(*, default_executable: str = "build/bin/UtilsTests") -> None:
     )
     parser.add_argument("--label", required=True, help="human-readable build variant")
     parser.add_argument("--context", required=True, help="unique Gitea review/check context")
+    parser.add_argument(
+        "--report-path",
+        default="",
+        help="write a machine-readable result for aggregate reporting",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-gitea", action="store_true")
     parser.add_argument("--verbose", "-v", action="store_true")
@@ -296,6 +356,8 @@ def main(*, default_executable: str = "build/bin/UtilsTests") -> None:
         print(result.output, end="" if result.output.endswith("\n") else "\n")
 
     write_step_summary(result, args.label)
+    if args.report_path:
+        write_json_report(result, args.label, args.report_path)
 
     if not args.no_gitea:
         client = GiteaClient.from_env(verbose=args.verbose)

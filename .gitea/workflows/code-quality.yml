@@ -328,13 +328,22 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Debug unit tests
-        env:
-          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
           python3 .gitea/check_unit_tests.py \
             --label "GCC Debug" \
             --context unit-tests-gcc-debug \
+            --report-path unit-test-report.json \
+            --no-gitea \
             --verbose
+
+      - name: Upload GCC Debug test report
+        if: ${{ always() }}
+        uses: christopherhx/gitea-upload-artifact@v4
+        with:
+          name: unit-test-report-gcc-debug
+          path: unit-test-report.json
+          if-no-files-found: error
+          retention-days: 1
 
   test-gcc-release:
     name: "[test] gcc release (linux)"
@@ -357,13 +366,22 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Release unit tests
-        env:
-          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
           python3 .gitea/check_unit_tests.py \
             --label "GCC Release" \
             --context unit-tests-gcc-release \
+            --report-path unit-test-report.json \
+            --no-gitea \
             --verbose
+
+      - name: Upload GCC Release test report
+        if: ${{ always() }}
+        uses: christopherhx/gitea-upload-artifact@v4
+        with:
+          name: unit-test-report-gcc-release
+          path: unit-test-report.json
+          if-no-files-found: error
+          retention-days: 1
 
   test-clang-debug:
     name: "[test] clang debug (linux)"
@@ -386,13 +404,22 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Debug unit tests
-        env:
-          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
           python3 .gitea/check_unit_tests.py \
             --label "Clang Debug" \
             --context unit-tests-clang-debug \
+            --report-path unit-test-report.json \
+            --no-gitea \
             --verbose
+
+      - name: Upload Clang Debug test report
+        if: ${{ always() }}
+        uses: christopherhx/gitea-upload-artifact@v4
+        with:
+          name: unit-test-report-clang-debug
+          path: unit-test-report.json
+          if-no-files-found: error
+          retention-days: 1
 
   test-clang-release:
     name: "[test] clang release (linux)"
@@ -415,12 +442,77 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Release unit tests
-        env:
-          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
           python3 .gitea/check_unit_tests.py \
             --label "Clang Release" \
             --context unit-tests-clang-release \
+            --report-path unit-test-report.json \
+            --no-gitea \
+            --verbose
+
+      - name: Upload Clang Release test report
+        if: ${{ always() }}
+        uses: christopherhx/gitea-upload-artifact@v4
+        with:
+          name: unit-test-report-clang-release
+          path: unit-test-report.json
+          if-no-files-found: error
+          retention-days: 1
+
+  report-unit-tests:
+    name: "[test] aggregate results"
+    needs:
+      - test-gcc-debug
+      - test-gcc-release
+      - test-clang-debug
+      - test-clang-release
+    if: ${{ always() }}
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download GCC Debug test report
+        continue-on-error: true
+        uses: christopherhx/gitea-download-artifact@v4
+        with:
+          name: unit-test-report-gcc-debug
+          path: unit-test-reports/gcc-debug
+
+      - name: Download GCC Release test report
+        continue-on-error: true
+        uses: christopherhx/gitea-download-artifact@v4
+        with:
+          name: unit-test-report-gcc-release
+          path: unit-test-reports/gcc-release
+
+      - name: Download Clang Debug test report
+        continue-on-error: true
+        uses: christopherhx/gitea-download-artifact@v4
+        with:
+          name: unit-test-report-clang-debug
+          path: unit-test-reports/clang-debug
+
+      - name: Download Clang Release test report
+        continue-on-error: true
+        uses: christopherhx/gitea-download-artifact@v4
+        with:
+          name: unit-test-report-clang-release
+          path: unit-test-reports/clang-release
+
+      - name: Publish aggregate unit-test result
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
+        run: |
+          python3 .gitea/report_unit_tests.py \
+            --report-dir unit-test-reports \
+            --expected "GCC Debug" \
+            --expected "GCC Release" \
+            --expected "Clang Debug" \
+            --expected "Clang Release" \
             --verbose
 
   clang-tidy:
