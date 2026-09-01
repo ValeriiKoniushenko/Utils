@@ -6,7 +6,9 @@ on:
     branches:
       - develop
 
-# Serialize workflow runs so Gitea review updates for this repository do not overlap.
+# Serialize workflow runs so Gitea review updates and persistent build-cache writes
+# for this repository do not overlap. Parallel jobs use distinct cache slots, each
+# with one writer; dependent readers start only after their producer has completed.
 concurrency:
   group: utils-ci-shared-cache
   cancel-in-progress: false
@@ -54,6 +56,7 @@ jobs:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-clang-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -65,10 +68,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible Clang build cache; configuring from scratch"
+          fi
+
       - name: Configure
         run: |
           echo "::group::CMake configure"
-          cmake --fresh -S . -B build \
+          cmake -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -87,6 +100,9 @@ jobs:
             echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
   build-gcc:
     name: "[build] gcc (linux)"
     needs: clear-previous-ci-reviews
@@ -95,6 +111,7 @@ jobs:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-gcc-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: gcc
@@ -106,9 +123,19 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible GCC build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible GCC build cache; configuring from scratch"
+          fi
+
       - name: Configure
         run: |
-          cmake --fresh -S . -B build \
+          cmake -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=ON \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -124,12 +151,23 @@ jobs:
             echo "## Build: gcc"
             echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
   clang-tidy:
     name: "[lint] clang-tidy"
     needs: build
     runs-on: linux
     container:
       image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-clang-v1:/build-cache
+    env:
+      CCACHE_DIR: /ccache
+      CC: clang
+      CXX: clang++
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -144,9 +182,19 @@ jobs:
           git fetch origin develop:refs/remotes/origin/develop
           echo "::endgroup::"
 
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang build cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible Clang build cache; configuring from scratch"
+          fi
+
       - name: Configure tests for analysis headers
         run: |
-          cmake --fresh -S . -B build \
+          cmake -S . -B build \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -179,6 +227,7 @@ jobs:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-clang-tests-debug-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -190,9 +239,21 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Debug test cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible Clang Debug test cache; configuring from scratch"
+          fi
+
       - name: Configure (tests enabled)
         run: |
-          cmake --fresh -S . -B build \
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
@@ -209,6 +270,9 @@ jobs:
           build/bin/UtilsTests
           echo "::endgroup::"
 
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
   valgrind:
     name: "[test] valgrind (clang)"
     needs: unit-tests
@@ -217,6 +281,7 @@ jobs:
       image: cpp-ci:latest
       volumes:
         - /srv/ci-cache/ccache:/ccache
+        - /srv/ci-cache/utils/build-clang-tests-debug-v1:/build-cache
     env:
       CCACHE_DIR: /ccache
       CC: clang
@@ -228,9 +293,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Restore build cache
+        run: |
+          mkdir -p build
+          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
+            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
+            echo "Restoring compatible Clang Debug test cache"
+            rsync -a --delete /build-cache/ build/
+          else
+            echo "No compatible Clang Debug test cache; configuring from scratch"
+          fi
+
       - name: Configure tests
         run: |
-          cmake --fresh -S . -B build \
+          cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Debug \
             -DUTILS_DISABLE_TESTS=OFF \
             -DUTILS_DISABLE_BENCHMARKS=ON \
