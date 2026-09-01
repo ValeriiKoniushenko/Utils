@@ -107,7 +107,7 @@ jobs:
         run: rsync -a --delete build/ /build-cache/
 
       - name: Upload GCC Debug test executable
-        uses: actions/upload-artifact@v4
+        uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: utils-tests-gcc-debug
           path: build/bin/UtilsTests
@@ -170,7 +170,7 @@ jobs:
         run: rsync -a --delete build/ /build-cache/
 
       - name: Upload GCC Release test executable
-        uses: actions/upload-artifact@v4
+        uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: utils-tests-gcc-release
           path: build/bin/UtilsTests
@@ -235,7 +235,7 @@ jobs:
         run: rsync -a --delete build/ /build-cache/
 
       - name: Upload Clang Debug test executable
-        uses: actions/upload-artifact@v4
+        uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: utils-tests-clang-debug
           path: build/bin/UtilsTests
@@ -300,7 +300,7 @@ jobs:
         run: rsync -a --delete build/ /build-cache/
 
       - name: Upload Clang Release test executable
-        uses: actions/upload-artifact@v4
+        uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: utils-tests-clang-release
           path: build/bin/UtilsTests
@@ -319,7 +319,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download GCC Debug test executable
-        uses: actions/download-artifact@v4
+        uses: christopherhx/gitea-download-artifact@v4
         with:
           name: utils-tests-gcc-debug
           path: build/bin
@@ -349,7 +349,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download GCC Release test executable
-        uses: actions/download-artifact@v4
+        uses: christopherhx/gitea-download-artifact@v4
         with:
           name: utils-tests-gcc-release
           path: build/bin
@@ -379,7 +379,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Clang Debug test executable
-        uses: actions/download-artifact@v4
+        uses: christopherhx/gitea-download-artifact@v4
         with:
           name: utils-tests-clang-debug
           path: build/bin
@@ -409,7 +409,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Clang Release test executable
-        uses: actions/download-artifact@v4
+        uses: christopherhx/gitea-download-artifact@v4
         with:
           name: utils-tests-clang-release
           path: build/bin
@@ -510,7 +510,7 @@ jobs:
           submodules: recursive
 
       - name: Download Clang Debug test executable
-        uses: actions/download-artifact@v4
+        uses: christopherhx/gitea-download-artifact@v4
         with:
           name: utils-tests-clang-debug
           path: build/bin
