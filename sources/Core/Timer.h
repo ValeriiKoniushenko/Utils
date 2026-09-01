@@ -83,7 +83,8 @@ namespace Core
 
     private:
         ClockT::time_point _startTime;
-    };
+    }
+    ;
 
     using FStopwatch = Stopwatch<float>;
     using DStopwatch = Stopwatch<double>;
