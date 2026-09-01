@@ -521,7 +521,7 @@ TEST(DelegateTest, SubscriberPoolsSupportMoveAssignment)
 
     destination = std::move(source);
 
-    EXPECT_TRUE(source.isEmpty());
+    EXPECT_TRUE(source.isEmpty()); // NOLINT(bugprone-use-after-move)
     EXPECT_EQ(1, destination.size());
     EXPECT_EQ(1, sourceDelegate->getSubscriptionsCount());
     EXPECT_TRUE(destinationDelegate->isEmpty());
