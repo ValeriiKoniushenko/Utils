@@ -49,7 +49,7 @@ jobs:
           python3 .gitea/check_clang_format.py --base develop
 
   build-gcc-debug:
-    name: "[build] gcc debug & test (linux)"
+    name: "[build] gcc debug (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -97,22 +97,16 @@ jobs:
           echo "::group::Build"
           cmake --build build -j$(( ($(nproc) + 3) / 4 ))
           echo "::endgroup::"
-
-      - name: Run Debug unit tests
-        run: |
-          echo "::group::UtilsTests (GCC Debug)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
           {
-            echo "## Debug: gcc"
-            echo "Build and unit tests succeeded."
+            echo "## Build: gcc Debug"
+            echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
   build-gcc-release:
-    name: "[release] gcc build & test (linux)"
+    name: "[build] gcc release (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -158,22 +152,16 @@ jobs:
           echo "::group::Build"
           cmake --build build -j$(( ($(nproc) + 3) / 4 ))
           echo "::endgroup::"
-
-      - name: Run Release unit tests
-        run: |
-          echo "::group::UtilsTests (GCC Release)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
           {
-            echo "## Release: gcc"
-            echo "Build and unit tests succeeded."
+            echo "## Build: gcc Release"
+            echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
   build-clang-debug:
-    name: "[build] clang debug & test (linux)"
+    name: "[build] clang debug (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -221,22 +209,16 @@ jobs:
           echo "::group::Build"
           cmake --build build -j$(( ($(nproc) + 3) / 4 ))
           echo "::endgroup::"
-
-      - name: Run Debug unit tests
-        run: |
-          echo "::group::UtilsTests (Clang Debug)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
           {
-            echo "## Debug: clang"
-            echo "Build and unit tests succeeded."
+            echo "## Build: clang Debug"
+            echo "Build succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save build cache
         run: rsync -a --delete build/ /build-cache/
 
   build-clang-release:
-    name: "[release] clang build & test (linux)"
+    name: "[build] clang release (linux)"
     needs: clear-previous-ci-reviews
     runs-on: linux
     container:
@@ -284,19 +266,145 @@ jobs:
           echo "::group::Build"
           cmake --build build -j$(( ($(nproc) + 3) / 4 ))
           echo "::endgroup::"
+          {
+            echo "## Build: clang Release"
+            echo "Build succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Run Release unit tests
+      - name: Save build cache
+        run: rsync -a --delete build/ /build-cache/
+
+  test-gcc-debug:
+    name: "[test] gcc debug (linux)"
+    needs: build-gcc-debug
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/utils/build-gcc-debug-v1:/build-cache
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore GCC Debug build
+        run: |
+          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
+            || [ ! -x /build-cache/bin/UtilsTests ]; then
+            echo "GCC Debug build cache is missing or incompatible" >&2
+            exit 1
+          fi
+          mkdir -p build
+          rsync -a --delete /build-cache/ build/
+
+      - name: Run GCC Debug unit tests
+        run: |
+          echo "::group::UtilsTests (GCC Debug)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Tests: gcc Debug"
+            echo "Unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  test-gcc-release:
+    name: "[test] gcc release (linux)"
+    needs: build-gcc-release
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/utils/build-gcc-release-v1:/build-cache
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore GCC Release build
+        run: |
+          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null \
+            || [ ! -x /build-cache/bin/UtilsTests ]; then
+            echo "GCC Release build cache is missing or incompatible" >&2
+            exit 1
+          fi
+          mkdir -p build
+          rsync -a --delete /build-cache/ build/
+
+      - name: Run GCC Release unit tests
+        run: |
+          echo "::group::UtilsTests (GCC Release)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Tests: gcc Release"
+            echo "Unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  test-clang-debug:
+    name: "[test] clang debug (linux)"
+    needs: build-clang-debug
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/utils/build-clang-debug-v1:/build-cache
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Clang Debug build
+        run: |
+          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
+            || [ ! -x /build-cache/bin/UtilsTests ]; then
+            echo "Clang Debug build cache is missing or incompatible" >&2
+            exit 1
+          fi
+          mkdir -p build
+          rsync -a --delete /build-cache/ build/
+
+      - name: Run Clang Debug unit tests
+        run: |
+          echo "::group::UtilsTests (Clang Debug)"
+          build/bin/UtilsTests
+          echo "::endgroup::"
+          {
+            echo "## Tests: clang Debug"
+            echo "Unit tests succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  test-clang-release:
+    name: "[test] clang release (linux)"
+    needs: build-clang-release
+    runs-on: linux
+    container:
+      image: cpp-ci:latest
+      volumes:
+        - /srv/ci-cache/utils/build-clang-release-v1:/build-cache
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Clang Release build
+        run: |
+          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Release" /build-cache/CMakeCache.txt 2>/dev/null \
+            || [ ! -x /build-cache/bin/UtilsTests ]; then
+            echo "Clang Release build cache is missing or incompatible" >&2
+            exit 1
+          fi
+          mkdir -p build
+          rsync -a --delete /build-cache/ build/
+
+      - name: Run Clang Release unit tests
         run: |
           echo "::group::UtilsTests (Clang Release)"
           build/bin/UtilsTests
           echo "::endgroup::"
           {
-            echo "## Release: clang"
-            echo "Build and unit tests succeeded."
+            echo "## Tests: clang Release"
+            echo "Unit tests succeeded."
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Save build cache
-        run: rsync -a --delete build/ /build-cache/
 
   clang-tidy:
     name: "[lint] clang-tidy"
@@ -369,7 +477,7 @@ jobs:
 
   valgrind:
     name: "[test] valgrind (clang)"
-    needs: build-clang-debug
+    needs: test-clang-debug
     runs-on: linux
     container:
       image: cpp-ci:latest
@@ -389,27 +497,13 @@ jobs:
 
       - name: Restore build cache
         run: |
-          mkdir -p build
-          if grep -Fqx "CMAKE_HOME_DIRECTORY:INTERNAL=$GITHUB_WORKSPACE" /build-cache/CMakeCache.txt 2>/dev/null \
-            && grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null; then
-            echo "Restoring compatible Clang Debug test cache"
-            rsync -a --delete /build-cache/ build/
-          else
-            echo "No compatible Clang Debug test cache; configuring from scratch"
+          if ! grep -Fqx "CMAKE_BUILD_TYPE:STRING=Debug" /build-cache/CMakeCache.txt 2>/dev/null \
+            || [ ! -x /build-cache/bin/UtilsTests ]; then
+            echo "Clang Debug build cache is missing or incompatible" >&2
+            exit 1
           fi
-
-      - name: Configure tests
-        run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DUTILS_DISABLE_TESTS=OFF \
-            -DUTILS_DISABLE_BENCHMARKS=ON \
-            -DBUILD_UTILS_WITH_TEST_COVERAGE=OFF \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build tests
-        run: cmake --build build -j$(( ($(nproc) + 3) / 4 ))
+          mkdir -p build
+          rsync -a --delete /build-cache/ build/
 
       - name: Run tests under Valgrind
         env:
