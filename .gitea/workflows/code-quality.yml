@@ -328,14 +328,13 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Debug unit tests
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
-          echo "::group::UtilsTests (GCC Debug)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-          {
-            echo "## Tests: gcc Debug"
-            echo "Unit tests succeeded."
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 .gitea/check_unit_tests.py \
+            --label "GCC Debug" \
+            --context unit-tests-gcc-debug \
+            --verbose
 
   test-gcc-release:
     name: "[test] gcc release (linux)"
@@ -358,14 +357,13 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run GCC Release unit tests
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
-          echo "::group::UtilsTests (GCC Release)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-          {
-            echo "## Tests: gcc Release"
-            echo "Unit tests succeeded."
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 .gitea/check_unit_tests.py \
+            --label "GCC Release" \
+            --context unit-tests-gcc-release \
+            --verbose
 
   test-clang-debug:
     name: "[test] clang debug (linux)"
@@ -388,14 +386,13 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Debug unit tests
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
-          echo "::group::UtilsTests (Clang Debug)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-          {
-            echo "## Tests: clang Debug"
-            echo "Unit tests succeeded."
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 .gitea/check_unit_tests.py \
+            --label "Clang Debug" \
+            --context unit-tests-clang-debug \
+            --verbose
 
   test-clang-release:
     name: "[test] clang release (linux)"
@@ -418,14 +415,13 @@ jobs:
         run: chmod +x build/bin/UtilsTests
 
       - name: Run Clang Release unit tests
+        env:
+          GITEATOKEN: ${{ secrets.GITEATOKEN }}
         run: |
-          echo "::group::UtilsTests (Clang Release)"
-          build/bin/UtilsTests
-          echo "::endgroup::"
-          {
-            echo "## Tests: clang Release"
-            echo "Unit tests succeeded."
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 .gitea/check_unit_tests.py \
+            --label "Clang Release" \
+            --context unit-tests-clang-release \
+            --verbose
 
   clang-tidy:
     name: "[lint] clang-tidy"
