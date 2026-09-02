@@ -14,3 +14,6 @@
 	path = dependencies/pcre2
     url = https://github.com/PCRE2Project/pcre2.git
     ignore = all
+[submodule ".agents/Agents"]
+	path = .agents/Agents
+	url = git@github.com:ValeriiKoniushenko/Agents.git
