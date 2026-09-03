@@ -50,6 +50,21 @@ public:
     }
 };
 
+template<class CharT>
+class StaticStringTestProxy : public BaseString<CharT>
+{
+public:
+    using BaseString<CharT>::BaseString;
+
+    [[nodiscard]] static StaticStringTestProxy Intern(const CharT* string)
+    {
+        return StaticStringTestProxy(
+            StringPool<CharT>::Instance().intern(string, StringToolset<CharT>::Length(string)));
+    }
+
+    void markAsStaticForTest() { this->markAsStatic(); }
+};
+
 TEST_F(StringTestF, ConverterToString)
 {
     auto test = [this]<class T>()
@@ -69,16 +84,26 @@ TEST_F(StringTestF, ConverterToString)
         EXPECT_EQ(String("true"), String::MakeFrom(true));
         EXPECT_EQ(String("false"), String::MakeFrom(false));
 
-        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world"))));
-        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).c_str()));
-        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).data()));
+        EXPECT_EQ(String("Hello world"),
+                  String::MakeFrom(std::basic_string<T>(Str<T>("Hello world"))));
+        EXPECT_EQ(String("Hello world"),
+                  String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).c_str()));
+        EXPECT_EQ(String("Hello world"),
+                  String::MakeFrom(std::basic_string<T>(Str<T>("Hello world")).data()));
 
-        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world"))));
-        EXPECT_EQ(String("Hello world"), String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world")).data()));
+        EXPECT_EQ(String("Hello world"),
+                  String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world"))));
+        EXPECT_EQ(String("Hello world"),
+                  String::MakeFrom(std::basic_string_view<T>(Str<T>("Hello world")).data()));
 
-        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir"))));
-        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>()));
-        EXPECT_EQ(String("path/to/dir"), String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>().c_str()));
+        EXPECT_EQ(String("path/to/dir"),
+                  String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir"))));
+        EXPECT_EQ(
+            String("path/to/dir"),
+            String::MakeFrom(std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>()));
+        EXPECT_EQ(String("path/to/dir"),
+                  String::MakeFrom(
+                      std::filesystem::path(Str<T>("path/to/dir")).generic_string<T>().c_str()));
     };
 
     auto a = "Hello"_atom;
@@ -97,7 +122,8 @@ TEST_F(StringTestF, ConverterFromString)
         EXPECT_EQ(123.f, TS::template FromCStringTo<float>(Str<T>("123.f")));
         EXPECT_EQ(123., TS::template FromCStringTo<double>(Str<T>("123.")));
 
-        EXPECT_THROW((void)TS::template FromCStringTo<double>(Str<T>("ss123.")), std::invalid_argument);
+        EXPECT_THROW((void)TS::template FromCStringTo<double>(Str<T>("ss123.")),
+                     std::invalid_argument);
 
         // integral
         // int32 or lower
@@ -114,7 +140,8 @@ TEST_F(StringTestF, ConverterFromString)
         EXPECT_EQ(123, TS::template FromCStringTo<long long>(Str<T>("123")));
         EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<long long>(Str<T>("112123456789")));
         EXPECT_EQ(-112'123'456'789, TS::template FromCStringTo<long long>(Str<T>("-112123456789")));
-        EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<unsigned long long>(Str<T>("112123456789")));
+        EXPECT_EQ(112'123'456'789,
+                  TS::template FromCStringTo<unsigned long long>(Str<T>("112123456789")));
         EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<int64_t>(Str<T>("112123456789")));
         EXPECT_EQ(112'123'456'789, TS::template FromCStringTo<uint64_t>(Str<T>("112123456789")));
     };
@@ -415,7 +442,8 @@ TEST_F(StringTestF, Comparision)
             EXPECT_EQ(BaseString<T>::Intern(hello.data()), BaseString<T>::Intern(hello.data()));
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == BaseString<T>::Intern(hello.data()));
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == std::basic_string<T>(hello.data()));
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) == std::basic_string_view<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        == std::basic_string_view<T>(hello.data()).data());
         }
 
         {
@@ -427,10 +455,14 @@ TEST_F(StringTestF, Comparision)
             EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= hello.data());
 
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) < BaseString<T>::Intern(hello1.data()));
-            EXPECT_FALSE(BaseString<T>::Intern(hello.data()) > BaseString<T>::Intern(hello1.data()));
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) != BaseString<T>::Intern(hello1.data()));
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= BaseString<T>::Intern(hello1.data()));
-            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= BaseString<T>::Intern(hello.data()));
+            EXPECT_FALSE(BaseString<T>::Intern(hello.data())
+                         > BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        != BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        <= BaseString<T>::Intern(hello1.data()));
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data())
+                        >= BaseString<T>::Intern(hello.data()));
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= BaseString<T>::Intern(hello.data()));
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= BaseString<T>::Intern(hello.data()));
 
@@ -440,11 +472,16 @@ TEST_F(StringTestF, Comparision)
             EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= std::basic_string<T>(hello.data()));
             EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string<T>(hello1.data()));
 
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) != std::basic_string_view<T>(hello1.data()).data());
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) >= std::basic_string_view<T>(hello.data()).data());
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string_view<T>(hello.data()).data());
-            EXPECT_TRUE(BaseString<T>::Intern(hello1.data()) >= std::basic_string<T>(hello.data()).data());
-            EXPECT_TRUE(BaseString<T>::Intern(hello.data()) <= std::basic_string_view<T>(hello1.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        != std::basic_string_view<T>(hello1.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        >= std::basic_string_view<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        <= std::basic_string_view<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello1.data())
+                        >= std::basic_string<T>(hello.data()).data());
+            EXPECT_TRUE(BaseString<T>::Intern(hello.data())
+                        <= std::basic_string_view<T>(hello1.data()).data());
         }
     };
 
@@ -765,7 +802,8 @@ TEST_F(StringTestF, Iterator)
             std::ifstream in(Str<T>("temp.txt"));
             ASSERT_TRUE(in.is_open());
 
-            BaseString<T> str((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            BaseString<T> str((std::istreambuf_iterator<char>(in)),
+                              std::istreambuf_iterator<char>());
             ASSERT_FALSE(str.isEmpty());
             EXPECT_TRUE(str.isDynamic());
             EXPECT_EQ(Str<T>("Hello world!"), str);
@@ -914,7 +952,7 @@ TEST_F(StringTestF, Cmp)
         {
             const auto str = BaseString<T>::Intern(Str<T>("Hello world!"));
             EXPECT_TRUE(str.compare(Str<T>("hello world!"), true) == Comparison::Equal);
-            EXPECT_TRUE(str.compare(Str<T>("hello world"), true) == Comparison::Less);
+            EXPECT_TRUE(str.compare(Str<T>("hello world"), true) == Comparison::Greater);
         }
 
         {
@@ -1054,11 +1092,25 @@ TEST_F(StringTestF, PushBack)
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
             std::basic_string<T> text = Str<T>(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum");
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem "
+                "Ipsum has been the industry's standard dummy text ever since the 1500s, when an "
+                "unknown printer took a galley of type and scrambled it to make a type specimen "
+                "book. It has survived not only five centuries, but also the leap into electronic "
+                "typesetting, remaining essentially unchanged. It was popularised in the 1960s "
+                "with the release of Letraset sheets containing Lorem Ipsum passages, and more "
+                "recently with desktop publishing software like Aldus PageMaker including versions "
+                "of Lorem Ipsum");
             str.pushBack(text.data());
             EXPECT_EQ(
                 Str<T>(
-                    "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum"),
+                    "Hello WorldLorem Ipsum is simply dummy text of the printing and typesetting "
+                    "industry. Lorem Ipsum has been the industry's standard dummy text ever since "
+                    "the 1500s, when an unknown printer took a galley of type and scrambled it to "
+                    "make a type specimen book. It has survived not only five centuries, but also "
+                    "the leap into electronic typesetting, remaining essentially unchanged. It was "
+                    "popularised in the 1960s with the release of Letraset sheets containing Lorem "
+                    "Ipsum passages, and more recently with desktop publishing software like Aldus "
+                    "PageMaker including versions of Lorem Ipsum"),
                 str);
             EXPECT_EQ(11 + text.size(), str.size());
         }
@@ -1096,11 +1148,25 @@ TEST_F(StringTestF, PushFront)
         {
             auto str = BaseString<T>::Intern(Str<T>("Hello World"));
             std::basic_string<T> text = Str<T>(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum");
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem "
+                "Ipsum has been the industry's standard dummy text ever since the 1500s, when an "
+                "unknown printer took a galley of type and scrambled it to make a type specimen "
+                "book. It has survived not only five centuries, but also the leap into electronic "
+                "typesetting, remaining essentially unchanged. It was popularised in the 1960s "
+                "with the release of Letraset sheets containing Lorem Ipsum passages, and more "
+                "recently with desktop publishing software like Aldus PageMaker including versions "
+                "of Lorem Ipsum");
             str.pushFront(text.data());
             EXPECT_EQ(
                 Str<T>(
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem IpsumHello World"),
+                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
+                    "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, "
+                    "when an unknown printer took a galley of type and scrambled it to make a type "
+                    "specimen book. It has survived not only five centuries, but also the leap "
+                    "into electronic typesetting, remaining essentially unchanged. It was "
+                    "popularised in the 1960s with the release of Letraset sheets containing Lorem "
+                    "Ipsum passages, and more recently with desktop publishing software like Aldus "
+                    "PageMaker including versions of Lorem IpsumHello World"),
                 str);
             EXPECT_EQ(11 + text.size(), str.size());
         }
@@ -1357,7 +1423,8 @@ TEST_F(StringTestF, AdvanceWorkFlow)
         ASSERT_EQ(str, Str<T>("HELLO WORLD???"));
         ASSERT_EQ(std::basic_string<T>(Str<T>("HELLO WORLD???")), str);
         ASSERT_EQ(str, std::basic_string<T>(Str<T>("HELLO WORLD???")));
-        ASSERT_TRUE(BaseString<T>::Toolset::Cmp(str.c_str(), Str<T>("HELLO WORLD???")) == Comparison::Equal);
+        ASSERT_TRUE(BaseString<T>::Toolset::Cmp(str.c_str(), Str<T>("HELLO WORLD???"))
+                    == Comparison::Equal);
 
         ASSERT_TRUE(str.compare(Str<T>("AAA"), true) == Comparison::Greater);
         ASSERT_TRUE(str.compare(Str<T>("AAA")) == Comparison::Greater);
@@ -1418,7 +1485,9 @@ TEST_F(StringTestF, Format)
     {
         std::basic_string<T> jenny = Str<T>("Jenny");
         std::basic_string<T> coffee = Str<T>("coffee");
-        const auto str = BaseString<T>::Format(Str<T>(R"(Hello {}! I have {}$. If u want we can go to {}.)"), jenny.data(), 300, coffee.data());
+        const auto str
+            = BaseString<T>::Format(Str<T>(R"(Hello {}! I have {}$. If u want we can go to {}.)"),
+                                    jenny.data(), 300, coffee.data());
         EXPECT_EQ(Str<T>("Hello Jenny! I have 300$. If u want we can go to coffee."), str);
     };
 
@@ -1446,7 +1515,8 @@ TEST_F(StringTestF, IterateOverLines)
     {
         const auto str = BaseString<T>::Intern(Str<T>("Hello\nWorld!\nHow are you?"));
 
-        std::vector<BaseString<T>> lines = { Str<T>("Hello"), Str<T>("World!"), Str<T>("How are you?") };
+        std::vector<BaseString<T>> lines
+            = { Str<T>("Hello"), Str<T>("World!"), Str<T>("How are you?") };
 
         std::vector<bool> linesValidator;
         int i = 0;
@@ -1531,8 +1601,10 @@ TEST_F(StringTestF, Adding)
         std::basic_string<T> hello = Str<T>("Hello ");
         EXPECT_EQ(helloWorld.data(), hello.data() + BaseString<T>(Str<T>("world!")));
         EXPECT_EQ(helloWorld.data(), hello.data() + BaseString<T>::Intern(Str<T>("world!")));
-        EXPECT_EQ(helloWorld.data(), hello.data() + BaseString<T>::Intern(Str<T>("world")) + Str<T>("!"));
-        EXPECT_EQ(helloWorld.data(), hello.data() + BaseString<T>::Intern(Str<T>("world")) + BaseString<T>::Intern(Str<T>("!")));
+        EXPECT_EQ(helloWorld.data(),
+                  hello.data() + BaseString<T>::Intern(Str<T>("world")) + Str<T>("!"));
+        EXPECT_EQ(helloWorld.data(), hello.data() + BaseString<T>::Intern(Str<T>("world"))
+                                         + BaseString<T>::Intern(Str<T>("!")));
         EXPECT_EQ(helloWorld.data(), BaseString<T>(hello.data()) + Str<T>("world!"));
     };
 
@@ -1586,7 +1658,8 @@ TEST_F(StringTestF, WorkingWithStdFilesystemPath)
         }
 
         {
-            auto str = BaseString<T>(Str<T>("Path: ")) + BaseString<T>::MakeFrom(std::filesystem::current_path());
+            auto str = BaseString<T>(Str<T>("Path: "))
+                       + BaseString<T>::MakeFrom(std::filesystem::current_path());
         }
     };
 
@@ -1602,11 +1675,7 @@ TEST_F(StringTestF, ForEachByLine)
 
         BaseString<T> str = Str<T>("Hello\nWorld\n!");
         std::vector<BaseString<T>> tokens;
-        str.forEachByLine(
-            [&tokens](auto str)
-            {
-                tokens.emplace_back(std::move(str));
-            });
+        str.forEachByLine([&tokens](auto str) { tokens.emplace_back(std::move(str)); });
 
         ASSERT_EQ(3, tokens.size());
         EXPECT_EQ(Str<T>("Hello"), tokens[0]);
@@ -2078,5 +2147,184 @@ TEST_F(StringTestF, AtomStringAndResizeLogic)
         str.toUpperCase();
         ASSERT_FALSE(str.isStatic());
     }
+}
 
+TEST_F(StringTestF, InternedStringsOwnExactlyTheSuppliedView)
+{
+    auto test = [this]<class T>()
+    {
+        using String = BaseString<T>;
+        using View = std::basic_string_view<T>;
+
+        const std::basic_string<T> source = Str<T>("value-suffix");
+        const auto atom = String::Intern(View(source.data(), 5));
+
+        EXPECT_TRUE(atom.isStatic());
+        EXPECT_EQ(Str<T>("value"), atom);
+        EXPECT_EQ(5, atom.size());
+        EXPECT_EQ(0, atom.c_str()[atom.size()]);
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST(StringAtomTest, InterningDistinctHashCollisionsKeepsBothValues)
+{
+    // These ASCII values have the same 32-bit FNV-1a hash used by StringPool.
+    const auto first = Core::StringAtom::Intern("hnbEPHSc");
+    const auto second = Core::StringAtom::Intern("Oxj6CBhI");
+
+    EXPECT_NE(first, second);
+    EXPECT_STREQ("hnbEPHSc", first.c_str());
+    EXPECT_STREQ("Oxj6CBhI", second.c_str());
+    EXPECT_NE(first.c_str(), second.c_str());
+}
+
+TEST_F(StringTestF, StringViewsUseTheirDeclaredLength)
+{
+    auto test = [this]<class T>()
+    {
+        using String = BaseString<T>;
+        using View = std::basic_string_view<T>;
+
+        const std::basic_string<T> wordStorage = Str<T>("target-suffix");
+        const std::basic_string<T> upperStorage = Str<T>("ABC-suffix");
+        const std::basic_string<T> upperWordStorage = Str<T>("TARGET-suffix");
+        const View word(wordStorage.data(), 6);
+        const View upperWord(upperWordStorage.data(), 6);
+        const String target = Str<T>("target");
+        const String haystack = Str<T>("before target after target");
+
+        EXPECT_TRUE(target == word);
+        EXPECT_EQ(haystack.c_str() + 7, haystack.find(word));
+        EXPECT_EQ(haystack.c_str() + 20, haystack.reverseFind(word));
+
+        const auto matches = haystack.findAll(word);
+        ASSERT_EQ(2, matches.size());
+        EXPECT_EQ(haystack.c_str() + 7, matches[0]);
+        EXPECT_EQ(haystack.c_str() + 20, matches[1]);
+
+        const auto caseInsensitiveMatches = haystack.findAllIgnoreCase(upperWord);
+        ASSERT_EQ(2, caseInsensitiveMatches.size());
+        EXPECT_EQ(haystack.c_str() + 7, caseInsensitiveMatches[0]);
+        EXPECT_EQ(haystack.c_str() + 20, caseInsensitiveMatches[1]);
+
+        EXPECT_EQ(Comparison::Less,
+                  String(Str<T>("ab")).compare(View(upperStorage.data(), 3), true));
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, ReverseFindReturnsNullWhenNoOccurrenceExists)
+{
+    auto test = [this]<class T>()
+    {
+        const BaseString<T> string = Str<T>("abcabc");
+
+        EXPECT_EQ(nullptr, string.reverseFind(Str<T>("zz")));
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, AppendingAnAliasedViewSurvivesReallocation)
+{
+    auto test = []<class T>()
+    {
+        using String = BaseString<T>;
+
+        const std::basic_string<T> original(31, static_cast<T>('x'));
+        String string(original);
+
+        string.pushBack(string.toStdStringView());
+
+        EXPECT_EQ(original + original, string.toStdString());
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, ReplaceAllWithAnEmptyNeedleLeavesTheStringUnchanged)
+{
+    auto test = [this]<class T>()
+    {
+        using String = BaseString<T>;
+        using View = std::basic_string_view<T>;
+
+        String string = Str<T>("unchanged");
+        string.replaceAll(View{}, View(Str<T>("replacement")));
+
+        EXPECT_EQ(Str<T>("unchanged"), string);
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, IteratorsOrderPositionsInsteadOfCharacters)
+{
+    auto test = [this]<class T>()
+    {
+        BaseString<T> string = Str<T>("aa");
+
+        const auto begin = string.begin();
+        const auto next = begin + 1;
+        EXPECT_LT(begin, next);
+        EXPECT_EQ(-1, begin - next);
+
+        auto reverse = string.rbegin() + 1;
+        const auto reverseNext = reverse + 1;
+        EXPECT_LT(reverse, reverseNext);
+        EXPECT_EQ(-1, reverse - reverseNext);
+
+        reverse -= 1;
+        EXPECT_EQ(reverse, string.rbegin());
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, InterningAnEmptyStringViewIsSafe)
+{
+    auto test = []<class T>()
+    {
+        const auto atom = BaseString<T>::Intern(std::basic_string_view<T>{});
+
+        EXPECT_TRUE(atom.isEmpty());
+        EXPECT_TRUE(atom.toStdString().empty());
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, InternedStringCanBeValidatedAsStatic)
+{
+    auto test = [this]<class T>()
+    {
+        auto atom = StaticStringTestProxy<T>::Intern(Str<T>("static"));
+
+        ASSERT_TRUE(atom.isStatic());
+        atom.markAsStaticForTest();
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST(StringPoolTest, ClearCompilesAndAllowsSubsequentInterning)
+{
+    auto& pool = Core::StringPool<char>::Instance();
+    (void)pool.intern("pool-clear-before", 17);
+
+    pool.clear();
+
+    const auto value = Core::StringAtom::Intern("pool-clear-after");
+    EXPECT_EQ("pool-clear-after", value);
 }

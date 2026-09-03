@@ -23,15 +23,137 @@
  */
 
 #include "Core/String.h"
-
 #include "Dictionary.h"
 
+#include <algorithm>
 #include <benchmark/benchmark.h>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace Core;
 
 namespace
 {
+    using PoolHashT = std::size_t;
+    using PoolValueT = StringData<char>;
+
+    [[nodiscard]] PoolHashT MakePoolHash(std::string_view value)
+    {
+        return StringAtom::Toolset::Hash(value.data(), value.size());
+    }
+
+    [[nodiscard]] PoolValueT MakePoolValue(std::string_view value)
+    {
+        std::vector<char> buffer(value.size() + 1);
+        std::ranges::copy(value, buffer.begin());
+        buffer[value.size()] = 0;
+        return { std::move(buffer), value.size() };
+    }
+
+    [[nodiscard]] std::vector<std::string> MakeUniqueHashCorpus(std::size_t count)
+    {
+        std::vector<std::string> corpus;
+        std::unordered_set<PoolHashT> hashes;
+        corpus.reserve(count);
+        hashes.reserve(count);
+
+        for (std::size_t index = 0; corpus.size() < count; ++index)
+        {
+            auto value = "Utils.StringPool.Lookup." + std::to_string(index);
+            if (hashes.emplace(MakePoolHash(value)).second)
+            {
+                corpus.push_back(std::move(value));
+            }
+        }
+
+        return corpus;
+    }
+
+    class HashOnlyLookupPool
+    {
+    public:
+        explicit HashOnlyLookupPool(const std::vector<std::string>& values)
+        {
+            _strings.reserve(values.size());
+            for (const auto& value : values)
+            {
+                _strings.emplace(MakePoolHash(value), MakePoolValue(value));
+            }
+        }
+
+        [[nodiscard]] const char* findExisting(std::string_view value) const
+        {
+            const auto it = _strings.find(MakePoolHash(value));
+            return it == _strings.end() ? nullptr : it->second.str.data();
+        }
+
+    private:
+        // The original StringPool lookup: a hash is treated as the string identity.
+        std::unordered_map<PoolHashT, PoolValueT> _strings;
+    };
+
+    class CollisionSafeLookupPool
+    {
+    public:
+        explicit CollisionSafeLookupPool(const std::vector<std::string>& values)
+        {
+            _strings.reserve(values.size());
+            for (const auto& value : values)
+            {
+                _strings.emplace(MakePoolHash(value), MakePoolValue(value));
+            }
+        }
+
+        [[nodiscard]] const char* findExisting(std::string_view value) const
+        {
+            const auto [first, last] = _strings.equal_range(MakePoolHash(value));
+            for (auto it = first; it != last; ++it)
+            {
+                const auto& existing = it->second;
+                if (existing.size == value.size()
+                    && std::equal(existing.str.begin(), existing.str.end() - 1, value.begin()))
+                {
+                    return existing.str.data();
+                }
+            }
+
+            return nullptr;
+        }
+
+    private:
+        // The current StringPool lookup: hash narrows candidates, bytes identify the string.
+        std::unordered_multimap<PoolHashT, PoolValueT> _strings;
+    };
+
+    template<class PoolT>
+    void BenchmarkExistingPoolLookup(benchmark::State& state)
+    {
+        const auto corpus = MakeUniqueHashCorpus(static_cast<std::size_t>(state.range(0)));
+        const PoolT pool(corpus);
+        auto value = corpus.begin();
+
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(pool.findExisting(*value));
+            if (++value == corpus.end())
+            {
+                value = corpus.begin();
+            }
+        }
+    }
+
+    void BM_StringPool_HashOnly_ExistingLookup(benchmark::State& state)
+    {
+        BenchmarkExistingPoolLookup<HashOnlyLookupPool>(state);
+    }
+
+    void BM_StringPool_Multimap_ExistingLookup(benchmark::State& state)
+    {
+        BenchmarkExistingPoolLookup<CollisionSafeLookupPool>(state);
+    }
+
     // -------------------------------
     // Static comparison
     // -------------------------------
@@ -223,5 +345,8 @@ BENCHMARK(BM_StdString_Substr)->Range(8, 1 << 16)->Complexity();
 
 BENCHMARK(BM_StringAtom_Find)->Range(8, 1 << 16)->Complexity();
 BENCHMARK(BM_StdString_Find)->Range(8, 1 << 16)->Complexity();
+
+BENCHMARK(BM_StringPool_HashOnly_ExistingLookup)->Arg(1'000)->Arg(10'000);
+BENCHMARK(BM_StringPool_Multimap_ExistingLookup)->Arg(1'000)->Arg(10'000);
 
 BENCHMARK_MAIN();

@@ -313,18 +313,38 @@ namespace Core
                 return string;
             }
             const auto lenStr = Length(string);
-            const auto limitOffset = end ? (string + lenStr) - end : 0;
             const auto lenSubstr = Length(substr);
             if (lenSubstr > lenStr)
             {
                 return nullptr;
             }
 
-            for (const CharT* p = string + lenStr - lenSubstr - limitOffset; p >= string; --p)
+            const auto* last = string + lenStr;
+            if (end != nullptr)
             {
-                if (memcmp(p, substr, lenSubstr * sizeof(CharT)) == 0 || p == string)
+                if (end < string)
+                {
+                    return nullptr;
+                }
+
+                last = (std::min)(end, last);
+            }
+
+            if (last - string < static_cast<std::ptrdiff_t>(lenSubstr))
+            {
+                return nullptr;
+            }
+
+            for (const CharT* p = last - lenSubstr;; --p)
+            {
+                if (std::char_traits<CharT>::compare(p, substr, lenSubstr) == 0)
                 {
                     return p;
+                }
+
+                if (p == string)
+                {
+                    break;
                 }
             }
 
@@ -485,6 +505,11 @@ namespace Core
     public:
         [[nodiscard]] InternalStringViewT intern(const CharT* string, std::size_t size)
         {
+            if (string == nullptr)
+            {
+                return {};
+            }
+
 #if defined(UTILS_DEBUG)
             if constexpr (sizeof(CharT) == 1)
             {
@@ -492,37 +517,41 @@ namespace Core
             }
 #endif
             const auto currentHash = Toolset::Hash(string, size);
-            auto it = _strings.find(currentHash);
-            if (it != _strings.end())
+            const auto [first, last] = _strings.equal_range(currentHash);
+            for (auto it = first; it != last; ++it)
             {
-                return it->second.toReadOnly();
+                auto& existing = it->second;
+                if (existing.size == size
+                    && std::equal(existing.str.begin(), existing.str.begin() + size, string))
+                {
+                    return existing.toReadOnly();
+                }
             }
 
-            std::vector<CharT> buffer;
-            buffer.reserve(size + 1);
+            std::vector<CharT> buffer(size + 1);
+            std::copy_n(string, size, buffer.begin());
+            buffer[size] = 0;
 
-            auto* addr = buffer.data();
-            memcpy(addr, string, (size + 1) * sizeof(CharT));
-            _strings.emplace(currentHash, StringDataT(std::move(buffer), size));
-
-            return InternalStringViewT{ addr, size };
+            const auto it = _strings.emplace(currentHash, StringDataT(std::move(buffer), size));
+            return it->second.toReadOnly();
         }
 
         [[nodiscard]] bool isStatic(const CharT* string, std::size_t size)
         {
-            return _strings.contains(Toolset::Hash(string, size));
+            const auto [first, last] = _strings.equal_range(Toolset::Hash(string, size));
+            return std::any_of(first, last,
+                               [string, size](const auto& value)
+                               {
+                                   const auto& existing = value.second;
+                                   return existing.size == size
+                                          && std::equal(existing.str.begin(),
+                                                        existing.str.begin() + size, string);
+                               });
         }
 
-        void clear()
-        {
-            for (auto& pair : _strings)
-            {
-                pair.second.clear();
-            }
-            _strings.clear();
-        }
+        void clear() { _strings.clear(); }
 
-        std::unordered_map<std::size_t, StringDataT>& _raw() { return _strings; }
+        auto& _raw() { return _strings; }
 
     protected:
         StringPool()
@@ -535,7 +564,7 @@ namespace Core
         }
 
     private:
-        std::unordered_map<std::size_t, StringDataT> _strings;
+        std::unordered_multimap<std::size_t, StringDataT> _strings;
     };
 
     template<class CharType>
@@ -641,7 +670,7 @@ namespace Core
 
             Self& operator-=(int step) noexcept override
             {
-                _data -= step;
+                _data -= (IsReversed ? -step : step);
                 return *this;
             }
 
@@ -659,6 +688,11 @@ namespace Core
             {
                 if (_owner == other._owner)
                 {
+                    if constexpr (IsReversed)
+                    {
+                        return other._data - _data;
+                    }
+
                     return _data - other._data;
                 }
 
@@ -703,29 +737,23 @@ namespace Core
 
             [[nodiscard]] Comparison operator<=>(const Self& other) const noexcept
             {
-                if (!_data || !other._data)
+                if (!_data || !other._data || _owner != other._owner)
                 {
                     Assert("Impossible to compare two iterators. Some iterator is invalid");
                     return Comparison::None;
                 }
 
-                if (*_data > *other._data)
-                {
-                    return Comparison::Greater;
-                }
-
-                if (*_data == *other._data)
+                if (_data == other._data)
                 {
                     return Comparison::Equal;
                 }
 
-                if (*_data < *other._data)
+                if constexpr (IsReversed)
                 {
-                    return Comparison::Less;
+                    return _data > other._data ? Comparison::Less : Comparison::Greater;
                 }
 
-                Assert("Impossible to compare two iterators. Was get some error");
-                return Comparison::None;
+                return _data < other._data ? Comparison::Less : Comparison::Greater;
             }
 
         private:
@@ -843,12 +871,7 @@ namespace Core
             }
 #endif
 
-            if (_size == other._size)
-            {
-                return memcmp(_string, other._string, _size * sizeof(CharT)) == 0;
-            }
-
-            return Toolset::Cmp(_string, other._string) == Comparison::Equal;
+            return toStdStringView() == other.toStdStringView();
         }
 
         [[nodiscard]] bool operator!=(const Self& other) const { return !this->operator==(other); }
@@ -955,7 +978,7 @@ namespace Core
             {
                 return ((_string && _string[0] == 0) || _string == nullptr) && other.empty();
             }
-            return *this == other.data();
+            return toStdStringView() == other;
         }
 
         [[nodiscard]] bool operator>(StdStringViewT other) const
@@ -964,7 +987,7 @@ namespace Core
             {
                 return _size > other.size();
             }
-            return *this > other.data();
+            return toStdStringView() > other;
         }
 
         [[nodiscard]] bool operator>=(StdStringViewT other) const
@@ -973,7 +996,7 @@ namespace Core
             {
                 return _size >= other.size();
             }
-            return *this >= other.data();
+            return toStdStringView() >= other;
         }
 
         [[nodiscard]] bool operator<(StdStringViewT other) const
@@ -982,7 +1005,7 @@ namespace Core
             {
                 return _size < other.size();
             }
-            return *this < other.data();
+            return toStdStringView() < other;
         }
 
         [[nodiscard]] bool operator<=(StdStringViewT other) const
@@ -991,7 +1014,7 @@ namespace Core
             {
                 return _size <= other.size();
             }
-            return *this <= other.data();
+            return toStdStringView() <= other;
         }
 
         [[nodiscard]] bool operator!() const noexcept { return isEmpty(); }
@@ -1036,7 +1059,7 @@ namespace Core
                 return {};
             }
 
-            return { _string ? _string : "", _size };
+            return { _string, _size };
         }
 
         [[nodiscard]] CharT at(std::size_t index) const
@@ -1370,7 +1393,7 @@ namespace Core
 
         void replaceAll(StdStringViewT mainValue, StdStringViewT newValue) noexcept
         {
-            if (!isEmpty())
+            if (!isEmpty() && !mainValue.empty())
             {
                 tryToMakeAsDynamic();
                 int offset = 0;
@@ -1775,9 +1798,12 @@ namespace Core
 
             const auto oldSize = _size;
             const auto finalSize = _size + size;
+            StdStringT preservedValue;
             if (finalSize >= _capacity)
             {
+                preservedValue.assign(str, size);
                 reserve(finalSize * capacityMultiplier);
+                str = preservedValue.data();
             }
 
             memcpy_s(_string + oldSize, (_capacity - oldSize) * sizeof(CharT), str,
@@ -1942,28 +1968,36 @@ namespace Core
 
             if (isIgnoreCase)
             {
-                for (std::size_t index = 0; index < other.size() && _string[index]; ++index)
+                const auto commonSize = (std::min)(_size, other.size());
+                for (std::size_t index = 0; index < commonSize; ++index)
                 {
-                    if (_string[index + 1] == 0 && other.size() == index + 1)
-                    {
-                        return Comparison::Equal;
-                    }
-
-                    const auto diff
-                        = Toolset::ToUpper(_string[index]) - Toolset::ToUpper(other[index]);
-                    if (diff > 0 || _string[index + 1] == 0)
+                    const auto lhs = Toolset::ToUpper(_string[index]);
+                    const auto rhs = Toolset::ToUpper(other[index]);
+                    if (lhs > rhs)
                     {
                         return Comparison::Greater;
                     }
-                    if (diff < 0 || other.size() == index + 1)
+                    if (lhs < rhs)
                     {
                         return Comparison::Less;
                     }
                 }
-                return Comparison::None;
+
+                if (_size == other.size())
+                {
+                    return Comparison::Equal;
+                }
+
+                return _size > other.size() ? Comparison::Greater : Comparison::Less;
             }
 
-            return Toolset::Cmp(_string, other.data());
+            const auto result = toStdStringView().compare(other);
+            if (result == 0)
+            {
+                return Comparison::Equal;
+            }
+
+            return result > 0 ? Comparison::Greater : Comparison::Less;
         }
 
         [[nodiscard]] const CharT* find(StdStringViewT other,
@@ -1974,11 +2008,18 @@ namespace Core
                 return nullptr;
             }
 
+            if (baseOffset > _size)
+            {
+                return nullptr;
+            }
+
             if (other.empty())
             {
-                return _string;
+                return _string + baseOffset;
             }
-            return Toolset::StrStr(_string + baseOffset, other.data());
+
+            const auto position = toStdStringView().find(other, baseOffset);
+            return position == StdStringViewT::npos ? nullptr : _string + position;
         }
         [[nodiscard]] const CharT* findIgnoreCase(StdStringViewT other,
                                                   std::size_t baseOffset = 0) const noexcept
@@ -1988,28 +2029,65 @@ namespace Core
                 return nullptr;
             }
 
-            if (other.empty())
-            {
-                return _string;
-            }
-            return Toolset::StrIStr(_string + baseOffset, other.data());
-        }
-
-        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, std::size_t baseOffset = 0,
-                                               std::size_t limitOffset = 0) const noexcept
-        {
-            if (isEmpty())
+            if (baseOffset > _size)
             {
                 return nullptr;
             }
 
             if (other.empty())
             {
-                return _string;
+                return _string + baseOffset;
             }
 
-            return Toolset::ReverseStrStr(_string + baseOffset, other.data(),
-                                          _string + size() - limitOffset);
+            if (other.size() > _size - baseOffset)
+            {
+                return nullptr;
+            }
+
+            for (std::size_t position = baseOffset; position + other.size() <= _size; ++position)
+            {
+                bool matched = true;
+                for (std::size_t index = 0; index < other.size(); ++index)
+                {
+                    if (Toolset::ToLower(_string[position + index])
+                        != Toolset::ToLower(other[index]))
+                    {
+                        matched = false;
+                        break;
+                    }
+                }
+
+                if (matched)
+                {
+                    return _string + position;
+                }
+            }
+
+            return nullptr;
+        }
+
+        [[nodiscard]] const CharT* reverseFind(StdStringViewT other, std::size_t baseOffset = 0,
+                                               std::size_t limitOffset = 0) const noexcept
+        {
+            if (isEmpty() || baseOffset > _size || limitOffset > _size - baseOffset)
+            {
+                return nullptr;
+            }
+
+            if (other.empty())
+            {
+                return _string + baseOffset;
+            }
+
+            const auto last = _size - limitOffset;
+            if (other.size() > last - baseOffset)
+            {
+                return nullptr;
+            }
+
+            const auto position = toStdStringView().rfind(other, last - other.size());
+            return position == StdStringViewT::npos || position < baseOffset ? nullptr
+                                                                             : _string + position;
         }
 
         [[nodiscard]] std::vector<const CharT*> findAll(StdStringViewT other) const noexcept
@@ -2021,16 +2099,12 @@ namespace Core
 
             std::vector<const CharT*> strings;
 
-            CharT* foundStr = _string;
-            do
+            std::size_t offset = 0;
+            while (const auto* found = find(other, offset))
             {
-                foundStr = Toolset::StrStr(foundStr, other.data());
-                if (foundStr)
-                {
-                    strings.push_back(foundStr);
-                    ++foundStr;
-                }
-            } while (foundStr);
+                strings.push_back(found);
+                offset = static_cast<std::size_t>(found - _string) + 1;
+            }
 
             return strings;
         }
@@ -2044,16 +2118,12 @@ namespace Core
 
             std::vector<const CharT*> strings;
 
-            CharT* foundStr = _string;
-            do
+            std::size_t offset = 0;
+            while (const auto* found = findIgnoreCase(other, offset))
             {
-                foundStr = Toolset::StrIStr(foundStr, other.data());
-                if (foundStr)
-                {
-                    strings.push_back(foundStr);
-                    ++foundStr;
-                }
-            } while (foundStr);
+                strings.push_back(found);
+                offset = static_cast<std::size_t>(found - _string) + 1;
+            }
 
             return strings;
         }
@@ -2397,7 +2467,12 @@ namespace Core
 
             const auto* result = StringToolset<CharT>::ReverseStrStr(
                 begin, GetLineSeparatorString(separator), end);
-            if (result != nullptr && result != begin)
+            if (result == nullptr)
+            {
+                return begin;
+            }
+
+            if (result != begin)
             {
                 result += GetLineSeparatorStringSize(separator);
             }
@@ -2445,7 +2520,7 @@ namespace Core
             }
 
 #if defined(UTILS_DEBUG)
-            Assert(Core::StringPool<char>::Instance().isStatic(_string));
+            Assert(Core::StringPool<CharT>::Instance().isStatic(_string, _size));
 #endif
         }
 

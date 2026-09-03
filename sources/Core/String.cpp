@@ -96,7 +96,7 @@ std::ostream& operator<<(std::ostream& stream, const Core::StringAtom& s)
 std::istream& operator>>(std::istream& stream, Core::StringAtom& s)
 {
     std::string temp;
-    std::cin >> temp;
+    stream >> temp;
     s += temp;
     return stream;
 }

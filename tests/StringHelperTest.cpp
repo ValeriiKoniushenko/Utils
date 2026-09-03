@@ -63,6 +63,16 @@ TEST(StringHelperTest, defaultInputStream)
     EXPECT_EQ(str, "42helloworld");
 }
 
+TEST(StringHelperTest, inputOperatorUsesTheProvidedStream)
+{
+    std::istringstream input("42 hello");
+    Core::StringAtom string;
+
+    input >> string >> string;
+
+    EXPECT_EQ("42hello", string);
+}
+
 TEST(StringHelperTest, quickFormat)
 {
     {
