@@ -30,6 +30,21 @@ command, units, and whether a conclusion uses real time or CPU time.
 Small changes can be noise. Prefer repeated aggregate results and treat a difference as meaningful
 only when it is consistent across samples.
 
+=== String-pool lookup comparison
+
+`UtilsBench_String` includes a focused comparison between the historical hash-only lookup and the
+collision-safe multimap lookup. It prepopulates collision-free 1,000- and 10,000-string corpora and
+times only an existing-string lookup: hashing, container lookup, and candidate validation. Allocation
+and insertion are deliberately outside the measured region.
+
+The hash-only benchmark is a historical performance reference, not a collision-safe implementation
+choice. Run both benchmarks together with randomized interleaving:
+
+[source,shell]
+----
+include::example$developer-workflows.sh[tag=string_pool_lookup_benchmark]
+----
+
 Historical benchmark tables from the Markdown documentation are not retained as API documentation:
 they came from different runs and had no complete environment metadata. Reproduce results against
 the current code instead.

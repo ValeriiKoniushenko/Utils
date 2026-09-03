@@ -28,6 +28,14 @@ build/benchmarks/bin/UtilsBench_ProdStringsCase \
   --benchmark_report_aggregates_only=true
 # end::focused_benchmark[]
 
+# tag::string_pool_lookup_benchmark[]
+build/benchmarks/bin/UtilsBench_String \
+  --benchmark_filter='BM_StringPool_(HashOnly|Multimap)_ExistingLookup' \
+  --benchmark_repetitions=10 \
+  --benchmark_enable_random_interleaving=true \
+  --benchmark_report_aggregates_only=true
+# end::string_pool_lookup_benchmark[]
+
 # tag::format_check[]
 clang-format --dry-run --Werror path/to/changed-file.cpp
 # end::format_check[]
