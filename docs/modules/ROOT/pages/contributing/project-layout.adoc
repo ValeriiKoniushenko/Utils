@@ -29,6 +29,6 @@
 The root `Utils` target links `Utils::Core` and `Utils::Utils`. Runtime binaries go to the selected
 build directory's `bin/` folder, while libraries go to `lib/`.
 
-The root project requires C++23, exports `compile_commands.json`, and turns C++ module scanning off.
+The root project requires C++26, exports `compile_commands.json`, and turns C++ module scanning off.
 If ccache is available and Utils is configured as the top-level project, CMake selects it as the
 compiler launcher.

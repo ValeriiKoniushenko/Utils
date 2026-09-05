@@ -1,6 +1,6 @@
 = Getting started
 
-Utils builds as part of a CMake project and requires a C++23-capable toolchain.
+Utils builds as part of a CMake project and requires a C++26-capable toolchain.
 
 Follow these pages in order:
 

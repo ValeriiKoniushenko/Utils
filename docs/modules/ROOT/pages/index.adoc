@@ -1,7 +1,7 @@
 = Utils
-:description: Cross-platform C++23 utilities for geometry, strings, ownership, events, enums, diagnostics, and common programming tasks.
+:description: Cross-platform C++26 utilities for geometry, strings, ownership, events, enums, diagnostics, and common programming tasks.
 
-Utils is a cross-platform C++23 library that collects reusable building blocks for geometry,
+Utils is a cross-platform C++26 library that collects reusable building blocks for geometry,
 math, strings, ownership, events, enums, assertions, file handling, and related tasks.
 
 The project exposes two libraries and one umbrella target:

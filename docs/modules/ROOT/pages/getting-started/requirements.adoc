@@ -3,11 +3,11 @@
 == Required tools
 
 * CMake 3.30 or newer.
-* A compiler and standard library with C++23 support.
+* A compiler and standard library with C++26 support.
 * Git with submodule support when building from a repository checkout.
 
 The project documentation uses Clang 18.1.8 or GCC 14.2.1 as known baselines. Newer compatible
-Clang, GCC, or MSVC toolchains may also work; CMake verifies the required `cxx_std_23` feature at
+Clang, GCC, or MSVC toolchains may also work; CMake verifies the required `cxx_std_26` feature at
 configure time.
 
 Ninja is used in the documented commands because it gives consistent single- and multi-config
