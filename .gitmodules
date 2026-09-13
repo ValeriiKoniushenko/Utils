@@ -21,3 +21,7 @@
 	path = Scripts
 	url = git@github.com:ValeriiKoniushenko/Scripts.git
 	branch = develop
+[submodule "scripts"]
+	path = scripts
+	url = git@github.com:ValeriiKoniushenko/Scripts.git
+	branch = develop
