@@ -852,6 +852,52 @@ TEST_F(StringTestF, Modifications_SubStr)
     test.template operator()<wchar_t>();
 }
 
+TEST_F(StringTestF, StartWith)
+{
+    auto test = [this]<class T>()
+    {
+        using View = std::basic_string_view<T>;
+
+        const BaseString<T> str = Str<T>("Hello world!");
+        const std::basic_string<T> prefixStorage = Str<T>("Hello suffix");
+
+        EXPECT_TRUE(str.startWith(Str<T>("Hello")));
+        EXPECT_TRUE(str.startWith(Str<T>("Hello world!")));
+        EXPECT_TRUE(str.startWith(View{}));
+        EXPECT_TRUE(str.startWith(View(prefixStorage.data(), 5)));
+        EXPECT_FALSE(str.startWith(Str<T>("world")));
+        EXPECT_FALSE(str.startWith(Str<T>("Hello world!!")));
+        EXPECT_TRUE(BaseString<T>{}.startWith(View{}));
+        EXPECT_FALSE(BaseString<T>{}.startWith(Str<T>("Hello")));
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
+TEST_F(StringTestF, EndWith)
+{
+    auto test = [this]<class T>()
+    {
+        using View = std::basic_string_view<T>;
+
+        const BaseString<T> str = Str<T>("Hello world!");
+        const std::basic_string<T> suffixStorage = Str<T>("prefix world!");
+
+        EXPECT_TRUE(str.endWith(Str<T>("world!")));
+        EXPECT_TRUE(str.endWith(Str<T>("Hello world!")));
+        EXPECT_TRUE(str.endWith(View{}));
+        EXPECT_TRUE(str.endWith(View(suffixStorage.data() + 7, 6)));
+        EXPECT_FALSE(str.endWith(Str<T>("Hello")));
+        EXPECT_FALSE(str.endWith(Str<T>(" Hello world!")));
+        EXPECT_TRUE(BaseString<T>{}.endWith(View{}));
+        EXPECT_FALSE(BaseString<T>{}.endWith(Str<T>("world!")));
+    };
+
+    test.template operator()<char>();
+    test.template operator()<wchar_t>();
+}
+
 TEST_F(StringTestF, Find)
 {
     auto test = [this]<class T>()

@@ -1237,6 +1237,16 @@ namespace Core
             }
         }
 
+        [[nodiscard]] bool startWith(StdStringViewT value) const noexcept
+        {
+            return toStdStringView().starts_with(value);
+        }
+
+        [[nodiscard]] bool endWith(StdStringViewT value) const noexcept
+        {
+            return toStdStringView().ends_with(value);
+        }
+
         void trimStart(CharT ch = ' ')
         {
             if (!isEmpty())
