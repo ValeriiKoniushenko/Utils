@@ -406,10 +406,9 @@ class GiteaClient:
                 if user and "id" in user:
                     self._user_id = int(user["id"])
                 login = (user or {}).get("login", "?")
-                email = (user or {}).get("email", "")
+                # No e-mail: job logs can be public (token owner's address).
                 self._trace(
-                    f"authenticated as login={login!r} id={self._user_id} "
-                    f"email={email!r} via scheme={scheme!r}"
+                    f"authenticated as login={login!r} id={self._user_id} via scheme={scheme!r}"
                 )
                 return
             except urllib.error.HTTPError as e:
